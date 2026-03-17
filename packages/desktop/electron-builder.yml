@@ -27,7 +27,7 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: false
+  notarize: true
   extendInfo:
     NSMicrophoneUsageDescription: ClawWork needs microphone access for voice dictation in chat input.
 dmg:
