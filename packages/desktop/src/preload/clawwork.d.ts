@@ -71,7 +71,7 @@ interface QuickLaunchConfigResult {
 
 interface AppSettings {
   workspacePath: string;
-  theme?: 'dark' | 'light';
+  theme?: 'dark' | 'light' | 'auto';
   language?: 'en' | 'zh';
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;

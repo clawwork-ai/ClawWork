@@ -10,7 +10,8 @@
     "notConfigured": "Not configured",
     "noTitle": "(Untitled)",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "close": "Close"
   },
   "leftNav": {
     "searchTasks": "Search tasks\u2026",
@@ -33,6 +34,7 @@
     "appearance": "Appearance",
     "theme": "Theme",
     "themeUpdated": "Theme updated",
+    "themeAuto": "Auto",
     "shortcuts": "Shortcuts",
     "sendShortcut": "Send message",
     "sendEnter": "Enter",
@@ -85,7 +87,14 @@
     "quickLaunchDisabled": "Quick Launch disabled",
     "quickLaunchShortcut": "Shortcut",
     "quickLaunchShortcutConflict": "Shortcut may conflict with another app",
-    "pressShortcut": "Press shortcut..."
+    "pressShortcut": "Press shortcut...",
+    "general": "General",
+    "generalDesc": "Theme, language, and keyboard shortcuts",
+    "systemDesc": "System behavior, shortcuts, and workspace",
+    "gatewaysDesc": "Manage OpenClaw Gateway connections",
+    "aboutDesc": "Version, updates, and links",
+    "confirmDeleteTitle": "Remove Gateway",
+    "confirmDeleteDesc": "Remove \"{{name}}\"? Active connections to this gateway will be terminated."
   },
   "setup": {
     "welcome": "Welcome to ClawWork",

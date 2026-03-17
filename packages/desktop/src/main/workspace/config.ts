@@ -26,7 +26,7 @@ export interface QuickLaunchConfig {
 
 export interface AppConfig {
   workspacePath: string;
-  theme?: 'dark' | 'light';
+  theme?: 'dark' | 'light' | 'auto';
   language?: 'en' | 'zh';
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;

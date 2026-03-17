@@ -10,7 +10,8 @@
     "notConfigured": "未配置",
     "noTitle": "(无标题)",
     "cancel": "取消",
-    "save": "保存"
+    "save": "保存",
+    "close": "关闭"
   },
   "leftNav": {
     "searchTasks": "搜索任务…",
@@ -33,6 +34,7 @@
     "appearance": "外观",
     "theme": "主题",
     "themeUpdated": "主题已更新",
+    "themeAuto": "跟随系统",
     "shortcuts": "快捷键",
     "sendShortcut": "发送消息",
     "sendEnter": "回车",
@@ -85,7 +87,14 @@
     "quickLaunchDisabled": "快速启动已关闭",
     "quickLaunchShortcut": "快捷键",
     "quickLaunchShortcutConflict": "快捷键可能与其他应用冲突",
-    "pressShortcut": "按下快捷键..."
+    "pressShortcut": "按下快捷键...",
+    "general": "通用",
+    "generalDesc": "主题、语言和键盘快捷键",
+    "systemDesc": "系统行为、快捷键和工作空间",
+    "gatewaysDesc": "管理 OpenClaw Gateway 连接",
+    "aboutDesc": "版本、更新和链接",
+    "confirmDeleteTitle": "移除网关",
+    "confirmDeleteDesc": "移除「{{name}}」？与该网关的活跃连接将被终止。"
   },
   "setup": {
     "welcome": "欢迎使用 ClawWork",

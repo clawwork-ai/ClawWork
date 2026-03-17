@@ -1,0 +1,189 @@
+import { useState, useEffect, useCallback } from 'react';
+import { MonitorDot, Zap, FolderOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import Toggle from '../components/Toggle';
+import SettingRow from '../components/SettingRow';
+
+export default function SystemSection() {
+  const { t } = useTranslation();
+  const [trayEnabled, setTrayEnabled] = useState(true);
+  const [quickLaunchEnabled, setQuickLaunchEnabled] = useState(false);
+  const [quickLaunchShortcut, setQuickLaunchShortcut] = useState('Alt+Space');
+  const [recordingShortcut, setRecordingShortcut] = useState(false);
+  const [workspacePath, setWorkspacePath] = useState('');
+
+  useEffect(() => {
+    window.clawwork.getQuickLaunchConfig().then((config) => {
+      setQuickLaunchEnabled(config.enabled);
+      setQuickLaunchShortcut(config.shortcut);
+    });
+    window.clawwork.getTrayEnabled().then(setTrayEnabled);
+    window.clawwork.getSettings().then((settings) => {
+      if (settings) setWorkspacePath(settings.workspacePath || t('common.notConfigured'));
+    });
+  }, [t]);
+
+  const handleTrayToggle = useCallback(
+    async (enabled: boolean) => {
+      await window.clawwork.setTrayEnabled(enabled);
+      setTrayEnabled(enabled);
+      toast.success(enabled ? t('settings.trayEnabled') : t('settings.trayDisabled'));
+    },
+    [t],
+  );
+
+  const handleQuickLaunchToggle = useCallback(
+    async (enabled: boolean) => {
+      const success = await window.clawwork.updateQuickLaunchConfig(enabled, quickLaunchShortcut);
+      if (success) {
+        setQuickLaunchEnabled(enabled);
+        toast.success(enabled ? t('settings.quickLaunchEnabled') : t('settings.quickLaunchDisabled'));
+      } else {
+        toast.error(t('settings.quickLaunchShortcutConflict'));
+      }
+    },
+    [quickLaunchShortcut, t],
+  );
+
+  const handleShortcutRecord = useCallback(
+    (e: React.KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        setRecordingShortcut(false);
+        return;
+      }
+      if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
+
+      const parts: string[] = [];
+      if (e.metaKey || e.ctrlKey) parts.push('CommandOrControl');
+      if (e.altKey) parts.push('Alt');
+      if (e.shiftKey) parts.push('Shift');
+      if (parts.length === 0) return;
+
+      const key = e.code.startsWith('Key')
+        ? e.code.slice(3)
+        : e.code.startsWith('Digit')
+          ? e.code.slice(5)
+          : e.key === ' '
+            ? 'Space'
+            : e.key.length === 1
+              ? e.key.toUpperCase()
+              : e.key;
+
+      parts.push(key);
+      const shortcut = parts.join('+');
+      setRecordingShortcut(false);
+
+      window.clawwork.updateQuickLaunchConfig(quickLaunchEnabled, shortcut).then((ok) => {
+        if (ok) {
+          setQuickLaunchShortcut(shortcut);
+          toast.success(t('settings.shortcutUpdated'));
+        } else {
+          toast.error(t('settings.quickLaunchShortcutConflict'));
+        }
+      });
+    },
+    [quickLaunchEnabled, t],
+  );
+
+  return (
+    <div>
+      <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.system')}</h3>
+      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.systemDesc')}</p>
+      <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <MonitorDot size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <div>
+                  <span className="text-sm text-[var(--text-primary)]">{t('settings.trayIcon')}</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.trayIconDesc')}</p>
+                </div>
+              </div>
+            }
+          >
+            <Toggle checked={trayEnabled} onChange={handleTrayToggle} ariaLabel={t('settings.trayIcon')} />
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <Zap size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <div>
+                  <span className="text-sm text-[var(--text-primary)]">{t('settings.quickLaunch')}</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.quickLaunchDesc')}</p>
+                </div>
+              </div>
+            }
+          >
+            <div className="flex items-center gap-2.5 flex-shrink-0">
+              {quickLaunchEnabled &&
+                (recordingShortcut ? (
+                  <input
+                    autoFocus
+                    readOnly
+                    placeholder={t('settings.pressShortcut')}
+                    onKeyDown={handleShortcutRecord}
+                    onBlur={() => setRecordingShortcut(false)}
+                    className={cn(
+                      'w-[140px] text-center text-sm font-mono px-2.5 py-1 rounded-md',
+                      'bg-[var(--accent-soft)] border border-[var(--accent)]/40',
+                      'text-[var(--accent)] outline-none animate-pulse',
+                      'focus:ring-2 focus:ring-[var(--ring-accent)]',
+                    )}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={t('settings.quickLaunchShortcut')}
+                    onClick={() => setRecordingShortcut(true)}
+                    className={cn(
+                      'text-sm font-mono px-2.5 py-1 rounded-md',
+                      'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                      'text-[var(--text-primary)] hover:border-[var(--accent)]/40 transition-colors',
+                      'cursor-pointer',
+                    )}
+                  >
+                    {quickLaunchShortcut}
+                  </button>
+                ))}
+              <Toggle
+                checked={quickLaunchEnabled}
+                onChange={handleQuickLaunchToggle}
+                ariaLabel={t('settings.quickLaunch')}
+              />
+            </div>
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <FolderOpen size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <div>
+                  <span className="text-sm text-[var(--text-primary)]">{t('settings.workspace')}</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.workspaceHint')}</p>
+                </div>
+              </div>
+            }
+          >
+            <div
+              className={cn(
+                'h-9 px-3 flex items-center rounded-md max-w-[260px] truncate',
+                'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                'text-[var(--text-primary)] text-sm font-mono',
+              )}
+            >
+              {workspacePath}
+            </div>
+          </SettingRow>
+        </div>
+      </div>
+    </div>
+  );
+}

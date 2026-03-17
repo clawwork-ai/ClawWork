@@ -135,7 +135,7 @@ export default function App() {
           }}
         />
         <Toaster
-          theme={theme}
+          theme={theme === 'auto' ? 'system' : theme}
           position="bottom-right"
           toastOptions={{
             style: {
@@ -185,7 +185,7 @@ export default function App() {
           )}
         </AnimatePresence>
         <Toaster
-          theme={theme}
+          theme={theme === 'auto' ? 'system' : theme}
           position="bottom-right"
           toastOptions={{
             style: {

@@ -4,7 +4,7 @@ import i18n from '../i18n';
 
 type MainView = 'chat' | 'files' | 'archived';
 
-type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light' | 'auto';
 
 export type Language = 'en' | 'zh';
 
@@ -90,7 +90,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   settingsOpen: false,
   setSettingsOpen: (open) => set({ settingsOpen: open }),
 
-  theme: 'dark',
+  theme: 'auto',
   setTheme: (theme) => set({ theme }),
 
   language: 'en',

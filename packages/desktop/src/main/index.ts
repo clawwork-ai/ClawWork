@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } from
 import { join } from 'path';
 import { writeFileSync } from 'fs';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { nativeTheme } from 'electron';
 import { initAllGateways, destroyAllGateways, rebindAllWindows } from './ws/index.js';
 import { initDebugLogger, getDebugLogger } from './debug/index.js';
 import { registerWsHandlers } from './ipc/ws-handlers.js';
@@ -70,7 +71,11 @@ function createWindow(): BrowserWindow {
     show: false,
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },
-    backgroundColor: readConfig()?.theme === 'light' ? '#FAFAFA' : '#1C1C1C',
+    backgroundColor: (() => {
+      const t = readConfig()?.theme;
+      const dark = t === 'light' ? false : t === 'dark' ? true : nativeTheme.shouldUseDarkColors;
+      return dark ? '#1C1C1C' : '#FAFAFA';
+    })(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
       sandbox: true,
