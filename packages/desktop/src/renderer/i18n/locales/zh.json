@@ -85,6 +85,7 @@
     "workspaceHint": "AI 产物保存位置",
     "workspaceChange": "更改",
     "workspaceChanged": "工作空间迁移成功",
+    "workspaceOldPathHint": "旧工作空间（{{path}}）已保留，可手动删除。",
     "workspaceChangeFailed": "工作空间迁移失败：{{error}}",
     "about": "关于",
     "githubStar": "在 GitHub 上给我们 Star ⭐",

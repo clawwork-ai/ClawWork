@@ -52,12 +52,16 @@ export default function SystemSection() {
   const handleChangeWorkspace = useCallback(async () => {
     const selected = await window.clawwork.browseWorkspace();
     if (!selected || selected === workspacePath) return;
+    const oldPath = workspacePath;
     setChangingWorkspace(true);
     const result = await window.clawwork.changeWorkspace(selected);
     setChangingWorkspace(false);
     if (result.ok) {
       setWorkspacePath(selected);
-      toast.success(t('settings.workspaceChanged'));
+      toast.success(t('settings.workspaceChanged'), {
+        description: t('settings.workspaceOldPathHint', { path: oldPath }),
+        duration: 8000,
+      });
     } else {
       toast.error(t('settings.workspaceChangeFailed', { error: result.error }));
     }

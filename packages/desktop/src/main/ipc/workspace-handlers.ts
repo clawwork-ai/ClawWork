@@ -1,5 +1,11 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
-import { getWorkspacePath, writeConfig, updateConfig, isWorkspaceConfigured, getDefaultWorkspacePath } from '../workspace/config.js';
+import {
+  getWorkspacePath,
+  writeConfig,
+  updateConfig,
+  isWorkspaceConfigured,
+  getDefaultWorkspacePath,
+} from '../workspace/config.js';
 import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
 import { initDatabase, reinitDatabase } from '../db/index.js';
 
@@ -52,7 +58,9 @@ export function registerWorkspaceHandlers(): void {
       updateConfig({ workspacePath: newWorkspacePath });
       return { ok: true };
     } catch (err) {
-      try { reinitDatabase(oldPath); } catch {}
+      try {
+        reinitDatabase(oldPath);
+      } catch {}
       const msg = err instanceof Error ? err.message : 'migration failed';
       return { ok: false, error: msg };
     }
