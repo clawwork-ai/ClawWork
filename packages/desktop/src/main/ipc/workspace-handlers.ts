@@ -10,17 +10,9 @@ import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
 import { initDatabase, reinitDatabase, closeDatabase } from '../db/index.js';
 
 export function registerWorkspaceHandlers(): void {
-  ipcMain.handle('workspace:is-configured', () => {
-    return isWorkspaceConfigured();
-  });
-
-  ipcMain.handle('workspace:get-path', () => {
-    return getWorkspacePath();
-  });
-
-  ipcMain.handle('workspace:get-default', () => {
-    return getDefaultWorkspacePath();
-  });
+  ipcMain.handle('workspace:is-configured', isWorkspaceConfigured);
+  ipcMain.handle('workspace:get-path', getWorkspacePath);
+  ipcMain.handle('workspace:get-default', getDefaultWorkspacePath);
 
   ipcMain.handle('workspace:browse', async () => {
     const win = BrowserWindow.getAllWindows()[0];
@@ -54,16 +46,18 @@ export function registerWorkspaceHandlers(): void {
     if (oldPath === newWorkspacePath) return { ok: true };
     closeDatabase();
     try {
-      migrateWorkspace(oldPath, newWorkspacePath);
+      await migrateWorkspace(oldPath, newWorkspacePath);
       reinitDatabase(newWorkspacePath);
       updateConfig({ workspacePath: newWorkspacePath });
       return { ok: true };
     } catch (err) {
+      let suffix = '';
       try {
         reinitDatabase(oldPath);
-      } catch {}
-      const msg = err instanceof Error ? err.message : 'migration failed';
-      return { ok: false, error: msg };
+      } catch (rollbackErr) {
+        suffix = `; rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : 'unknown'}`;
+      }
+      return { ok: false, error: `${err instanceof Error ? err.message : 'migration failed'}${suffix}` };
     }
   });
 }
