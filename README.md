@@ -136,6 +136,10 @@ Next up:
 - Desktop notifications for background completions
 - Custom themes
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/image?repos=clawwork-ai/ClawWork&type=date&legend=top-left)](https://www.star-history.com/?repos=clawwork-ai%2FClawWork&type=date&legend=top-left)
+
 ## Contributing
 
 The project is early and moving fast. If you want to help:
