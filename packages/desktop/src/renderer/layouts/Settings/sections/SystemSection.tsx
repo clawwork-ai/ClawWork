@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MonitorDot, Zap, FolderOpen } from 'lucide-react';
+import { MonitorDot, Zap, FolderOpen, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import Toggle from '../components/Toggle';
 import SettingRow from '../components/SettingRow';
 
@@ -13,6 +14,7 @@ export default function SystemSection() {
   const [quickLaunchShortcut, setQuickLaunchShortcut] = useState('Alt+Space');
   const [recordingShortcut, setRecordingShortcut] = useState(false);
   const [workspacePath, setWorkspacePath] = useState('');
+  const [changingWorkspace, setChangingWorkspace] = useState(false);
 
   useEffect(() => {
     window.clawwork.getQuickLaunchConfig().then((config) => {
@@ -46,6 +48,20 @@ export default function SystemSection() {
     },
     [quickLaunchShortcut, t],
   );
+
+  const handleChangeWorkspace = useCallback(async () => {
+    const selected = await window.clawwork.browseWorkspace();
+    if (!selected || selected === workspacePath) return;
+    setChangingWorkspace(true);
+    const result = await window.clawwork.changeWorkspace(selected);
+    setChangingWorkspace(false);
+    if (result.ok) {
+      setWorkspacePath(selected);
+      toast.success(t('settings.workspaceChanged'));
+    } else {
+      toast.error(t('settings.workspaceChangeFailed', { error: result.error }));
+    }
+  }, [workspacePath, t]);
 
   const handleShortcutRecord = useCallback(
     (e: React.KeyboardEvent) => {
@@ -172,14 +188,26 @@ export default function SystemSection() {
               </div>
             }
           >
-            <div
-              className={cn(
-                'h-9 px-3 flex items-center rounded-md max-w-[260px] truncate',
-                'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-[var(--text-primary)] text-sm font-mono',
-              )}
-            >
-              {workspacePath}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div
+                className={cn(
+                  'h-9 px-3 flex items-center rounded-md max-w-[180px] truncate',
+                  'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                  'text-[var(--text-primary)] text-sm font-mono',
+                )}
+                title={workspacePath}
+              >
+                {workspacePath}
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleChangeWorkspace}
+                disabled={changingWorkspace}
+                className="titlebar-no-drag h-9 gap-1.5 flex-shrink-0"
+              >
+                {changingWorkspace ? <Loader2 size={14} className="animate-spin" /> : <FolderOpen size={14} />}
+                {t('settings.workspaceChange')}
+              </Button>
             </div>
           </SettingRow>
         </div>

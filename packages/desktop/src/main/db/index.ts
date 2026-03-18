@@ -52,9 +52,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
 );
 `;
 
-export function initDatabase(workspacePath: string): void {
-  if (db) return;
-
+function openDatabaseAt(workspacePath: string): void {
   const dbPath = join(workspacePath, DB_FILE_NAME);
   mkdirSync(dirname(dbPath), { recursive: true });
   sqlite = new Database(dbPath);
@@ -62,12 +60,9 @@ export function initDatabase(workspacePath: string): void {
   sqlite.pragma('foreign_keys = ON');
   sqlite.exec(CREATE_TABLES_SQL);
 
-  // Migration: add gateway_id column to existing tasks table
   try {
     sqlite.exec("ALTER TABLE tasks ADD COLUMN gateway_id TEXT NOT NULL DEFAULT ''");
-  } catch {
-    // Column already exists, ignore
-  }
+  } catch {}
 
   for (const sql of [
     'ALTER TABLE tasks ADD COLUMN model TEXT',
@@ -94,6 +89,16 @@ export function initDatabase(workspacePath: string): void {
 
   db = drizzle(sqlite, { schema });
   console.log(`[db] initialized at ${dbPath}`);
+}
+
+export function initDatabase(workspacePath: string): void {
+  if (db) return;
+  openDatabaseAt(workspacePath);
+}
+
+export function reinitDatabase(workspacePath: string): void {
+  closeDatabase();
+  openDatabaseAt(workspacePath);
 }
 
 export function getDb(): ReturnType<typeof drizzle> {

@@ -247,6 +247,7 @@ export interface ClawWorkAPI {
   getDefaultWorkspacePath: () => Promise<string>;
   browseWorkspace: () => Promise<string | null>;
   setupWorkspace: (path: string) => Promise<IpcResult>;
+  changeWorkspace: (path: string) => Promise<IpcResult>;
 
   // Settings
   getSettings: () => Promise<AppSettings | null>;

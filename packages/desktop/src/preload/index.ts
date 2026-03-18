@@ -88,6 +88,7 @@ function buildApi(): ClawWorkAPI {
     getDefaultWorkspacePath: () => ipcRenderer.invoke('workspace:get-default') as Promise<string>,
     browseWorkspace: () => ipcRenderer.invoke('workspace:browse') as Promise<string | null>,
     setupWorkspace: (path: string) => ipcRenderer.invoke('workspace:setup', path),
+    changeWorkspace: (path: string) => ipcRenderer.invoke('workspace:change', path),
 
     getSettings: () => ipcRenderer.invoke('settings:get'),
     updateSettings: (partial: Record<string, unknown>) => ipcRenderer.invoke('settings:update', partial),
