@@ -7,7 +7,7 @@ import {
   getDefaultWorkspacePath,
 } from '../workspace/config.js';
 import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
-import { initDatabase, reinitDatabase } from '../db/index.js';
+import { initDatabase, reinitDatabase, closeDatabase } from '../db/index.js';
 
 export function registerWorkspaceHandlers(): void {
   ipcMain.handle('workspace:is-configured', () => {
@@ -52,6 +52,7 @@ export function registerWorkspaceHandlers(): void {
     const oldPath = getWorkspacePath();
     if (!oldPath) return { ok: false, error: 'no current workspace' };
     if (oldPath === newWorkspacePath) return { ok: true };
+    closeDatabase();
     try {
       migrateWorkspace(oldPath, newWorkspacePath);
       reinitDatabase(newWorkspacePath);
