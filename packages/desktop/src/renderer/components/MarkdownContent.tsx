@@ -245,12 +245,18 @@ export default function MarkdownContent({
           </Markdown>
         </div>
         {showMessageCopy && content.trim() && (
-          <CopyActionButton
-            label={copyMessageLabel}
-            copiedLabel={copiedLabel}
-            text={content}
-            className="mt-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-          />
+          <div className="flex gap-1 mt-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100">
+            {taskId && messageId && (
+              <SaveActionButton
+                onSave={() =>
+                  window.clawwork.saveCodeBlock({ taskId, messageId, content, language: 'md' }).then((r) => {
+                    if (!r.ok) throw new Error(r.error);
+                  })
+                }
+              />
+            )}
+            <CopyActionButton label={copyMessageLabel} copiedLabel={copiedLabel} text={content} />
+          </div>
         )}
       </div>
       {showCursor && (

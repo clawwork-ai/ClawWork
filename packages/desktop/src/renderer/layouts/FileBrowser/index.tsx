@@ -68,6 +68,10 @@ export default function FileBrowser() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    return () => setSelectedArtifact(null);
+  }, [setSelectedArtifact]);
+
+  useEffect(() => {
     window.clawwork.listArtifacts().then((res) => {
       if (res.ok && res.result) {
         setArtifacts(res.result as unknown as Artifact[]);
@@ -142,9 +146,9 @@ export default function FileBrowser() {
   return (
     <div className="flex h-full">
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="titlebar-no-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
+        <header className="titlebar-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0 relative z-[51]">
           <h2 className="text-sm font-semibold text-[var(--text-primary)]">{t('common.fileManager')}</h2>
-          <div className="flex items-center gap-2">
+          <div className="titlebar-no-drag flex items-center gap-2">
             <select
               value={filterTaskId ?? ''}
               onChange={(e) => setFilterTaskId(e.target.value || null)}

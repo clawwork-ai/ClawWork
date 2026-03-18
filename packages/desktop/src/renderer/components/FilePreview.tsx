@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2, Copy, Check } from 'lucide-react';
+import hljs from 'highlight.js';
 import { useTranslation } from 'react-i18next';
 import type { Artifact } from '@clawwork/shared';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion as motionPresets } from '@/styles/design-tokens';
+import { cn, formatFileSize } from '@/lib/utils';
+import { copyTextToClipboard } from '@/lib/clipboard';
 import MarkdownContent from './MarkdownContent';
 
 interface FilePreviewProps {
@@ -48,12 +51,48 @@ function langFromName(name: string): string {
   return map[ext] ?? '';
 }
 
+function extFromName(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot !== -1 ? name.slice(dot + 1).toUpperCase() : '';
+}
+
+function CopyButton({ text }: { text: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  return (
+    <button
+      onClick={() => {
+        void copyTextToClipboard(text);
+        setCopied(true);
+      }}
+      title={copied ? t('chatMessage.copied') : t('chatMessage.copyCode')}
+      className={cn(
+        'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors',
+        'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]',
+        copied && 'text-[var(--accent)]',
+      )}
+    >
+      {copied ? <Check size={12} /> : <Copy size={12} />}
+    </button>
+  );
+}
+
 export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewProps) {
   const { t } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
   const [encoding, setEncoding] = useState<'utf-8' | 'base64'>('utf-8');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const ext = extFromName(artifact.name);
+  const isCode = encoding === 'utf-8' && !isMarkdown(artifact.name) && !isImage(artifact.mimeType);
 
   useEffect(() => {
     setLoading(true);
@@ -73,8 +112,19 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
 
   return (
     <motion.div className="flex flex-col h-full" {...motionPresets.slideIn}>
-      <header className="flex items-center px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
-        <h3 className="text-sm font-medium text-[var(--text-primary)] truncate min-w-0">{artifact.name}</h3>
+      <header className="flex items-center justify-between gap-2 px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          {ext && (
+            <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+              {ext}
+            </span>
+          )}
+          <h3 className="text-sm font-medium text-[var(--text-primary)] truncate min-w-0">{artifact.name}</h3>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-[10px] text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
+          {isCode && content !== null && <CopyButton text={content} />}
+        </div>
       </header>
 
       <ScrollArea className="flex-1">
@@ -101,6 +151,27 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
         </Button>
       </div>
     </motion.div>
+  );
+}
+
+function CodePreview({ content, lang }: { content: string; lang: string }) {
+  const highlighted = useMemo(() => {
+    if (lang && hljs.getLanguage(lang)) {
+      return hljs.highlight(content, { language: lang }).value;
+    }
+    return hljs.highlightAuto(content).value;
+  }, [content, lang]);
+
+  return (
+    <div className="overflow-x-auto">
+      <pre className="p-4 text-[0.82em] leading-relaxed font-mono">
+        <code
+          className={cn('hljs', lang && `language-${lang}`)}
+          style={{ background: 'none', padding: 0 }}
+          dangerouslySetInnerHTML={{ __html: highlighted }}
+        />
+      </pre>
+    </div>
   );
 }
 
@@ -139,8 +210,7 @@ function PreviewContent({
 
   if (encoding === 'utf-8') {
     const lang = langFromName(name);
-    const fenced = lang ? `\`\`\`${lang}\n${content}\n\`\`\`` : `\`\`\`\n${content}\n\`\`\``;
-    return <MarkdownContent content={fenced} />;
+    return <CodePreview content={content} lang={lang} />;
   }
 
   return (

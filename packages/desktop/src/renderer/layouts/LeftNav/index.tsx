@@ -378,7 +378,7 @@ export default function LeftNav() {
 
   return (
     <div className="flex flex-col h-full pt-14 relative">
-      <div className="absolute top-[8px] right-2 z-10">{CollapseToggleButton}</div>
+      <div className="absolute top-[8px] right-2 z-[51]">{CollapseToggleButton}</div>
       <div className="px-4 pb-3 space-y-2 flex-shrink-0">
         {hasMultipleGateways ? (
           <div className="titlebar-no-drag flex items-center gap-0.5">

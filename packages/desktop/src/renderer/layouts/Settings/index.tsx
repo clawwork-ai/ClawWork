@@ -25,7 +25,7 @@ export default function Settings({ onClose }: { onClose: () => void }) {
 
   return (
     <motion.div {...motionPresets.fadeIn} className="flex flex-col h-full">
-      <header className="flex items-center justify-between h-12 px-4 border-b border-[var(--border)] flex-shrink-0">
+      <header className="titlebar-drag flex items-center justify-between h-12 px-4 border-b border-[var(--border)] flex-shrink-0 relative z-[51]">
         <h2 className="font-medium text-[var(--text-primary)]">{t('common.settings')}</h2>
         <Button
           variant="ghost"

@@ -24,6 +24,7 @@ export default function App() {
 
   const rightPanelOpen = useUiStore((s) => s.rightPanelOpen);
   const toggleRightPanel = useUiStore((s) => s.toggleRightPanel);
+  const mainView = useUiStore((s) => s.mainView);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const theme = useUiStore((s) => s.theme);
@@ -135,7 +136,7 @@ export default function App() {
 
       if (!e.shiftKey && e.code === rightCode) {
         e.preventDefault();
-        toggleRightPanel();
+        if (useUiStore.getState().mainView === 'chat') toggleRightPanel();
       }
     },
     [
@@ -246,7 +247,7 @@ export default function App() {
         </main>
 
         <AnimatePresence>
-          {rightPanelOpen && !settingsOpen && (
+          {rightPanelOpen && !settingsOpen && mainView === 'chat' && (
             <>
               <div
                 className="w-1.5 flex-shrink-0 cursor-col-resize hover:bg-[var(--accent)]/20 transition-colors z-10"
