@@ -65,6 +65,15 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
   {
+    files: ['website/src/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+    languageOptions: { globals: globals.browser },
+  },
+  {
     files: [
       'packages/desktop/src/main/**/*.{ts,tsx}',
       'packages/desktop/src/preload/**/*.{ts,tsx}',

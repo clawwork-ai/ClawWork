@@ -1,3 +1,4 @@
 packages:
   - 'packages/shared'
   - 'packages/desktop'
+  - 'website'

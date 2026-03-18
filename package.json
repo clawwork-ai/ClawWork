@@ -8,7 +8,7 @@
     "dev": "pnpm --filter @clawwork/desktop dev",
     "build": "pnpm -r build",
     "check:architecture": "node scripts/check-architecture.mjs",
-    "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit",
+    "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
