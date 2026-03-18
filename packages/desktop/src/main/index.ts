@@ -84,6 +84,12 @@ function createWindow(): BrowserWindow {
     },
   });
 
+  ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
+    if (process.platform === 'darwin') {
+      mainWindow.setWindowButtonVisibility(visible);
+    }
+  });
+
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
   });

@@ -157,6 +157,10 @@ export default function App() {
   }, [handleGlobalKeyDown]);
 
   useEffect(() => {
+    window.clawwork.setWindowButtonVisibility(!leftNavCollapsed);
+  }, [leftNavCollapsed]);
+
+  useEffect(() => {
     return window.clawwork.onQuickLaunchSubmit((message) => {
       const task = createTask();
       const title = message.slice(0, 30).replace(/\n/g, ' ').trim();

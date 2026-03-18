@@ -208,6 +208,8 @@ function buildApi(): ClawWorkAPI {
       };
     },
 
+    setWindowButtonVisibility: (visible: boolean) => ipcRenderer.send('ui:set-window-button-visibility', visible),
+
     selectContextFolder: () => ipcRenderer.invoke('context:select-folder'),
     listContextFiles: (folders: string[], query?: string) =>
       ipcRenderer.invoke('context:list-files', { folders, query }),

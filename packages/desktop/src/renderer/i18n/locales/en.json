@@ -11,7 +11,9 @@
     "noTitle": "(Untitled)",
     "cancel": "Cancel",
     "save": "Save",
-    "close": "Close"
+    "close": "Close",
+    "task": "Task",
+    "time": "Time"
   },
   "leftNav": {
     "searchTasks": "Search tasks\u2026",

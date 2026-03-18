@@ -11,7 +11,9 @@
     "noTitle": "(无标题)",
     "cancel": "取消",
     "save": "保存",
-    "close": "关闭"
+    "close": "关闭",
+    "task": "任务",
+    "time": "时间"
   },
   "leftNav": {
     "searchTasks": "搜索任务…",

@@ -2,8 +2,7 @@ import { type MouseEvent } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { MessageSquare, Circle, Loader2, Server, Cpu, Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
-import { formatRelativeTime } from '@/lib/utils';
+import { cn, formatRelativeTime } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -18,9 +17,10 @@ interface TaskItemProps {
   active: boolean;
   onContextMenu: (e: MouseEvent) => void;
   collapsed?: boolean;
+  multiGateway?: boolean;
 }
 
-export default function TaskItem({ task, active, onContextMenu, collapsed }: TaskItemProps) {
+export default function TaskItem({ task, active, onContextMenu, collapsed, multiGateway }: TaskItemProps) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
@@ -29,7 +29,6 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
   const setMainView = useUiStore((s) => s.setMainView);
   const isStreaming = useMessageStore((s) => !!s.streamingByTask[task.id]);
   const gwInfo = useUiStore((s) => s.gatewayInfoMap[task.gatewayId]);
-  const multiGateway = useUiStore((s) => Object.keys(s.gatewayInfoMap).length > 1);
   const agentInfo = useUiStore((s) =>
     task.agentId && task.agentId !== 'main'
       ? s.agentCatalogByGateway[task.gatewayId]?.agents.find((a) => a.id === task.agentId)
@@ -50,14 +49,15 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
         <TooltipTrigger asChild>
           <motion.button
             {...motionPresets.listItem}
+            whileTap={reduced ? undefined : { scale: 0.95 }}
             onClick={handleClick}
             onContextMenu={onContextMenu}
-            className="titlebar-no-drag w-full flex justify-center py-1.5 relative"
+            className="titlebar-no-drag w-full flex justify-center py-1.5 relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]"
           >
             {active && <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-[var(--accent)]" />}
             <span
               className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium',
+                'w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors',
                 active
                   ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
@@ -80,30 +80,33 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
     <motion.button
       {...motionPresets.listItem}
       whileHover={reduced ? undefined : { x: 2 }}
+      whileTap={reduced ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
       onClick={handleClick}
       onContextMenu={onContextMenu}
       className={cn(
-        'titlebar-no-drag w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-colors relative',
+        'titlebar-no-drag w-full flex items-start gap-3 px-3 py-2.5 rounded-md text-left transition-all relative',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
         active
-          ? 'bg-[var(--accent-soft)] text-[var(--text-primary)]'
+          ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]'
           : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
       )}
+      style={active ? { boxShadow: 'var(--shadow-card)' } : undefined}
     >
       {active && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--accent)]" />}
       <MessageSquare size={16} className="mt-0.5 flex-shrink-0 opacity-50" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <p className="font-medium truncate flex-1">{task.title || t('common.newTask')}</p>
+          <span className="font-medium truncate flex-1">{task.title || t('common.newTask')}</span>
           {isStreaming ? (
             <Loader2 size={12} className="flex-shrink-0 animate-spin text-[var(--accent)]" />
           ) : hasUnread ? (
             <Circle size={6} className="flex-shrink-0 fill-[var(--accent)] text-[var(--accent)]" />
           ) : null}
         </div>
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <div className="flex items-center gap-x-1.5 gap-y-1 mt-1 flex-wrap">
           {task.status === 'completed' && (
-            <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+            <span className="text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
               {t('common.completed')}
             </span>
           )}
@@ -111,7 +114,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
             <Tooltip>
               <TooltipTrigger asChild>
                 <span
-                  className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate"
+                  className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate"
                   style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
                 >
                   <Server size={9} className="flex-shrink-0 opacity-60" />
@@ -124,7 +127,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
           {agentInfo && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                <span className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
                   {agentInfo.identity?.emoji ? (
                     <span className="text-xs leading-none">{agentInfo.identity.emoji}</span>
                   ) : (
@@ -139,7 +142,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
           {modelLabel && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                <span className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
                   <Cpu size={9} className="flex-shrink-0 opacity-60" />
                   {modelLabel}
                 </span>
@@ -147,7 +150,9 @@ export default function TaskItem({ task, active, onContextMenu, collapsed }: Tas
               <TooltipContent>{modelTooltip}</TooltipContent>
             </Tooltip>
           )}
-          <p className="text-xs text-[var(--text-muted)]">{formatRelativeTime(new Date(task.updatedAt))}</p>
+          <span className="text-[11px] leading-tight text-[var(--text-muted)]">
+            {formatRelativeTime(new Date(task.updatedAt))}
+          </span>
         </div>
       </div>
     </motion.button>

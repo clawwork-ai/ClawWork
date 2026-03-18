@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   PanelRightOpen,
   PanelRightClose,
-  RotateCcw,
   Archive,
+  ArchiveRestore,
+  Search,
+  MessageSquare,
   Server,
   Bot,
   Cpu,
@@ -578,8 +580,21 @@ function ArchivedTasks() {
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const updateTaskStatus = useTaskStore((s) => s.updateTaskStatus);
   const setMainView = useUiStore((s) => s.setMainView);
+  const gwInfoMap = useUiStore((s) => s.gatewayInfoMap);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const archivedTasks = useMemo(() => tasks.filter((task) => task.status === 'archived'), [tasks]);
+  const archivedTasks = useMemo(() => {
+    const archived = tasks.filter((task) => task.status === 'archived');
+    if (!searchQuery.trim()) return archived;
+    const q = searchQuery.toLowerCase();
+    return archived.filter((task) => {
+      const title = (task.title || '').toLowerCase();
+      const gwName = (gwInfoMap[task.gatewayId]?.name || '').toLowerCase();
+      return title.includes(q) || gwName.includes(q);
+    });
+  }, [tasks, searchQuery, gwInfoMap]);
+
+  const totalArchived = useMemo(() => tasks.filter((task) => task.status === 'archived').length, [tasks]);
 
   const handleReactivate = (taskId: string): void => {
     updateTaskStatus(taskId, 'active');
@@ -595,53 +610,82 @@ function ArchivedTasks() {
       <header className="flex items-center gap-2.5 h-12 px-5 border-b border-[var(--border)] flex-shrink-0">
         <Archive size={18} className="text-[var(--text-muted)]" />
         <h2 className="font-medium text-[var(--text-primary)]">{t('leftNav.archivedChats')}</h2>
-        <span className="text-xs text-[var(--text-muted)]">({archivedTasks.length})</span>
+        <span className="text-xs text-[var(--text-muted)]">({totalArchived})</span>
       </header>
-      <ScrollArea className="flex-1 px-6 py-4">
-        <div className="max-w-3xl mx-auto">
+      {totalArchived > 0 && (
+        <div className="px-5 py-3 flex-shrink-0">
+          <div className="relative max-w-md">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('leftNav.searchTasks')}
+              className="w-full h-9 pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+            />
+          </div>
+        </div>
+      )}
+      <ScrollArea className="flex-1 px-5">
+        <div className="max-w-3xl">
           {archivedTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Archive size={40} className="text-[var(--text-muted)] opacity-40 mb-4" />
-              <p className="text-sm text-[var(--text-muted)]">{t('archived.empty')}</p>
+              <p className="text-sm text-[var(--text-muted)]">
+                {searchQuery.trim() ? t('search.noResults') : t('archived.empty')}
+              </p>
             </div>
           ) : (
-            <AnimatePresence>
-              {archivedTasks.map((task) => (
-                <motion.div
-                  key={task.id}
-                  {...motionPresets.listItem}
-                  exit={{ opacity: 0, x: -8 }}
-                  layout
-                  className="flex items-center gap-3 px-4 py-3 mb-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] hover:border-[var(--border-accent)] transition-colors cursor-pointer group"
-                  onClick={() => handleOpenTask(task.id)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                      {task.title || t('common.noTitle')}
-                    </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                      {formatRelativeTime(new Date(task.updatedAt))}
-                    </p>
-                  </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleReactivate(task.id);
-                        }}
-                      >
-                        <RotateCcw size={14} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t('contextMenu.reactivate')}</TooltipContent>
-                  </Tooltip>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <>
+              <div className="grid grid-cols-[1fr_minmax(80px,120px)_80px_32px] gap-x-3 items-center px-3 py-1.5 text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
+                <span>{t('common.task')}</span>
+                <span>Gateway</span>
+                <span>{t('common.time')}</span>
+                <span />
+              </div>
+              <AnimatePresence>
+                {archivedTasks.map((task) => {
+                  const gwName = gwInfoMap[task.gatewayId]?.name;
+                  return (
+                    <motion.div
+                      key={task.id}
+                      {...motionPresets.listItem}
+                      exit={{ opacity: 0, x: -8 }}
+                      layout
+                      className="grid grid-cols-[1fr_minmax(80px,120px)_80px_32px] gap-x-3 items-center px-3 py-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors cursor-pointer group"
+                      onClick={() => handleOpenTask(task.id)}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <MessageSquare size={14} className="flex-shrink-0 text-[var(--text-muted)] opacity-50" />
+                        <span className="text-sm text-[var(--text-primary)] truncate">
+                          {task.title || t('common.noTitle')}
+                        </span>
+                      </div>
+                      <span className="text-xs text-[var(--text-muted)] truncate">{gwName || '-'}</span>
+                      <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
+                        {formatRelativeTime(new Date(task.updatedAt))}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReactivate(task.id);
+                            }}
+                          >
+                            <ArchiveRestore size={14} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('contextMenu.reactivate')}</TooltipContent>
+                      </Tooltip>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </>
           )}
         </div>
       </ScrollArea>

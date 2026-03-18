@@ -1,4 +1,13 @@
-import { useState, useEffect, useRef, useCallback, useMemo, type MouseEvent } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  type MouseEvent,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Plus,
@@ -41,6 +50,74 @@ import type { TaskStatus } from '@clawwork/shared';
 
 type ConfirmAction = 'reset' | 'delete' | null;
 
+function IconButton({
+  icon: Icon,
+  tooltip,
+  onClick,
+  className,
+  badge,
+  tooltipSide = 'right',
+}: {
+  icon: ComponentType<{ size: number; className?: string }>;
+  tooltip: string;
+  onClick: () => void;
+  className?: string;
+  badge?: ReactNode;
+  tooltipSide?: 'right' | 'top' | 'bottom' | 'left';
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={onClick}
+          className={cn(
+            'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md transition-colors relative',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+            'active:scale-95',
+            className,
+          )}
+        >
+          <Icon size={16} />
+          {badge}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side={tooltipSide}>{tooltip}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function NavButton({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+  badge,
+}: {
+  icon: ComponentType<{ size: number; className?: string }>;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  badge?: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'titlebar-no-drag w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+        'active:scale-[0.98]',
+        active
+          ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+          : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
+      )}
+    >
+      <Icon size={16} className="opacity-60 flex-shrink-0" />
+      {label}
+      {badge}
+    </button>
+  );
+}
+
 export default function LeftNav() {
   const { t } = useTranslation();
   const tasks = useTaskStore((s) => s.tasks);
@@ -51,6 +128,7 @@ export default function LeftNav() {
   const removeTask = useTaskStore((s) => s.removeTask);
   const clearMessages = useMessageStore((s) => s.clearMessages);
   const addMessage = useMessageStore((s) => s.addMessage);
+  const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
   const mainView = useUiStore((s) => s.mainView);
   const setMainView = useUiStore((s) => s.setMainView);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
@@ -171,9 +249,10 @@ export default function LeftNav() {
     if (result.type === 'artifact') {
       setMainView('files');
     } else {
-      setMainView('chat');
       const targetId = result.type === 'task' ? result.id : result.taskId;
       if (targetId) setActiveTask(targetId);
+      if (result.type === 'message') setHighlightedMessage(result.id);
+      setMainView('chat');
     }
   };
 
@@ -182,16 +261,16 @@ export default function LeftNav() {
     openMenu(e, taskId, status);
   };
 
-  const visibleTasks = tasks.filter((t) => t.status !== 'archived');
-  const activeTasks = visibleTasks.filter((t) => t.status === 'active');
-  const completedTasks = visibleTasks.filter((t) => t.status === 'completed');
+  const visibleTasks = useMemo(() => tasks.filter((t) => t.status !== 'archived'), [tasks]);
+  const activeTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'active'), [visibleTasks]);
+  const completedTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'completed'), [visibleTasks]);
 
   const CollapseToggleButton = (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           onClick={toggleLeftNavCollapsed}
-          className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
+          className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)] active:scale-95"
         >
           {leftNavCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
         </button>
@@ -202,335 +281,8 @@ export default function LeftNav() {
     </Tooltip>
   );
 
-  if (leftNavCollapsed) {
-    return (
-      <div className="flex flex-col h-full pt-14 items-center py-2 gap-1 overflow-hidden">
-        {CollapseToggleButton}
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => startNewTask()}
-              className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80 transition-opacity"
-            >
-              <Plus size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t('common.newTask')}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => {
-                toggleLeftNavCollapsed();
-                focusSearch();
-              }}
-              className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
-            >
-              <Search size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t('leftNav.searchTasks')}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setMainView('files')}
-              className={cn(
-                'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
-                mainView === 'files'
-                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-              )}
-            >
-              <FolderOpen size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t('common.fileManager')}</TooltipContent>
-        </Tooltip>
-
-        <div className="w-6 h-px bg-[var(--border)] my-1" />
-
-        <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col items-center gap-0.5 px-1.5">
-            {activeTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                active={task.id === activeTaskId}
-                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                collapsed
-              />
-            ))}
-            {completedTasks.length > 0 && activeTasks.length > 0 && (
-              <div className="w-6 h-px bg-[var(--border)] my-0.5" />
-            )}
-            {completedTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                active={task.id === activeTaskId}
-                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                collapsed
-              />
-            ))}
-          </div>
-        </ScrollArea>
-
-        <div className="w-6 h-px bg-[var(--border)] my-1" />
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setMainView('archived')}
-              className={cn(
-                'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
-                mainView === 'archived'
-                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-              )}
-            >
-              <Archive size={16} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{t('leftNav.archivedChats')}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className={cn(
-                'titlebar-no-drag relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
-                settingsOpen
-                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-              )}
-            >
-              <Settings size={16} />
-              {hasUpdate && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            {hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
-          </TooltipContent>
-        </Tooltip>
-
-        <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed />
-
-        <DropdownMenu
-          open={isOpen}
-          onOpenChange={(open) => {
-            if (!open) closeMenu();
-          }}
-        >
-          <DropdownMenuTrigger className="sr-only" />
-          <DropdownMenuContent style={menuPos ? { position: 'fixed', left: menuPos.x, top: menuPos.y } : undefined}>
-            {items.map((item) => (
-              <DropdownMenuItem
-                key={item.label}
-                danger={item.danger}
-                disabled={item.disabled}
-                onClick={() => {
-                  item.action();
-                  closeMenu();
-                }}
-              >
-                {item.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Dialog
-          open={confirmAction !== null}
-          onOpenChange={(open) => {
-            if (!open) setConfirmAction(null);
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {confirmAction === 'reset' ? t('dialog.resetSessionTitle') : t('dialog.deleteTaskTitle')}
-              </DialogTitle>
-              <DialogDescription>
-                {confirmAction === 'reset' ? t('dialog.resetSessionDesc') : t('dialog.deleteTaskDesc')}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => setConfirmAction(null)}>
-                {t('common.cancel')}
-              </Button>
-              <Button
-                variant={confirmAction === 'delete' ? 'danger' : 'default'}
-                onClick={confirmAction === 'reset' ? handleResetConfirm : handleDeleteConfirm}
-              >
-                {t('dialog.confirm')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-full pt-14 relative">
-      <div className="absolute top-[8px] right-2 z-[51]">{CollapseToggleButton}</div>
-      <div className="px-4 pb-3 space-y-2 flex-shrink-0">
-        {hasMultipleGateways ? (
-          <div className="titlebar-no-drag flex items-center gap-0.5">
-            <Button variant="soft" onClick={() => startNewTask()} className="flex-1 gap-2 rounded-r-none">
-              <Plus size={16} /> {t('common.newTask')}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="soft" className="px-1.5 rounded-l-none border-l border-[var(--border)]">
-                  <ChevronDown size={14} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[160px]">
-                {connectedGateways.map((gw) => (
-                  <DropdownMenuItem key={gw.id} onClick={() => startNewTask(gw.id)}>
-                    {gw.color ? (
-                      <span className="mr-2 w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: gw.color }} />
-                    ) : (
-                      <Server size={12} className="mr-2 flex-shrink-0 opacity-60" />
-                    )}
-                    {gw.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ) : (
-          <Button variant="soft" onClick={() => startNewTask()} className="titlebar-no-drag w-full gap-2">
-            <Plus size={16} /> {t('common.newTask')}
-          </Button>
-        )}
-        <div className="titlebar-no-drag relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('leftNav.searchTasks')}
-            className="w-full h-9 pl-9 pr-3 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--border-accent)] transition-colors"
-          />
-        </div>
-      </div>
-
-      <div className="relative flex-1 min-h-0">
-        <AnimatePresence>
-          {searchQuery.trim() && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="absolute inset-0 z-10 bg-[var(--bg-elevated)] border-t border-[var(--border)]"
-            >
-              <SearchResults results={searchResults} onSelect={handleSelectResult} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="flex flex-col h-full">
-          <div className="px-4 pb-2 flex-shrink-0">
-            <button
-              onClick={() => setMainView('files')}
-              className={cn(
-                'titlebar-no-drag w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
-                mainView === 'files'
-                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-              )}
-            >
-              <FolderOpen size={16} className="opacity-60" /> {t('common.fileManager')}
-            </button>
-          </div>
-
-          <ScrollArea className="flex-1 px-4">
-            <div className="space-y-0.5">
-              {visibleTasks.length === 0 && (
-                <p className="text-xs text-[var(--text-muted)] text-center py-8">{t('leftNav.emptyHint')}</p>
-              )}
-              {activeTasks.length > 0 && (
-                <>
-                  <p className="text-xs uppercase tracking-wider text-[var(--text-muted)] px-3 py-2">
-                    {t('common.inProgress')} ({activeTasks.length})
-                  </p>
-                  {activeTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      active={task.id === activeTaskId}
-                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                    />
-                  ))}
-                </>
-              )}
-              {completedTasks.length > 0 && (
-                <>
-                  <p className="text-xs uppercase tracking-wider text-[var(--text-muted)] px-3 py-2 mt-3">
-                    {t('common.completed')} ({completedTasks.length})
-                  </p>
-                  {completedTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      active={task.id === activeTaskId}
-                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                    />
-                  ))}
-                </>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
-
-      <div className="flex-shrink-0 px-4 py-3 border-t border-[var(--border)] space-y-1">
-        <button
-          onClick={() => setMainView('archived')}
-          className={cn(
-            'titlebar-no-drag w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
-            mainView === 'archived'
-              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-          )}
-        >
-          <Archive size={16} className="opacity-60" /> {t('leftNav.archivedChats')}
-        </button>
-        <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setSettingsOpen(!settingsOpen)}
-                className={cn(
-                  'titlebar-no-drag relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
-                  settingsOpen
-                    ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-                )}
-              >
-                <Settings size={16} className="opacity-60" /> {t('common.settings')}
-                {hasUpdate && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--accent)]" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              {hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
-            </TooltipContent>
-          </Tooltip>
-          <div className="ml-auto">
-            <ConnectionStatus gatewayStatus={aggregatedGwStatus} />
-          </div>
-        </div>
-      </div>
-
+  const overlays = (
+    <>
       <DropdownMenu
         open={isOpen}
         onOpenChange={(open) => {
@@ -583,6 +335,255 @@ export default function LeftNav() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  if (leftNavCollapsed) {
+    return (
+      <div className="flex flex-col h-full items-center py-2 gap-1 overflow-hidden">
+        <div className="flex-shrink-0 flex items-center justify-center w-full h-12">{CollapseToggleButton}</div>
+
+        <IconButton
+          icon={Plus}
+          tooltip={t('common.newTask')}
+          onClick={() => startNewTask()}
+          className="bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80"
+        />
+
+        <IconButton
+          icon={Search}
+          tooltip={t('leftNav.searchTasks')}
+          onClick={() => {
+            toggleLeftNavCollapsed();
+            focusSearch();
+          }}
+          className="text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+        />
+
+        <IconButton
+          icon={FolderOpen}
+          tooltip={t('common.fileManager')}
+          onClick={() => setMainView('files')}
+          className={
+            mainView === 'files'
+              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+          }
+        />
+
+        <div className="w-6 h-px bg-[var(--border)] my-1" />
+
+        <ScrollArea className="flex-1 w-full">
+          <div className="flex flex-col items-center gap-0.5 px-1.5">
+            {activeTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                active={task.id === activeTaskId}
+                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                collapsed
+              />
+            ))}
+            {completedTasks.length > 0 && activeTasks.length > 0 && (
+              <div className="w-6 h-px bg-[var(--border)] my-0.5" />
+            )}
+            {completedTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                active={task.id === activeTaskId}
+                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                collapsed
+              />
+            ))}
+          </div>
+        </ScrollArea>
+
+        <div className="w-6 h-px bg-[var(--border)] my-1" />
+
+        <IconButton
+          icon={Archive}
+          tooltip={t('leftNav.archivedChats')}
+          onClick={() => setMainView('archived')}
+          className={
+            mainView === 'archived'
+              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+          }
+        />
+
+        <IconButton
+          icon={Settings}
+          tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
+          onClick={() => setSettingsOpen(!settingsOpen)}
+          className={
+            settingsOpen
+              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+          }
+          badge={
+            hasUpdate ? (
+              <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
+            ) : undefined
+          }
+        />
+
+        <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed />
+
+        {overlays}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full pt-14 relative">
+      <div className="absolute top-[8px] right-2 z-[51]">{CollapseToggleButton}</div>
+      <div className="px-4 pb-3 space-y-2 flex-shrink-0">
+        {hasMultipleGateways ? (
+          <div className="titlebar-no-drag flex items-center gap-0.5">
+            <Button variant="soft" onClick={() => startNewTask()} className="flex-1 gap-2 rounded-r-none">
+              <Plus size={16} /> {t('common.newTask')}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="soft" className="px-1.5 rounded-l-none border-l border-[var(--border)]">
+                  <ChevronDown size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                {connectedGateways.map((gw) => (
+                  <DropdownMenuItem key={gw.id} onClick={() => startNewTask(gw.id)}>
+                    {gw.color ? (
+                      <span className="mr-2 w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: gw.color }} />
+                    ) : (
+                      <Server size={12} className="mr-2 flex-shrink-0 opacity-60" />
+                    )}
+                    {gw.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <Button variant="soft" onClick={() => startNewTask()} className="titlebar-no-drag w-full gap-2">
+            <Plus size={16} /> {t('common.newTask')}
+          </Button>
+        )}
+        <div className="titlebar-no-drag relative">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('leftNav.searchTasks')}
+            className="w-full h-9 pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+          />
+        </div>
+      </div>
+
+      <div className="relative flex-1 min-h-0">
+        <AnimatePresence>
+          {searchQuery.trim() && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 z-10 bg-[var(--bg-elevated)] border-t border-[var(--border)]"
+            >
+              <SearchResults results={searchResults} onSelect={handleSelectResult} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex flex-col h-full">
+          <div className="px-4 pb-2 flex-shrink-0">
+            <NavButton
+              icon={FolderOpen}
+              label={t('common.fileManager')}
+              active={mainView === 'files'}
+              onClick={() => setMainView('files')}
+            />
+          </div>
+
+          <ScrollArea className="flex-1 px-4">
+            <div className="space-y-0.5">
+              {visibleTasks.length === 0 && (
+                <p className="text-xs text-[var(--text-muted)] text-center py-8">{t('leftNav.emptyHint')}</p>
+              )}
+              {activeTasks.length > 0 && (
+                <>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] px-3 py-2">
+                    {t('common.inProgress')} ({activeTasks.length})
+                  </p>
+                  {activeTasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      active={task.id === activeTaskId}
+                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                      multiGateway={hasMultipleGateways}
+                    />
+                  ))}
+                </>
+              )}
+              {completedTasks.length > 0 && (
+                <>
+                  <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] px-3 py-2 mt-3">
+                    {t('common.completed')} ({completedTasks.length})
+                  </p>
+                  {completedTasks.map((task) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      active={task.id === activeTaskId}
+                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                      multiGateway={hasMultipleGateways}
+                    />
+                  ))}
+                </>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+
+      <div className="flex-shrink-0 px-4 py-2 border-t border-[var(--border)]">
+        <div className="flex items-center">
+          <IconButton
+            icon={Archive}
+            tooltip={t('leftNav.archivedChats')}
+            onClick={() => setMainView('archived')}
+            tooltipSide="top"
+            className={
+              mainView === 'archived'
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+          />
+          <div className="flex-1" />
+          <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed className="mr-1.5" />
+          <IconButton
+            icon={Settings}
+            tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
+            onClick={() => setSettingsOpen(true)}
+            tooltipSide="top"
+            className={
+              settingsOpen
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+            badge={
+              hasUpdate ? (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
+              ) : undefined
+            }
+          />
+        </div>
+      </div>
+
+      {overlays}
     </div>
   );
 }
