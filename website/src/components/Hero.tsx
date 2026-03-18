@@ -130,7 +130,7 @@ export function Hero() {
 
       <div style={{ marginTop: '48px' }}>
         <img
-          src="/screenshot.png"
+          src={`${import.meta.env.BASE_URL}screenshot.png`}
           alt="ClawWork screenshot"
           style={{
             maxWidth: '100%',

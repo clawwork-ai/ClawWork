@@ -72,7 +72,7 @@ export function Footer() {
             gap: '12px',
           }}
         >
-          <img src="/logo.png" alt="ClawWork" style={{ width: '20px', height: '20px' }} />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '20px', height: '20px' }} />
           <span
             style={{
               fontSize: '13px',
