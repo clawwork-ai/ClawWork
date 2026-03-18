@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type MouseEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Search, FolderOpen, Settings, Archive, Server, ChevronDown } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  FolderOpen,
+  Settings,
+  Archive,
+  Server,
+  ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
@@ -48,6 +58,9 @@ export default function LeftNav() {
   const gwStatusMap = useUiStore((s) => s.gatewayStatusMap);
   const gwInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const hasUpdate = useUiStore((s) => s.hasUpdate);
+  const leftNavCollapsed = useUiStore((s) => s.leftNavCollapsed);
+  const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
+  const focusSearch = useUiStore((s) => s.focusSearch);
   const connectedGateways = Object.values(gwInfoMap).filter((gw) => gwStatusMap[gw.id] === 'connected');
   const hasMultipleGateways = connectedGateways.length > 1;
   const searchFocusTrigger = useUiStore((s) => s.searchFocusTrigger);
@@ -134,9 +147,10 @@ export default function LeftNav() {
 
   useEffect(() => {
     if (searchFocusTrigger === 0) return;
+    if (leftNavCollapsed) return;
     searchInputRef.current?.focus();
     searchInputRef.current?.select();
-  }, [searchFocusTrigger]);
+  }, [searchFocusTrigger, leftNavCollapsed]);
 
   useEffect(() => {
     clearTimeout(timerRef.current);
@@ -172,8 +186,199 @@ export default function LeftNav() {
   const activeTasks = visibleTasks.filter((t) => t.status === 'active');
   const completedTasks = visibleTasks.filter((t) => t.status === 'completed');
 
+  const CollapseToggleButton = (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          onClick={toggleLeftNavCollapsed}
+          className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
+        >
+          {leftNavCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right">
+        {leftNavCollapsed ? t('leftNav.expandNav') : t('leftNav.collapseNav')}
+      </TooltipContent>
+    </Tooltip>
+  );
+
+  if (leftNavCollapsed) {
+    return (
+      <div className="flex flex-col h-full pt-14 items-center py-2 gap-1 overflow-hidden">
+        {CollapseToggleButton}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => startNewTask()}
+              className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80 transition-opacity"
+            >
+              <Plus size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('common.newTask')}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                toggleLeftNavCollapsed();
+                focusSearch();
+              }}
+              className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
+            >
+              <Search size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('leftNav.searchTasks')}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setMainView('files')}
+              className={cn(
+                'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
+                mainView === 'files'
+                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
+              )}
+            >
+              <FolderOpen size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('common.fileManager')}</TooltipContent>
+        </Tooltip>
+
+        <div className="w-6 h-px bg-[var(--border)] my-1" />
+
+        <ScrollArea className="flex-1 w-full">
+          <div className="flex flex-col items-center gap-0.5 px-1.5">
+            {activeTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                active={task.id === activeTaskId}
+                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                collapsed
+              />
+            ))}
+            {completedTasks.length > 0 && activeTasks.length > 0 && (
+              <div className="w-6 h-px bg-[var(--border)] my-0.5" />
+            )}
+            {completedTasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                active={task.id === activeTaskId}
+                onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+                collapsed
+              />
+            ))}
+          </div>
+        </ScrollArea>
+
+        <div className="w-6 h-px bg-[var(--border)] my-1" />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setMainView('archived')}
+              className={cn(
+                'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
+                mainView === 'archived'
+                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
+              )}
+            >
+              <Archive size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('leftNav.archivedChats')}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className={cn(
+                'titlebar-no-drag relative flex items-center justify-center w-8 h-8 rounded-lg transition-colors',
+                settingsOpen
+                  ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
+              )}
+            >
+              <Settings size={16} />
+              {hasUpdate && <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
+          </TooltipContent>
+        </Tooltip>
+
+        <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed />
+
+        <DropdownMenu
+          open={isOpen}
+          onOpenChange={(open) => {
+            if (!open) closeMenu();
+          }}
+        >
+          <DropdownMenuTrigger className="sr-only" />
+          <DropdownMenuContent style={menuPos ? { position: 'fixed', left: menuPos.x, top: menuPos.y } : undefined}>
+            {items.map((item) => (
+              <DropdownMenuItem
+                key={item.label}
+                danger={item.danger}
+                disabled={item.disabled}
+                onClick={() => {
+                  item.action();
+                  closeMenu();
+                }}
+              >
+                {item.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Dialog
+          open={confirmAction !== null}
+          onOpenChange={(open) => {
+            if (!open) setConfirmAction(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {confirmAction === 'reset' ? t('dialog.resetSessionTitle') : t('dialog.deleteTaskTitle')}
+              </DialogTitle>
+              <DialogDescription>
+                {confirmAction === 'reset' ? t('dialog.resetSessionDesc') : t('dialog.deleteTaskDesc')}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setConfirmAction(null)}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant={confirmAction === 'delete' ? 'danger' : 'default'}
+                onClick={confirmAction === 'reset' ? handleResetConfirm : handleDeleteConfirm}
+              >
+                {t('dialog.confirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full pt-14 relative">
+      <div className="absolute top-[8px] right-2 z-10">{CollapseToggleButton}</div>
       <div className="px-4 pb-3 space-y-2 flex-shrink-0">
         {hasMultipleGateways ? (
           <div className="titlebar-no-drag flex items-center gap-0.5">
@@ -300,7 +505,7 @@ export default function LeftNav() {
         >
           <Archive size={16} className="opacity-60" /> {t('leftNav.archivedChats')}
         </button>
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <button

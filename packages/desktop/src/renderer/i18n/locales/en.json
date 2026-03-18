@@ -18,7 +18,9 @@
     "emptyHint": "Click \"New Task\" to start",
     "appSettings": "App Settings",
     "archivedChats": "Archived Chats",
-    "updateAvailable": "Update available"
+    "updateAvailable": "Update available",
+    "collapseNav": "Collapse sidebar",
+    "expandNav": "Expand sidebar"
   },
   "mainArea": {
     "welcomeSubtitle": "AI-powered task execution",
@@ -40,6 +42,8 @@
     "sendEnter": "Enter",
     "sendCmdEnter": "{{mod}} Enter",
     "shortcutUpdated": "Shortcut updated",
+    "leftNavShortcut": "Toggle sidebar",
+    "rightPanelShortcut": "Toggle context panel",
     "gateways": "Gateways",
     "addGateway": "Add Gateway",
     "editGateway": "Edit Gateway",

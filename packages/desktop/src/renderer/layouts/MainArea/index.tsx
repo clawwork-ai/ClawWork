@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PanelRightOpen,
+  PanelRightClose,
   RotateCcw,
   Archive,
   Server,
@@ -200,6 +201,7 @@ function WelcomeScreen() {
 function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
   const { t } = useTranslation();
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
+  const rightPanelOpen = useUiStore((s) => s.rightPanelOpen);
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const hasMultipleGateways = Object.keys(gatewayInfoMap).length > 1;
   const gwInfo = activeTask ? gatewayInfoMap[activeTask.gatewayId] : undefined;
@@ -479,7 +481,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="icon" onClick={onTogglePanel} className="titlebar-no-drag">
-            <PanelRightOpen size={18} />
+            {rightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{t('mainArea.toggleContextPanel')}</TooltipContent>

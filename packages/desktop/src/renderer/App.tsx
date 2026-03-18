@@ -36,10 +36,38 @@ export default function App() {
   const addMessage = useMessageStore((s) => s.addMessage);
   const setProcessing = useMessageStore((s) => s.setProcessing);
 
+  const leftNavCollapsed = useUiStore((s) => s.leftNavCollapsed);
+  const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
+  const leftNavWidth = useUiStore((s) => s.leftNavWidth);
+  const setLeftNavWidth = useUiStore((s) => s.setLeftNavWidth);
+  const rightPanelWidth = useUiStore((s) => s.rightPanelWidth);
+  const setRightPanelWidth = useUiStore((s) => s.setRightPanelWidth);
+  const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
+  const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
+
   useGatewayEventDispatcher();
   useTheme();
   useUpdateCheck();
   useTraySync();
+
+  const startPanelDrag = useCallback(
+    (e: React.MouseEvent, startWidth: number, setWidth: (w: number) => void, dir: 1 | -1) => {
+      e.preventDefault();
+      const ox = e.clientX;
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'col-resize';
+      const onMove = (ev: MouseEvent) => setWidth(startWidth + dir * (ev.clientX - ox));
+      const onUp = () => {
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+    },
+    [],
+  );
 
   useEffect(() => {
     window.clawwork.isWorkspaceConfigured().then((configured) => {
@@ -56,6 +84,12 @@ export default function App() {
     window.clawwork.getSettings().then((settings) => {
       if (settings?.sendShortcut) {
         useUiStore.setState({ sendShortcut: settings.sendShortcut });
+      }
+      if (settings?.leftNavShortcut) {
+        useUiStore.setState({ leftNavShortcut: settings.leftNavShortcut });
+      }
+      if (settings?.rightPanelShortcut) {
+        useUiStore.setState({ rightPanelShortcut: settings.rightPanelShortcut });
       }
     });
   }, [ready]);
@@ -79,10 +113,34 @@ export default function App() {
 
       if (!e.shiftKey && e.code === 'KeyK') {
         e.preventDefault();
+        if (leftNavCollapsed) toggleLeftNavCollapsed();
         focusSearch();
+        return;
+      }
+
+      const leftCode = leftNavShortcut;
+      const rightCode = rightPanelShortcut;
+
+      if (!e.shiftKey && e.code === leftCode) {
+        e.preventDefault();
+        toggleLeftNavCollapsed();
+        return;
+      }
+
+      if (!e.shiftKey && e.code === rightCode) {
+        e.preventDefault();
+        toggleRightPanel();
       }
     },
-    [startNewTask, setMainView, focusSearch],
+    [
+      startNewTask,
+      setMainView,
+      focusSearch,
+      leftNavShortcut,
+      rightPanelShortcut,
+      toggleLeftNavCollapsed,
+      toggleRightPanel,
+    ],
   );
 
   useEffect(() => {
@@ -156,12 +214,21 @@ export default function App() {
       <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
         <div className="titlebar-drag fixed top-0 left-0 right-0 h-8 z-50" />
 
-        <aside
-          className={cn('flex-shrink-0 border-r border-[var(--border)] bg-[var(--bg-secondary)]')}
-          style={{ width: 260 }}
+        <motion.aside
+          animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
+          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+          className={cn('flex-shrink-0 border-r border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
+          style={{ minWidth: leftNavCollapsed ? 52 : 180 }}
         >
           <LeftNav />
-        </aside>
+        </motion.aside>
+
+        {!leftNavCollapsed && (
+          <div
+            className="w-1.5 flex-shrink-0 cursor-col-resize hover:bg-[var(--accent)]/20 transition-colors z-10"
+            onMouseDown={(e) => startPanelDrag(e, leftNavWidth, setLeftNavWidth, 1)}
+          />
+        )}
 
         <main className="flex-1 min-w-0 flex flex-col">
           {settingsOpen ? (
@@ -173,15 +240,21 @@ export default function App() {
 
         <AnimatePresence>
           {rightPanelOpen && !settingsOpen && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-              className={cn('flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
-            >
-              <RightPanel onClose={() => setRightPanelOpen(false)} />
-            </motion.aside>
+            <>
+              <div
+                className="w-1.5 flex-shrink-0 cursor-col-resize hover:bg-[var(--accent)]/20 transition-colors z-10"
+                onMouseDown={(e) => startPanelDrag(e, rightPanelWidth, setRightPanelWidth, -1)}
+              />
+              <motion.aside
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: rightPanelWidth, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+                className={cn('flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
+              >
+                <RightPanel onClose={() => setRightPanelOpen(false)} />
+              </motion.aside>
+            </>
           )}
         </AnimatePresence>
         <Toaster

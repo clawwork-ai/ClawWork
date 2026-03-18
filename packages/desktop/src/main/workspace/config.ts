@@ -38,6 +38,8 @@ export interface AppConfig {
   voiceInput?: VoiceInputConfig;
   quickLaunch?: QuickLaunchConfig;
   trayEnabled?: boolean;
+  leftNavShortcut?: 'Comma' | 'BracketLeft';
+  rightPanelShortcut?: 'Period' | 'BracketRight';
 }
 
 function configFilePath(): string {

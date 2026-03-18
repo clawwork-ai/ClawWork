@@ -17,9 +17,10 @@ interface TaskItemProps {
   task: Task;
   active: boolean;
   onContextMenu: (e: MouseEvent) => void;
+  collapsed?: boolean;
 }
 
-export default function TaskItem({ task, active, onContextMenu }: TaskItemProps) {
+export default function TaskItem({ task, active, onContextMenu, collapsed }: TaskItemProps) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
@@ -42,6 +43,38 @@ export default function TaskItem({ task, active, onContextMenu }: TaskItemProps)
     clearUnread(task.id);
     setMainView('chat');
   };
+
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.button
+            {...motionPresets.listItem}
+            onClick={handleClick}
+            onContextMenu={onContextMenu}
+            className="titlebar-no-drag w-full flex justify-center py-1.5 relative"
+          >
+            {active && <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-[var(--accent)]" />}
+            <span
+              className={cn(
+                'w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium',
+                active
+                  ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
+                  : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+              )}
+            >
+              {task.title ? task.title[0].toUpperCase() : <MessageSquare size={14} />}
+            </span>
+            {isStreaming && <Loader2 className="absolute top-0.5 right-1 w-3 h-3 animate-spin text-[var(--accent)]" />}
+            {hasUnread && !isStreaming && (
+              <span className="absolute top-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />
+            )}
+          </motion.button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{task.title || t('common.newTask')}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <motion.button

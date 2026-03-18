@@ -3,7 +3,14 @@ import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { modKey } from '@/lib/utils';
-import { useUiStore, type Theme, type Language, type SendShortcut } from '@/stores/uiStore';
+import {
+  useUiStore,
+  type Theme,
+  type Language,
+  type SendShortcut,
+  type PanelShortcutLeft,
+  type PanelShortcutRight,
+} from '@/stores/uiStore';
 import SettingRow from '../components/SettingRow';
 import SegmentedControl from '../components/SegmentedControl';
 
@@ -20,6 +27,10 @@ export default function GeneralSection() {
   const setLanguage = useUiStore((s) => s.setLanguage);
   const sendShortcut = useUiStore((s) => s.sendShortcut);
   const setSendShortcut = useUiStore((s) => s.setSendShortcut);
+  const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
+  const setLeftNavShortcut = useUiStore((s) => s.setLeftNavShortcut);
+  const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
+  const setRightPanelShortcut = useUiStore((s) => s.setRightPanelShortcut);
 
   const handleThemeToggle = useCallback(
     (next: Theme) => {
@@ -36,6 +47,24 @@ export default function GeneralSection() {
       toast.success(t('settings.shortcutUpdated'));
     },
     [sendShortcut, setSendShortcut, t],
+  );
+
+  const handleLeftNavShortcutChange = useCallback(
+    (next: PanelShortcutLeft) => {
+      if (next === leftNavShortcut) return;
+      setLeftNavShortcut(next);
+      toast.success(t('settings.shortcutUpdated'));
+    },
+    [leftNavShortcut, setLeftNavShortcut, t],
+  );
+
+  const handleRightPanelShortcutChange = useCallback(
+    (next: PanelShortcutRight) => {
+      if (next === rightPanelShortcut) return;
+      setRightPanelShortcut(next);
+      toast.success(t('settings.shortcutUpdated'));
+    },
+    [rightPanelShortcut, setRightPanelShortcut, t],
   );
 
   return (
@@ -100,6 +129,34 @@ export default function GeneralSection() {
               options={[
                 { value: 'enter' as const, label: t('settings.sendEnter') },
                 { value: 'cmdEnter' as const, label: t('settings.sendCmdEnter', { mod: modKey }) },
+              ]}
+            />
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow label={t('settings.leftNavShortcut')}>
+            <SegmentedControl
+              layoutId="seg-left-nav"
+              value={leftNavShortcut}
+              onChange={handleLeftNavShortcutChange}
+              ariaLabel={t('settings.leftNavShortcut')}
+              options={[
+                { value: 'Comma' as const, label: `${modKey} ,` },
+                { value: 'BracketLeft' as const, label: `${modKey} [` },
+              ]}
+            />
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow label={t('settings.rightPanelShortcut')}>
+            <SegmentedControl
+              layoutId="seg-right-panel"
+              value={rightPanelShortcut}
+              onChange={handleRightPanelShortcutChange}
+              ariaLabel={t('settings.rightPanelShortcut')}
+              options={[
+                { value: 'Period' as const, label: `${modKey} .` },
+                { value: 'BracketRight' as const, label: `${modKey} ]` },
               ]}
             />
           </SettingRow>

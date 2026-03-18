@@ -18,7 +18,9 @@
     "emptyHint": "点击「新任务」开始",
     "appSettings": "应用设置",
     "archivedChats": "归档对话",
-    "updateAvailable": "有新版本可用"
+    "updateAvailable": "有新版本可用",
+    "collapseNav": "收起侧栏",
+    "expandNav": "展开侧栏"
   },
   "mainArea": {
     "welcomeSubtitle": "AI 驱动的任务执行",
@@ -40,6 +42,8 @@
     "sendEnter": "回车",
     "sendCmdEnter": "{{mod}} 回车",
     "shortcutUpdated": "快捷键已更新",
+    "leftNavShortcut": "切换侧栏",
+    "rightPanelShortcut": "切换上下文面板",
     "gateways": "网关",
     "addGateway": "添加网关",
     "editGateway": "编辑网关",

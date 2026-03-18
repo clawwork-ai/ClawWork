@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 type Status = 'connected' | 'connecting' | 'disconnected';
 
@@ -14,6 +15,7 @@ interface StatusConfig {
 interface ConnectionStatusProps {
   gatewayStatus: Status;
   className?: string;
+  collapsed?: boolean;
 }
 
 function computeConfig(status: Status): StatusConfig {
@@ -27,9 +29,20 @@ function computeConfig(status: Status): StatusConfig {
   }
 }
 
-export default function ConnectionStatus({ gatewayStatus, className }: ConnectionStatusProps) {
+export default function ConnectionStatus({ gatewayStatus, className, collapsed }: ConnectionStatusProps) {
   const { t } = useTranslation();
   const cfg = computeConfig(gatewayStatus);
+
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', cfg.color, cfg.pulse && 'animate-pulse')} />
+        </TooltipTrigger>
+        <TooltipContent side="right">{t(cfg.labelKey)}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait">

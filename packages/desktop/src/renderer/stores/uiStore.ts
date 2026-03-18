@@ -10,12 +10,38 @@ export type Language = 'en' | 'zh';
 
 export type SendShortcut = 'enter' | 'cmdEnter';
 
+export type PanelShortcutLeft = 'Comma' | 'BracketLeft';
+export type PanelShortcutRight = 'Period' | 'BracketRight';
+
 export type GatewayConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 export interface GatewayInfo {
   id: string;
   name: string;
   color?: string;
+}
+
+function ls(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function lsSet(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+}
+
+function lsWidth(key: string, min: number, max: number, vwFraction: number): number {
+  const stored = ls(key);
+  if (stored) {
+    const n = Number(stored);
+    if (!isNaN(n) && n >= min && n <= max) return n;
+  }
+  return typeof window === 'undefined' ? min : Math.min(max, Math.max(min, window.innerWidth * vwFraction));
 }
 
 interface UiState {
@@ -35,36 +61,28 @@ interface UiState {
   language: Language;
   setLanguage: (lang: Language) => void;
 
-  /** Per-gateway connection status map */
   gatewayStatusMap: Record<string, GatewayConnectionStatus>;
   setGatewayStatusByGateway: (gatewayId: string, status: GatewayConnectionStatus) => void;
 
-  /** Default gateway for new tasks */
   defaultGatewayId: string | null;
   setDefaultGatewayId: (id: string | null) => void;
 
-  /** Cached gateway metadata for display (name, color) */
   gatewayInfoMap: Record<string, GatewayInfo>;
   setGatewayInfoMap: (map: Record<string, GatewayInfo>) => void;
 
-  /** taskIds with unread messages (background tasks that received new content) */
   unreadTaskIds: Set<string>;
   markUnread: (taskId: string) => void;
   clearUnread: (taskId: string) => void;
 
-  /** Whether a newer version is available (set by startup update check) */
   hasUpdate: boolean;
   setHasUpdate: (has: boolean) => void;
 
-  /** Per-gateway model catalogs */
   modelCatalogByGateway: Record<string, ModelCatalogEntry[]>;
   setModelCatalogForGateway: (gatewayId: string, models: ModelCatalogEntry[]) => void;
 
-  /** Per-gateway agent catalogs */
   agentCatalogByGateway: Record<string, { agents: AgentInfo[]; defaultId: string }>;
   setAgentCatalogForGateway: (gatewayId: string, agents: AgentInfo[], defaultId: string) => void;
 
-  /** Per-gateway tools catalogs */
   toolsCatalogByGateway: Record<string, ToolsCatalog>;
   setToolsCatalogForGateway: (gatewayId: string, catalog: ToolsCatalog) => void;
 
@@ -75,6 +93,21 @@ interface UiState {
   focusSearch: () => void;
 
   getAgentsForGateway: (gatewayId: string) => { agents: AgentInfo[]; defaultId: string };
+
+  leftNavCollapsed: boolean;
+  toggleLeftNavCollapsed: () => void;
+
+  leftNavWidth: number;
+  setLeftNavWidth: (w: number) => void;
+
+  rightPanelWidth: number;
+  setRightPanelWidth: (w: number) => void;
+
+  leftNavShortcut: PanelShortcutLeft;
+  setLeftNavShortcut: (s: PanelShortcutLeft) => void;
+
+  rightPanelShortcut: PanelShortcutRight;
+  setRightPanelShortcut: (s: PanelShortcutRight) => void;
 }
 
 const EMPTY_AGENT_CATALOG = { agents: [] as AgentInfo[], defaultId: 'main' };
@@ -168,5 +201,39 @@ export const useUiStore = create<UiState>((set, get) => ({
   getAgentsForGateway: (gatewayId: string) => {
     const entry = get().agentCatalogByGateway[gatewayId];
     return entry ?? EMPTY_AGENT_CATALOG;
+  },
+
+  leftNavCollapsed: ls('cw:leftNavCollapsed') === 'true',
+  toggleLeftNavCollapsed: () =>
+    set((s) => {
+      const next = !s.leftNavCollapsed;
+      lsSet('cw:leftNavCollapsed', String(next));
+      return { leftNavCollapsed: next };
+    }),
+
+  leftNavWidth: lsWidth('cw:leftNavWidth', 180, 400, 0.18),
+  setLeftNavWidth: (w) => {
+    const clamped = Math.min(400, Math.max(180, w));
+    lsSet('cw:leftNavWidth', String(clamped));
+    set({ leftNavWidth: clamped });
+  },
+
+  rightPanelWidth: lsWidth('cw:rightPanelWidth', 240, 500, 0.2),
+  setRightPanelWidth: (w) => {
+    const clamped = Math.min(500, Math.max(240, w));
+    lsSet('cw:rightPanelWidth', String(clamped));
+    set({ rightPanelWidth: clamped });
+  },
+
+  leftNavShortcut: 'Comma',
+  setLeftNavShortcut: (s) => {
+    set({ leftNavShortcut: s });
+    window.clawwork.updateSettings({ leftNavShortcut: s });
+  },
+
+  rightPanelShortcut: 'Period',
+  setRightPanelShortcut: (s) => {
+    set({ rightPanelShortcut: s });
+    window.clawwork.updateSettings({ rightPanelShortcut: s });
   },
 }));

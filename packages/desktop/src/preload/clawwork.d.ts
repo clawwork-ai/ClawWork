@@ -85,6 +85,8 @@ interface AppSettings {
   };
   quickLaunch?: QuickLaunchSettings;
   trayEnabled?: boolean;
+  leftNavShortcut?: 'Comma' | 'BracketLeft';
+  rightPanelShortcut?: 'Period' | 'BracketRight';
 }
 
 export type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';
