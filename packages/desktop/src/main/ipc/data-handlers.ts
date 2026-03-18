@@ -2,6 +2,8 @@ import { ipcMain } from 'electron';
 import { eq, desc } from 'drizzle-orm';
 import { getDb, isDbReady } from '../db/index.js';
 import { tasks, messages, artifacts } from '../db/schema.js';
+import { autoExtractArtifacts } from '../artifact/auto-extract.js';
+import { getWorkspacePath } from '../workspace/config.js';
 
 function ipcError(err: unknown): { ok: false; error: string } {
   return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
@@ -126,6 +128,14 @@ export function registerDataHandlers(): void {
             imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
           })
           .run();
+        if (msg.role === 'assistant' && msg.content.length > 0) {
+          const workspacePath = getWorkspacePath();
+          if (workspacePath) {
+            autoExtractArtifacts({ workspacePath, taskId: msg.taskId, messageId: msg.id, content: msg.content }).catch(
+              (err: unknown) => console.error('[auto-extract]', err),
+            );
+          }
+        }
         return { ok: true };
       } catch (err) {
         console.error('[data] create-message failed:', err);

@@ -226,6 +226,15 @@ export interface ClawWorkAPI {
   getArtifact: (id: string) => Promise<IpcResult>;
   readArtifactFile: (localPath: string) => Promise<IpcResult>;
   onArtifactSaved: (callback: (artifact: unknown) => void) => void;
+  saveCodeBlock: (params: {
+    taskId: string;
+    messageId: string;
+    content: string;
+    language?: string;
+    fileName?: string;
+  }) => Promise<IpcResult>;
+  saveImageFromUrl: (params: { taskId: string; messageId: string; url: string; alt?: string }) => Promise<IpcResult>;
+  searchArtifacts: (query: string) => Promise<IpcResult>;
 
   // Workspace
   isWorkspaceConfigured: () => Promise<boolean>;

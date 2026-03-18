@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, statSync } from 'fs';
+import { copyFileSync, existsSync, statSync, writeFileSync } from 'fs';
 import { basename, extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import type { Artifact } from '@clawwork/shared';
@@ -97,6 +97,66 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
       size: artifact.size,
       gitSha: artifact.gitSha,
       createdAt: artifact.createdAt,
+    })
+    .run();
+
+  return artifact;
+}
+
+interface SaveArtifactFromBufferParams {
+  workspacePath: string;
+  taskId: string;
+  messageId: string;
+  fileName: string;
+  buffer: Buffer;
+  artifactType: 'code' | 'image' | 'file';
+  contentText?: string;
+}
+
+export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParams): Promise<Artifact> {
+  const { workspacePath, taskId, messageId, fileName, buffer, artifactType, contentText } = params;
+
+  const taskDir = ensureTaskDir(workspacePath, taskId);
+  const finalName = uniqueFileName(taskDir, fileName);
+  const destPath = join(taskDir, finalName);
+
+  writeFileSync(destPath, buffer);
+
+  const localPath = `${taskId}/${finalName}`;
+  const mimeType = detectMimeType(finalName);
+  const now = new Date().toISOString();
+  const id = randomUUID();
+
+  const artifact: Artifact = {
+    id,
+    taskId,
+    messageId,
+    type: artifactType,
+    name: finalName,
+    filePath: '',
+    localPath,
+    mimeType,
+    size: buffer.length,
+    gitSha: '',
+    contentText: contentText ?? '',
+    createdAt: now,
+  };
+
+  const db = getDb();
+  db.insert(artifacts)
+    .values({
+      id: artifact.id,
+      taskId: artifact.taskId,
+      messageId: artifact.messageId,
+      type: artifact.type,
+      name: artifact.name,
+      filePath: artifact.filePath,
+      localPath: artifact.localPath,
+      mimeType: artifact.mimeType,
+      size: artifact.size,
+      gitSha: artifact.gitSha,
+      createdAt: artifact.createdAt,
+      contentText: contentText ?? '',
     })
     .run();
 

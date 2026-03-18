@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Artifact } from '@clawwork/shared';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion as motionPresets } from '@/styles/design-tokens';
@@ -11,7 +10,6 @@ import MarkdownContent from './MarkdownContent';
 
 interface FilePreviewProps {
   artifact: Artifact;
-  onClose: () => void;
   onNavigateToTask: (taskId: string, messageId: string) => void;
 }
 
@@ -19,17 +17,12 @@ function isImage(mime: string): boolean {
   return mime.startsWith('image/');
 }
 
-function isMarkdown(mime: string, name: string): boolean {
-  return mime === 'text/markdown' || name.endsWith('.md');
-}
-
-function isCode(mime: string): boolean {
-  const codeMimes = ['text/typescript', 'text/javascript', 'application/json', 'text/html', 'text/css', 'text/plain'];
-  return codeMimes.includes(mime);
+function isMarkdown(name: string): boolean {
+  return name.endsWith('.md');
 }
 
 function langFromName(name: string): string {
-  const ext = name.slice(name.lastIndexOf('.') + 1);
+  const ext = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
   const map: Record<string, string> = {
     ts: 'typescript',
     tsx: 'typescript',
@@ -45,15 +38,17 @@ function langFromName(name: string): string {
     rs: 'rust',
     java: 'java',
     sh: 'bash',
+    bash: 'bash',
     yaml: 'yaml',
     yml: 'yaml',
     xml: 'xml',
     toml: 'toml',
+    txt: '',
   };
   return map[ext] ?? '';
 }
 
-export default function FilePreview({ artifact, onClose, onNavigateToTask }: FilePreviewProps) {
+export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewProps) {
   const { t } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
   const [encoding, setEncoding] = useState<'utf-8' | 'base64'>('utf-8');
@@ -78,38 +73,33 @@ export default function FilePreview({ artifact, onClose, onNavigateToTask }: Fil
 
   return (
     <motion.div className="flex flex-col h-full" {...motionPresets.slideIn}>
-      <header
-        className={cn('flex items-center justify-between px-4 h-11 border-b border-[var(--border)] flex-shrink-0')}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <h3 className="text-sm font-medium text-[var(--text-primary)] truncate">{artifact.name}</h3>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onNavigateToTask(artifact.taskId, artifact.messageId)}
-            title={t('filePreview.goToSource')}
-          >
-            <ExternalLink size={14} />
-          </Button>
-        </div>
-        <Button variant="ghost" size="icon-sm" onClick={onClose}>
-          <X size={16} />
-        </Button>
+      <header className="flex items-center px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
+        <h3 className="text-sm font-medium text-[var(--text-primary)] truncate min-w-0">{artifact.name}</h3>
       </header>
 
       <ScrollArea className="flex-1">
-        <div className="p-4">
-          {loading && (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 size={20} className="animate-spin text-[var(--text-muted)]" />
-            </div>
-          )}
-          {error && <p className="text-sm text-[var(--danger)] text-center py-8">{error}</p>}
-          {!loading && !error && content !== null && (
-            <PreviewContent content={content} encoding={encoding} mimeType={artifact.mimeType} name={artifact.name} />
-          )}
-        </div>
+        {loading && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 size={20} className="animate-spin text-[var(--text-muted)]" />
+          </div>
+        )}
+        {error && <p className="text-sm text-[var(--danger)] text-center py-8 px-4">{error}</p>}
+        {!loading && !error && content !== null && (
+          <PreviewContent content={content} encoding={encoding} mimeType={artifact.mimeType} name={artifact.name} />
+        )}
       </ScrollArea>
+
+      <div className="flex-shrink-0 border-t border-[var(--border)] px-4 py-2.5">
+        <Button
+          variant="soft"
+          size="sm"
+          onClick={() => onNavigateToTask(artifact.taskId, artifact.messageId)}
+          className="w-full gap-2"
+        >
+          <ExternalLink size={13} />
+          <span className="text-xs">{t('filePreview.goToSource')}</span>
+        </Button>
+      </div>
     </motion.div>
   );
 }
@@ -129,7 +119,7 @@ function PreviewContent({
 
   if (isImage(mimeType) && encoding === 'base64') {
     return (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center p-4">
         <img
           src={`data:${mimeType};base64,${content}`}
           alt={name}
@@ -139,30 +129,22 @@ function PreviewContent({
     );
   }
 
-  if (isMarkdown(mimeType, name)) {
+  if (isMarkdown(name)) {
     return (
-      <div className="max-w-none">
+      <div className="p-4">
         <MarkdownContent content={content} />
       </div>
     );
   }
 
-  if (isCode(mimeType)) {
+  if (encoding === 'utf-8') {
     const lang = langFromName(name);
     const fenced = lang ? `\`\`\`${lang}\n${content}\n\`\`\`` : `\`\`\`\n${content}\n\`\`\``;
-    return (
-      <div className="max-w-none">
-        <MarkdownContent content={fenced} />
-      </div>
-    );
-  }
-
-  if (encoding === 'utf-8') {
-    return <pre className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap break-words">{content}</pre>;
+    return <MarkdownContent content={fenced} />;
   }
 
   return (
-    <p className="text-sm text-[var(--text-muted)] text-center py-8">
+    <p className="text-sm text-[var(--text-muted)] text-center py-8 px-4">
       {t('filePreview.cannotPreview')} ({mimeType})
     </p>
   );

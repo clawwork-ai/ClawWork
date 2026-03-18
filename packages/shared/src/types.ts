@@ -93,6 +93,7 @@ export interface Artifact {
   size: number;
   /** Git commit SHA from auto-commit, empty if not yet committed */
   gitSha: string;
+  contentText?: string;
   createdAt: string;
 }
 

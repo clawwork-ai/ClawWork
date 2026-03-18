@@ -11,42 +11,55 @@ interface FileCardProps {
   onClick: () => void;
 }
 
-function getIcon(type: ArtifactType, name: string) {
-  if (type === 'image') return Image;
-  if (type === 'code') return FileCode;
-  if (name.endsWith('.md') || name.endsWith('.txt')) return FileText;
-  return File;
+function getTypeConfig(type: ArtifactType, name: string) {
+  if (type === 'image') return { Icon: Image, color: 'text-purple-400', bg: 'bg-purple-400/10' };
+  if (type === 'code') return { Icon: FileCode, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-dim)]' };
+  if (name.endsWith('.md') || name.endsWith('.txt'))
+    return { Icon: FileText, color: 'text-blue-400', bg: 'bg-blue-400/10' };
+  return { Icon: File, color: 'text-[var(--text-muted)]', bg: 'bg-[var(--bg-tertiary)]' };
+}
+
+function extBadge(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot !== -1 ? name.slice(dot + 1).toUpperCase() : '';
 }
 
 export default function FileCard({ artifact, taskTitle, selected, onClick }: FileCardProps) {
-  const Icon = getIcon(artifact.type, artifact.name);
+  const { Icon, color, bg } = getTypeConfig(artifact.type, artifact.name);
+  const ext = extBadge(artifact.name);
 
   return (
     <motion.button
       onClick={onClick}
       {...motionPresets.scale}
       className={cn(
-        'w-full text-left rounded-lg border p-3 transition-colors',
+        'w-full text-left rounded-xl border transition-all duration-150 overflow-hidden group',
         selected
-          ? 'border-[var(--border-accent)] bg-[var(--accent-dim)]'
-          : 'border-[var(--border)] hover:bg-[var(--bg-hover)]',
+          ? 'border-[var(--border-accent)] bg-[var(--accent-dim)] shadow-sm shadow-[var(--accent)]/10'
+          : 'border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--border-accent)]/50 hover:bg-[var(--bg-hover)]',
       )}
     >
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-9 h-9 rounded-md bg-[var(--bg-tertiary)] flex items-center justify-center">
-          <Icon size={18} className="text-[var(--text-muted)]" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{artifact.name}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatFileSize(artifact.size)}</p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[120px]">{taskTitle}</span>
-            <span className="text-[10px] text-[var(--text-muted)]">·</span>
-            <span className="text-[10px] text-[var(--text-muted)]">
-              {formatRelativeTime(new Date(artifact.createdAt))}
-            </span>
+      <div className="p-3">
+        <div className="flex items-start gap-2.5">
+          <div className={cn('flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center', bg)}>
+            <Icon size={18} className={color} />
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-snug">{artifact.name}</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatFileSize(artifact.size)}</p>
+          </div>
+          {ext && (
+            <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+              {ext}
+            </span>
+          )}
         </div>
+      </div>
+      <div className="px-3 pb-2.5 flex items-center gap-1.5">
+        <span className="text-[10px] text-[var(--text-muted)] truncate flex-1">{taskTitle}</span>
+        <span className="text-[10px] text-[var(--text-muted)] flex-shrink-0">
+          {formatRelativeTime(new Date(artifact.createdAt))}
+        </span>
       </div>
     </motion.button>
   );

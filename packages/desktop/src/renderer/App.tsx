@@ -10,6 +10,7 @@ import ApprovalDialog from './components/ApprovalDialog';
 import { useUiStore } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
 import { useMessageStore } from './stores/messageStore';
+import { useFileStore } from './stores/fileStore';
 import { useGatewayEventDispatcher } from './hooks/useGatewayDispatcher';
 import { useTheme } from './hooks/useTheme';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
@@ -23,7 +24,6 @@ export default function App() {
 
   const rightPanelOpen = useUiStore((s) => s.rightPanelOpen);
   const toggleRightPanel = useUiStore((s) => s.toggleRightPanel);
-  const setRightPanelOpen = useUiStore((s) => s.setRightPanelOpen);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const theme = useUiStore((s) => s.theme);
@@ -68,6 +68,12 @@ export default function App() {
     },
     [],
   );
+
+  useEffect(() => {
+    window.clawwork.onArtifactSaved((artifact) => {
+      useFileStore.getState().addArtifactIfNew(artifact as import('@clawwork/shared').Artifact);
+    });
+  }, []);
 
   useEffect(() => {
     window.clawwork.isWorkspaceConfigured().then((configured) => {
@@ -136,6 +142,7 @@ export default function App() {
       startNewTask,
       setMainView,
       focusSearch,
+      leftNavCollapsed,
       leftNavShortcut,
       rightPanelShortcut,
       toggleLeftNavCollapsed,
@@ -252,7 +259,7 @@ export default function App() {
                 transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
                 className={cn('flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
               >
-                <RightPanel onClose={() => setRightPanelOpen(false)} />
+                <RightPanel />
               </motion.aside>
             </>
           )}

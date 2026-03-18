@@ -576,6 +576,7 @@ export default function ChatInput() {
     contextFolders,
     stopVoiceInput,
     commitPendingTask,
+    updateTaskMetadata,
     t,
   ]);
 

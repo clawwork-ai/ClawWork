@@ -1,18 +1,14 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, FileText, GitBranch, CheckSquare, Square, Loader2, Cpu, ArrowUp, ArrowDown, Brain } from 'lucide-react';
+import { FileText, GitBranch, CheckSquare, Square, Loader2, Cpu, ArrowUp, ArrowDown, Brain } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore, EMPTY_MESSAGES } from '@/stores/messageStore';
 import { cn, formatTokenCount } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { ProgressStep, Artifact } from '@clawwork/shared';
-
-interface RightPanelProps {
-  onClose: () => void;
-}
 
 function extractProgressSteps(messages: { role: string; content: string }[]): ProgressStep[] {
   const steps: ProgressStep[] = [];
@@ -39,10 +35,6 @@ function extractProgressSteps(messages: { role: string; content: string }[]): Pr
   return steps;
 }
 
-function collectArtifacts(messages: { artifacts: Artifact[] }[]): Artifact[] {
-  return messages.flatMap((m) => m.artifacts);
-}
-
 function StepIcon({ status }: { status: ProgressStep['status'] }) {
   switch (status) {
     case 'completed':
@@ -54,29 +46,49 @@ function StepIcon({ status }: { status: ProgressStep['status'] }) {
   }
 }
 
-export default function RightPanel({ onClose }: RightPanelProps) {
+export default function RightPanel() {
   const { t } = useTranslation();
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
+  const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
   const messages = useMessageStore((s) =>
     activeTaskId ? (s.messagesByTask[activeTaskId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
 
   const steps = extractProgressSteps(messages);
-  const artifacts = collectArtifacts(messages);
   const doneCount = steps.filter((s) => s.status === 'completed').length;
 
-  return (
-    <div className="flex flex-col h-full pt-10">
-      <div className="flex items-center justify-between px-4 h-12 border-b border-[var(--border)] flex-shrink-0">
-        <h3 className="font-medium text-[var(--text-primary)]">{t('rightPanel.context')}</h3>
-        <Button variant="ghost" size="icon-sm" onClick={onClose}>
-          <X size={16} />
-        </Button>
-      </div>
+  const [taskArtifacts, setTaskArtifacts] = useState<Artifact[]>([]);
 
+  useEffect(() => {
+    if (!activeTaskId) {
+      setTaskArtifacts([]);
+      return;
+    }
+    window.clawwork.listArtifacts(activeTaskId).then((res) => {
+      if (res.ok && res.result) {
+        setTaskArtifacts(res.result as unknown as Artifact[]);
+      }
+    });
+
+    const handleArtifactSaved = (artifact: unknown) => {
+      const a = artifact as Artifact;
+      if (a.taskId !== activeTaskId) return;
+      setTaskArtifacts((prev) => {
+        if (prev.some((x) => x.id === a.id)) return prev;
+        return [a, ...prev];
+      });
+    };
+    window.clawwork.onArtifactSaved(handleArtifactSaved);
+    return () => {
+      window.clawwork.removeAllListeners('artifact:saved');
+    };
+  }, [activeTaskId]);
+
+  return (
+    <div className="flex flex-col h-full">
       <Tabs defaultValue="progress" className="flex flex-col flex-1 min-h-0">
-        <TabsList className="mx-4 mt-2">
+        <TabsList className="mx-4 mt-10">
           <TabsTrigger value="progress">{t('rightPanel.progress')}</TabsTrigger>
           <TabsTrigger value="artifacts">{t('rightPanel.artifacts')}</TabsTrigger>
           <TabsTrigger value="git">Git</TabsTrigger>
@@ -158,20 +170,21 @@ export default function RightPanel({ onClose }: RightPanelProps) {
 
           <TabsContent value="artifacts" className="p-4">
             <div className="space-y-1.5">
-              {artifacts.length === 0 ? (
+              {taskArtifacts.length === 0 ? (
                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)]">
                   <FileText size={15} className="opacity-60" />
                   <span className="truncate">{t('common.noFiles')}</span>
                 </div>
               ) : (
-                artifacts.map((a) => (
+                taskArtifacts.map((a) => (
                   <button
                     key={a.id}
+                    onClick={() => setHighlightedMessage(a.messageId)}
                     className={cn(
                       'w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-tertiary)]',
                       'text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors text-left',
                     )}
-                    title={a.filePath}
+                    title={a.localPath}
                   >
                     <FileText size={15} className="opacity-60 flex-shrink-0" />
                     <span className="truncate flex-1">{a.name}</span>

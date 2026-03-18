@@ -171,7 +171,13 @@ const ChatMessage = memo(function ChatMessage({
           </div>
         ) : message.content || !images?.length ? (
           <div className="inline-block leading-relaxed rounded-2xl px-4 py-3 text-[var(--text-primary)]">
-            <MarkdownContent content={message.content} onImageClick={onImageClick} showMessageCopy />
+            <MarkdownContent
+              content={message.content}
+              onImageClick={onImageClick}
+              showMessageCopy
+              taskId={message.taskId}
+              messageId={message.id}
+            />
           </div>
         ) : null}
         {isUser && images?.length ? (

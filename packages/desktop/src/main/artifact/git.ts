@@ -17,3 +17,14 @@ export async function commitArtifact(workspacePath: string, localPath: string, m
 
   return result.commit || '';
 }
+
+export async function commitArtifactBatch(workspacePath: string, localPaths: string[]): Promise<string> {
+  const git = simpleGit(workspacePath);
+  for (const p of localPaths) {
+    await git.add(p);
+  }
+  const status = await git.status();
+  if (status.staged.length === 0) return '';
+  const result = await git.commit(`auto: extract ${localPaths.length} files from message`);
+  return result.commit || '';
+}

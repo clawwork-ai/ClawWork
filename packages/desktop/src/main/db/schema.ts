@@ -45,5 +45,6 @@ export const artifacts = sqliteTable('artifacts', {
   mimeType: text('mime_type').notNull().default(''),
   size: integer('size').notNull().default(0),
   gitSha: text('git_sha').notNull().default(''),
+  contentText: text('content_text').notNull().default(''),
   createdAt: text('created_at').notNull(),
 });

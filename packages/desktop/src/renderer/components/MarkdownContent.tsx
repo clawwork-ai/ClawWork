@@ -2,7 +2,7 @@ import { isValidElement, type ReactNode, useEffect, useState, type ComponentProp
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Save, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,21 +13,20 @@ interface MarkdownContentProps {
   onImageClick?: (src: string) => void;
   showMessageCopy?: boolean;
   showCursor?: boolean;
+  taskId?: string;
+  messageId?: string;
 }
 
 function flattenTextContent(node: ReactNode): string {
   if (typeof node === 'string' || typeof node === 'number') {
     return String(node);
   }
-
   if (Array.isArray(node)) {
     return node.map(flattenTextContent).join('');
   }
-
   if (isValidElement<{ children?: ReactNode }>(node)) {
     return flattenTextContent(node.props.children);
   }
-
   return '';
 }
 
@@ -81,6 +80,62 @@ function CopyActionButton({ label, copiedLabel, text, className }: CopyActionBut
   );
 }
 
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+interface SaveActionButtonProps {
+  className?: string;
+  onSave: () => Promise<void>;
+}
+
+function SaveActionButton({ className, onSave }: SaveActionButtonProps) {
+  const [state, setSaveState] = useState<SaveState>('idle');
+
+  useEffect(() => {
+    if (state !== 'saved' && state !== 'error') return;
+    const timer = window.setTimeout(() => setSaveState('idle'), 2000);
+    return () => window.clearTimeout(timer);
+  }, [state]);
+
+  const handleSave = async (): Promise<void> => {
+    if (state === 'saving') return;
+    setSaveState('saving');
+    try {
+      await onSave();
+      setSaveState('saved');
+    } catch {
+      setSaveState('error');
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      disabled={state === 'saving'}
+      className={cn(
+        'h-7 w-7 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 backdrop-blur-sm',
+        'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+        state === 'saved' && 'text-[var(--accent)]',
+        state === 'error' && 'text-red-400',
+        className,
+      )}
+      onClick={(event) => {
+        event.stopPropagation();
+        void handleSave();
+      }}
+    >
+      {state === 'saving' ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : state === 'saved' ? (
+        <Check size={14} />
+      ) : (
+        <Save size={14} />
+      )}
+    </Button>
+  );
+}
+
 const REMARK_PLUGINS = [remarkGfm] as const;
 const REHYPE_PLUGINS = [rehypeHighlight] as const;
 
@@ -89,6 +144,8 @@ export default function MarkdownContent({
   onImageClick,
   showMessageCopy = false,
   showCursor = false,
+  taskId,
+  messageId,
 }: MarkdownContentProps) {
   const { t } = useTranslation();
   const copyMessageLabel = t('chatMessage.copyMessage');
@@ -127,34 +184,57 @@ export default function MarkdownContent({
                   ? `file://${src.replace('clawwork-media://', '')}`
                   : src;
                 return (
-                  <img
-                    src={actualSrc}
-                    alt={alt ?? ''}
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                    className="max-w-full max-h-80 rounded-lg mt-2 cursor-pointer"
-                    onClick={() => actualSrc && onImageClick?.(actualSrc)}
-                  />
+                  <span className="group/img relative inline-block">
+                    <img
+                      src={actualSrc}
+                      alt={alt ?? ''}
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                      className="max-w-full max-h-80 rounded-lg mt-2 cursor-pointer"
+                      onClick={() => actualSrc && onImageClick?.(actualSrc)}
+                    />
+                    {taskId && messageId && actualSrc && (
+                      <span className="absolute top-3 right-2 opacity-0 transition-opacity group-hover/img:opacity-100">
+                        <SaveActionButton
+                          onSave={() =>
+                            window.clawwork
+                              .saveImageFromUrl({ taskId, messageId, url: src ?? '', alt: alt ?? '' })
+                              .then((r) => {
+                                if (!r.ok) throw new Error(r.error);
+                              })
+                          }
+                        />
+                      </span>
+                    )}
+                  </span>
                 );
               },
               pre: ({ children }: ComponentPropsWithoutRef<'pre'>) => {
                 const code = flattenTextContent(children).replace(/\n$/, '');
                 const lang = extractLang(children);
                 return (
-                  <div className="group/code relative">
+                  <div className="group/code relative max-w-full">
                     {lang && (
                       <span className="absolute left-3 top-2.5 text-xs text-[var(--text-muted)] select-none pointer-events-none">
                         {lang}
                       </span>
                     )}
-                    <CopyActionButton
-                      label={copyCodeLabel}
-                      copiedLabel={copiedLabel}
-                      text={code}
-                      className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover/code:opacity-100 focus-visible:opacity-100"
-                    />
+                    <div className="absolute right-2 top-2 z-10 flex gap-1 opacity-0 transition-opacity group-hover/code:opacity-100 focus-within:opacity-100">
+                      {taskId && messageId && (
+                        <SaveActionButton
+                          onSave={() =>
+                            window.clawwork
+                              .saveCodeBlock({ taskId, messageId, content: code, language: lang || undefined })
+                              .then((r) => {
+                                if (!r.ok) throw new Error(r.error);
+                              })
+                          }
+                        />
+                      )}
+                      <CopyActionButton label={copyCodeLabel} copiedLabel={copiedLabel} text={code} />
+                    </div>
                     <pre className="pt-10">{children}</pre>
                   </div>
                 );

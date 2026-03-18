@@ -1,12 +1,13 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, net } from 'electron';
 import { readFileSync } from 'fs';
 import { resolve, sep } from 'path';
 import { eq } from 'drizzle-orm';
-import { getDb } from '../db/index.js';
+import { getDb, getSqlite } from '../db/index.js';
 import { artifacts } from '../db/schema.js';
-import { saveArtifact } from '../artifact/save.js';
+import { saveArtifact, saveArtifactFromBuffer } from '../artifact/save.js';
 import { commitArtifact } from '../artifact/git.js';
 import { getWorkspacePath } from '../workspace/config.js';
+import { searchArtifacts } from '../db/search.js';
 
 interface SaveParams {
   taskId: string;
@@ -93,6 +94,119 @@ export function registerArtifactHandlers(): void {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown error';
       return { ok: false, error: msg };
+    }
+  });
+
+  ipcMain.handle(
+    'artifact:save-content',
+    async (
+      _event,
+      params: { taskId: string; messageId: string; content: string; language?: string; fileName?: string },
+    ) => {
+      const workspacePath = getWorkspacePath();
+      if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+      try {
+        const LANG_EXT: Record<string, string> = {
+          typescript: 'ts',
+          javascript: 'js',
+          python: 'py',
+          rust: 'rs',
+          go: 'go',
+          java: 'java',
+          md: 'md',
+          markdown: 'md',
+          tsx: 'tsx',
+          jsx: 'jsx',
+          json: 'json',
+          css: 'css',
+          html: 'html',
+          sh: 'sh',
+          bash: 'sh',
+          sql: 'sql',
+          yaml: 'yml',
+          yml: 'yml',
+        };
+        const fileName =
+          params.fileName ??
+          (() => {
+            const ext = (params.language && LANG_EXT[params.language.toLowerCase()]) ?? params.language ?? 'txt';
+            return `snippet.${ext}`;
+          })();
+        const buffer = Buffer.from(params.content, 'utf-8');
+        const artifact = await saveArtifactFromBuffer({
+          workspacePath,
+          taskId: params.taskId,
+          messageId: params.messageId,
+          fileName,
+          buffer,
+          artifactType: 'code',
+          contentText: params.content,
+        });
+        const sha = await commitArtifact(workspacePath, artifact.localPath, `save: ${artifact.name}`);
+        if (sha) {
+          const db = getDb();
+          db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
+          artifact.gitSha = sha;
+        }
+        const win = BrowserWindow.getAllWindows()[0];
+        if (win) win.webContents.send('artifact:saved', artifact);
+        return { ok: true, result: artifact };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    'artifact:save-image-url',
+    async (_event, params: { taskId: string; messageId: string; url: string; alt?: string }) => {
+      const workspacePath = getWorkspacePath();
+      if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+      try {
+        let buffer: Buffer;
+        const url = params.url;
+        if (/^https?:\/\//.test(url)) {
+          const res = await net.fetch(url);
+          if (!res.ok) return { ok: false, error: `fetch failed: ${res.status}` };
+          buffer = Buffer.from(await res.arrayBuffer());
+        } else if (url.startsWith('file://')) {
+          buffer = readFileSync(url.replace('file://', ''));
+        } else {
+          return { ok: false, error: 'unsupported url scheme' };
+        }
+        const ext = url.split('.').pop()?.split('?')[0]?.toLowerCase() ?? 'png';
+        const baseName = params.alt ? `${params.alt.replace(/[^a-zA-Z0-9_-]/g, '_')}.${ext}` : `image.${ext}`;
+        const artifact = await saveArtifactFromBuffer({
+          workspacePath,
+          taskId: params.taskId,
+          messageId: params.messageId,
+          fileName: baseName,
+          buffer,
+          artifactType: 'image',
+        });
+        const sha = await commitArtifact(workspacePath, artifact.localPath, `save: ${artifact.name}`);
+        if (sha) {
+          const db = getDb();
+          db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
+          artifact.gitSha = sha;
+        }
+        const win = BrowserWindow.getAllWindows()[0];
+        if (win) win.webContents.send('artifact:saved', artifact);
+        return { ok: true, result: artifact };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
+      }
+    },
+  );
+
+  ipcMain.handle('artifact:search', async (_event, params: { query: string }) => {
+    const sqlite = getSqlite();
+    if (!sqlite) return { ok: false, error: 'db not ready' };
+    try {
+      const results = searchArtifacts(sqlite, params.query);
+      return { ok: true, result: results };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
     }
   });
 }
