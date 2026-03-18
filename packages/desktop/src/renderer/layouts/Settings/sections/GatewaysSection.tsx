@@ -21,6 +21,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore, type GatewayConnectionStatus } from '@/stores/uiStore';
+import {
+  inferGatewayAuthMode,
+  parseGatewaySetupCode,
+  validateGatewayForm,
+  type GatewayAuthMode,
+} from '@/lib/gateway-auth';
 
 type GatewayType = 'openclaw';
 
@@ -29,6 +35,8 @@ interface GatewayFormData {
   url: string;
   token: string;
   password: string;
+  pairingCode: string;
+  authMode?: GatewayAuthMode;
 }
 
 interface GatewayServerConfig {
@@ -37,12 +45,21 @@ interface GatewayServerConfig {
   url: string;
   token?: string;
   password?: string;
+  pairingCode?: string;
+  authMode?: GatewayAuthMode;
   isDefault?: boolean;
   color?: string;
   type?: GatewayType;
 }
 
-const EMPTY_FORM: GatewayFormData = { name: '', url: 'ws://127.0.0.1:18789', token: '', password: '' };
+const EMPTY_FORM: GatewayFormData = {
+  name: '',
+  url: 'ws://127.0.0.1:18789',
+  token: '',
+  password: '',
+  pairingCode: '',
+  authMode: 'token',
+};
 
 const STATUS_ICON: Record<GatewayConnectionStatus, { icon: typeof CheckCircle2; color: string }> = {
   connected: { icon: CheckCircle2, color: 'text-[var(--accent)]' },
@@ -193,8 +210,54 @@ function GatewayForm({
   const { t } = useTranslation();
   const nameId = 'gateway-form-name';
   const urlId = 'gateway-form-url';
-  const tokenId = 'gateway-form-token';
-  const passwordId = 'gateway-form-password';
+  const authInputId = 'gateway-form-auth';
+
+  const [authMode, setAuthMode] = useState<GatewayAuthMode>(() => form.authMode ?? inferGatewayAuthMode(form));
+
+  useEffect(() => {
+    const nextMode = form.authMode ?? inferGatewayAuthMode(form);
+    setAuthMode((currentMode) => (currentMode === nextMode ? currentMode : nextMode));
+  }, [form]);
+
+  const handleAuthModeChange = (mode: GatewayAuthMode) => {
+    setAuthMode(mode);
+    setForm((f) => ({
+      ...f,
+      token: '',
+      password: '',
+      pairingCode: '',
+      authMode: mode,
+      url: mode === 'pairingCode' ? '' : f.url || 'ws://127.0.0.1:18789',
+    }));
+  };
+
+  const tryParseSetupCode = (raw: string): boolean => {
+    const parsed = parseGatewaySetupCode(raw);
+    if (!parsed) return false;
+    setForm((f) => ({ ...f, url: parsed.url, pairingCode: parsed.pairingCode }));
+    return true;
+  };
+
+  const AUTH_TABS: { mode: GatewayAuthMode; label: string }[] = [
+    { mode: 'token', label: 'Token' },
+    { mode: 'password', label: t('settings.password') },
+    { mode: 'pairingCode', label: t('settings.pairingCode') },
+  ];
+
+  const authPlaceholder =
+    authMode === 'token'
+      ? t('settings.tokenPlaceholder')
+      : authMode === 'password'
+        ? t('settings.passwordPlaceholder')
+        : t('settings.pairingCodePlaceholder');
+
+  const authValue = authMode === 'token' ? form.token : authMode === 'password' ? form.password : form.pairingCode;
+
+  const handleAuthChange = (v: string) => {
+    if (authMode === 'token') setForm((f) => ({ ...f, token: v }));
+    else if (authMode === 'password') setForm((f) => ({ ...f, password: v }));
+    else setForm((f) => ({ ...f, pairingCode: v }));
+  };
 
   return (
     <motion.div
@@ -226,56 +289,94 @@ function GatewayForm({
           />
         </div>
         <div>
-          <label htmlFor={urlId} className="text-sm text-[var(--text-secondary)] mb-1.5 block">
-            {t('settings.gatewayUrl')}
-          </label>
-          <input
-            id={urlId}
-            type="text"
-            value={form.url}
-            onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
-            placeholder="ws://127.0.0.1:18789"
-            className={cn(inputClass, 'w-full')}
-          />
+          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('settings.authMethod')}</label>
+          <div className="flex rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)] p-0.5 gap-0.5 mb-3">
+            {AUTH_TABS.map(({ mode, label }) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleAuthModeChange(mode)}
+                className={cn(
+                  'flex-1 h-7 text-xs font-medium rounded-md transition-colors',
+                  authMode === mode
+                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
+        {authMode !== 'pairingCode' && (
+          <div>
+            <label htmlFor={urlId} className="text-sm text-[var(--text-secondary)] mb-1.5 block">
+              {t('settings.gatewayUrl')}
+            </label>
+            <input
+              id={urlId}
+              type="text"
+              value={form.url}
+              onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+              placeholder="ws://127.0.0.1:18789"
+              className={cn(inputClass, 'w-full')}
+            />
+          </div>
+        )}
         <div>
-          <label htmlFor={tokenId} className="text-sm text-[var(--text-secondary)] mb-1.5 block">
-            Token
+          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">
+            {authMode === 'pairingCode' ? t('settings.pairingCode') : t('settings.authMethod')}
           </label>
           <input
-            id={tokenId}
+            id={authInputId}
             type="password"
-            value={form.token}
-            onChange={(e) => setForm((f) => ({ ...f, token: e.target.value }))}
-            placeholder={t('settings.tokenPlaceholder')}
+            value={authValue}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (authMode === 'pairingCode' && !tryParseSetupCode(v)) {
+                handleAuthChange(v);
+              } else if (authMode !== 'pairingCode') {
+                handleAuthChange(v);
+              }
+            }}
+            onPaste={(e) => {
+              if (authMode !== 'pairingCode') return;
+              const text = e.clipboardData.getData('text');
+              if (tryParseSetupCode(text)) e.preventDefault();
+            }}
+            placeholder={authMode === 'pairingCode' ? t('settings.setupCodePlaceholder') : authPlaceholder}
             className={cn(inputClass, 'w-full')}
           />
-        </div>
-        <div>
-          <label htmlFor={passwordId} className="text-sm text-[var(--text-secondary)] mb-1.5 block">
-            {t('settings.password')}
-          </label>
-          <input
-            id={passwordId}
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            placeholder={t('settings.passwordPlaceholder')}
-            className={cn(inputClass, 'w-full')}
-          />
+          {authMode === 'pairingCode' && form.url && form.url !== 'ws://127.0.0.1:18789' && (
+            <p className="text-xs text-[var(--accent)] mt-1.5">
+              ✓ {t('settings.setupCodeParsed')}: <span className="font-mono">{form.url}</span>
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2 pt-1">
-          <Button variant="outline" size="sm" onClick={onTest} disabled={testing} className="titlebar-no-drag gap-1.5">
-            {testing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-            {t('settings.testConnection')}
-          </Button>
+          {authMode !== 'pairingCode' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onTest}
+              disabled={testing}
+              className="titlebar-no-drag gap-1.5"
+            >
+              {testing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              {t('settings.testConnection')}
+            </Button>
+          )}
           <div className="flex-1" />
           <Button variant="ghost" size="sm" onClick={onClose} className="titlebar-no-drag">
             {t('common.cancel')}
           </Button>
           <Button variant="default" size="sm" onClick={onSave} disabled={saving} className="titlebar-no-drag gap-1.5">
             {saving && <Loader2 size={14} className="animate-spin" />}
-            {editingId ? t('common.save') : t('settings.addGateway')}
+            {editingId
+              ? t('common.save')
+              : authMode === 'pairingCode'
+                ? t('settings.startPairing')
+                : t('settings.addGateway')}
           </Button>
         </div>
       </div>
@@ -333,7 +434,14 @@ export default function GatewaysSection() {
 
   const openEditForm = useCallback((gw: GatewayServerConfig) => {
     setEditingId(gw.id);
-    setForm({ name: gw.name, url: gw.url, token: gw.token ?? '', password: gw.password ?? '' });
+    setForm({
+      name: gw.name,
+      url: gw.url,
+      token: gw.token ?? '',
+      password: gw.password ?? '',
+      pairingCode: gw.pairingCode ?? '',
+      authMode: gw.authMode,
+    });
     setShowForm(true);
   }, []);
 
@@ -344,6 +452,11 @@ export default function GatewaysSection() {
   }, []);
 
   const handleTest = useCallback(async () => {
+    const authMode = inferGatewayAuthMode(form);
+    if (authMode === 'pairingCode') {
+      toast.error(t('pairing.cannotTestPairingCode'));
+      return;
+    }
     try {
       new URL(form.url);
     } catch {
@@ -351,7 +464,10 @@ export default function GatewaysSection() {
       return;
     }
     setTesting(true);
-    const auth = { token: form.token || undefined, password: form.password || undefined };
+    const auth = {
+      token: form.token || undefined,
+      password: form.password || undefined,
+    };
     const res = await window.clawwork.testGateway(form.url, auth);
     setTesting(false);
     if (res.ok) {
@@ -361,30 +477,36 @@ export default function GatewaysSection() {
     } else {
       toast.error(t('settings.testFailed'), { description: res.error });
     }
-  }, [form.url, form.token, form.password, t]);
+  }, [form, t]);
 
   const handlePairingRetry = useCallback(async () => {
     setPairingRetrying(true);
-    const auth = { token: form.token || undefined, password: form.password || undefined };
+    const auth = {
+      token: form.token || undefined,
+      password: form.password || undefined,
+    };
     const res = await window.clawwork.testGateway(form.url, auth);
     setPairingRetrying(false);
     if (res.ok) {
       setShowPairingDialog(false);
       toast.success(t('pairing.approved'));
     } else {
-      toast.error(t('pairing.stillPending'));
+      toast.error(t('pairing.stillPending'), { description: res.error });
     }
   }, [form.url, form.token, form.password, t]);
 
   const handleSave = useCallback(async () => {
-    if (!form.name.trim()) {
-      toast.error(t('settings.nameRequired'));
-      return;
-    }
-    try {
-      new URL(form.url);
-    } catch {
-      toast.error(t('settings.invalidUrl'));
+    const authMode = inferGatewayAuthMode(form);
+    const validationError = validateGatewayForm({
+      mode: authMode,
+      name: form.name,
+      url: form.url,
+      token: form.token,
+      password: form.password,
+      pairingCode: form.pairingCode,
+    });
+    if (validationError) {
+      toast.error(t(`settings.${validationError}`));
       return;
     }
 
@@ -395,6 +517,8 @@ export default function GatewaysSection() {
         url: form.url.trim(),
         token: form.token.trim() || undefined,
         password: form.password.trim() || undefined,
+        pairingCode: form.pairingCode.trim() || undefined,
+        authMode,
       });
       if (res.ok) {
         toast.success(t('settings.gatewayUpdated'));
@@ -410,6 +534,8 @@ export default function GatewaysSection() {
         url: form.url.trim(),
         token: form.token.trim() || undefined,
         password: form.password.trim() || undefined,
+        pairingCode: form.pairingCode.trim() || undefined,
+        authMode,
         type: 'openclaw',
       };
       const res = await window.clawwork.addGateway(newGw);

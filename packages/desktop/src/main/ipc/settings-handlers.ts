@@ -77,32 +77,38 @@ export function registerSettingsHandlers(): void {
     return { ok: true };
   });
 
-  ipcMain.handle('settings:test-gateway', async (_event, url: string, auth: { token?: string; password?: string }) => {
-    const testAuth: GatewayAuth = auth.token
-      ? { token: auth.token }
-      : auth.password
-        ? { password: auth.password }
-        : { token: '' };
-    const testClient = new GatewayClient(
-      { id: `test-${Date.now()}`, name: 'test', url, auth: testAuth },
-      { noReconnect: true },
-    );
-    try {
-      testClient.connect();
-      const deadline = Date.now() + 10000;
-      while (Date.now() < deadline) {
-        if (testClient.isConnected) return { ok: true };
-        if (testClient.lastConnectionError) break;
-        await new Promise((r) => setTimeout(r, 200));
+  ipcMain.handle(
+    'settings:test-gateway',
+    async (_event, url: string, auth: { token?: string; password?: string; pairingCode?: string }) => {
+      if (auth.pairingCode) {
+        return { ok: false, error: 'pairing-code test is not supported' };
       }
-      const errorCode = testClient.lastConnectionErrorCode;
-      const msg = testClient.lastConnectionError ?? 'timeout';
-      if (errorCode === 'PAIRING_REQUIRED') {
-        return { ok: false, error: msg, pairingRequired: true };
+      const testAuth: GatewayAuth = auth.token
+        ? { token: auth.token }
+        : auth.password
+          ? { password: auth.password }
+          : { token: '' };
+      const testClient = new GatewayClient(
+        { id: `test-${Date.now()}`, name: 'test', url, auth: testAuth },
+        { noReconnect: true },
+      );
+      try {
+        testClient.connect();
+        const deadline = Date.now() + 10000;
+        while (Date.now() < deadline) {
+          if (testClient.isConnected) return { ok: true };
+          if (testClient.lastConnectionError) break;
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        const errorCode = testClient.lastConnectionErrorCode;
+        const msg = testClient.lastConnectionError ?? 'timeout';
+        if (errorCode === 'PAIRING_REQUIRED') {
+          return { ok: false, error: msg, pairingRequired: true };
+        }
+        return { ok: false, error: msg };
+      } finally {
+        testClient.destroy();
       }
-      return { ok: false, error: msg };
-    } finally {
-      testClient.destroy();
-    }
-  });
+    },
+  );
 }

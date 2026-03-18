@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { useUiStore } from '@/stores/uiStore';
 
 type Status = 'connected' | 'connecting' | 'disconnected';
 
@@ -32,12 +33,22 @@ function computeConfig(status: Status): StatusConfig {
 export default function ConnectionStatus({ gatewayStatus, className, collapsed }: ConnectionStatusProps) {
   const { t } = useTranslation();
   const cfg = computeConfig(gatewayStatus);
+  const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
+  const isClickable = gatewayStatus === 'disconnected';
 
   if (collapsed) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', cfg.color, cfg.pulse && 'animate-pulse')} />
+          <span
+            className={cn(
+              'w-2.5 h-2.5 rounded-full flex-shrink-0',
+              cfg.color,
+              cfg.pulse && 'animate-pulse',
+              isClickable && 'cursor-pointer',
+            )}
+            onClick={isClickable ? () => setSettingsOpen(true) : undefined}
+          />
         </TooltipTrigger>
         <TooltipContent side="right">{t(cfg.labelKey)}</TooltipContent>
       </Tooltip>
@@ -52,7 +63,12 @@ export default function ConnectionStatus({ gatewayStatus, className, collapsed }
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15 }}
-        className={cn('flex items-center gap-2 px-3 py-1.5 text-xs', className)}
+        className={cn(
+          'flex items-center gap-2 px-3 py-1.5 text-xs',
+          isClickable && 'cursor-pointer hover:text-[var(--text-secondary)] transition-colors',
+          className,
+        )}
+        onClick={isClickable ? () => setSettingsOpen(true) : undefined}
       >
         <span className={cn('w-2 h-2 rounded-full flex-shrink-0', cfg.color, cfg.pulse && 'animate-pulse')} />
         <span className="text-[var(--text-muted)]">

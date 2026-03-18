@@ -21,6 +21,9 @@ interface GatewayStatusEvent {
   gatewayId: string;
   connected: boolean;
   error?: string;
+  reconnectAttempt?: number;
+  maxAttempts?: number;
+  gaveUp?: boolean;
 }
 
 interface DebugEvent {
@@ -46,6 +49,8 @@ export interface GatewayServerConfig {
   url: string;
   token?: string;
   password?: string;
+  pairingCode?: string;
+  authMode?: 'token' | 'password' | 'pairingCode';
   isDefault?: boolean;
   color?: string;
 }
@@ -256,12 +261,14 @@ export interface ClawWorkAPI {
   }>;
   transcribeAudio: (audio: ArrayBuffer) => Promise<{ ok: boolean; transcript?: string; error?: string }>;
 
+  reconnectGateway: (gatewayId: string) => Promise<IpcResult>;
+
   // Gateway management
   addGateway: (gateway: GatewayServerConfig) => Promise<IpcResult>;
   removeGateway: (gatewayId: string) => Promise<IpcResult>;
   updateGateway: (gatewayId: string, partial: Partial<GatewayServerConfig>) => Promise<IpcResult>;
   setDefaultGateway: (gatewayId: string) => Promise<IpcResult>;
-  testGateway: (url: string, auth: { token?: string; password?: string }) => Promise<IpcResult>;
+  testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) => Promise<IpcResult>;
 
   // Updates
   checkForUpdates: () => Promise<UpdateCheckResult>;

@@ -31,6 +31,11 @@ import { getDebugLogger } from '../debug/index.js';
 const WS_CLOSE_POLICY_VIOLATION = 1008;
 const WS_HANDSHAKE_TIMEOUT_MS = 10_000;
 
+type GatewayClientOptions = {
+  noReconnect?: boolean;
+  onPairingSuccess?: (gatewayId: string) => void;
+};
+
 type PendingReq = {
   resolve: (payload: Record<string, unknown>) => void;
   reject: (err: Error) => void;
@@ -62,14 +67,16 @@ export class GatewayClient {
   private deviceIdentity: DeviceIdentity;
   private lastError: string | null = null;
   private lastErrorCode: string | null = null;
+  private onPairingSuccess?: (gatewayId: string) => void;
 
-  constructor(config: GatewayClientConfig, opts?: { noReconnect?: boolean }) {
+  constructor(config: GatewayClientConfig, opts?: GatewayClientOptions) {
     this.gatewayId = config.id;
     this.gatewayName = config.name;
     this.wsUrl = config.url;
     this.auth = config.auth;
     this.deviceIdentity = loadOrCreateDeviceIdentity();
     if (opts?.noReconnect) this.noReconnect = true;
+    this.onPairingSuccess = opts?.onPairingSuccess;
   }
 
   get id(): string {
@@ -141,6 +148,8 @@ export class GatewayClient {
           gatewayId: this.gatewayId,
           connected: false,
           error,
+          reconnectAttempt: this.reconnectAttempts,
+          maxAttempts: MAX_RECONNECT_ATTEMPTS,
         });
       }
       // Don't retry when server explicitly rejects (pairing required, auth denied)
@@ -266,7 +275,8 @@ export class GatewayClient {
   }
 
   private handleChallenge(nonce: string): void {
-    const signatureToken = 'token' in this.auth ? this.auth.token : null;
+    const signatureToken =
+      'token' in this.auth ? this.auth.token : 'bootstrapToken' in this.auth ? this.auth.bootstrapToken : null;
     const scopes = ['operator.admin', 'operator.write', 'operator.read', 'operator.approvals', 'operator.pairing'];
 
     const device = buildDeviceConnectPayload(this.deviceIdentity, {
@@ -363,6 +373,7 @@ export class GatewayClient {
         gatewayId: this.gatewayId,
         data: { role: typeof role === 'string' ? role : 'operator' },
       });
+      this.onPairingSuccess?.(this.gatewayId);
     }
   }
 
@@ -636,6 +647,9 @@ export class GatewayClient {
           gatewayId: this.gatewayId,
           connected: false,
           error: 'max reconnect attempts',
+          reconnectAttempt: this.reconnectAttempts,
+          maxAttempts: MAX_RECONNECT_ATTEMPTS,
+          gaveUp: true,
         });
       }
       return;
@@ -690,6 +704,11 @@ export class GatewayClient {
       this.ws = null;
     }
     this.authenticated = false;
+  }
+
+  reconnect(): void {
+    this.reconnectAttempts = 0;
+    this.connect();
   }
 
   destroy(): void {

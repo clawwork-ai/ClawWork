@@ -96,12 +96,14 @@ function buildApi(): ClawWorkAPI {
     checkWhisper: () => ipcRenderer.invoke('voice:check-whisper'),
     transcribeAudio: (audio: ArrayBuffer) => ipcRenderer.invoke('voice:transcribe', { audio }),
 
+    reconnectGateway: (gatewayId: string) => ipcRenderer.invoke('ws:reconnect-gateway', { gatewayId }),
+
     addGateway: (gateway: GatewayServerConfig) => ipcRenderer.invoke('settings:add-gateway', gateway),
     removeGateway: (gatewayId: string) => ipcRenderer.invoke('settings:remove-gateway', gatewayId),
     updateGateway: (gatewayId: string, partial: Partial<GatewayServerConfig>) =>
       ipcRenderer.invoke('settings:update-gateway', gatewayId, partial),
     setDefaultGateway: (gatewayId: string) => ipcRenderer.invoke('settings:set-default-gateway', gatewayId),
-    testGateway: (url: string, auth: { token?: string; password?: string }) =>
+    testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) =>
       ipcRenderer.invoke('settings:test-gateway', url, auth),
 
     checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates'),

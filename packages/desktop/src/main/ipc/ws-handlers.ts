@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { getGatewayClient, getAllGatewayClients } from '../ws/index.js';
+import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
 import { readConfig } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
 import type { ChatAttachment } from '@clawwork/shared';
@@ -504,6 +504,11 @@ export function registerWsHandlers(): void {
       }
     },
   );
+
+  ipcMain.handle('ws:reconnect-gateway', (_event, payload: { gatewayId: string }) => {
+    reconnectGateway(payload.gatewayId);
+    return { ok: true };
+  });
 }
 
 function safeJsonParse(raw: string): Record<string, unknown> | undefined {

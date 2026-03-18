@@ -1,15 +1,24 @@
 import type { BrowserWindow } from 'electron';
 import type { GatewayClientConfig } from '@clawwork/shared';
 import { GatewayClient } from './gateway-client.js';
-import { readConfig, buildGatewayAuth } from '../workspace/config.js';
+import { readConfig, buildGatewayAuth, clearGatewayPairingCode } from '../workspace/config.js';
 
 const gatewayClients = new Map<string, GatewayClient>();
+
+function createGatewayClient(config: GatewayClientConfig, opts?: { noReconnect?: boolean }): GatewayClient {
+  return new GatewayClient(config, {
+    ...opts,
+    onPairingSuccess: (gatewayId) => {
+      clearGatewayPairingCode(gatewayId);
+    },
+  });
+}
 
 export function initAllGateways(mainWindow: BrowserWindow): void {
   const config = readConfig();
   const gateways = config?.gateways ?? [];
   for (const gw of gateways) {
-    const client = new GatewayClient({ id: gw.id, name: gw.name, url: gw.url, auth: buildGatewayAuth(gw) });
+    const client = createGatewayClient({ id: gw.id, name: gw.name, url: gw.url, auth: buildGatewayAuth(gw) });
     client.setMainWindow(mainWindow);
     client.connect();
     gatewayClients.set(gw.id, client);
@@ -25,7 +34,7 @@ export function getAllGatewayClients(): Map<string, GatewayClient> {
 }
 
 export function addGateway(config: GatewayClientConfig, mainWindow: BrowserWindow): GatewayClient {
-  const client = new GatewayClient(config);
+  const client = createGatewayClient(config);
   client.setMainWindow(mainWindow);
   client.connect();
   gatewayClients.set(config.id, client);
@@ -43,6 +52,13 @@ export function removeGateway(gatewayId: string): void {
 export function rebindAllWindows(mainWindow: BrowserWindow): void {
   for (const client of gatewayClients.values()) {
     client.setMainWindow(mainWindow);
+  }
+}
+
+export function reconnectGateway(gatewayId: string): void {
+  const client = gatewayClients.get(gatewayId);
+  if (client) {
+    client.reconnect();
   }
 }
 

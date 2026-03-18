@@ -292,12 +292,23 @@ export function useGatewayEventDispatcher(): void {
         infoMap[gw.id] = { id: gw.id, name: gw.name, color: gw.color };
       }
       useUiStore.getState().setGatewayInfoMap(infoMap);
+      useUiStore.getState().setGatewaysLoaded(true);
     });
 
     const removeGatewayStatus = window.clawwork.onGatewayStatus((s) => {
       const wasConnected = connectedGatewaysRef.current.has(s.gatewayId);
       const next = s.connected ? ('connected' as const) : s.error ? ('disconnected' as const) : ('connecting' as const);
       setGatewayStatusByGateway(s.gatewayId, next);
+
+      if (s.reconnectAttempt !== undefined && s.maxAttempts !== undefined) {
+        useUiStore.getState().setGatewayReconnectInfo(s.gatewayId, {
+          attempt: s.reconnectAttempt,
+          max: s.maxAttempts,
+          gaveUp: s.gaveUp ?? false,
+        });
+      } else if (s.connected) {
+        useUiStore.getState().setGatewayReconnectInfo(s.gatewayId, null);
+      }
 
       if (s.connected && !wasConnected) {
         connectedGatewaysRef.current.add(s.gatewayId);

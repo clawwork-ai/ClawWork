@@ -96,4 +96,22 @@ describe('registerSettingsHandlers', () => {
     expect(connectMock).toHaveBeenCalledTimes(1);
     expect(destroyMock).toHaveBeenCalledTimes(1);
   });
+
+  it('rejects pairing code test requests without opening a websocket', async () => {
+    const { registerSettingsHandlers } = await import('../src/main/ipc/settings-handlers.js');
+
+    registerSettingsHandlers();
+
+    const handler = handleMap.get('settings:test-gateway');
+    expect(handler).toBeTypeOf('function');
+
+    await expect(
+      handler?.({}, 'wss://gateway.example.com', { pairingCode: 'pairing-code' }) as Promise<{
+        ok: boolean;
+        error: string;
+      }>,
+    ).resolves.toEqual({ ok: false, error: 'pairing-code test is not supported' });
+    expect(connectMock).not.toHaveBeenCalled();
+    expect(destroyMock).not.toHaveBeenCalled();
+  });
 });

@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { randomUUID } from 'node:crypto';
 import { CONFIG_FILE_NAME, DEFAULT_WORKSPACE_DIR } from '@clawwork/shared';
+import type { GatewayAuth } from '@clawwork/shared';
 
 export interface GatewayServerConfig {
   id: string;
@@ -11,6 +12,8 @@ export interface GatewayServerConfig {
   url: string;
   token?: string;
   password?: string;
+  pairingCode?: string;
+  authMode?: 'token' | 'password' | 'pairingCode';
   isDefault?: boolean;
   color?: string;
 }
@@ -54,7 +57,8 @@ export function getDefaultWorkspacePath(): string {
 function migrateConfigIfNeeded(config: AppConfig): AppConfig {
   if (config.gatewayUrl && (!config.gateways || config.gateways.length === 0)) {
     const id = randomUUID();
-    const token = config.bootstrapToken || process.env.OPENCLAW_GATEWAY_TOKEN;
+    const token = process.env.OPENCLAW_GATEWAY_TOKEN;
+    const pairingCode = config.bootstrapToken;
     const migrated: AppConfig = {
       workspacePath: config.workspacePath,
       theme: config.theme,
@@ -66,7 +70,9 @@ function migrateConfigIfNeeded(config: AppConfig): AppConfig {
           name: 'Default Gateway',
           url: config.gatewayUrl,
           token,
+          pairingCode,
           password: config.password,
+          authMode: token ? 'token' : config.password ? 'password' : pairingCode ? 'pairingCode' : 'token',
           isDefault: true,
         },
       ],
@@ -115,10 +121,23 @@ export function isWorkspaceConfigured(): boolean {
 }
 
 /** Build GatewayAuth from a persisted GatewayServerConfig */
-export function buildGatewayAuth(gw: GatewayServerConfig): { token: string } | { password: string } {
+export function buildGatewayAuth(gw: GatewayServerConfig): GatewayAuth {
+  if (gw.authMode === 'token') return { token: gw.token ?? '' };
+  if (gw.authMode === 'password') return { password: gw.password ?? '' };
+  if (gw.authMode === 'pairingCode') return { bootstrapToken: gw.pairingCode ?? '' };
   if (gw.token) return { token: gw.token };
   if (gw.password) return { password: gw.password };
+  if (gw.pairingCode) return { bootstrapToken: gw.pairingCode };
   const envToken = process.env.OPENCLAW_GATEWAY_TOKEN;
   if (envToken) return { token: envToken };
   return { token: '' };
+}
+
+export function clearGatewayPairingCode(gatewayId: string): void {
+  const config = readConfig();
+  if (!config) return;
+  const gateway = config.gateways.find((item) => item.id === gatewayId);
+  if (!gateway?.pairingCode) return;
+  gateway.pairingCode = undefined;
+  writeConfig(config);
 }

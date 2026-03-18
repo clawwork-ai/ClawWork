@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ConnectionBanner from '@/components/ConnectionBanner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PanelRightOpen,
@@ -654,6 +655,7 @@ export default function MainArea({ onTogglePanel }: MainAreaProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <ConnectionBanner />
       <AnimatePresence mode="wait">
         {mainView === 'files' ? (
           <motion.div key="files" {...motionPresets.fadeIn} className="flex-1 min-h-0">

@@ -6,16 +6,18 @@ import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import logo from '@/assets/logo.png';
+import { parseGatewaySetupCode, validateGatewayForm, type GatewayAuthMode } from '@/lib/gateway-auth';
 
 interface SetupProps {
   onSetupComplete: () => void;
+  initialStep?: 'workspace' | 'gateway';
 }
 
 type Step = 'workspace' | 'gateway';
 
-export default function Setup({ onSetupComplete }: SetupProps) {
+export default function Setup({ onSetupComplete, initialStep = 'workspace' }: SetupProps) {
   const { t } = useTranslation();
-  const [step, setStep] = useState<Step>('workspace');
+  const [step, setStep] = useState<Step>(initialStep);
 
   // Step 1: workspace
   const [path, setPath] = useState('');
@@ -25,11 +27,43 @@ export default function Setup({ onSetupComplete }: SetupProps) {
   // Step 2: gateway
   const [gwName, setGwName] = useState('Default Gateway');
   const [gwUrl, setGwUrl] = useState('ws://127.0.0.1:18789');
+  const [gwAuthMode, setGwAuthMode] = useState<GatewayAuthMode>('token');
   const [gwToken, setGwToken] = useState('');
   const [gwPassword, setGwPassword] = useState('');
+  const [gwPairingCode, setGwPairingCode] = useState('');
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'fail' | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const handleGwAuthModeChange = (mode: GatewayAuthMode) => {
+    setGwAuthMode(mode);
+    setGwToken('');
+    setGwPassword('');
+    setGwPairingCode('');
+    setTestResult(null);
+    if (mode === 'pairingCode') {
+      setGwUrl('');
+    } else if (!gwUrl.trim()) {
+      setGwUrl('ws://127.0.0.1:18789');
+    }
+  };
+
+  const tryParseGwSetupCode = (raw: string): boolean => {
+    const parsed = parseGatewaySetupCode(raw);
+    if (!parsed) return false;
+    setGwUrl(parsed.url);
+    setGwPairingCode(parsed.pairingCode);
+    setTestResult(null);
+    return true;
+  };
+
+  const gwAuthValue = gwAuthMode === 'token' ? gwToken : gwAuthMode === 'password' ? gwPassword : gwPairingCode;
+  const handleGwAuthChange = (v: string) => {
+    if (gwAuthMode === 'token') setGwToken(v);
+    else if (gwAuthMode === 'password') setGwPassword(v);
+    else setGwPairingCode(v);
+    setTestResult(null);
+  };
 
   useEffect(() => {
     window.clawwork.getDefaultWorkspacePath().then(setPath);
@@ -61,6 +95,11 @@ export default function Setup({ onSetupComplete }: SetupProps) {
   };
 
   const handleTestGateway = useCallback(async () => {
+    if (gwAuthMode === 'pairingCode') {
+      setTestResult('fail');
+      setError(t('pairing.cannotTestPairingCode'));
+      return;
+    }
     try {
       new URL(gwUrl);
     } catch {
@@ -74,18 +113,23 @@ export default function Setup({ onSetupComplete }: SetupProps) {
       password: gwPassword || undefined,
     });
     setTesting(false);
-    setTestResult(res.ok ? 'success' : 'fail');
-  }, [gwUrl, gwToken, gwPassword]);
+    setTestResult(res.ok || res.pairingRequired ? 'success' : 'fail');
+    if (res.pairingRequired) {
+      setError(t('pairing.instructions'));
+    }
+  }, [gwAuthMode, gwUrl, gwToken, gwPassword, t]);
 
   const handleFinish = useCallback(async () => {
-    if (!gwName.trim() || !gwUrl.trim()) {
-      setError(t('settings.nameRequired'));
-      return;
-    }
-    try {
-      new URL(gwUrl);
-    } catch {
-      setError(t('settings.invalidUrl'));
+    const validationError = validateGatewayForm({
+      mode: gwAuthMode,
+      name: gwName,
+      url: gwUrl,
+      token: gwToken,
+      password: gwPassword,
+      pairingCode: gwPairingCode,
+    });
+    if (validationError) {
+      setError(t(`settings.${validationError}`));
       return;
     }
     setSaving(true);
@@ -96,6 +140,8 @@ export default function Setup({ onSetupComplete }: SetupProps) {
       url: gwUrl.trim(),
       token: gwToken.trim() || undefined,
       password: gwPassword.trim() || undefined,
+      pairingCode: gwPairingCode.trim() || undefined,
+      authMode: gwAuthMode,
       isDefault: true,
     };
     const res = await window.clawwork.addGateway(gw);
@@ -105,7 +151,7 @@ export default function Setup({ onSetupComplete }: SetupProps) {
     } else {
       setError(res.error ?? 'Failed to add gateway');
     }
-  }, [gwName, gwUrl, gwToken, gwPassword, onSetupComplete, t]);
+  }, [gwAuthMode, gwName, gwUrl, gwToken, gwPassword, gwPairingCode, onSetupComplete, t]);
 
   const handleSkipGateway = useCallback(() => {
     onSetupComplete();
@@ -123,7 +169,7 @@ export default function Setup({ onSetupComplete }: SetupProps) {
       <div className="titlebar-drag fixed top-0 left-0 right-0 h-8 z-50" />
 
       <div className="flex flex-col items-center justify-center w-full px-6">
-        <motion.div {...motionPresets.slideUp} className="w-full max-w-md space-y-8">
+        <motion.div {...motionPresets.slideUp} className="w-full max-w-lg space-y-8">
           {/* Logo + title */}
           <div className="flex flex-col items-center text-center space-y-3">
             <div className="relative">
@@ -148,22 +194,32 @@ export default function Setup({ onSetupComplete }: SetupProps) {
           <div className="flex items-center justify-center gap-2">
             {(['workspace', 'gateway'] as const).map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    'w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors',
-                    step === s
-                      ? 'bg-[var(--accent)] text-black'
-                      : s === 'workspace' && step === 'gateway'
-                        ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
-                        : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
-                  )}
-                >
-                  {s === 'workspace' && step === 'gateway' ? <CheckCircle2 size={14} /> : i + 1}
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={cn(
+                      'w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors',
+                      step === s
+                        ? 'bg-[var(--accent)] text-black'
+                        : s === 'workspace' && step === 'gateway'
+                          ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
+                          : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
+                    )}
+                  >
+                    {s === 'workspace' && step === 'gateway' ? <CheckCircle2 size={14} /> : i + 1}
+                  </div>
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      step === s ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]',
+                    )}
+                  >
+                    {s === 'workspace' ? t('setup.stepWorkspace') : t('setup.stepGateway')}
+                  </span>
                 </div>
                 {i === 0 && (
                   <div
                     className={cn(
-                      'w-8 h-0.5 rounded',
+                      'w-8 h-0.5 rounded mx-1',
                       step === 'gateway' ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tertiary)]',
                     )}
                   />
@@ -188,6 +244,7 @@ export default function Setup({ onSetupComplete }: SetupProps) {
                     <FolderOpen size={15} className="text-[var(--text-muted)]" />
                     {t('setup.workspaceDir')}
                   </label>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{t('setup.workspaceExplain')}</p>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -204,6 +261,7 @@ export default function Setup({ onSetupComplete }: SetupProps) {
                       {t('setup.browse')}
                     </Button>
                   </div>
+                  <p className="text-xs text-[var(--text-muted)] opacity-70">{t('setup.workspaceHint')}</p>
                 </div>
 
                 <Button
@@ -238,6 +296,7 @@ export default function Setup({ onSetupComplete }: SetupProps) {
                     <Server size={15} className="text-[var(--text-muted)]" />
                     {t('setup.gatewayConfig')}
                   </label>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{t('setup.gatewayExplain')}</p>
                   <div>
                     <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.gatewayName')}</label>
                     <input
@@ -249,65 +308,111 @@ export default function Setup({ onSetupComplete }: SetupProps) {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.gatewayUrl')}</label>
-                    <input
-                      type="text"
-                      value={gwUrl}
-                      onChange={(e) => {
-                        setGwUrl(e.target.value);
-                        setTestResult(null);
-                      }}
-                      placeholder="ws://127.0.0.1:18789"
-                      className={cn(inputClass, 'w-full')}
-                    />
+                    <label className="text-xs text-[var(--text-muted)] mb-1.5 block">{t('settings.authMethod')}</label>
+                    <div className="flex rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)] p-0.5 gap-0.5 mb-2">
+                      {(
+                        [
+                          { mode: 'token', label: 'Token' },
+                          { mode: 'password', label: t('settings.password') },
+                          { mode: 'pairingCode', label: t('settings.pairingCode') },
+                        ] as const
+                      ).map(({ mode, label }) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => handleGwAuthModeChange(mode)}
+                          className={cn(
+                            'titlebar-no-drag flex-1 h-7 text-xs font-medium rounded-md transition-colors',
+                            gwAuthMode === mode
+                              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+                              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                          )}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                  {gwAuthMode !== 'pairingCode' && (
+                    <div>
+                      <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.gatewayUrl')}</label>
+                      <input
+                        type="text"
+                        value={gwUrl}
+                        onChange={(e) => {
+                          setGwUrl(e.target.value);
+                          setTestResult(null);
+                        }}
+                        placeholder="ws://127.0.0.1:18789"
+                        className={cn(inputClass, 'w-full')}
+                      />
+                      <p className="text-xs text-[var(--text-muted)] opacity-70 mt-1">{t('setup.urlHint')}</p>
+                    </div>
+                  )}
                   <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1 block">Token</label>
+                    <label className="text-xs text-[var(--text-muted)] mb-1.5 block">
+                      {gwAuthMode === 'pairingCode' ? t('settings.pairingCode') : t('settings.authMethod')}
+                    </label>
                     <input
                       type="password"
-                      value={gwToken}
+                      value={gwAuthValue}
                       onChange={(e) => {
-                        setGwToken(e.target.value);
-                        setTestResult(null);
+                        const v = e.target.value;
+                        if (gwAuthMode === 'pairingCode' && !tryParseGwSetupCode(v)) {
+                          handleGwAuthChange(v);
+                        } else if (gwAuthMode !== 'pairingCode') {
+                          handleGwAuthChange(v);
+                        }
                       }}
-                      placeholder={t('settings.tokenPlaceholder')}
+                      onPaste={(e) => {
+                        if (gwAuthMode !== 'pairingCode') return;
+                        const text = e.clipboardData.getData('text');
+                        if (tryParseGwSetupCode(text)) e.preventDefault();
+                      }}
+                      placeholder={
+                        gwAuthMode === 'pairingCode'
+                          ? t('settings.setupCodePlaceholder')
+                          : gwAuthMode === 'token'
+                            ? t('settings.tokenPlaceholder')
+                            : t('settings.passwordPlaceholder')
+                      }
                       className={cn(inputClass, 'w-full')}
                     />
-                  </div>
-                  <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.password')}</label>
-                    <input
-                      type="password"
-                      value={gwPassword}
-                      onChange={(e) => {
-                        setGwPassword(e.target.value);
-                        setTestResult(null);
-                      }}
-                      placeholder={t('settings.passwordPlaceholder')}
-                      className={cn(inputClass, 'w-full')}
-                    />
+                    {gwAuthMode === 'pairingCode' && gwUrl && gwUrl !== 'ws://127.0.0.1:18789' && (
+                      <p className="text-xs text-[var(--accent)] mt-1">
+                        ✓ {t('settings.setupCodeParsed')}: <span className="font-mono">{gwUrl}</span>
+                      </p>
+                    )}
+                    <p className="text-xs text-[var(--text-muted)] opacity-70 mt-1">
+                      {gwAuthMode === 'token'
+                        ? t('setup.tokenHint')
+                        : gwAuthMode === 'password'
+                          ? t('setup.passwordHint')
+                          : t('setup.pairingCodeHint')}
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTestGateway}
-                      disabled={testing}
-                      className="titlebar-no-drag gap-1.5"
-                    >
-                      {testing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                      {t('settings.testConnection')}
-                    </Button>
-                    {testResult === 'success' && (
-                      <span className="text-xs text-[var(--accent)] flex items-center gap-1">
-                        <CheckCircle2 size={12} /> {t('settings.testSuccess')}
-                      </span>
-                    )}
-                    {testResult === 'fail' && (
-                      <span className="text-xs text-[var(--danger)]">{t('settings.testFailed')}</span>
-                    )}
-                  </div>
+                  {gwAuthMode !== 'pairingCode' && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="default"
+                        onClick={handleTestGateway}
+                        disabled={testing}
+                        className="titlebar-no-drag gap-1.5"
+                      >
+                        {testing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                        {t('settings.testConnection')}
+                      </Button>
+                      {testResult === 'success' && (
+                        <span className="text-xs text-[var(--accent)] flex items-center gap-1">
+                          <CheckCircle2 size={12} /> {t('settings.testSuccess')}
+                        </span>
+                      )}
+                      {testResult === 'fail' && (
+                        <span className="text-xs text-[var(--danger)]">{t('settings.testFailed')}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3">
@@ -325,6 +430,8 @@ export default function Setup({ onSetupComplete }: SetupProps) {
                         <Loader2 size={16} className="animate-spin" />
                         {t('setup.initializing')}
                       </>
+                    ) : gwAuthMode === 'pairingCode' ? (
+                      t('settings.startPairing')
                     ) : (
                       t('setup.getStarted')
                     )}
