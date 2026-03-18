@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MonitorDot, Zap, FolderOpen, Loader2 } from 'lucide-react';
+import { MonitorDot, Zap, FolderOpen, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -180,40 +180,43 @@ export default function SystemSection() {
             </div>
           </SettingRow>
         </div>
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <FolderOpen size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <div>
-                  <span className="text-sm text-[var(--text-primary)]">{t('settings.workspace')}</span>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.workspaceHint')}</p>
-                </div>
-              </div>
-            }
-          >
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <div
-                className={cn(
-                  'h-9 px-3 flex items-center rounded-md max-w-[180px] truncate',
-                  'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                  'text-[var(--text-primary)] text-sm font-mono',
-                )}
-                title={workspacePath}
-              >
-                {workspacePath}
-              </div>
-              <Button
-                variant="outline"
-                onClick={handleChangeWorkspace}
-                disabled={changingWorkspace}
-                className="titlebar-no-drag h-9 gap-1.5 flex-shrink-0"
-              >
-                {changingWorkspace ? <Loader2 size={14} className="animate-spin" /> : <FolderOpen size={14} />}
-                {t('settings.workspaceChange')}
-              </Button>
+        <div className="px-5 py-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <FolderOpen size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+            <div>
+              <span className="text-sm text-[var(--text-primary)]">{t('settings.workspace')}</span>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.workspaceHint')}</p>
             </div>
-          </SettingRow>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'flex-1 min-w-0 px-3 py-2 rounded-md',
+                'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                'text-[var(--text-primary)] text-xs font-mono break-all',
+              )}
+            >
+              {workspacePath}
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => window.clawwork.openWorkspaceFolder()}
+              className="titlebar-no-drag h-9 w-9 flex-shrink-0"
+              title={t('settings.workspaceOpenFolder')}
+            >
+              <ExternalLink size={14} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleChangeWorkspace}
+              disabled={changingWorkspace}
+              className="titlebar-no-drag h-9 gap-1.5 flex-shrink-0"
+            >
+              {changingWorkspace ? <Loader2 size={14} className="animate-spin" /> : <FolderOpen size={14} />}
+              {t('settings.workspaceChange')}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

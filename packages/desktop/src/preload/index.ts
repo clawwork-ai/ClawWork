@@ -83,6 +83,7 @@ function buildApi(): ClawWorkAPI {
     saveImageFromUrl: (params) => ipcRenderer.invoke('artifact:save-image-url', params),
     searchArtifacts: (query: string) => ipcRenderer.invoke('artifact:search', { query }),
 
+    openWorkspaceFolder: () => ipcRenderer.invoke('workspace:open-folder'),
     isWorkspaceConfigured: () => ipcRenderer.invoke('workspace:is-configured') as Promise<boolean>,
     getWorkspacePath: () => ipcRenderer.invoke('workspace:get-path') as Promise<string | null>,
     getDefaultWorkspacePath: () => ipcRenderer.invoke('workspace:get-default') as Promise<string>,

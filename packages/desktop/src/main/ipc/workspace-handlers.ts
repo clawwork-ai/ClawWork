@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
 import {
   getWorkspacePath,
   writeConfig,
@@ -10,6 +10,11 @@ import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
 import { initDatabase, reinitDatabase, closeDatabase } from '../db/index.js';
 
 export function registerWorkspaceHandlers(): void {
+  ipcMain.handle('workspace:open-folder', () => {
+    const p = getWorkspacePath();
+    if (p) shell.openPath(p);
+  });
+
   ipcMain.handle('workspace:is-configured', isWorkspaceConfigured);
   ipcMain.handle('workspace:get-path', getWorkspacePath);
   ipcMain.handle('workspace:get-default', getDefaultWorkspacePath);

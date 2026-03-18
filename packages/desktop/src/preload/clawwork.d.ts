@@ -242,6 +242,7 @@ export interface ClawWorkAPI {
   searchArtifacts: (query: string) => Promise<IpcResult>;
 
   // Workspace
+  openWorkspaceFolder: () => Promise<void>;
   isWorkspaceConfigured: () => Promise<boolean>;
   getWorkspacePath: () => Promise<string | null>;
   getDefaultWorkspacePath: () => Promise<string>;

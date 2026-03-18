@@ -84,6 +84,7 @@
     "workspace": "Workspace",
     "workspaceHint": "AI artifact save location",
     "workspaceChange": "Change",
+    "workspaceOpenFolder": "Open in Finder",
     "workspaceChanged": "Workspace migrated successfully",
     "workspaceOldPathHint": "Old workspace at {{path}} was kept — you can delete it manually.",
     "workspaceChangeFailed": "Failed to migrate workspace: {{error}}",
