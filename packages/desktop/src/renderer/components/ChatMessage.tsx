@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Message } from '@clawwork/shared';
 import { Bot, User, Brain, ChevronDown, FileCode } from 'lucide-react';
@@ -46,7 +46,6 @@ function FileBlockChip({
       className={cn(
         'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs mb-1.5 mr-1.5',
         'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
-        'cursor-pointer',
       )}
     >
       <FileCode size={13} className="text-[var(--accent)] flex-shrink-0" />
@@ -68,7 +67,7 @@ const ChatMessage = memo(function ChatMessage({
   const isSystem = message.role === 'system';
   const ref = useRef<HTMLDivElement>(null);
   const [thinkingOpen, setThinkingOpen] = useState(false);
-  const parsedFiles = useMemo(() => (isUser ? parseFileBlocks(message.content) : null), [isUser, message.content]);
+  const parsedFiles = isUser ? parseFileBlocks(message.content) : null;
 
   useEffect(() => {
     if (!highlighted || !ref.current) return;
@@ -111,25 +110,6 @@ const ChatMessage = memo(function ChatMessage({
       </div>
 
       <div className={cn('min-w-0 max-w-[80%]', isUser && 'text-right')}>
-        {/* Image thumbnails for user messages */}
-        {isUser && images?.length ? (
-          <div className={cn('flex gap-2 mb-2 flex-wrap', isUser && 'justify-end')}>
-            {images.map((img, i) => (
-              <img
-                key={`${img.fileName}-${i}`}
-                src={img.dataUrl}
-                alt={img.fileName}
-                className={cn(
-                  'rounded-xl object-cover cursor-pointer border border-[var(--border-subtle)]',
-                  'hover:opacity-90 transition-opacity',
-                  images.length === 1 ? 'max-w-[280px] max-h-[200px]' : 'w-20 h-20',
-                )}
-                onClick={() => onImageClick?.(img.dataUrl)}
-              />
-            ))}
-          </div>
-        ) : null}
-
         {/* Thinking content (collapsible) */}
         {!isUser && message.thinkingContent && (
           <div className="mb-2">
@@ -171,38 +151,46 @@ const ChatMessage = memo(function ChatMessage({
         )}
 
         {/* Text content */}
-        {(message.content || !images?.length) &&
-          (() => {
-            if (isUser && parsedFiles) {
-              const { files, text } = parsedFiles;
-              const hasContent = files.length > 0 || text;
-              if (!hasContent) return null;
-              return (
-                <div
-                  className={cn(
-                    'inline-block leading-relaxed rounded-2xl px-4 py-3',
-                    'bg-[var(--bg-tertiary)] text-[var(--text-primary)]',
-                  )}
-                >
-                  <div className="flex flex-wrap">
-                    {files.map((f, i) => (
-                      <FileBlockChip
-                        key={`${f.path}-${i}`}
-                        file={f}
-                        onClick={() => onFileClick?.({ path: f.path, content: f.content })}
-                      />
-                    ))}
-                  </div>
-                  {text && <p className="whitespace-pre-wrap">{text}</p>}
-                </div>
-              );
-            }
-            return (
-              <div className={cn('inline-block leading-relaxed rounded-2xl px-4 py-3', 'text-[var(--text-primary)]')}>
-                <MarkdownContent content={message.content} onImageClick={onImageClick} showMessageCopy />
-              </div>
-            );
-          })()}
+        {isUser && parsedFiles && (parsedFiles.files.length > 0 || parsedFiles.text) ? (
+          <div
+            className={cn(
+              'inline-block leading-relaxed rounded-2xl px-4 py-3',
+              'bg-[var(--bg-tertiary)] text-[var(--text-primary)]',
+            )}
+          >
+            <div className="flex flex-wrap">
+              {parsedFiles.files.map((f, i) => (
+                <FileBlockChip
+                  key={`${f.path}-${i}`}
+                  file={f}
+                  onClick={() => onFileClick?.({ path: f.path, content: f.content })}
+                />
+              ))}
+            </div>
+            {parsedFiles.text && <p className="whitespace-pre-wrap">{parsedFiles.text}</p>}
+          </div>
+        ) : message.content || !images?.length ? (
+          <div className="inline-block leading-relaxed rounded-2xl px-4 py-3 text-[var(--text-primary)]">
+            <MarkdownContent content={message.content} onImageClick={onImageClick} showMessageCopy />
+          </div>
+        ) : null}
+        {isUser && images?.length ? (
+          <div className={cn('flex gap-2 mt-2 flex-wrap', 'justify-end')}>
+            {images.map((img, i) => (
+              <img
+                key={`${img.fileName}-${i}`}
+                src={img.dataUrl}
+                alt={img.fileName}
+                className={cn(
+                  'rounded-xl object-cover cursor-pointer border border-[var(--border-subtle)]',
+                  'hover:opacity-90 transition-opacity',
+                  images.length === 1 ? 'max-w-[280px] max-h-[200px]' : 'w-20 h-20',
+                )}
+                onClick={() => onImageClick?.(img.dataUrl)}
+              />
+            ))}
+          </div>
+        ) : null}
         {message.toolCalls.length > 0 && (
           <div className="mt-2 space-y-1">
             {message.toolCalls.map((tc) => (

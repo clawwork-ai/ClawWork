@@ -73,6 +73,7 @@ export const useMessageStore = create<MessageState>((set, _get) => ({
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp,
+        imageAttachments: msg.imageAttachments as unknown[] | undefined,
       })
       .catch(() => {});
     return msg;
