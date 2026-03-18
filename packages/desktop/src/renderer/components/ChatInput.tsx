@@ -259,8 +259,12 @@ export default function ChatInput() {
     (s) => (taskGwId ? s.modelCatalogByGateway[taskGwId] : undefined) ?? EMPTY_MODELS_CATALOG,
   );
   const toolsCatalog = useUiStore((s) => (taskGwId ? s.toolsCatalogByGateway[taskGwId] : undefined));
-  const currentModel = activeTask?.model === GATEWAY_INJECTED_MODEL ? undefined : activeTask?.model;
-  const currentThinking = (activeTask?.thinkingLevel ?? 'off') as ThinkingLevel;
+  const currentModel = activeTask
+    ? activeTask.model === GATEWAY_INJECTED_MODEL
+      ? undefined
+      : activeTask.model
+    : pendingNewTask?.model;
+  const currentThinking = (activeTask?.thinkingLevel ?? pendingNewTask?.thinkingLevel ?? 'off') as ThinkingLevel;
   const [whisperAvailable, setWhisperAvailable] = useState(false);
   useEffect(() => {
     window.clawwork.checkWhisper().then((r) => setWhisperAvailable(r.available));
@@ -442,6 +446,10 @@ export default function ChatInput() {
     const content = textarea.value.trim();
     if (!content && !pendingImages.length) return;
 
+    const pendingPreset = !activeTask ? useTaskStore.getState().pendingNewTask : null;
+    const pendingPresetModel = pendingPreset?.model;
+    const pendingPresetThinking = pendingPreset?.thinkingLevel;
+
     let task = activeTask;
     if (!task) {
       task = commitPendingTask();
@@ -526,6 +534,19 @@ export default function ChatInput() {
           )
         : [];
       const allAttachments = [...imageAttachments, ...extraAttachments];
+      if (pendingPresetModel) {
+        await window.clawwork.sendMessage(task.gatewayId, task.sessionKey, `/model ${pendingPresetModel}`);
+        updateTaskMetadata(task.id, {
+          model: pendingPresetModel,
+          modelProvider: useUiStore
+            .getState()
+            .modelCatalogByGateway[task.gatewayId]?.find((m) => m.id === pendingPresetModel)?.provider,
+        });
+      }
+      if (pendingPresetThinking && pendingPresetThinking !== 'off') {
+        await window.clawwork.sendMessage(task.gatewayId, task.sessionKey, `/think ${pendingPresetThinking}`);
+        updateTaskMetadata(task.id, { thinkingLevel: pendingPresetThinking });
+      }
       const result = await window.clawwork.sendMessage(
         task.gatewayId,
         task.sessionKey,
@@ -560,8 +581,14 @@ export default function ChatInput() {
 
   const handleModelQuickSend = useCallback(
     (modelId: string) => {
+      if (!activeTask) {
+        useTaskStore.setState((s) => ({
+          pendingNewTask: s.pendingNewTask ? { ...s.pendingNewTask, model: modelId } : null,
+        }));
+        return;
+      }
       const ta = textareaRef.current;
-      if (!ta || !activeTask) return;
+      if (!ta) return;
       updateTaskMetadata(activeTask.id, {
         model: modelId,
         modelProvider: modelCatalog.find((m) => m.id === modelId)?.provider,
@@ -576,8 +603,14 @@ export default function ChatInput() {
 
   const handleThinkingQuickSend = useCallback(
     (level: ThinkingLevel) => {
+      if (!activeTask) {
+        useTaskStore.setState((s) => ({
+          pendingNewTask: s.pendingNewTask ? { ...s.pendingNewTask, thinkingLevel: level } : null,
+        }));
+        return;
+      }
       const ta = textareaRef.current;
-      if (!ta || !activeTask) return;
+      if (!ta) return;
       ta.value = `/think ${level}`;
       ta.style.height = 'auto';
       ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
@@ -861,7 +894,7 @@ export default function ChatInput() {
         </AnimatePresence>
 
         {/* Model & Thinking toolbar */}
-        {activeTask && !isOffline && (
+        {!isOffline && (
           <div className="flex items-center gap-1.5 mb-1.5">
             {/* Model selector */}
             <DropdownMenu>
@@ -971,38 +1004,40 @@ export default function ChatInput() {
               </>
             )}
 
-            <div className="ml-auto flex items-center gap-0.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
-                      'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                      'hover:bg-[var(--bg-hover)] transition-colors',
-                    )}
-                    onClick={handleCompact}
-                  >
-                    <Minimize2 size={12} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top">{t('contextMenu.compactSession')}</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    className={cn(
-                      'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
-                      'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                      'hover:bg-[var(--bg-hover)] transition-colors',
-                    )}
-                    onClick={handleReset}
-                  >
-                    <RotateCcw size={12} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top">{t('contextMenu.resetSession')}</TooltipContent>
-              </Tooltip>
-            </div>
+            {activeTask && (
+              <div className="ml-auto flex items-center gap-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                        'hover:bg-[var(--bg-hover)] transition-colors',
+                      )}
+                      onClick={handleCompact}
+                    >
+                      <Minimize2 size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{t('contextMenu.compactSession')}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={cn(
+                        'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                        'hover:bg-[var(--bg-hover)] transition-colors',
+                      )}
+                      onClick={handleReset}
+                    >
+                      <RotateCcw size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{t('contextMenu.resetSession')}</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         )}
 

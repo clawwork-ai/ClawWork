@@ -6,6 +6,8 @@ import { useUiStore } from './uiStore';
 interface PendingNewTask {
   gatewayId: string;
   agentId: string;
+  model?: string;
+  thinkingLevel?: string;
 }
 
 interface TaskState {
