@@ -29,6 +29,7 @@ export async function hydrateFromLocal(): Promise<void> {
           artifacts: [],
           toolCalls: [],
           timestamp: r.timestamp,
+          imageAttachments: r.imageAttachments as Message['imageAttachments'],
         }));
         bulkLoad(t.id, msgs);
       }

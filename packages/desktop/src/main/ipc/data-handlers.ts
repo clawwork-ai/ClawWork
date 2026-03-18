@@ -110,6 +110,7 @@ export function registerDataHandlers(): void {
         role: string;
         content: string;
         timestamp: string;
+        imageAttachments?: unknown[];
       },
     ) => {
       if (!isDbReady()) return ipcError(new Error('database not ready'));
@@ -122,6 +123,7 @@ export function registerDataHandlers(): void {
             role: msg.role,
             content: msg.content,
             timestamp: msg.timestamp,
+            imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
           })
           .run();
         return { ok: true };
@@ -177,7 +179,18 @@ export function registerDataHandlers(): void {
         .where(eq(messages.taskId, params.taskId))
         .orderBy(messages.timestamp)
         .all();
-      return { ok: true, rows };
+      return {
+        ok: true,
+        rows: rows.map((r) => {
+          let imageAttachments: unknown[] | undefined;
+          if (r.imageAttachments) {
+            try {
+              imageAttachments = JSON.parse(r.imageAttachments as string);
+            } catch {}
+          }
+          return { ...r, imageAttachments };
+        }),
+      };
     } catch (err) {
       console.error('[data] list-messages failed:', err);
       return ipcError(err);

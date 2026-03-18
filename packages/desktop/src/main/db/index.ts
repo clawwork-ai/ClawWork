@@ -82,6 +82,10 @@ export function initDatabase(workspacePath: string): void {
     } catch {}
   }
 
+  try {
+    sqlite.exec('ALTER TABLE messages ADD COLUMN image_attachments TEXT');
+  } catch {}
+
   initFTS(sqlite);
 
   db = drizzle(sqlite, { schema });

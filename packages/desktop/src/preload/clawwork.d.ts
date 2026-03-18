@@ -129,6 +129,7 @@ interface PersistedMessage {
   role: string;
   content: string;
   timestamp: string;
+  imageAttachments?: unknown[];
 }
 
 interface DiscoveredSession {
@@ -296,6 +297,7 @@ export interface ClawWorkAPI {
     role: string;
     content: string;
     timestamp: string;
+    imageAttachments?: unknown[];
   }) => Promise<IpcResult>;
 
   deleteTask: (taskId: string) => Promise<IpcResult>;

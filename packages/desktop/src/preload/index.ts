@@ -137,8 +137,14 @@ function buildApi(): ClawWorkAPI {
       updatedAt: string;
     }) => ipcRenderer.invoke('data:update-task', params),
 
-    persistMessage: (msg: { id: string; taskId: string; role: string; content: string; timestamp: string }) =>
-      ipcRenderer.invoke('data:create-message', msg),
+    persistMessage: (msg: {
+      id: string;
+      taskId: string;
+      role: string;
+      content: string;
+      timestamp: string;
+      imageAttachments?: unknown[];
+    }) => ipcRenderer.invoke('data:create-message', msg),
 
     deleteTask: (taskId: string) => ipcRenderer.invoke('data:delete-task', { id: taskId }),
 
