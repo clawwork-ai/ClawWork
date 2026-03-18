@@ -32,7 +32,7 @@ export function Header() {
         }}
       >
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="ClawWork" style={{ width: '28px', height: '28px' }} />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '28px', height: '28px' }} />
           <span
             style={{
               fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
