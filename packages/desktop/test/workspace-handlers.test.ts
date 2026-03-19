@@ -87,7 +87,7 @@ describe('registerWorkspaceHandlers', () => {
 
     await Promise.resolve();
 
-    expect(closeDatabaseMock).not.toHaveBeenCalled();
+    expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
     expect(migrateWorkspaceMock).toHaveBeenCalledWith('/tmp/old-workspace', '/tmp/new-workspace');
     expect(reinitDatabaseMock).not.toHaveBeenCalled();
     expect(updateConfigMock).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('registerWorkspaceHandlers', () => {
       error: 'copy failed',
     });
 
-    expect(closeDatabaseMock).not.toHaveBeenCalled();
-    expect(reinitDatabaseMock).not.toHaveBeenCalled();
+    expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
+    expect(reinitDatabaseMock).toHaveBeenCalledWith('/tmp/old-workspace');
   });
 });

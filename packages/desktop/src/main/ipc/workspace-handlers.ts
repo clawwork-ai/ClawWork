@@ -58,6 +58,7 @@ export function registerWorkspaceHandlers(): void {
       updateConfig({ workspacePath: newWorkspacePath });
       return { ok: true };
     } catch (err) {
+      reinitDatabase(oldPath);
       return { ok: false, error: err instanceof Error ? err.message : 'migration failed' };
     }
   });
