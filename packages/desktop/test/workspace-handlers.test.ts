@@ -87,7 +87,7 @@ describe('registerWorkspaceHandlers', () => {
 
     await Promise.resolve();
 
-    expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
+    expect(closeDatabaseMock).not.toHaveBeenCalled();
     expect(migrateWorkspaceMock).toHaveBeenCalledWith('/tmp/old-workspace', '/tmp/new-workspace');
     expect(reinitDatabaseMock).not.toHaveBeenCalled();
     expect(updateConfigMock).not.toHaveBeenCalled();
@@ -95,17 +95,13 @@ describe('registerWorkspaceHandlers', () => {
     deferred.resolve();
 
     await expect(pending).resolves.toEqual({ ok: true });
+    expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
     expect(reinitDatabaseMock).toHaveBeenCalledWith('/tmp/new-workspace');
     expect(updateConfigMock).toHaveBeenCalledWith({ workspacePath: '/tmp/new-workspace' });
   });
 
-  it('includes rollback failure details when migration recovery also fails', async () => {
+  it('returns error without closing database when migration fails', async () => {
     migrateWorkspaceMock.mockRejectedValue(new Error('copy failed'));
-    reinitDatabaseMock.mockImplementation((workspacePath: string) => {
-      if (workspacePath === '/tmp/old-workspace') {
-        throw new Error('restore failed');
-      }
-    });
 
     const { registerWorkspaceHandlers } = await import('../src/main/ipc/workspace-handlers.js');
 
@@ -116,10 +112,10 @@ describe('registerWorkspaceHandlers', () => {
 
     await expect(handler?.({}, '/tmp/new-workspace')).resolves.toEqual({
       ok: false,
-      error: 'copy failed; rollback failed: restore failed',
+      error: 'copy failed',
     });
 
-    expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
-    expect(reinitDatabaseMock).toHaveBeenCalledWith('/tmp/old-workspace');
+    expect(closeDatabaseMock).not.toHaveBeenCalled();
+    expect(reinitDatabaseMock).not.toHaveBeenCalled();
   });
 });
