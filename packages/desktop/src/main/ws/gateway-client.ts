@@ -190,6 +190,14 @@ export class GatewayClient {
     }
 
     if (frame.type === 'event') {
+      if (typeof frame.event !== 'string' || !frame.payload || typeof frame.payload !== 'object') {
+        getDebugLogger().error({
+          domain: 'gateway',
+          event: 'gateway.frame.invalid-shape',
+          gatewayId: this.gatewayId,
+        });
+        return;
+      }
       getDebugLogger().debug({
         domain: 'gateway',
         event: 'gateway.event.received',
@@ -200,7 +208,7 @@ export class GatewayClient {
           payload: summarizePayload(frame.payload),
         },
       });
-      this.handleEvent(frame);
+      this.handleEvent(frame as { event: string; payload: Record<string, unknown>; seq?: number });
       return;
     }
 
