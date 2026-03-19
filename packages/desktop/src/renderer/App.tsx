@@ -166,14 +166,24 @@ export default function App() {
       const task = createTask();
       const title = message.slice(0, 30).replace(/\n/g, ' ').trim();
       updateTaskTitle(task.id, title + (message.length > 30 ? '\u2026' : ''));
-      addMessage(task.id, 'user', message);
+      const pendingUserMessage = addMessage(task.id, 'user', message, undefined, { persist: false });
       setProcessing(task.id, true);
       window.clawwork
         .sendMessage(task.gatewayId, task.sessionKey, message)
         .then((result) => {
           if (result && !result.ok) {
             setProcessing(task.id, false);
+            return;
           }
+          window.clawwork
+            .persistMessage({
+              id: pendingUserMessage.id,
+              taskId: pendingUserMessage.taskId,
+              role: pendingUserMessage.role,
+              content: pendingUserMessage.content,
+              timestamp: pendingUserMessage.timestamp,
+            })
+            .catch(() => {});
         })
         .catch(() => {
           setProcessing(task.id, false);

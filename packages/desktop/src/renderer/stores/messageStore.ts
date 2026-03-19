@@ -22,6 +22,7 @@ interface MessageState {
     role: MessageRole,
     content: string,
     imageAttachments?: MessageImageAttachment[],
+    options?: { persist?: boolean },
   ) => Message;
   /** Insert or update a ToolCall on the latest assistant message for a task.
    *  If no assistant message exists yet, one is created to host the tool call. */
@@ -49,7 +50,7 @@ export const useMessageStore = create<MessageState>((set, _get) => ({
   processingTasks: new Set(),
   highlightedMessageId: null,
 
-  addMessage: (taskId, role, content, imageAttachments?) => {
+  addMessage: (taskId, role, content, imageAttachments?, options?) => {
     const msg: Message = {
       id: generateId(),
       taskId,
@@ -66,16 +67,18 @@ export const useMessageStore = create<MessageState>((set, _get) => ({
         [taskId]: [...(s.messagesByTask[taskId] ?? []), msg],
       },
     }));
-    window.clawwork
-      .persistMessage({
-        id: msg.id,
-        taskId: msg.taskId,
-        role: msg.role,
-        content: msg.content,
-        timestamp: msg.timestamp,
-        imageAttachments: msg.imageAttachments as unknown[] | undefined,
-      })
-      .catch(() => {});
+    if (options?.persist !== false) {
+      window.clawwork
+        .persistMessage({
+          id: msg.id,
+          taskId: msg.taskId,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp,
+          imageAttachments: msg.imageAttachments as unknown[] | undefined,
+        })
+        .catch(() => {});
+    }
     return msg;
   },
 
@@ -190,9 +193,22 @@ export const useMessageStore = create<MessageState>((set, _get) => ({
 
   clearMessages: (taskId) =>
     set((s) => {
-      const next = { ...s.messagesByTask };
-      delete next[taskId];
-      return { messagesByTask: next };
+      const nextMessages = { ...s.messagesByTask };
+      const nextStreaming = { ...s.streamingByTask };
+      const nextThinking = { ...s.streamingThinkingByTask };
+      const nextProcessing = new Set(s.processingTasks);
+
+      delete nextMessages[taskId];
+      delete nextStreaming[taskId];
+      delete nextThinking[taskId];
+      nextProcessing.delete(taskId);
+
+      return {
+        messagesByTask: nextMessages,
+        streamingByTask: nextStreaming,
+        streamingThinkingByTask: nextThinking,
+        processingTasks: nextProcessing,
+      };
     }),
 
   setHighlightedMessage: (id) => set({ highlightedMessageId: id }),

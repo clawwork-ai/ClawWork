@@ -512,7 +512,7 @@ export default function ChatInput() {
         ? images.map((img) => ({ fileName: img.file.name, dataUrl: img.previewUrl }))
         : undefined;
 
-      addMessage(task.id, 'user', finalContent, msgImages);
+      const pendingUserMessage = addMessage(task.id, 'user', finalContent, msgImages, { persist: false });
       setProcessing(task.id, true);
 
       if (!task.title) {
@@ -558,6 +558,17 @@ export default function ChatInput() {
         const msg = result.error || t('errors.sendFailed');
         addMessage(task.id, 'system', `${t('errors.sendFailed')}: ${msg}`);
         toast.error('Failed to send message', { description: msg });
+      } else {
+        window.clawwork
+          .persistMessage({
+            id: pendingUserMessage.id,
+            taskId: pendingUserMessage.taskId,
+            role: pendingUserMessage.role,
+            content: pendingUserMessage.content,
+            timestamp: pendingUserMessage.timestamp,
+            imageAttachments: pendingUserMessage.imageAttachments as unknown[] | undefined,
+          })
+          .catch(() => {});
       }
     } catch (err) {
       setProcessing(task.id, false);
