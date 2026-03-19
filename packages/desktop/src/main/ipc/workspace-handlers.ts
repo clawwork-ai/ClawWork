@@ -49,20 +49,14 @@ export function registerWorkspaceHandlers(): void {
     const oldPath = getWorkspacePath();
     if (!oldPath) return { ok: false, error: 'no current workspace' };
     if (oldPath === newWorkspacePath) return { ok: true };
-    closeDatabase();
     try {
       await migrateWorkspace(oldPath, newWorkspacePath);
+      closeDatabase();
       reinitDatabase(newWorkspacePath);
       updateConfig({ workspacePath: newWorkspacePath });
       return { ok: true };
     } catch (err) {
-      let suffix = '';
-      try {
-        reinitDatabase(oldPath);
-      } catch (rollbackErr) {
-        suffix = `; rollback failed: ${rollbackErr instanceof Error ? rollbackErr.message : 'unknown'}`;
-      }
-      return { ok: false, error: `${err instanceof Error ? err.message : 'migration failed'}${suffix}` };
+      return { ok: false, error: err instanceof Error ? err.message : 'migration failed' };
     }
   });
 }

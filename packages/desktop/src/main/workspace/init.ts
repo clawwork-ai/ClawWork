@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { cp } from 'fs/promises';
-import { join, resolve } from 'path';
+import { join, resolve, sep } from 'path';
 import simpleGit from 'simple-git';
 import { DB_FILE_NAME } from '@clawwork/shared';
 
@@ -42,6 +42,11 @@ export async function migrateWorkspace(oldPath: string, newPath: string): Promis
 
 export function ensureTaskDir(workspacePath: string, taskId: string): string {
   const taskDir = join(workspacePath, taskId);
+  const resolved = resolve(taskDir);
+  const base = resolve(workspacePath);
+  if (!resolved.startsWith(base + sep)) {
+    throw new Error('taskId escapes workspace directory');
+  }
   if (!existsSync(taskDir)) {
     mkdirSync(taskDir, { recursive: true });
   }

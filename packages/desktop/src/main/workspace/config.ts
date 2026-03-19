@@ -102,7 +102,7 @@ export function readConfig(): AppConfig | null {
 
 export function writeConfig(config: AppConfig): void {
   const cfgPath = configFilePath();
-  writeFileSync(cfgPath, JSON.stringify(config, null, 2), 'utf-8');
+  writeFileSync(cfgPath, JSON.stringify(config, null, 2), { encoding: 'utf-8', mode: 0o600 });
 }
 
 export function updateConfig(partial: Partial<AppConfig>): AppConfig {
