@@ -37,7 +37,11 @@ export async function migrateWorkspace(oldPath: string, newPath: string): Promis
   if (resolvedNew.startsWith(resolvedOld + '/') || resolvedNew === resolvedOld) {
     throw new Error('New workspace path must not be inside or equal to the current workspace');
   }
-  await cp(resolvedOld, resolvedNew, { recursive: true });
+  await cp(resolvedOld, resolvedNew, {
+    recursive: true,
+    errorOnExist: false,
+    force: true,
+  });
 }
 
 export function ensureTaskDir(workspacePath: string, taskId: string): string {

@@ -52,8 +52,8 @@ export function registerWorkspaceHandlers(): void {
     if (!oldPath) return { ok: false, error: 'no current workspace' };
     if (oldPath === newWorkspacePath) return { ok: true };
     try {
-      await migrateWorkspace(oldPath, newWorkspacePath);
       closeDatabase();
+      await migrateWorkspace(oldPath, newWorkspacePath);
       reinitDatabase(newWorkspacePath);
       updateConfig({ workspacePath: newWorkspacePath });
       return { ok: true };
