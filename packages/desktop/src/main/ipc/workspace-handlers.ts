@@ -5,6 +5,7 @@ import {
   updateConfig,
   isWorkspaceConfigured,
   getDefaultWorkspacePath,
+  ensureDeviceId,
 } from '../workspace/config.js';
 import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
 import { reinitDatabase, closeDatabase } from '../db/index.js';
@@ -38,6 +39,7 @@ export function registerWorkspaceHandlers(): void {
       await initWorkspace(workspacePath);
       reinitDatabase(workspacePath);
       writeConfig({ workspacePath, gateways: [] });
+      ensureDeviceId();
       return { ok: true };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'setup failed';
@@ -58,5 +60,9 @@ export function registerWorkspaceHandlers(): void {
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err.message : 'migration failed' };
     }
+  });
+
+  ipcMain.handle('workspace:get-device-id', () => {
+    return ensureDeviceId();
   });
 }

@@ -43,6 +43,7 @@ export interface AppConfig {
   trayEnabled?: boolean;
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
+  deviceId?: string;
 }
 
 function configFilePath(): string {
@@ -131,6 +132,17 @@ export function buildGatewayAuth(gw: GatewayServerConfig): GatewayAuth {
   const envToken = process.env.OPENCLAW_GATEWAY_TOKEN;
   if (envToken) return { token: envToken };
   return { token: '' };
+}
+
+export function ensureDeviceId(): string {
+  const config = readConfig();
+  if (config?.deviceId) return config.deviceId;
+  const deviceId = randomUUID();
+  if (config) {
+    config.deviceId = deviceId;
+    writeConfig(config);
+  }
+  return deviceId;
 }
 
 export function clearGatewayPairingCode(gatewayId: string): void {

@@ -23,11 +23,16 @@ export default function AboutSection() {
   const { t } = useTranslation();
   const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
 
   useEffect(() => {
     window.clawwork
       .checkForUpdates()
       .then(setUpdateInfo)
+      .catch(() => {});
+    window.clawwork
+      .getDeviceId()
+      .then(setDeviceId)
       .catch(() => {});
   }, []);
 
@@ -51,12 +56,20 @@ export default function AboutSection() {
       <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.about')}</h3>
       <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.aboutDesc')}</p>
       <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-        <div className="px-5 py-4">
+        <div className="px-5 py-4 space-y-3">
           <SettingRow label={t('settings.version')}>
             <span className="text-sm text-[var(--text-primary)] font-mono">
               v{updateInfo?.currentVersion ?? '0.0.3'}
             </span>
           </SettingRow>
+          {deviceId && (
+            <div>
+              <SettingRow label="Device ID">
+                <span className="text-xs text-[var(--text-secondary)] font-mono select-all">{deviceId}</span>
+              </SettingRow>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{t('settings.deviceIdDesc')}</p>
+            </div>
+          )}
         </div>
 
         {updateInfo?.hasUpdate && (

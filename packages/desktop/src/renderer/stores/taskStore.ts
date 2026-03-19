@@ -10,6 +10,8 @@ interface PendingNewTask {
   thinkingLevel?: string;
 }
 
+let cachedDeviceId: string | null = null;
+
 interface TaskState {
   tasks: Task[];
   activeTaskId: string | null;
@@ -90,7 +92,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const now = new Date().toISOString();
     const task: Task = {
       id,
-      sessionKey: buildSessionKey(id, agentId),
+      sessionKey: buildSessionKey(id, agentId, cachedDeviceId ?? undefined),
       sessionId: '',
       title: '',
       status: 'active',
@@ -110,10 +112,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   updateTaskTitle: (id, title) => {
     const now = new Date().toISOString();
+    const task = get().tasks.find((t) => t.id === id);
     set((s) => ({
       tasks: s.tasks.map((t) => (t.id === id ? { ...t, title, updatedAt: now } : t)),
     }));
     window.clawwork.persistTaskUpdate({ id, title, updatedAt: now }).catch(() => {});
+    if (task?.gatewayId && task?.sessionKey) {
+      window.clawwork.patchSession(task.gatewayId, task.sessionKey, { label: title }).catch(() => {});
+    }
   },
 
   updateTaskStatus: (id, status) => {
@@ -157,6 +163,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   hydrate: async () => {
     if (get().hydrated) return;
     try {
+      cachedDeviceId = await window.clawwork.getDeviceId();
       const res = await window.clawwork.loadTasks();
       if (res.ok && res.rows) {
         set({

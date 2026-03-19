@@ -114,6 +114,7 @@
     "systemDesc": "系统行为、快捷键和工作空间",
     "gatewaysDesc": "管理 OpenClaw Gateway 连接",
     "aboutDesc": "版本、更新和链接",
+    "deviceIdDesc": "此安装的唯一标识，会话按 Device ID 隔离。如需跨设备同步会话，请将此 ID 复制到另一台设备的配置文件中。",
     "confirmDeleteTitle": "移除网关",
     "confirmDeleteDesc": "移除「{{name}}」？与该网关的活跃连接将被终止。"
   },

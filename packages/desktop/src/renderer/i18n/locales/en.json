@@ -114,6 +114,7 @@
     "systemDesc": "System behavior, shortcuts, and workspace",
     "gatewaysDesc": "Manage OpenClaw Gateway connections",
     "aboutDesc": "Version, updates, and links",
+    "deviceIdDesc": "Unique to this installation. Sessions are scoped by Device ID. To sync sessions across devices, copy this ID to the config file on the other device.",
     "confirmDeleteTitle": "Remove Gateway",
     "confirmDeleteDesc": "Remove \"{{name}}\"? Active connections to this gateway will be terminated."
   },

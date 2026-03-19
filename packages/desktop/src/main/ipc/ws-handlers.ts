@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
-import { readConfig } from '../workspace/config.js';
+import { readConfig, ensureDeviceId } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
 import type { ChatAttachment } from '@clawwork/shared';
 import { getDebugLogger } from '../debug/index.js';
@@ -217,9 +217,10 @@ export function registerWsHandlers(): void {
     for (const [gatewayId, gw] of clients) {
       if (!gw.isConnected) continue;
       try {
+        const deviceId = ensureDeviceId();
         const raw = (await gw.listSessions()) as unknown as SessionsListPayload;
         const allSessions = raw.sessions ?? [];
-        const ours = allSessions.filter((s) => isClawWorkSession(s.key));
+        const ours = allSessions.filter((s) => isClawWorkSession(s.key, deviceId));
 
         for (const s of ours) {
           const taskId = parseTaskIdFromSessionKey(s.key);
@@ -282,11 +283,14 @@ export function registerWsHandlers(): void {
             })
             .filter((m) => m.content || m.toolCalls.length > 0);
 
+          const firstUserMsg = msgs.find((m) => m.role === 'user' && m.content);
+          const titleFromMsg = firstUserMsg ? firstUserMsg.content.slice(0, 30) : '';
+
           discovered.push({
             gatewayId,
             taskId,
             sessionKey: s.key,
-            title: s.derivedTitle ?? s.label ?? s.displayName ?? '',
+            title: s.derivedTitle ?? s.label ?? titleFromMsg,
             updatedAt: s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString(),
             agentId: parseAgentIdFromSessionKey(s.key),
             model: s.model,

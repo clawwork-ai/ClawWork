@@ -345,6 +345,8 @@ export interface ClawWorkAPI {
 
   setWindowButtonVisibility: (visible: boolean) => void;
 
+  getDeviceId: () => Promise<string>;
+
   selectContextFolder: () => Promise<IpcResult>;
   listContextFiles: (folders: string[], query?: string) => Promise<IpcResult>;
   readContextFile: (absolutePath: string, folders: string[]) => Promise<IpcResult>;
