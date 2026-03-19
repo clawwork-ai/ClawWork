@@ -183,6 +183,139 @@ describe('session sync startup flow', () => {
     ]);
   });
 
+  it('deduplicates messages with different timestamps but same role+content', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {},
+      streamingByTask: {},
+      streamingThinkingByTask: {},
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    const taskRow = {
+      id: 'task-dup',
+      sessionKey: 'agent:main:clawwork:task:task-dup',
+      sessionId: 'session-dup',
+      title: 'Dup test',
+      status: 'active',
+      model: null,
+      modelProvider: null,
+      thinkingLevel: null,
+      inputTokens: null,
+      outputTokens: null,
+      contextTokens: null,
+      createdAt: '2026-03-16T00:00:00.000Z',
+      updatedAt: '2026-03-16T00:00:00.000Z',
+      tags: [],
+      artifactDir: 'tasks/task-dup',
+      gatewayId: 'gw-1',
+    };
+    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    window.clawwork.loadMessages.mockResolvedValue({
+      ok: true,
+      rows: [
+        { id: 'u1', taskId: 'task-dup', role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.123Z' },
+        {
+          id: 'a1',
+          taskId: 'task-dup',
+          role: 'assistant',
+          content: 'Hi there!',
+          timestamp: '2026-03-16T10:00:01.234Z',
+        },
+      ],
+    });
+    window.clawwork.syncSessions.mockResolvedValue({
+      ok: true,
+      discovered: [
+        {
+          gatewayId: 'gw-1',
+          taskId: 'task-dup',
+          sessionKey: 'agent:main:clawwork:task:task-dup',
+          title: 'Dup test',
+          updatedAt: '2026-03-16T10:00:02.000Z',
+          agentId: 'main',
+          messages: [
+            { role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.456Z' },
+            { role: 'assistant', content: 'Hi there!', timestamp: '2026-03-16T10:00:01.789Z' },
+          ],
+        },
+      ],
+    });
+
+    await sessionSync.syncFromGateway();
+
+    const msgs = messageStore.useMessageStore.getState().messagesByTask['task-dup'];
+    expect(msgs).toHaveLength(2);
+    expect(msgs[0].content).toBe('Hello');
+    expect(msgs[1].content).toBe('Hi there!');
+    expect(window.clawwork.persistMessage).not.toHaveBeenCalled();
+  });
+
+  it('allows genuine duplicate content messages (user sends same text twice)', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {},
+      streamingByTask: {},
+      streamingThinkingByTask: {},
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    const taskRow = {
+      id: 'task-legit',
+      sessionKey: 'agent:main:clawwork:task:task-legit',
+      sessionId: 'session-legit',
+      title: 'Legit dup',
+      status: 'active',
+      model: null,
+      modelProvider: null,
+      thinkingLevel: null,
+      inputTokens: null,
+      outputTokens: null,
+      contextTokens: null,
+      createdAt: '2026-03-16T00:00:00.000Z',
+      updatedAt: '2026-03-16T00:00:00.000Z',
+      tags: [],
+      artifactDir: 'tasks/task-legit',
+      gatewayId: 'gw-1',
+    };
+    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    window.clawwork.loadMessages.mockResolvedValue({
+      ok: true,
+      rows: [{ id: 'u1', taskId: 'task-legit', role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.000Z' }],
+    });
+    window.clawwork.syncSessions.mockResolvedValue({
+      ok: true,
+      discovered: [
+        {
+          gatewayId: 'gw-1',
+          taskId: 'task-legit',
+          sessionKey: 'agent:main:clawwork:task:task-legit',
+          title: 'Legit dup',
+          updatedAt: '2026-03-16T10:00:03.000Z',
+          agentId: 'main',
+          messages: [
+            { role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.500Z' },
+            { role: 'assistant', content: 'Hi!', timestamp: '2026-03-16T10:00:01.000Z' },
+            { role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:02.000Z' },
+            { role: 'assistant', content: 'Hi again!', timestamp: '2026-03-16T10:00:03.000Z' },
+          ],
+        },
+      ],
+    });
+
+    await sessionSync.syncFromGateway();
+
+    const msgs = messageStore.useMessageStore.getState().messagesByTask['task-legit'];
+    expect(msgs).toHaveLength(4);
+    expect(msgs.map((m: { content: string }) => m.content)).toEqual(['Hello', 'Hi!', 'Hello', 'Hi again!']);
+  });
+
   it('reuses resolved hydration state across later gateway sync calls', async () => {
     const { sessionSync, taskStore, messageStore } = await loadModules();
 

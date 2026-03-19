@@ -82,7 +82,6 @@ export function useGatewayEventDispatcher(): void {
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTaskIdRef = useRef(activeTaskId);
   activeTaskIdRef.current = activeTaskId;
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const removeDebug = window.clawwork.onDebugEvent((event) => {
@@ -163,10 +162,6 @@ export function useGatewayEventDispatcher(): void {
         store.finalizeStream(taskId);
         debugEvent('renderer.chat.finalized', { taskId, sessionKey });
         autoTitleIfNeeded(taskId);
-        clearTimeout(syncTimerRef.current ?? undefined);
-        syncTimerRef.current = setTimeout(() => {
-          syncFromGateway().catch(() => {});
-        }, 500);
       } else if (state === 'error' || state === 'aborted') {
         store.setProcessing(taskId, false);
         store.finalizeStream(taskId);
@@ -246,7 +241,6 @@ export function useGatewayEventDispatcher(): void {
     return () => {
       removeGatewayEvent();
       removeDebug();
-      clearTimeout(syncTimerRef.current ?? undefined);
     };
   }, []);
 

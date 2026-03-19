@@ -70,12 +70,19 @@ export async function syncFromGateway(): Promise<void> {
       });
       if (d.messages.length === 0) continue;
       const local = messagesByTask[d.taskId] ?? [];
-      const existingKeys = new Set(local.map((msg) => `${msg.role}:${msg.timestamp}:${msg.content}`));
+      const existingCounts = new Map<string, number>();
+      for (const msg of local) {
+        const key = `${msg.role}:${msg.content}`;
+        existingCounts.set(key, (existingCounts.get(key) ?? 0) + 1);
+      }
+      const remoteCounts = new Map<string, number>();
       const newMsgs: Message[] = d.messages
-        .filter(
-          (msg: { role: string; content: string; timestamp: string }) =>
-            !existingKeys.has(`${msg.role}:${msg.timestamp}:${msg.content}`),
-        )
+        .filter((msg: { role: string; content: string; timestamp: string }) => {
+          const key = `${msg.role}:${msg.content}`;
+          const seen = remoteCounts.get(key) ?? 0;
+          remoteCounts.set(key, seen + 1);
+          return seen + 1 > (existingCounts.get(key) ?? 0);
+        })
         .map(
           (m: {
             role: string;
