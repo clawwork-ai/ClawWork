@@ -79,10 +79,8 @@ export default function RightPanel() {
         return [a, ...prev];
       });
     };
-    window.clawwork.onArtifactSaved(handleArtifactSaved);
-    return () => {
-      window.clawwork.removeAllListeners('artifact:saved');
-    };
+    const cleanup = window.clawwork.onArtifactSaved(handleArtifactSaved);
+    return cleanup;
   }, [activeTaskId]);
 
   return (

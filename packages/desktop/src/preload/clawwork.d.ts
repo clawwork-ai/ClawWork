@@ -213,7 +213,6 @@ export interface ClawWorkAPI {
     feature?: string;
     data?: Record<string, unknown>;
   }) => void;
-  removeAllListeners: (channel: string) => void;
 
   // Data persistence
   loadTasks: () => Promise<ListResult<PersistedTask>>;
@@ -230,7 +229,7 @@ export interface ClawWorkAPI {
   listArtifacts: (taskId?: string) => Promise<IpcResult>;
   getArtifact: (id: string) => Promise<IpcResult>;
   readArtifactFile: (localPath: string) => Promise<IpcResult>;
-  onArtifactSaved: (callback: (artifact: unknown) => void) => void;
+  onArtifactSaved: (callback: (artifact: unknown) => void) => () => void;
   saveCodeBlock: (params: {
     taskId: string;
     messageId: string;

@@ -77,7 +77,13 @@ function buildApi(): ClawWorkAPI {
     getArtifact: (id: string) => ipcRenderer.invoke('artifact:get', { id }),
     readArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:read-file', { localPath }),
     onArtifactSaved: (callback: (artifact: unknown) => void) => {
-      ipcRenderer.on('artifact:saved', (_event, artifact) => callback(artifact));
+      const listener = (_event: Electron.IpcRendererEvent, artifact: unknown): void => {
+        callback(artifact);
+      };
+      ipcRenderer.on('artifact:saved', listener);
+      return () => {
+        ipcRenderer.removeListener('artifact:saved', listener);
+      };
     },
     saveCodeBlock: (params) => ipcRenderer.invoke('artifact:save-content', params),
     saveImageFromUrl: (params) => ipcRenderer.invoke('artifact:save-image-url', params),
@@ -170,10 +176,6 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:session-delete', { gatewayId, sessionKey }),
     compactSession: (gatewayId: string, sessionKey: string, maxLines?: number) =>
       ipcRenderer.invoke('ws:session-compact', { gatewayId, sessionKey, maxLines }),
-
-    removeAllListeners: (channel: string) => {
-      ipcRenderer.removeAllListeners(channel);
-    },
 
     updateTrayStatus: (status, tasks) => ipcRenderer.send('tray:update-status', { status, tasks: tasks ?? [] }),
     getTrayEnabled: () => ipcRenderer.invoke('tray:get-enabled') as Promise<boolean>,
