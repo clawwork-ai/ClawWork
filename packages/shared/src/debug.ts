@@ -1,6 +1,6 @@
 const REDACTED = '***redacted***';
 const TRUNCATE_AT = 500;
-const SECRET_KEY_RE = /(token|password|secret|authorization|cookie)/i;
+const SECRET_KEY_RE = /(token|password|secret|authorization|cookie|pairingcode|bootstraptoken)/i;
 
 export type DebugLevel = 'debug' | 'info' | 'warn' | 'error';
 export type DebugDomain =
