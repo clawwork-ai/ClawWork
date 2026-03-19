@@ -1,5 +1,5 @@
 import { copyFileSync, statSync, writeFileSync } from 'fs';
-import { basename, extname, join } from 'path';
+import { basename, extname, resolve, sep } from 'path';
 import { randomUUID } from 'crypto';
 import type { Artifact } from '@clawwork/shared';
 import { getDb } from '../db/index.js';
@@ -30,9 +30,29 @@ function detectMimeType(fileName: string): string {
   return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
+function sanitizeArtifactName(name: string): string {
+  if (!name || name === '.' || name === '..') throw new Error('invalid artifact name');
+  if (name.includes('/') || name.includes('\\')) throw new Error('invalid artifact name');
+  if (name.includes('..')) throw new Error('invalid artifact name');
+  return basename(name);
+}
+
+function resolveArtifactDestination(taskDir: string, fileName: string): { destPath: string; finalName: string } {
+  const finalName = uniqueFileName(taskDir, fileName);
+  const resolvedTaskDir = resolve(taskDir);
+  const destPath = resolve(taskDir, finalName);
+
+  if (!destPath.startsWith(`${resolvedTaskDir}${sep}`)) {
+    throw new Error('artifact path escapes task dir');
+  }
+
+  return { destPath, finalName };
+}
+
 function uniqueFileName(_dir: string, name: string): string {
-  const ext = extname(name);
-  const base = name.slice(0, name.length - ext.length);
+  const safeName = sanitizeArtifactName(name);
+  const ext = extname(safeName);
+  const base = safeName.slice(0, safeName.length - ext.length);
   return `${base}-${randomUUID().slice(0, 8)}${ext}`;
 }
 
@@ -50,8 +70,7 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
 
   const taskDir = ensureTaskDir(workspacePath, taskId);
   const originalName = fileName ?? basename(sourcePath);
-  const finalName = uniqueFileName(taskDir, originalName);
-  const destPath = join(taskDir, finalName);
+  const { finalName, destPath } = resolveArtifactDestination(taskDir, originalName);
 
   copyFileSync(sourcePath, destPath);
 
@@ -109,8 +128,7 @@ export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParam
   const { workspacePath, taskId, messageId, fileName, buffer, artifactType, contentText } = params;
 
   const taskDir = ensureTaskDir(workspacePath, taskId);
-  const finalName = uniqueFileName(taskDir, fileName);
-  const destPath = join(taskDir, finalName);
+  const { finalName, destPath } = resolveArtifactDestination(taskDir, fileName);
 
   writeFileSync(destPath, buffer);
 

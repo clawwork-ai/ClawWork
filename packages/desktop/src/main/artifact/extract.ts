@@ -37,6 +37,13 @@ export interface ExtractedCodeBlock {
   lineCount: number;
 }
 
+function sanitizeExtractedFileName(raw: string): string {
+  if (!raw || raw === '.' || raw === '..') throw new Error('invalid code block filename');
+  if (raw.includes('/') || raw.includes('\\')) throw new Error('invalid code block filename');
+  if (raw.includes('..')) throw new Error('invalid code block filename');
+  return raw;
+}
+
 export function extractImagesFromMarkdown(content: string): ExtractedImage[] {
   return [...content.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)].map(([, alt, src]) => ({
     src,
@@ -52,7 +59,7 @@ export function extractCodeBlocksFromMarkdown(content: string): ExtractedCodeBlo
       const hasDot = lang.includes('.');
       if (lineCount <= 10 && !hasDot) return null;
       const fileName = hasDot
-        ? lang
+        ? sanitizeExtractedFileName(lang)
         : `snippet-${createHash('sha1').update(body).digest('hex').slice(0, 6)}.${LANG_EXT[lang.toLowerCase()] ?? 'txt'}`;
       return { language: lang, content: body, fileName, lineCount };
     })
