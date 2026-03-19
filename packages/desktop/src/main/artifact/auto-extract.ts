@@ -16,11 +16,41 @@ interface AutoExtractParams {
   content: string;
 }
 
+const MAX_REMOTE_SIZE = 10 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 10_000;
+
+function isPrivateHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+}
+
 async function fetchToBuffer(url: string): Promise<Buffer> {
-  const res = await net.fetch(url);
-  if (!res.ok) throw new Error(`fetch ${url} failed: ${res.status}`);
-  const ab = await res.arrayBuffer();
-  return Buffer.from(ab);
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:') {
+    throw new Error('remote fetch disabled for non-https scheme');
+  }
+  if (isPrivateHost(parsed.hostname)) {
+    throw new Error('remote fetch disabled for private hosts');
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await net.fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`fetch ${url} failed: ${res.status}`);
+
+    const contentLength = Number(res.headers.get('content-length') ?? '0');
+    if (contentLength > MAX_REMOTE_SIZE) {
+      throw new Error('remote artifact too large');
+    }
+
+    const ab = await res.arrayBuffer();
+    if (ab.byteLength > MAX_REMOTE_SIZE) {
+      throw new Error('remote artifact too large');
+    }
+    return Buffer.from(ab);
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function autoExtractArtifacts(params: AutoExtractParams): Promise<void> {
