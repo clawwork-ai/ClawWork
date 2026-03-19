@@ -145,6 +145,68 @@ See memory files for detailed phase history and technical pitfalls discovered du
 - State management uses Zustand, one store per domain (`taskStore`, `messageStore`, `uiStore`)
 - WebSocket message types are defined in `@clawwork/shared`; desktop imports from there
 
+## Debugging
+
+When investigating message duplication, rendering glitches, or state sync issues, use these tools **before** asking the user for more info.
+
+### SQLite Database
+
+The workspace DB is at `<workspace>/clawwork.db`. Query it directly:
+
+```bash
+sqlite3 clawwork.db "SELECT id, task_id, role, substr(content,1,50), timestamp FROM messages WHERE task_id='<id>' ORDER BY timestamp"
+```
+
+Check for duplicate rows (same role+content, different timestamps — a known past bug pattern):
+
+```bash
+sqlite3 clawwork.db "SELECT task_id, role, substr(content,1,50), COUNT(*) as cnt FROM messages GROUP BY task_id, role, content HAVING cnt > 1"
+```
+
+### Renderer Debug Events
+
+`useGatewayDispatcher.ts` emits structured events via `debugEvent()`. Open DevTools Console and filter by `[debug]` to see the message lifecycle:
+
+- `renderer.gateway.event.received` — raw Gateway event arrived
+- `renderer.chat.delta.applied` — streaming delta appended
+- `renderer.chat.final.received` — final event received
+- `renderer.chat.finalized` — stream finalized into message
+- `renderer.event.dropped.*` — event dropped (missing session, unknown task, etc.)
+- `renderer.toolcall.upserted` — tool call added/updated
+
+### Main Process Debug Events
+
+`window.clawwork.reportDebugEvent` forwards renderer events to the main process. These are captured in debug bundle exports (`fix(debug)` PR #125). Use the debug export feature to collect a full event trace.
+
+### Zustand State Inspection
+
+In DevTools Console, directly inspect store state:
+
+```js
+// Current messages for a task
+window.__ZUSTAND_STORES__?.messageStore?.getState()?.messagesByTask['<taskId>'];
+
+// Or via the module (if source maps available)
+// Check streamingByTask for in-progress streams
+```
+
+### When to Use Each Tool
+
+| Symptom                        | First check                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| Duplicate messages in UI       | SQLite duplicate query → check if DB has dupes or just Zustand store          |
+| Messages missing after restart | SQLite row count → check if persist failed                                    |
+| Streaming stuck / no final     | DevTools `[debug]` filter → look for `final.received` without `finalized`     |
+| Messages from wrong task       | DevTools `[debug]` filter → check `sessionKey` → `taskId` mapping             |
+| State sync issues (reconnect)  | DevTools `[debug]` filter → look for `syncFromGateway` calls and their timing |
+
+### Past Bug Patterns
+
+| Pattern                               | Root Cause                                                                                                          | Fix Reference                                                                     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Every message doubled after bot reply | `syncFromGateway` triggered 500ms after each `state==='final'`; client vs server timestamp mismatch broke dedup key | Removed post-final sync trigger; changed dedup to content-counting (no timestamp) |
+| Startup hydration duplicates          | Race between `hydrateFromLocal` and `syncFromGateway`                                                               | Serialized via `hydrationPromise` + DB unique index (#126)                        |
+
 ## Design Documents
 
 - Full design doc: `docs/openclaw-desktop-design.md` (v0.2)

@@ -76,29 +76,6 @@ export const radius = {
   full: '9999px',
 } as const;
 
-export const typography = {
-  fontFamily: {
-    sans: "'Inter Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
-    mono: "'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace",
-  },
-  fontSize: {
-    xs: ['12px', { lineHeight: '16px' }],
-    sm: ['13px', { lineHeight: '18px' }],
-    base: ['14px', { lineHeight: '20px' }],
-    md: ['15px', { lineHeight: '22px' }],
-    lg: ['17px', { lineHeight: '24px' }],
-    xl: ['19px', { lineHeight: '28px' }],
-    '2xl': ['22px', { lineHeight: '30px' }],
-    '3xl': ['26px', { lineHeight: '34px' }],
-  },
-  fontWeight: {
-    normal: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
-  },
-} as const;
-
 export const shadows = {
   sm: '0 1px 2px rgba(0, 0, 0, 0.3)',
   md: '0 2px 8px rgba(0, 0, 0, 0.4)',

@@ -49,15 +49,15 @@ export default function FileCard({ artifact, taskTitle, selected, onClick }: Fil
             <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatFileSize(artifact.size)}</p>
           </div>
           {ext && (
-            <span className="flex-shrink-0 text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+            <span className="flex-shrink-0 text-[11px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
               {ext}
             </span>
           )}
         </div>
       </div>
       <div className="px-3 pb-2.5 flex items-center gap-1.5">
-        <span className="text-[10px] text-[var(--text-muted)] truncate flex-1">{taskTitle}</span>
-        <span className="text-[10px] text-[var(--text-muted)] flex-shrink-0">
+        <span className="text-[11px] text-[var(--text-muted)] truncate flex-1">{taskTitle}</span>
+        <span className="text-[11px] text-[var(--text-muted)] flex-shrink-0">
           {formatRelativeTime(new Date(artifact.createdAt))}
         </span>
       </div>

@@ -71,7 +71,7 @@ export default function SlashCommandMenu({
                   }}
                 >
                   {/* Command name */}
-                  <span className="font-mono text-[13px] font-medium text-[var(--accent)] shrink-0">/{cmd.name}</span>
+                  <span className="font-mono text-sm font-medium text-[var(--accent)] shrink-0">/{cmd.name}</span>
                   {/* Description */}
                   <span className="text-xs truncate">{cmd.description}</span>
                   {/* Arg hint */}
@@ -81,7 +81,7 @@ export default function SlashCommandMenu({
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-[10px] text-[var(--fg-muted)]">
+            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-[11px] text-[var(--fg-muted)]">
               <span>
                 <kbd className="font-mono">↑↓</kbd> navigate
               </span>

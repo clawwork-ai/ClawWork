@@ -1,6 +1,6 @@
 # ClawWork Design System
 
-> Version 1.1 — Phase 3.5 + Premium Depth Pass
+> Version 1.2 — Phase 3.5 + Premium Depth Pass + Typography Rework
 > Brand identity: `#0FFD0D` (accent green), dark-first developer tool aesthetic.
 
 ## Color System
@@ -44,13 +44,31 @@ Used for backgrounds, text, borders. Dark mode uses 800-950 for backgrounds, lig
 
 ## Typography
 
-| Property  | Value                                               |
-| --------- | --------------------------------------------------- |
-| Sans font | Inter Variable                                      |
-| Mono font | JetBrains Mono Variable                             |
-| Base size | 14px (bumped from 13px in Premium Depth Pass)       |
-| Scale     | xs:11 sm:12 base:13 md:14 lg:16 xl:18 2xl:20 3xl:24 |
-| Weight    | normal:400 medium:500 semibold:600 bold:700         |
+| Property       | Value                                                     |
+| -------------- | --------------------------------------------------------- |
+| Sans font      | Inter Variable                                            |
+| Mono font      | JetBrains Mono Variable                                   |
+| Base size      | 16px (browser standard)                                   |
+| Default weight | 420 (slightly heavier than normal for retina readability) |
+| Scale          | xs:13 sm:14 base:16 md:17 lg:18 xl:20 2xl:24 3xl:28       |
+| Weight         | normal:400 medium:500 semibold:600 bold:700               |
+
+### Typography Implementation
+
+Font sizes are defined as absolute px values via `@theme` in `theme.css`. The root font-size is 16px (browser standard). All `text-xs`, `text-sm`, `text-base` etc. Tailwind classes use the `@theme` px values, not rem.
+
+Users can adjust the overall zoom level via `Cmd+` / `Cmd-` (macOS) or `Ctrl+` / `Ctrl-` (Windows/Linux). Zoom level is persisted to config.
+
+### Icon Size Scale
+
+| Token | Size | Usage                                |
+| ----- | ---- | ------------------------------------ |
+| `xs`  | 12px | Inline badges, close buttons         |
+| `sm`  | 14px | Compact toolbar, secondary actions   |
+| `md`  | 16px | Standard UI elements                 |
+| `lg`  | 18px | Primary action buttons, input icons  |
+| `xl`  | 20px | Large UI elements, loading spinners  |
+| `2xl` | 24px | Hero elements, feature illustrations |
 
 ## Spacing
 

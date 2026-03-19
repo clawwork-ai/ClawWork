@@ -19,7 +19,7 @@ import { registerQuickLaunchHandlers } from './ipc/quick-launch-handlers.js';
 import { registerContextHandlers } from './ipc/context-handlers.js';
 import { initTray, destroyTray, updateTrayWindow } from './tray.js';
 import { initQuickLaunch, destroyQuickLaunch, updateQuickLaunchMainWindow } from './quick-launch.js';
-import { getWorkspacePath, readConfig } from './workspace/config.js';
+import { getWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
 import { initDatabase, closeDatabase } from './db/index.js';
 
 let isQuitting = false;
@@ -58,11 +58,32 @@ function setupDevScreenshot(win: BrowserWindow): void {
   ipcMain.handle('dev:screenshot', () => captureScreenshot(win));
 }
 
+function buildAppMenu(): Menu {
+  const isMac = process.platform === 'darwin';
+  const template: Electron.MenuItemConstructorOptions[] = [
+    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    { role: 'editMenu' as const },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'reload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+      ],
+    },
+    ...(isMac ? [{ role: 'windowMenu' as const }] : []),
+  ];
+  return Menu.buildFromTemplate(template);
+}
+
 function createWindow(): BrowserWindow {
   getDebugLogger().info({ domain: 'app', event: 'app.window.create' });
-  if (process.platform !== 'darwin') {
-    Menu.setApplicationMenu(null);
-  }
+  Menu.setApplicationMenu(buildAppMenu());
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -91,7 +112,29 @@ function createWindow(): BrowserWindow {
   });
 
   mainWindow.on('ready-to-show', () => {
+    const savedZoom = readConfig()?.zoomLevel;
+    if (savedZoom) {
+      mainWindow.webContents.setZoomLevel(savedZoom);
+    }
     mainWindow.show();
+  });
+
+  mainWindow.webContents.on('before-input-event', (_event, input) => {
+    if (!(input.meta || input.control) || input.type !== 'keyDown') return;
+    if (input.key === '-' || input.key === '_') {
+      const level = mainWindow.webContents.getZoomLevel() - 0.5;
+      mainWindow.webContents.setZoomLevel(level);
+      updateConfig({ zoomLevel: level });
+    }
+  });
+
+  mainWindow.on('blur', () => {
+    if (mainWindow.isDestroyed()) return;
+    const level = mainWindow.webContents.getZoomLevel();
+    const saved = readConfig()?.zoomLevel ?? 0;
+    if (level !== saved) {
+      updateConfig({ zoomLevel: level });
+    }
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

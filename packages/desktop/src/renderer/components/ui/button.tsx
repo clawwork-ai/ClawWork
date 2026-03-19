@@ -9,7 +9,7 @@ const buttonVariants = cva(
     'transition-all duration-150 ease-out',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
     'disabled:pointer-events-none disabled:opacity-50',
-    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+    '[&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0',
   ].join(' '),
   {
     variants: {

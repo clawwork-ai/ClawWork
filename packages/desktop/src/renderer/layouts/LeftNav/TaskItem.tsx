@@ -106,7 +106,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
         </div>
         <div className="flex items-center gap-x-1.5 gap-y-1 mt-1 flex-wrap">
           {task.status === 'completed' && (
-            <span className="text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+            <span className="text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
               {t('common.completed')}
             </span>
           )}
@@ -114,10 +114,10 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
             <Tooltip>
               <TooltipTrigger asChild>
                 <span
-                  className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate"
+                  className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate"
                   style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
                 >
-                  <Server size={9} className="flex-shrink-0 opacity-60" />
+                  <Server size={10} className="flex-shrink-0 opacity-60" />
                   {gwInfo.name}
                 </span>
               </TooltipTrigger>
@@ -127,11 +127,11 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
           {agentInfo && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
                   {agentInfo.identity?.emoji ? (
                     <span className="text-xs leading-none">{agentInfo.identity.emoji}</span>
                   ) : (
-                    <Bot size={9} className="flex-shrink-0 opacity-60" />
+                    <Bot size={10} className="flex-shrink-0 opacity-60" />
                   )}
                   {agentInfo.name ?? agentInfo.id}
                 </span>
@@ -142,15 +142,15 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
           {modelLabel && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-[11px] leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
-                  <Cpu size={9} className="flex-shrink-0 opacity-60" />
+                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                  <Cpu size={10} className="flex-shrink-0 opacity-60" />
                   {modelLabel}
                 </span>
               </TooltipTrigger>
               <TooltipContent>{modelTooltip}</TooltipContent>
             </Tooltip>
           )}
-          <span className="text-[11px] leading-tight text-[var(--text-muted)]">
+          <span className="text-xs leading-tight text-[var(--text-muted)]">
             {formatRelativeTime(new Date(task.updatedAt))}
           </span>
         </div>

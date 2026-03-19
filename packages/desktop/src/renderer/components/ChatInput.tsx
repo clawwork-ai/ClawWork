@@ -894,9 +894,9 @@ export default function ChatInput() {
                       'text-[var(--text-muted)] hover:text-[var(--danger)]',
                     )}
                   >
-                    <X size={10} />
+                    <X size={12} />
                   </button>
-                  <span className="absolute bottom-0 left-0 right-0 text-[9px] text-center text-[var(--text-muted)] bg-black/50 rounded-b-lg truncate px-1">
+                  <span className="absolute bottom-0 left-0 right-0 text-[11px] text-center text-[var(--text-muted)] bg-black/50 rounded-b-lg truncate px-1">
                     {img.file.name}
                   </span>
                 </motion.div>
@@ -913,19 +913,19 @@ export default function ChatInput() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                   )}
                 >
-                  <Cpu size={12} className="flex-shrink-0" />
+                  <Cpu size={16} className="flex-shrink-0" />
                   <span className="max-w-[100px] truncate">{modelLabel}</span>
                   {currentModelEntry?.reasoning && (
-                    <span className="px-1 py-px rounded text-[9px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
+                    <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
                       R
                     </span>
                   )}
-                  <ChevronDown size={10} className="opacity-50" />
+                  <ChevronDown size={14} className="opacity-50" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
@@ -943,7 +943,7 @@ export default function ChatInput() {
                         >
                           <span className="truncate">{m.name ?? m.id}</span>
                           {m.reasoning && (
-                            <span className="px-1 py-px rounded text-[9px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
+                            <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
                               R
                             </span>
                           )}
@@ -967,15 +967,15 @@ export default function ChatInput() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                     currentThinking !== 'off' && 'text-[var(--accent)]',
                   )}
                 >
-                  <Brain size={12} className="flex-shrink-0" />
+                  <Brain size={16} className="flex-shrink-0" />
                   <span>{t(THINKING_LABEL_KEYS[currentThinking])}</span>
-                  <ChevronDown size={10} className="opacity-50" />
+                  <ChevronDown size={14} className="opacity-50" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
@@ -997,13 +997,13 @@ export default function ChatInput() {
               <TooltipTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                   )}
                   onClick={() => setDashboardOpen(true)}
                 >
-                  <TerminalSquare size={12} />
+                  <TerminalSquare size={16} />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top">{t('slashDashboard.tooltip')}</TooltipContent>
@@ -1022,13 +1022,13 @@ export default function ChatInput() {
                   <TooltipTrigger asChild>
                     <button
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                        'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
                         'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                         'hover:bg-[var(--bg-hover)] transition-colors',
                       )}
                       onClick={handleCompact}
                     >
-                      <Minimize2 size={12} />
+                      <Minimize2 size={16} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top">{t('contextMenu.compactSession')}</TooltipContent>
@@ -1037,13 +1037,13 @@ export default function ChatInput() {
                   <TooltipTrigger asChild>
                     <button
                       className={cn(
-                        'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+                        'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
                         'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                         'hover:bg-[var(--bg-hover)] transition-colors',
                       )}
                       onClick={handleReset}
                     >
-                      <RotateCcw size={12} />
+                      <RotateCcw size={16} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top">{t('contextMenu.resetSession')}</TooltipContent>
@@ -1124,7 +1124,7 @@ export default function ChatInput() {
                 disabled={disabled}
                 className="rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <Paperclip size={16} />
+                <Paperclip size={18} />
               </Button>
             </motion.div>
 
@@ -1139,13 +1139,13 @@ export default function ChatInput() {
                         'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       )}
                     >
-                      <File size={12} className="flex-shrink-0" />
+                      <File size={14} className="flex-shrink-0" />
                       {f.fileName}
                       <button
                         onClick={() => removeSelectedFile(f.absolutePath)}
                         className="ml-0.5 opacity-50 hover:opacity-100"
                       >
-                        <X size={10} />
+                        <X size={12} />
                       </button>
                     </span>
                   ))}
@@ -1217,13 +1217,13 @@ export default function ChatInput() {
                         !isVoiceListening && 'text-[var(--text-muted)] hover:text-[var(--text-primary)]',
                       )}
                     >
-                      <Mic size={16} />
+                      <Mic size={18} />
                     </Button>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>{voiceTooltip}</TooltipContent>
               </Tooltip>
-              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
+              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
                 {t('voiceInput.beta')}
               </span>
             </div>
@@ -1245,7 +1245,7 @@ export default function ChatInput() {
                         disabled={aborting}
                         className="rounded-xl"
                       >
-                        <Square size={14} fill="currentColor" />
+                        <Square size={16} fill="currentColor" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>{t('chatInput.stopGenerating')}</TooltipContent>
@@ -1262,7 +1262,7 @@ export default function ChatInput() {
                   whileTap={reduced ? undefined : motionPresets.scale.whileTap}
                 >
                   <Button variant="soft" size="icon" onClick={handleSend} disabled={disabled} className="rounded-xl">
-                    <Send size={16} />
+                    <Send size={18} />
                   </Button>
                 </motion.div>
               )}
@@ -1282,7 +1282,7 @@ export default function ChatInput() {
                   'hover:bg-[var(--bg-hover)] transition-colors',
                 )}
               >
-                <FolderPlus size={12} />
+                <FolderPlus size={16} />
               </button>
             </TooltipTrigger>
             <TooltipContent side="top">Add context folder for @ file references</TooltipContent>
@@ -1291,7 +1291,7 @@ export default function ChatInput() {
             <span
               key={folder}
               className={cn(
-                'inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md flex-shrink-0 max-w-[140px]',
+                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-[160px]',
                 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
               )}
             >
@@ -1300,11 +1300,11 @@ export default function ChatInput() {
                 onClick={() => handleRemoveContextFolder(folder)}
                 className="opacity-50 hover:opacity-100 flex-shrink-0"
               >
-                <X size={9} />
+                <X size={12} />
               </button>
             </span>
           ))}
-          <p className="flex-1 text-xs text-[var(--text-muted)] text-right tracking-wide">
+          <p className="flex-1 text-sm text-[var(--text-muted)] text-right tracking-wide">
             {isOffline
               ? t('chatInput.offlineHint')
               : sendShortcut === 'cmdEnter'

@@ -7,6 +7,25 @@
    See docs/design-system.md for full specification.
    ============================================================ */
 
+@theme {
+  --font-size-xs: 13px;
+  --font-size-xs--line-height: 18px;
+  --font-size-sm: 14px;
+  --font-size-sm--line-height: 20px;
+  --font-size-base: 16px;
+  --font-size-base--line-height: 24px;
+  --font-size-lg: 18px;
+  --font-size-lg--line-height: 26px;
+  --font-size-xl: 20px;
+  --font-size-xl--line-height: 28px;
+  --font-size-2xl: 24px;
+  --font-size-2xl--line-height: 32px;
+  --font-size-3xl: 28px;
+  --font-size-3xl--line-height: 36px;
+  --font-size-4xl: 36px;
+  --font-size-4xl--line-height: 40px;
+}
+
 @layer base {
   :root,
   :root[data-theme='dark'] {
@@ -88,7 +107,8 @@
       BlinkMacSystemFont,
       system-ui,
       sans-serif;
-    font-size: 14px;
+    font-size: 16px;
+    font-weight: 420;
     line-height: 1.5;
     letter-spacing: -0.011em;
     background-color: var(--bg-primary);

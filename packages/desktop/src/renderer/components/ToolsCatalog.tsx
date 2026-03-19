@@ -26,12 +26,12 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            'inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs',
+            'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
             'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
             'hover:bg-[var(--bg-hover)] transition-colors',
           )}
         >
-          <Wrench size={12} className="flex-shrink-0" />
+          <Wrench size={14} className="flex-shrink-0" />
           <span>{t('rightPanel.toolCount', { count: totalTools })}</span>
         </button>
       </DropdownMenuTrigger>
@@ -41,12 +41,12 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
             {gi > 0 && <DropdownMenuSeparator />}
             <div className="flex items-center gap-1.5 px-2 py-1.5">
               {group.source === 'plugin' ? (
-                <Plug size={12} className="text-[var(--text-muted)]" />
+                <Plug size={14} className="text-[var(--text-muted)]" />
               ) : (
-                <Wrench size={12} className="text-[var(--text-muted)]" />
+                <Wrench size={14} className="text-[var(--text-muted)]" />
               )}
               <span className="text-xs font-medium text-[var(--text-primary)]">{group.label}</span>
-              <span className="text-[10px] text-[var(--text-muted)] ml-auto">{group.tools.length}</span>
+              <span className="text-[11px] text-[var(--text-muted)] ml-auto">{group.tools.length}</span>
             </div>
             {group.tools.map((tool) => (
               <DropdownMenuItem
@@ -56,7 +56,7 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
               >
                 <span className="text-xs text-[var(--text-secondary)]">{tool.label}</span>
                 {tool.description && (
-                  <span className="text-[11px] text-[var(--text-muted)] line-clamp-1">{tool.description}</span>
+                  <span className="text-xs text-[var(--text-muted)] line-clamp-1">{tool.description}</span>
                 )}
               </DropdownMenuItem>
             ))}

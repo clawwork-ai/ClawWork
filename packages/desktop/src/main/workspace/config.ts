@@ -44,6 +44,7 @@ export interface AppConfig {
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
   deviceId?: string;
+  zoomLevel?: number;
 }
 
 function configFilePath(): string {
