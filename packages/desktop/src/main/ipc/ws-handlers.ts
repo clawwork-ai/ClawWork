@@ -375,8 +375,13 @@ export function registerWsHandlers(): void {
   ipcMain.handle('ws:abort-chat', async (_event, payload: { gatewayId: string; sessionKey: string }) => {
     const gw = getGatewayClient(payload.gatewayId);
     if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
-    await gw.abortChat(payload.sessionKey);
-    return { ok: true };
+    try {
+      await gw.abortChat(payload.sessionKey);
+      return { ok: true };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown error';
+      return { ok: false, error: msg };
+    }
   });
 
   ipcMain.handle(
