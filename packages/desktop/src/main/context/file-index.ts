@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'fs';
+import { readdirSync, lstatSync } from 'fs';
 import { join, extname, relative } from 'path';
 import type { FileIndexEntry } from '@clawwork/shared';
 import { classifyTier, getMimeType } from './file-types.js';
@@ -45,10 +45,12 @@ function walkDir(dir: string, rootDir: string, results: FileIndexEntry[], depth:
     const fullPath = join(dir, name);
     let stat;
     try {
-      stat = statSync(fullPath);
+      stat = lstatSync(fullPath);
     } catch {
       continue;
     }
+
+    if (stat.isSymbolicLink()) continue;
 
     if (stat.isDirectory()) {
       if (SKIP_DIRS.has(name)) continue;

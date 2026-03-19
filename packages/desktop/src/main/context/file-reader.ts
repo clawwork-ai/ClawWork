@@ -1,15 +1,15 @@
-import { openSync, readSync, closeSync, readFileSync, statSync } from 'fs';
-import { extname, resolve } from 'path';
+import { openSync, readSync, closeSync, readFileSync, realpathSync, statSync } from 'fs';
+import { extname, sep } from 'path';
 import type { FileReadResult } from '@clawwork/shared';
 import { classifyTier, getMimeType } from './file-types.js';
 
 const MAX_TEXT_SIZE = 100 * 1024;
 
 export function validatePathSecurity(absolutePath: string, contextFolders: string[]): boolean {
-  const normalized = resolve(absolutePath);
+  const realPath = realpathSync(absolutePath);
   return contextFolders.some((folder) => {
-    const normalizedFolder = resolve(folder);
-    return normalized.startsWith(normalizedFolder + '/') || normalized === normalizedFolder;
+    const realFolder = realpathSync(folder);
+    return realPath.startsWith(realFolder + sep) || realPath === realFolder;
   });
 }
 
