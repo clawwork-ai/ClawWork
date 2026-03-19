@@ -1,30 +1,45 @@
 import simpleGit from 'simple-git';
 import { basename } from 'path';
 
+let gitQueue = Promise.resolve<unknown>(undefined);
+
+function enqueueGitOp<T>(fn: () => Promise<T>): Promise<T> {
+  const op = gitQueue.then(fn, fn);
+  gitQueue = op.then(
+    () => {},
+    () => {},
+  );
+  return op;
+}
+
 export async function commitArtifact(workspacePath: string, localPath: string, message?: string): Promise<string> {
-  const git = simpleGit(workspacePath);
+  return enqueueGitOp(async () => {
+    const git = simpleGit(workspacePath);
 
-  await git.add(localPath);
+    await git.add(localPath);
 
-  const status = await git.status();
-  if (status.staged.length === 0) {
-    return '';
-  }
+    const status = await git.status();
+    if (status.staged.length === 0) {
+      return '';
+    }
 
-  const fileName = basename(localPath);
-  const commitMessage = message ?? `artifact: ${fileName}`;
-  const result = await git.commit(commitMessage);
+    const fileName = basename(localPath);
+    const commitMessage = message ?? `artifact: ${fileName}`;
+    const result = await git.commit(commitMessage);
 
-  return result.commit || '';
+    return result.commit || '';
+  });
 }
 
 export async function commitArtifactBatch(workspacePath: string, localPaths: string[]): Promise<string> {
-  const git = simpleGit(workspacePath);
-  for (const p of localPaths) {
-    await git.add(p);
-  }
-  const status = await git.status();
-  if (status.staged.length === 0) return '';
-  const result = await git.commit(`auto: extract ${localPaths.length} files from message`);
-  return result.commit || '';
+  return enqueueGitOp(async () => {
+    const git = simpleGit(workspacePath);
+    for (const p of localPaths) {
+      await git.add(p);
+    }
+    const status = await git.status();
+    if (status.staged.length === 0) return '';
+    const result = await git.commit(`auto: extract ${localPaths.length} files from message`);
+    return result.commit || '';
+  });
 }

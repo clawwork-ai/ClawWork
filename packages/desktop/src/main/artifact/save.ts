@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, statSync, writeFileSync } from 'fs';
+import { copyFileSync, statSync, writeFileSync } from 'fs';
 import { basename, extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import type { Artifact } from '@clawwork/shared';
@@ -30,18 +30,10 @@ function detectMimeType(fileName: string): string {
   return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
-function uniqueFileName(dir: string, name: string): string {
-  if (!existsSync(join(dir, name))) return name;
-
+function uniqueFileName(_dir: string, name: string): string {
   const ext = extname(name);
   const base = name.slice(0, name.length - ext.length);
-  let counter = 1;
-  let candidate = `${base}-${counter}${ext}`;
-  while (existsSync(join(dir, candidate))) {
-    counter++;
-    candidate = `${base}-${counter}${ext}`;
-  }
-  return candidate;
+  return `${base}-${randomUUID().slice(0, 8)}${ext}`;
 }
 
 interface SaveArtifactParams {

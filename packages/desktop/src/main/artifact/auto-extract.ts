@@ -49,7 +49,9 @@ export async function autoExtractArtifacts(params: AutoExtractParams): Promise<v
       saved.push(
         await saveArtifactFromBuffer({ workspacePath, taskId, messageId, fileName, buffer, artifactType: 'image' }),
       );
-    } catch {}
+    } catch (err) {
+      console.error('[auto-extract] image save failed:', err);
+    }
   }
 
   for (const block of codeBlocks) {
@@ -65,7 +67,9 @@ export async function autoExtractArtifacts(params: AutoExtractParams): Promise<v
           contentText: block.content,
         }),
       );
-    } catch {}
+    } catch (err) {
+      console.error('[auto-extract] code block save failed:', err);
+    }
   }
 
   if (saved.length === 0) return;
