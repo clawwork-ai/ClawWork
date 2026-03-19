@@ -170,7 +170,11 @@ export function registerArtifactHandlers(): void {
           if (!res.ok) return { ok: false, error: `fetch failed: ${res.status}` };
           buffer = Buffer.from(await res.arrayBuffer());
         } else if (url.startsWith('file://')) {
-          buffer = readFileSync(url.replace('file://', ''));
+          const filePath = resolve(url.replace('file://', ''));
+          if (!filePath.startsWith(resolve(workspacePath) + sep)) {
+            return { ok: false, error: 'file path outside workspace' };
+          }
+          buffer = readFileSync(filePath);
         } else {
           return { ok: false, error: 'unsupported url scheme' };
         }

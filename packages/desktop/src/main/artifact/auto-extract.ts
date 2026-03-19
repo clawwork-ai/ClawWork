@@ -1,5 +1,6 @@
 import { net, BrowserWindow } from 'electron';
 import { readFileSync } from 'fs';
+import { resolve, sep } from 'path';
 import { extractImagesFromMarkdown, extractCodeBlocksFromMarkdown } from './extract.js';
 import { saveArtifactFromBuffer } from './save.js';
 import { commitArtifactBatch } from './git.js';
@@ -40,7 +41,9 @@ export async function autoExtractArtifacts(params: AutoExtractParams): Promise<v
       if (img.isRemote) {
         buffer = await fetchToBuffer(img.src);
       } else if (img.src.startsWith('clawwork-media://')) {
-        buffer = readFileSync(img.src.replace('clawwork-media://', ''));
+        const filePath = resolve(img.src.replace('clawwork-media://', ''));
+        if (!filePath.startsWith(resolve(workspacePath) + sep)) continue;
+        buffer = readFileSync(filePath);
       } else {
         continue;
       }
