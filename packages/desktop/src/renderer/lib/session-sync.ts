@@ -3,6 +3,7 @@ import { useTaskStore } from '../stores/taskStore';
 import { useMessageStore } from '../stores/messageStore';
 
 const GATEWAY_INJECTED_MODEL = 'gateway-injected';
+let hydrationPromise: Promise<void> | null = null;
 
 function sanitizeModel(model?: string): string | undefined {
   return model === GATEWAY_INJECTED_MODEL ? undefined : model;
@@ -13,30 +14,34 @@ function sanitizeModel(model?: string): string | undefined {
  * Called once on mount for instant offline render.
  */
 export async function hydrateFromLocal(): Promise<void> {
-  const { hydrate } = useTaskStore.getState();
-  const { bulkLoad } = useMessageStore.getState();
-  await hydrate();
-  const tasks = useTaskStore.getState().tasks;
-  for (const t of tasks) {
-    try {
-      const res = await window.clawwork.loadMessages(t.id);
-      if (res.ok && res.rows && res.rows.length > 0) {
-        const msgs: Message[] = res.rows.map((r) => ({
-          id: r.id,
-          taskId: r.taskId,
-          role: r.role as MessageRole,
-          content: r.content,
-          artifacts: [],
-          toolCalls: [],
-          timestamp: r.timestamp,
-          imageAttachments: r.imageAttachments as Message['imageAttachments'],
-        }));
-        bulkLoad(t.id, msgs);
+  if (!hydrationPromise) {
+    hydrationPromise = (async () => {
+      const { hydrate } = useTaskStore.getState();
+      const { bulkLoad } = useMessageStore.getState();
+      await hydrate();
+      const tasks = useTaskStore.getState().tasks;
+      for (const t of tasks) {
+        try {
+          const res = await window.clawwork.loadMessages(t.id);
+          if (res.ok && res.rows && res.rows.length > 0) {
+            const msgs: Message[] = res.rows.map((r) => ({
+              id: r.id,
+              taskId: r.taskId,
+              role: r.role as MessageRole,
+              content: r.content,
+              artifacts: [],
+              toolCalls: [],
+              timestamp: r.timestamp,
+              imageAttachments: r.imageAttachments as Message['imageAttachments'],
+            }));
+            bulkLoad(t.id, msgs);
+          }
+        } catch {}
       }
-    } catch {
-      /* skip failed loads */
-    }
+    })();
   }
+
+  await hydrationPromise;
 }
 
 /**
@@ -45,6 +50,7 @@ export async function hydrateFromLocal(): Promise<void> {
  */
 export async function syncFromGateway(): Promise<void> {
   try {
+    await hydrateFromLocal();
     const res = await window.clawwork.syncSessions();
     if (!res.ok || !res.discovered) return;
     const { adoptTasks, updateTaskMetadata } = useTaskStore.getState();

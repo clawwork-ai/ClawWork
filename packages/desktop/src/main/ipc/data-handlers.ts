@@ -138,6 +138,9 @@ export function registerDataHandlers(): void {
         }
         return { ok: true };
       } catch (err) {
+        if (err instanceof Error && /UNIQUE constraint failed|messages_logical_unique/i.test(err.message)) {
+          return { ok: true };
+        }
         console.error('[data] create-message failed:', err);
         return ipcError(err);
       }
