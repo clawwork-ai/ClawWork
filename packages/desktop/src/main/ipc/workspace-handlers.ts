@@ -7,7 +7,7 @@ import {
   getDefaultWorkspacePath,
 } from '../workspace/config.js';
 import { initWorkspace, migrateWorkspace } from '../workspace/init.js';
-import { initDatabase, reinitDatabase, closeDatabase } from '../db/index.js';
+import { reinitDatabase, closeDatabase } from '../db/index.js';
 
 export function registerWorkspaceHandlers(): void {
   ipcMain.handle('workspace:open-folder', () => {
@@ -36,7 +36,7 @@ export function registerWorkspaceHandlers(): void {
   ipcMain.handle('workspace:setup', async (_event, workspacePath: string) => {
     try {
       await initWorkspace(workspacePath);
-      initDatabase(workspacePath);
+      reinitDatabase(workspacePath);
       writeConfig({ workspacePath, gateways: [] });
       return { ok: true };
     } catch (err) {
