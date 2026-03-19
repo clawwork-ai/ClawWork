@@ -63,43 +63,51 @@ export async function syncFromGateway(): Promise<void> {
         contextTokens: d.contextTokens,
       });
       if (d.messages.length === 0) continue;
-      if (messagesByTask[d.taskId]?.length) continue;
-      const msgs: Message[] = d.messages.map(
-        (m: {
-          role: string;
-          content: string;
-          timestamp: string;
-          toolCalls?: {
-            id: string;
-            name: string;
-            status: string;
-            args?: Record<string, unknown>;
-            result?: string;
-            startedAt: string;
-            completedAt?: string;
-          }[];
-        }) => ({
-          id: crypto.randomUUID(),
-          taskId: d.taskId,
-          role: m.role as MessageRole,
-          content: m.content,
-          artifacts: [],
-          toolCalls: (m.toolCalls ?? []).map(
-            (tc): ToolCall => ({
-              id: tc.id,
-              name: tc.name,
-              status: tc.status as ToolCall['status'],
-              args: tc.args,
-              result: tc.result,
-              startedAt: tc.startedAt,
-              completedAt: tc.completedAt,
-            }),
-          ),
-          timestamp: m.timestamp,
-        }),
-      );
-      bulkLoad(d.taskId, msgs);
-      for (const msg of msgs) {
+      const local = messagesByTask[d.taskId] ?? [];
+      const existingKeys = new Set(local.map((msg) => `${msg.role}:${msg.timestamp}:${msg.content}`));
+      const newMsgs: Message[] = d.messages
+        .filter(
+          (msg: { role: string; content: string; timestamp: string }) =>
+            !existingKeys.has(`${msg.role}:${msg.timestamp}:${msg.content}`),
+        )
+        .map(
+          (m: {
+            role: string;
+            content: string;
+            timestamp: string;
+            toolCalls?: {
+              id: string;
+              name: string;
+              status: string;
+              args?: Record<string, unknown>;
+              result?: string;
+              startedAt: string;
+              completedAt?: string;
+            }[];
+          }) => ({
+            id: crypto.randomUUID(),
+            taskId: d.taskId,
+            role: m.role as MessageRole,
+            content: m.content,
+            artifacts: [],
+            toolCalls: (m.toolCalls ?? []).map(
+              (tc): ToolCall => ({
+                id: tc.id,
+                name: tc.name,
+                status: tc.status as ToolCall['status'],
+                args: tc.args,
+                result: tc.result,
+                startedAt: tc.startedAt,
+                completedAt: tc.completedAt,
+              }),
+            ),
+            timestamp: m.timestamp,
+          }),
+        );
+      if (newMsgs.length === 0) continue;
+      const merged = [...local, ...newMsgs].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+      bulkLoad(d.taskId, merged);
+      for (const msg of newMsgs) {
         window.clawwork
           .persistMessage({
             id: msg.id,
