@@ -116,7 +116,7 @@ interface UiState {
   setRightPanelShortcut: (s: PanelShortcutRight) => void;
 }
 
-const EMPTY_AGENT_CATALOG = { agents: [] as AgentInfo[], defaultId: 'main' };
+const EMPTY_AGENT_CATALOG = { agents: [] as AgentInfo[], defaultId: '' };
 
 export const useUiStore = create<UiState>((set, get) => ({
   rightPanelOpen: false,

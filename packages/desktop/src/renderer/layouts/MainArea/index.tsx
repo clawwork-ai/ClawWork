@@ -57,13 +57,17 @@ function WelcomeScreen() {
   const [selectedGwId, setSelectedGwId] = useState(
     pendingNewTask?.gatewayId ?? defaultGatewayId ?? gateways[0]?.id ?? '',
   );
-  const [selectedAgentId, setSelectedAgentId] = useState(pendingNewTask?.agentId ?? 'main');
+  const initialAgentId =
+    pendingNewTask?.agentId ||
+    agentCatalogByGateway[pendingNewTask?.gatewayId ?? defaultGatewayId ?? '']?.defaultId ||
+    '';
+  const [selectedAgentId, setSelectedAgentId] = useState(initialAgentId);
   const [gwExpanded, setGwExpanded] = useState(false);
   const [agentExpanded, setAgentExpanded] = useState(false);
 
   const gwAgents = agentCatalogByGateway[selectedGwId];
   const agentCatalog = gwAgents?.agents ?? [];
-  const hasMultipleAgents = agentCatalog.length > 1;
+  const hasAgents = agentCatalog.length > 0;
   useEffect(() => {
     if (!selectedGwId) {
       const fallback = defaultGatewayId ?? gateways[0]?.id ?? '';
@@ -78,10 +82,8 @@ function WelcomeScreen() {
   }, [selectedGwId]);
 
   useEffect(() => {
-    if (gwAgents) {
+    if (gwAgents?.defaultId) {
       setSelectedAgentId(gwAgents.defaultId);
-    } else {
-      setSelectedAgentId('main');
     }
   }, [gwAgents]);
 
@@ -150,7 +152,7 @@ function WelcomeScreen() {
         </div>
       )}
 
-      {hasMultipleAgents && (
+      {hasAgents && (
         <div className={cn('flex flex-wrap items-center justify-center gap-2', hasMultipleGw ? 'mt-3' : 'mt-6')}>
           {visibleAgents.map((agent) => (
             <button
@@ -206,11 +208,12 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const hasMultipleGateways = Object.keys(gatewayInfoMap).length > 1;
   const gwInfo = activeTask ? gatewayInfoMap[activeTask.gatewayId] : undefined;
-  const agentInfo = useUiStore((s) =>
-    activeTask?.agentId && activeTask.agentId !== 'main'
-      ? s.agentCatalogByGateway[activeTask.gatewayId]?.agents.find((a) => a.id === activeTask.agentId)
-      : undefined,
-  );
+  const agentInfo = useUiStore((s) => {
+    if (!activeTask?.agentId) return undefined;
+    const catalog = s.agentCatalogByGateway[activeTask.gatewayId];
+    if (!catalog || activeTask.agentId === catalog.defaultId) return undefined;
+    return catalog.agents.find((a) => a.id === activeTask.agentId);
+  });
   const sessionUsage = useUsageStore((s) => s.sessionUsage);
   const cost = useUsageStore((s) => s.cost);
   const usageStatus = useUsageStore((s) => s.status);

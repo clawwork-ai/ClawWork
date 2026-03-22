@@ -212,6 +212,7 @@
     "serverAborted": "任务被服务端中止",
     "unknown": "未知错误",
     "failed": "失败",
+    "agentNotResponding": "Agent 未响应 — 可能不可用或服务端配置有误，请尝试其他 Agent",
     "stage": {
       "send": "发送",
       "stream": "推流",

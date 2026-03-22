@@ -66,19 +66,22 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   pendingNewTask: null,
 
   startNewTask: (gatewayId?, agentId?) => {
-    const resolvedGatewayId = gatewayId ?? useUiStore.getState().defaultGatewayId ?? '';
-    const resolvedAgentId = agentId ?? 'main';
+    const uiState = useUiStore.getState();
+    const resolvedGatewayId = gatewayId ?? uiState.defaultGatewayId ?? '';
+    const resolvedAgentId = agentId || uiState.agentCatalogByGateway[resolvedGatewayId]?.defaultId || '';
     set({
       activeTaskId: null,
       pendingNewTask: { gatewayId: resolvedGatewayId, agentId: resolvedAgentId },
     });
-    useUiStore.getState().setMainView('chat');
+    uiState.setMainView('chat');
   },
 
   commitPendingTask: () => {
     const pending = get().pendingNewTask;
-    const gwId = pending?.gatewayId ?? useUiStore.getState().defaultGatewayId ?? '';
-    const agId = pending?.agentId ?? 'main';
+    const uiState = useUiStore.getState();
+    const gwId = pending?.gatewayId ?? uiState.defaultGatewayId ?? '';
+    const agId = pending?.agentId || uiState.agentCatalogByGateway[gwId]?.defaultId;
+    if (!agId) throw new Error('no agent available — gateway catalog not loaded');
     const task = get().createTask(gwId, agId);
     set({ pendingNewTask: null });
     return task;
@@ -88,11 +91,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   createTask: (gatewayId?, agentId?) => {
     const resolvedGatewayId = gatewayId ?? useUiStore.getState().defaultGatewayId ?? '';
+    const resolvedAgentId = agentId || useUiStore.getState().agentCatalogByGateway[resolvedGatewayId]?.defaultId;
+    if (!resolvedAgentId) throw new Error('no agent available — gateway catalog not loaded');
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
     const task: Task = {
       id,
-      sessionKey: buildSessionKey(id, agentId, cachedDeviceId ?? undefined),
+      sessionKey: buildSessionKey(id, resolvedAgentId, cachedDeviceId ?? undefined),
       sessionId: '',
       title: '',
       status: 'active',
@@ -101,7 +106,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       tags: [],
       artifactDir: '',
       gatewayId: resolvedGatewayId,
-      agentId: agentId ?? 'main',
+      agentId: resolvedAgentId,
     };
     set((s) => ({ tasks: [task, ...s.tasks], activeTaskId: id }));
     window.clawwork.persistTask(task).catch(() => {});

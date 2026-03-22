@@ -212,6 +212,7 @@
     "serverAborted": "Task interrupted by server",
     "unknown": "Unknown error",
     "failed": "failed",
+    "agentNotResponding": "Agent is not responding — it may be unavailable or misconfigured on the server. Try a different agent.",
     "stage": {
       "send": "Send",
       "stream": "Stream",

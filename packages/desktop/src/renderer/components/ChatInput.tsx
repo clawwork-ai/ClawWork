@@ -241,6 +241,26 @@ export default function ChatInput() {
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
   const isGenerating = isProcessing || isStreaming;
+  const responseTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    if (!activeTask) return;
+    if (isStreaming) {
+      const timer = responseTimers.current.get(activeTask.id);
+      if (timer) {
+        clearTimeout(timer);
+        responseTimers.current.delete(activeTask.id);
+      }
+    }
+  }, [isStreaming, activeTask]);
+
+  useEffect(() => {
+    const timers = responseTimers.current;
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
 
   const addMessage = useMessageStore((s) => s.addMessage);
   const setProcessing = useMessageStore((s) => s.setProcessing);
@@ -456,7 +476,12 @@ export default function ChatInput() {
 
     let task = activeTask;
     if (!task) {
-      task = commitPendingTask();
+      try {
+        task = commitPendingTask();
+      } catch {
+        toast.error(t('errors.agentNotResponding'));
+        return;
+      }
     }
 
     textarea.value = '';
@@ -570,6 +595,26 @@ export default function ChatInput() {
         const toastMsg = formatErrorForToast(appError, t);
         toast.error(toastMsg.title, { description: toastMsg.description });
       } else {
+        const sentTaskId = task.id;
+        const prev = responseTimers.current.get(sentTaskId);
+        if (prev) clearTimeout(prev);
+        responseTimers.current.set(
+          sentTaskId,
+          setTimeout(() => {
+            responseTimers.current.delete(sentTaskId);
+            const store = useMessageStore.getState();
+            const turn = store.activeTurnByTask[sentTaskId];
+            if (store.processingTasks.has(sentTaskId) && (!turn || (!turn.streamingText && !turn.streamingThinking))) {
+              store.setProcessing(sentTaskId, false);
+              const appError = buildAppError({
+                source: 'gateway',
+                stage: 'lifecycle',
+                rawMessage: t('errors.agentNotResponding'),
+              });
+              store.addMessage(sentTaskId, 'system', formatErrorForUser(appError, t));
+            }
+          }, 30_000),
+        );
         window.clawwork
           .persistMessage({
             id: pendingUserMessage.id,
@@ -677,6 +722,11 @@ export default function ChatInput() {
     if (!activeTask || aborting) return;
     setAborting(true);
     markAbortedByUser(activeTask.id);
+    const abortTimer = responseTimers.current.get(activeTask.id);
+    if (abortTimer) {
+      clearTimeout(abortTimer);
+      responseTimers.current.delete(activeTask.id);
+    }
     try {
       await window.clawwork.abortChat(activeTask.gatewayId, activeTask.sessionKey);
     } catch {

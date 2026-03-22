@@ -32,11 +32,12 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
   const gwInfo = useUiStore((s) => s.gatewayInfoMap[task.gatewayId]);
-  const agentInfo = useUiStore((s) =>
-    task.agentId && task.agentId !== 'main'
-      ? s.agentCatalogByGateway[task.gatewayId]?.agents.find((a) => a.id === task.agentId)
-      : undefined,
-  );
+  const agentInfo = useUiStore((s) => {
+    if (!task.agentId) return undefined;
+    const catalog = s.agentCatalogByGateway[task.gatewayId];
+    if (!catalog || task.agentId === catalog.defaultId) return undefined;
+    return catalog.agents.find((a) => a.id === task.agentId);
+  });
   const modelLabel = task.model === GATEWAY_INJECTED_MODEL ? 'Default' : task.model?.split('/').pop();
   const modelTooltip = task.model === GATEWAY_INJECTED_MODEL ? 'Default' : task.model;
 
