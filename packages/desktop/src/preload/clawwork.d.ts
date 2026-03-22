@@ -2,6 +2,8 @@ interface IpcResult {
   ok: boolean;
   result?: Record<string, unknown>;
   error?: string;
+  errorCode?: string;
+  errorDetails?: Record<string, unknown>;
   pairingRequired?: boolean;
 }
 
@@ -137,6 +139,7 @@ interface PersistedMessage {
   content: string;
   timestamp: string;
   imageAttachments?: unknown[];
+  toolCalls?: unknown[];
 }
 
 interface DiscoveredSession {
@@ -317,6 +320,7 @@ export interface ClawWorkAPI {
     content: string;
     timestamp: string;
     imageAttachments?: unknown[];
+    toolCalls?: unknown[];
   }) => Promise<IpcResult>;
 
   deleteTask: (taskId: string) => Promise<IpcResult>;

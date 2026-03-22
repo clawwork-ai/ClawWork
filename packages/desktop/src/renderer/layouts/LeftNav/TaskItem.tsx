@@ -27,7 +27,10 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
   const clearUnread = useUiStore((s) => s.clearUnread);
   const hasUnread = useUiStore((s) => s.unreadTaskIds.has(task.id));
   const setMainView = useUiStore((s) => s.setMainView);
-  const isStreaming = useMessageStore((s) => !!s.streamingByTask[task.id]);
+  const isStreaming = useMessageStore((s) => {
+    const turn = s.activeTurnByTask[task.id];
+    return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
+  });
   const gwInfo = useUiStore((s) => s.gatewayInfoMap[task.gatewayId]);
   const agentInfo = useUiStore((s) =>
     task.agentId && task.agentId !== 'main'

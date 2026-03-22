@@ -9,14 +9,26 @@ import type { GatewayClient } from '../ws/gateway-client.js';
 async function gatewayRpc(
   gatewayId: string,
   fn: (gw: GatewayClient) => Promise<Record<string, unknown> | void>,
-): Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }> {
+): Promise<{
+  ok: boolean;
+  result?: Record<string, unknown>;
+  error?: string;
+  errorCode?: string;
+  errorDetails?: Record<string, unknown>;
+}> {
   const gw = getGatewayClient(gatewayId);
-  if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
+  if (!gw?.isConnected) return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
   try {
     const result = await fn(gw);
     return result ? { ok: true, result } : { ok: true };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    const typed = err as Error & { code?: string; details?: Record<string, unknown> };
+    return {
+      ok: false,
+      error: typed.message ?? 'unknown error',
+      errorCode: typed.code,
+      errorDetails: typed.details,
+    };
   }
 }
 
@@ -61,6 +73,8 @@ interface ChatHistoryPayload {
   sessionId?: string;
 }
 
+const INTERNAL_ASSISTANT_MARKERS = new Set(['NO_REPLY']);
+
 /** Parsed tool call for transport to renderer */
 interface ParsedToolCall {
   id: string;
@@ -103,7 +117,7 @@ export function registerWsHandlers(): void {
           taskId,
           error: { message: 'gateway not connected' },
         });
-        return { ok: false, error: 'gateway not connected' };
+        return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
       }
       try {
         await gw.sendChatMessage(payload.sessionKey, payload.content, payload.attachments);
@@ -117,16 +131,17 @@ export function registerWsHandlers(): void {
         });
         return { ok: true };
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'unknown error';
+        const typed = err as Error & { code?: string; details?: Record<string, unknown> };
+        const msg = typed.message ?? 'unknown error';
         getDebugLogger().error({
           domain: 'ipc',
           event: 'ipc.ws.send-message.failed',
           gatewayId: payload.gatewayId,
           sessionKey: payload.sessionKey,
           taskId,
-          error: { message: msg },
+          error: { message: msg, code: typed.code },
         });
-        return { ok: false, error: msg };
+        return { ok: false, error: msg, errorCode: typed.code, errorDetails: typed.details };
       }
     },
   );
@@ -281,7 +296,11 @@ export function registerWsHandlers(): void {
                 toolCalls,
               };
             })
-            .filter((m) => m.content || m.toolCalls.length > 0);
+            .filter((m) => {
+              if (!m.content && m.toolCalls.length === 0) return false;
+              if (m.role === 'assistant' && INTERNAL_ASSISTANT_MARKERS.has(m.content.trim())) return false;
+              return true;
+            });
 
           const firstUserMsg = msgs.find((m) => m.role === 'user' && m.content);
           const titleFromMsg = firstUserMsg ? firstUserMsg.content.slice(0, 30) : '';

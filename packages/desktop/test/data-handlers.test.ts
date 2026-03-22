@@ -4,7 +4,9 @@ const handleMap = new Map<string, (...args: unknown[]) => unknown>();
 const getWorkspacePathMock = vi.fn(() => null);
 const autoExtractArtifactsMock = vi.fn();
 const runMock = vi.fn();
-const valuesMock = vi.fn(() => ({ run: runMock }));
+const conflictRunMock = vi.fn();
+const onConflictDoUpdateMock = vi.fn(() => ({ run: conflictRunMock }));
+const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock, run: runMock }));
 const insertMock = vi.fn(() => ({ values: valuesMock }));
 const getDbMock = vi.fn(() => ({ insert: insertMock }));
 
@@ -36,6 +38,8 @@ describe('registerDataHandlers', () => {
     getWorkspacePathMock.mockReturnValue(null);
     autoExtractArtifactsMock.mockReset();
     runMock.mockReset();
+    conflictRunMock.mockReset();
+    onConflictDoUpdateMock.mockClear();
     valuesMock.mockClear();
     insertMock.mockClear();
     getDbMock.mockClear();
@@ -49,13 +53,7 @@ describe('registerDataHandlers', () => {
     const createMessage = handleMap.get('data:create-message');
     expect(createMessage).toBeTypeOf('function');
 
-    runMock
-      .mockImplementationOnce(() => undefined)
-      .mockImplementationOnce(() => {
-        throw new Error(
-          'UNIQUE constraint failed: messages.task_id, messages.role, messages.content, messages.timestamp',
-        );
-      });
+    conflictRunMock.mockImplementation(() => undefined);
 
     const payload = {
       id: 'msg-1',
@@ -68,7 +66,47 @@ describe('registerDataHandlers', () => {
     expect(createMessage?.({}, payload)).toEqual({ ok: true });
     expect(createMessage?.({}, { ...payload, id: 'msg-2' })).toEqual({ ok: true });
 
-    expect(runMock).toHaveBeenCalledTimes(2);
+    expect(conflictRunMock).toHaveBeenCalledTimes(2);
     expect(autoExtractArtifactsMock).not.toHaveBeenCalled();
+  });
+
+  it('updates toolCalls when persisting the same logical message again', async () => {
+    const { registerDataHandlers } = await import('../src/main/ipc/data-handlers.js');
+
+    registerDataHandlers();
+
+    const createMessage = handleMap.get('data:create-message');
+    expect(createMessage).toBeTypeOf('function');
+
+    const payload = {
+      id: 'msg-tool-1',
+      taskId: 'task-1',
+      role: 'assistant',
+      content: 'CPU info',
+      timestamp: '2026-03-16T00:00:01.000Z',
+      toolCalls: [{ id: 'exec-1', name: 'exec', status: 'running' }],
+    };
+
+    expect(createMessage?.({}, payload)).toEqual({ ok: true });
+    expect(
+      createMessage?.(
+        {},
+        {
+          ...payload,
+          id: 'msg-tool-2',
+          toolCalls: [{ id: 'exec-1', name: 'exec', status: 'done', result: 'uname -a' }],
+        },
+      ),
+    ).toEqual({ ok: true });
+
+    expect(onConflictDoUpdateMock).toHaveBeenCalledTimes(2);
+    expect(onConflictDoUpdateMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        target: expect.anything(),
+        set: expect.objectContaining({
+          toolCalls: JSON.stringify([{ id: 'exec-1', name: 'exec', status: 'done', result: 'uname -a' }]),
+        }),
+      }),
+    );
   });
 });

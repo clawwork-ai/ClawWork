@@ -36,13 +36,13 @@ export function useTraySync(): void {
     if (prevRef.current.status === status && prevRef.current.taskIds === taskIdsKey) return;
     prevRef.current = { status, taskIds: taskIdsKey };
 
-    const streamingByTask = useMessageStore.getState().streamingByTask;
+    const activeTurnByTask = useMessageStore.getState().activeTurnByTask;
     const activeTasks = activeIds.map((id) => {
       const t = tasks.find((task) => task.id === id)!;
       return {
         taskId: id,
         title: t.title || 'Untitled',
-        snippet: (streamingByTask[id] ?? '').slice(0, 60),
+        snippet: (activeTurnByTask[id]?.streamingText ?? '').slice(0, 60),
         duration: formatDuration(t.updatedAt),
       };
     });

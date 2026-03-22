@@ -68,3 +68,29 @@ export const CONFIG_FILE_NAME = 'clawwork-config.json';
 
 /** SQLite database file name within workspace */
 export const DB_FILE_NAME = '.clawwork.db';
+
+export const RETRYABLE_ERROR_CODES = new Set([
+  'RATE_LIMIT',
+  'RATE_LIMITED',
+  'TIMEOUT',
+  'PROVIDER_UNAVAILABLE',
+  'MODEL_UNAVAILABLE',
+  'SERVICE_UNAVAILABLE',
+  'GATEWAY_TIMEOUT',
+  'OVERLOADED',
+]);
+
+export const NON_RETRYABLE_ERROR_CODES = new Set([
+  'AUTH_INVALID',
+  'AUTH_FAILED',
+  'GATEWAY_AUTH_FAILED',
+  'QUOTA_EXHAUSTED',
+  'CONTENT_POLICY',
+  'CONTENT_FILTERED',
+  'CONTEXT_LENGTH_EXCEEDED',
+  'INVALID_REQUEST',
+  'SESSION_NOT_FOUND',
+  'AGENT_NOT_FOUND',
+  'PERMISSION_DENIED',
+  'METHOD_NOT_SUPPORTED',
+]);

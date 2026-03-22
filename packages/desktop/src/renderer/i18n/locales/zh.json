@@ -208,7 +208,21 @@
   },
   "errors": {
     "requestFailed": "请求出错",
-    "sendFailed": "发送失败"
+    "sendFailed": "发送失败",
+    "serverAborted": "任务被服务端中止",
+    "unknown": "未知错误",
+    "failed": "失败",
+    "stage": {
+      "send": "发送",
+      "stream": "推流",
+      "final": "完成",
+      "lifecycle": "Agent",
+      "sync": "同步",
+      "persist": "持久化"
+    }
+  },
+  "agent": {
+    "modelFallback": "已切换至模型: {{model}}"
   },
   "chatInput": {
     "describeTask": "描述你的任务…",

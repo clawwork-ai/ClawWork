@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import type { MessageImageAttachment, ModelCatalogEntry, ToolEntry, FileIndexEntry } from '@clawwork/shared';
 import { toast } from 'sonner';
+import { markAbortedByUser } from '@/hooks/useGatewayDispatcher';
+import { buildAppError, formatErrorForUser, formatErrorForToast } from '@/lib/error-format';
 import { cn, modKey } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
@@ -233,9 +235,11 @@ export default function ChatInput() {
   const activeTask = useTaskStore((s) => s.tasks.find((t) => t.id === s.activeTaskId));
 
   const isProcessing = useMessageStore((s) => (activeTask ? s.processingTasks.has(activeTask.id) : false));
-  const isStreaming = useMessageStore((s) =>
-    activeTask ? Boolean(s.streamingByTask[activeTask.id]) || Boolean(s.streamingThinkingByTask[activeTask.id]) : false,
-  );
+  const isStreaming = useMessageStore((s) => {
+    if (!activeTask) return false;
+    const turn = s.activeTurnByTask[activeTask.id];
+    return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
+  });
   const isGenerating = isProcessing || isStreaming;
 
   const addMessage = useMessageStore((s) => s.addMessage);
@@ -555,9 +559,16 @@ export default function ChatInput() {
       );
       if (result && !result.ok) {
         setProcessing(task.id, false);
-        const msg = result.error || t('errors.sendFailed');
-        addMessage(task.id, 'system', `${t('errors.sendFailed')}: ${msg}`);
-        toast.error('Failed to send message', { description: msg });
+        const appError = buildAppError({
+          source: 'gateway',
+          stage: 'send',
+          rawMessage: result.error || t('errors.sendFailed'),
+          code: result.errorCode,
+          details: result.errorDetails,
+        });
+        addMessage(task.id, 'system', formatErrorForUser(appError, t));
+        const toastMsg = formatErrorForToast(appError, t);
+        toast.error(toastMsg.title, { description: toastMsg.description });
       } else {
         window.clawwork
           .persistMessage({
@@ -567,14 +578,20 @@ export default function ChatInput() {
             content: pendingUserMessage.content,
             timestamp: pendingUserMessage.timestamp,
             imageAttachments: pendingUserMessage.imageAttachments as unknown[] | undefined,
+            toolCalls: pendingUserMessage.toolCalls,
           })
           .catch(() => {});
       }
     } catch (err) {
       setProcessing(task.id, false);
-      const msg = err instanceof Error ? err.message : String(err);
-      addMessage(task.id, 'system', `${t('errors.sendFailed')}: ${msg}`);
-      toast.error('Failed to send message', { description: msg });
+      const appError = buildAppError({
+        source: 'local',
+        stage: 'send',
+        rawMessage: err instanceof Error ? err.message : String(err),
+      });
+      addMessage(task.id, 'system', formatErrorForUser(appError, t));
+      const toastMsg = formatErrorForToast(appError, t);
+      toast.error(toastMsg.title, { description: toastMsg.description });
     }
   }, [
     activeTask,
@@ -659,6 +676,7 @@ export default function ChatInput() {
   const handleAbort = useCallback(async () => {
     if (!activeTask || aborting) return;
     setAborting(true);
+    markAbortedByUser(activeTask.id);
     try {
       await window.clawwork.abortChat(activeTask.gatewayId, activeTask.sessionKey);
     } catch {

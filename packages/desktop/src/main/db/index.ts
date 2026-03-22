@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS messages (
   role TEXT NOT NULL,
   content TEXT NOT NULL,
   timestamp TEXT NOT NULL,
-  image_attachments TEXT
+  image_attachments TEXT,
+  tool_calls TEXT
 );
 
 CREATE TABLE IF NOT EXISTS artifacts (
@@ -82,19 +83,19 @@ function openDatabaseAt(workspacePath: string): void {
     sqlite.exec('ALTER TABLE messages ADD COLUMN image_attachments TEXT');
   } catch {}
 
-  sqlite.exec(`
-    DELETE FROM messages
-    WHERE rowid NOT IN (
-      SELECT MIN(rowid)
-      FROM messages
-      GROUP BY task_id, role, content, timestamp, COALESCE(image_attachments, '')
-    )
-  `);
+  try {
+    sqlite.exec('ALTER TABLE messages ADD COLUMN tool_calls TEXT');
+  } catch {}
+
+  sqlite.exec(`DROP INDEX IF EXISTS messages_logical_unique`);
+  sqlite.exec(`DROP INDEX IF EXISTS messages_dedup`);
 
   sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS messages_logical_unique
-    ON messages(task_id, role, content, timestamp, COALESCE(image_attachments, ''))
+    CREATE UNIQUE INDEX IF NOT EXISTS messages_dedup
+    ON messages(task_id, role, timestamp)
   `);
+
+  sqlite.exec("DELETE FROM messages WHERE role = 'assistant' AND (content = '' OR TRIM(content) = 'NO_REPLY')");
 
   try {
     sqlite.exec("ALTER TABLE artifacts ADD COLUMN content_text TEXT NOT NULL DEFAULT ''");

@@ -19,9 +19,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { ToolCall } from '@clawwork/shared';
 import { useTaskStore } from '@/stores/taskStore';
-import { useMessageStore, EMPTY_MESSAGES } from '@/stores/messageStore';
+import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
 import { cn, formatRelativeTime, formatTokenCount, formatCost } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
@@ -41,7 +40,6 @@ import { useUsageStore } from '@/stores/usageStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayDispatcher';
 
 const STICK_TO_BOTTOM_THRESHOLD_PX = 60;
-const EMPTY_TOOL_CALLS: ToolCall[] = [];
 
 interface MainAreaProps {
   onTogglePanel: () => void;
@@ -499,25 +497,10 @@ function ChatContent() {
   const messages = useMessageStore((s) =>
     activeTaskId ? (s.messagesByTask[activeTaskId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
-  const streamingContent = useMessageStore((s) => (activeTaskId ? (s.streamingByTask[activeTaskId] ?? '') : ''));
-  const streamingThinkingContent = useMessageStore((s) =>
-    activeTaskId ? (s.streamingThinkingByTask[activeTaskId] ?? '') : '',
-  );
+  const activeTurn = useMessageStore((s) => (activeTaskId ? (s.activeTurnByTask[activeTaskId] ?? null) : null));
   const highlightedId = useMessageStore((s) => s.highlightedMessageId);
   const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
   const isProcessing = useMessageStore((s) => (activeTaskId ? s.processingTasks.has(activeTaskId) : false));
-  const streamingToolCalls = useMessageStore((s) => {
-    if (!activeTaskId) return EMPTY_TOOL_CALLS;
-    const msgs = s.messagesByTask[activeTaskId];
-    if (!msgs?.length) return EMPTY_TOOL_CALLS;
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].role === 'user') break;
-      if (msgs[i].role === 'assistant' && msgs[i].toolCalls.length > 0) {
-        return msgs[i].toolCalls.some((tc) => tc.status === 'running') ? msgs[i].toolCalls : EMPTY_TOOL_CALLS;
-      }
-    }
-    return EMPTY_TOOL_CALLS;
-  });
   const viewportRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -536,14 +519,14 @@ function ChatContent() {
     if (!stickToBottom.current) return;
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, streamingContent, streamingThinkingContent, isProcessing, streamingToolCalls]);
+  }, [messages.length, activeTurn, isProcessing]);
 
   return (
     <>
       <ScrollArea viewportRef={viewportRef} className="flex-1 px-6 py-4" onScrollCapture={handleScroll}>
         <div className="max-w-3xl mx-auto space-y-1">
           {!activeTask && <WelcomeScreen />}
-          {activeTask && messages.length === 0 && !streamingContent && !streamingThinkingContent && <WelcomeScreen />}
+          {activeTask && messages.length === 0 && !activeTurn && <WelcomeScreen />}
           {messages.map((msg) => (
             <ChatMessage
               key={msg.id}
@@ -554,17 +537,32 @@ function ChatContent() {
               onFileClick={setPreviewFile}
             />
           ))}
-          {(streamingContent || streamingThinkingContent || streamingToolCalls.length > 0) && (
-            <StreamingMessage
-              content={streamingContent}
-              thinkingContent={streamingThinkingContent || undefined}
-              toolCalls={streamingToolCalls}
+          {activeTurn?.finalized && activeTurn.content && (
+            <ChatMessage
+              key={`turn-${activeTurn.id}`}
+              message={activeTurnToMessage(activeTurn, activeTaskId!)}
+              highlighted={false}
+              onHighlightDone={handleHighlightDone}
+              onImageClick={setLightboxSrc}
+              onFileClick={setPreviewFile}
             />
           )}
-          <AnimatePresence>
-            {isProcessing && !streamingContent && !streamingThinkingContent && streamingToolCalls.length === 0 && (
-              <ThinkingIndicator />
+          {activeTurn &&
+            !activeTurn.finalized &&
+            (activeTurn.streamingText || activeTurn.streamingThinking || activeTurn.toolCalls.length > 0) && (
+              <StreamingMessage
+                content={activeTurn.streamingText}
+                thinkingContent={activeTurn.streamingThinking || undefined}
+                toolCalls={activeTurn.toolCalls}
+              />
             )}
+          <AnimatePresence>
+            {isProcessing &&
+              (!activeTurn ||
+                (!activeTurn.streamingText &&
+                  !activeTurn.streamingThinking &&
+                  activeTurn.toolCalls.length === 0 &&
+                  !activeTurn.finalized)) && <ThinkingIndicator />}
           </AnimatePresence>
         </div>
       </ScrollArea>

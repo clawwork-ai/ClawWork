@@ -157,6 +157,7 @@ function buildApi(): ClawWorkAPI {
       content: string;
       timestamp: string;
       imageAttachments?: unknown[];
+      toolCalls?: unknown[];
     }) => ipcRenderer.invoke('data:create-message', msg),
 
     deleteTask: (taskId: string) => ipcRenderer.invoke('data:delete-task', { id: taskId }),

@@ -182,6 +182,7 @@ export default function App() {
               role: pendingUserMessage.role,
               content: pendingUserMessage.content,
               timestamp: pendingUserMessage.timestamp,
+              toolCalls: pendingUserMessage.toolCalls,
             })
             .catch(() => {});
         })

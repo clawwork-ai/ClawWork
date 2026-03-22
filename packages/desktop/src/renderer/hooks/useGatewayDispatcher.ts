@@ -15,7 +15,66 @@ import { useMessageStore } from '../stores/messageStore';
 import { useTaskStore } from '../stores/taskStore';
 import { useUiStore } from '../stores/uiStore';
 import { useApprovalStore } from '../stores/approvalStore';
-import { hydrateFromLocal, syncFromGateway } from '../lib/session-sync';
+import { hydrateFromLocal, syncFromGateway, syncSessionMessages, retrySyncPending } from '../lib/session-sync';
+import { buildAppError, formatErrorForUser, formatErrorForToast } from '../lib/error-format';
+
+interface ErrorCorrelation {
+  taskId: string;
+  runId?: string;
+  code?: string;
+  source: string;
+  rawMessage: string;
+  displayedAt: number;
+}
+
+const DEDUP_FALLBACK_WINDOW_MS = 2000;
+
+function isSameFailure(a: ErrorCorrelation, existing: ErrorCorrelation): boolean {
+  if (a.taskId !== existing.taskId) return false;
+  if (a.runId && existing.runId) return a.runId === existing.runId;
+  if (a.code && existing.code) return a.code === existing.code && a.source === existing.source;
+  return false;
+}
+
+const perTaskLastError = new Map<string, ErrorCorrelation>();
+const lifecycleErrorBuffer = new Map<string, { error: string; runId?: string; timer: ReturnType<typeof setTimeout> }>();
+const abortedByUser = new Set<string>();
+
+export function markAbortedByUser(taskId: string): void {
+  abortedByUser.add(taskId);
+}
+
+function shouldDisplayError(correlation: ErrorCorrelation): boolean {
+  const existing = perTaskLastError.get(correlation.taskId);
+  if (!existing) return true;
+  if (isSameFailure(correlation, existing)) return false;
+  if (Date.now() - existing.displayedAt < DEDUP_FALLBACK_WINDOW_MS) {
+    if (
+      !correlation.runId &&
+      !existing.runId &&
+      !correlation.code &&
+      !existing.code &&
+      correlation.source === existing.source &&
+      correlation.rawMessage === existing.rawMessage
+    )
+      return false;
+  }
+  return true;
+}
+
+function recordDisplayedError(correlation: ErrorCorrelation): void {
+  perTaskLastError.set(correlation.taskId, { ...correlation, displayedAt: Date.now() });
+}
+
+function clearTaskErrorState(taskId: string): void {
+  perTaskLastError.delete(taskId);
+  abortedByUser.delete(taskId);
+  const buffered = lifecycleErrorBuffer.get(taskId);
+  if (buffered) {
+    clearTimeout(buffered.timer);
+    lifecycleErrorBuffer.delete(taskId);
+  }
+}
 
 function debugEvent(
   event: string,
@@ -45,6 +104,7 @@ interface ChatContentBlock {
 interface ChatMessage {
   role?: string;
   content?: ChatContentBlock[];
+  timestamp?: number;
 }
 
 interface ChatEventPayload {
@@ -54,24 +114,52 @@ interface ChatEventPayload {
   message?: ChatMessage;
   content?: ChatContentBlock[];
   text?: string;
+  errorMessage?: string;
+  errorCode?: string;
+  error?: { code?: string; message?: string; details?: Record<string, unknown> };
 }
+
+type AgentEventStream = 'lifecycle' | 'tool' | 'assistant' | 'error' | 'compaction';
 
 interface AgentToolData {
-  phase?: string; // "update" = running, "result" = done, "error" = error
-  name?: string; // tool name, e.g. "exec"
-  toolCallId?: string; // e.g. "call_9GV1FoNq..."
-  meta?: string; // result description (present on "result" phase)
-  isError?: boolean; // true if tool errored
-  args?: string; // tool arguments (sometimes present)
+  phase?: string;
+  name?: string;
+  toolCallId?: string;
+  meta?: string;
+  isError?: boolean;
+  args?: string;
 }
 
-interface AgentToolEvent {
+interface AgentLifecycleData {
+  phase?: 'start' | 'end' | 'error' | 'fallback';
+  error?: string;
+  startedAt?: number;
+  endedAt?: number;
+  selectedProvider?: string;
+  selectedModel?: string;
+  activeProvider?: string;
+  activeModel?: string;
+}
+
+interface AgentErrorData {
+  reason?: string;
+  expected?: number;
+  received?: number;
+}
+
+interface AgentCompactionData {
+  phase?: 'start' | 'end';
+  willRetry?: boolean;
+  completed?: boolean;
+}
+
+interface AgentEvent {
   sessionKey: string;
   runId?: string;
-  stream?: string;
+  stream?: AgentEventStream | string;
   seq?: number;
   ts?: number;
-  data?: AgentToolData;
+  data?: AgentToolData | AgentLifecycleData | AgentErrorData | AgentCompactionData;
 }
 
 /**
@@ -97,7 +185,7 @@ export function useGatewayEventDispatcher(): void {
       if (data.event === 'chat') {
         handleChatEvent(data.payload as unknown as ChatEventPayload);
       } else if (data.event === 'agent') {
-        handleAgentEvent(data.payload as unknown as AgentToolEvent);
+        handleAgentEvent(data.payload as unknown as AgentEvent);
       } else if (data.event === 'exec.approval.requested') {
         useApprovalStore.getState().addApproval(data.gatewayId, data.payload as unknown as ExecApprovalRequest);
         toast.warning(i18n.t('approval.newRequest'));
@@ -134,6 +222,7 @@ export function useGatewayEventDispatcher(): void {
       const thinking = extractThinking(payload);
 
       if (state === 'delta') {
+        clearTaskErrorState(taskId);
         if (text) {
           store.setProcessing(taskId, false);
           store.appendStreamDelta(taskId, text);
@@ -159,24 +248,75 @@ export function useGatewayEventDispatcher(): void {
         for (const tc of toolCalls) {
           store.upsertToolCall(taskId, tc);
         }
-        store.finalizeStream(taskId);
+        store.finalizeStream(taskId, { runId: payload.runId });
         debugEvent('renderer.chat.finalized', { taskId, sessionKey });
         autoTitleIfNeeded(taskId);
-      } else if (state === 'error' || state === 'aborted') {
+        syncSessionMessages(taskId).catch((err) => {
+          debugEvent('renderer.sync.post-final.failed', {
+            taskId,
+            sessionKey,
+            error: err instanceof Error ? err.message : 'unknown',
+          });
+        });
+      } else if (state === 'error') {
         store.setProcessing(taskId, false);
-        store.finalizeStream(taskId);
-        debugEvent('renderer.chat.terminated', { taskId, sessionKey, state });
-        if (state === 'error') {
-          const errText = extractText(payload) || i18n.t('errors.requestFailed');
-          store.addMessage(taskId, 'system', errText);
+        store.clearActiveTurn(taskId);
+
+        const buffered = lifecycleErrorBuffer.get(taskId);
+        if (buffered) {
+          clearTimeout(buffered.timer);
+          lifecycleErrorBuffer.delete(taskId);
         }
+
+        const errorCode = payload.errorCode ?? payload.error?.code;
+        const errorDetails = payload.error?.details;
+        const rawMessage =
+          payload.errorMessage ?? payload.error?.message ?? (extractText(payload) || i18n.t('errors.requestFailed'));
+        const appError = buildAppError({
+          source: 'upstream',
+          stage: 'stream',
+          rawMessage,
+          code: errorCode,
+          details: errorDetails,
+        });
+        const correlation: ErrorCorrelation = {
+          taskId,
+          runId: payload.runId,
+          code: errorCode,
+          source: 'upstream',
+          rawMessage,
+          displayedAt: 0,
+        };
+
+        debugEvent('renderer.chat.error', { taskId, sessionKey, rawMessage, code: errorCode, runId: payload.runId });
+
+        if (shouldDisplayError(correlation)) {
+          const userText = formatErrorForUser(appError, i18n.t);
+          store.addMessage(taskId, 'system', userText);
+          const { title, description } = formatErrorForToast(appError, i18n.t);
+          toast.error(title, { description });
+          recordDisplayedError(correlation);
+        }
+      } else if (state === 'aborted') {
+        store.setProcessing(taskId, false);
+        store.clearActiveTurn(taskId);
+        debugEvent('renderer.chat.aborted', { taskId, sessionKey, userInitiated: abortedByUser.has(taskId) });
+
+        if (!abortedByUser.has(taskId)) {
+          store.addMessage(
+            taskId,
+            'system',
+            i18n.t('errors.serverAborted', { defaultValue: 'Task interrupted by server' }),
+          );
+        }
+        abortedByUser.delete(taskId);
       }
     }
 
-    function handleAgentEvent(payload: AgentToolEvent): void {
+    function handleAgentEvent(payload: AgentEvent): void {
       const { sessionKey, stream, data } = payload;
-      if (stream !== 'tool' || !data || !sessionKey) {
-        debugEvent('renderer.agent.dropped.invalid_payload', {
+      if (!sessionKey || !data) {
+        debugEvent('renderer.agent.dropped.missing_fields', {
           stream,
           hasData: Boolean(data),
           hasSessionKey: Boolean(sessionKey),
@@ -190,13 +330,48 @@ export function useGatewayEventDispatcher(): void {
         return;
       }
 
-      if (!data.name || !data.toolCallId) return;
-
       const localTasks = useTaskStore.getState().tasks;
       if (!localTasks.some((t) => t.id === taskId)) {
         debugEvent('renderer.agent.dropped.unknown_task', { taskId, sessionKey, stream });
         return;
       }
+
+      switch (stream) {
+        case 'tool':
+          handleAgentToolStream(taskId, sessionKey, data as AgentToolData);
+          break;
+        case 'lifecycle':
+          handleAgentLifecycleStream(taskId, sessionKey, data as AgentLifecycleData);
+          break;
+        case 'error':
+          handleAgentErrorStream(taskId, sessionKey, data as AgentErrorData);
+          break;
+        case 'assistant':
+          debugEvent('renderer.agent.assistant_stream', { taskId, sessionKey });
+          break;
+        case 'compaction':
+          debugEvent('renderer.agent.compaction', {
+            taskId,
+            sessionKey,
+            phase: (data as AgentCompactionData).phase,
+            completed: (data as AgentCompactionData).completed,
+          });
+          break;
+        default:
+          debugEvent('renderer.agent.unknown_stream', {
+            taskId,
+            sessionKey,
+            stream,
+            topLevelKeys: data ? Object.keys(data) : [],
+            phase: (data as Record<string, unknown>)?.phase,
+            reason: (data as Record<string, unknown>)?.reason,
+          });
+          break;
+      }
+    }
+
+    function handleAgentToolStream(taskId: string, sessionKey: string, data: AgentToolData): void {
+      if (!data.name || !data.toolCallId) return;
 
       if (taskId !== activeTaskIdRef.current) {
         useUiStore.getState().markUnread(taskId);
@@ -234,6 +409,80 @@ export function useGatewayEventDispatcher(): void {
         toolCallId: tc.id,
         status: tc.status,
         name: tc.name,
+      });
+    }
+
+    function handleAgentLifecycleStream(taskId: string, sessionKey: string, data: AgentLifecycleData): void {
+      const store = useMessageStore.getState();
+
+      switch (data.phase) {
+        case 'start':
+          store.setProcessing(taskId, true);
+          debugEvent('renderer.agent.lifecycle.start', { taskId, sessionKey });
+          break;
+        case 'end':
+          store.setProcessing(taskId, false);
+          debugEvent('renderer.agent.lifecycle.end', { taskId, sessionKey });
+          break;
+        case 'error': {
+          store.setProcessing(taskId, false);
+          debugEvent('renderer.agent.lifecycle.error', {
+            taskId,
+            sessionKey,
+            error: data.error,
+          });
+          if (!data.error) break;
+
+          const existing = lifecycleErrorBuffer.get(taskId);
+          if (existing) clearTimeout(existing.timer);
+
+          const timer = setTimeout(() => {
+            lifecycleErrorBuffer.delete(taskId);
+            const errorText = data.error!;
+            const appError = buildAppError({ source: 'agent', stage: 'lifecycle', rawMessage: errorText });
+            const correlation: ErrorCorrelation = {
+              taskId,
+              runId: undefined,
+              source: 'agent',
+              rawMessage: errorText,
+              displayedAt: 0,
+            };
+            if (shouldDisplayError(correlation)) {
+              store.addMessage(taskId, 'system', formatErrorForUser(appError, i18n.t));
+              const { title, description } = formatErrorForToast(appError, i18n.t);
+              toast.error(title, { description });
+              recordDisplayedError(correlation);
+            }
+          }, DEDUP_FALLBACK_WINDOW_MS);
+
+          lifecycleErrorBuffer.set(taskId, { error: data.error, timer });
+          break;
+        }
+        case 'fallback':
+          debugEvent('renderer.agent.lifecycle.fallback', {
+            taskId,
+            sessionKey,
+            from: `${data.selectedProvider}/${data.selectedModel}`,
+            to: `${data.activeProvider}/${data.activeModel}`,
+          });
+          if (data.activeModel) {
+            const msg = i18n.t('agent.modelFallback', {
+              model: data.activeModel,
+              defaultValue: `Switched to model: ${data.activeModel}`,
+            });
+            store.addMessage(taskId, 'system', msg, undefined, { persist: false });
+          }
+          break;
+      }
+    }
+
+    function handleAgentErrorStream(taskId: string, sessionKey: string, data: AgentErrorData): void {
+      debugEvent('renderer.agent.stream_error', {
+        taskId,
+        sessionKey,
+        reason: data.reason,
+        expected: data.expected,
+        received: data.received,
       });
     }
 
@@ -311,6 +560,7 @@ export function useGatewayEventDispatcher(): void {
           syncedRef.current = true;
           syncFromGateway();
         }
+        retrySyncPending();
         fetchCatalogs(s.gatewayId);
       } else if (!s.connected && wasConnected) {
         connectedGatewaysRef.current.delete(s.gatewayId);
@@ -376,9 +626,12 @@ function autoTitleIfNeeded(taskId: string): void {
   const { tasks, updateTaskTitle } = useTaskStore.getState();
   const task = tasks.find((t) => t.id === taskId);
   if (task && !task.title) {
-    const msgs = useMessageStore.getState().messagesByTask[taskId] ?? [];
-    const firstAssistant = msgs.find((m) => m.role === 'assistant');
-    if (firstAssistant) {
+    const store = useMessageStore.getState();
+    const msgs = store.messagesByTask[taskId] ?? [];
+    const turn = store.activeTurnByTask[taskId];
+    const firstAssistant =
+      msgs.find((m) => m.role === 'assistant') ?? (turn?.content ? { content: turn.content } : null);
+    if (firstAssistant && firstAssistant.content) {
       const title = firstAssistant.content.slice(0, 30).replace(/\n/g, ' ').trim();
       if (title) {
         updateTaskTitle(taskId, title + (firstAssistant.content.length > 30 ? '…' : ''));

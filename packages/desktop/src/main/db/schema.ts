@@ -28,6 +28,7 @@ export const messages = sqliteTable('messages', {
   content: text('content').notNull(),
   timestamp: text('timestamp').notNull(),
   imageAttachments: text('image_attachments'),
+  toolCalls: text('tool_calls'),
 });
 
 export const artifacts = sqliteTable('artifacts', {

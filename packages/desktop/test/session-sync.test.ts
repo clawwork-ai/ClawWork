@@ -27,6 +27,7 @@ describe('session sync startup flow', () => {
     const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as Window & {
       clawwork: {
         syncSessions: ReturnType<typeof vi.fn>;
+        chatHistory: ReturnType<typeof vi.fn>;
         persistTask: ReturnType<typeof vi.fn>;
         persistTaskUpdate: ReturnType<typeof vi.fn>;
         loadMessages: ReturnType<typeof vi.fn>;
@@ -37,6 +38,7 @@ describe('session sync startup flow', () => {
     };
     windowWithClawwork.clawwork = {
       syncSessions: vi.fn(),
+      chatHistory: vi.fn(),
       persistTask: vi.fn().mockResolvedValue({ ok: true }),
       persistTaskUpdate: vi.fn().mockResolvedValue({ ok: true }),
       loadMessages: vi.fn().mockResolvedValue({ ok: true, rows: [] }),
@@ -52,8 +54,7 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      streamingByTask: {},
-      streamingThinkingByTask: {},
+      activeTurnByTask: {},
       processingTasks: new Set(),
       highlightedMessageId: null,
     });
@@ -100,8 +101,7 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      streamingByTask: {},
-      streamingThinkingByTask: {},
+      activeTurnByTask: {},
       processingTasks: new Set(),
       highlightedMessageId: null,
     });
@@ -183,14 +183,13 @@ describe('session sync startup flow', () => {
     ]);
   });
 
-  it('deduplicates messages with different timestamps but same role+content', async () => {
+  it('deduplicates assistant messages by matching Gateway timestamp', async () => {
     const { sessionSync, taskStore, messageStore } = await loadModules();
 
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      streamingByTask: {},
-      streamingThinkingByTask: {},
+      activeTurnByTask: {},
       processingTasks: new Set(),
       highlightedMessageId: null,
     });
@@ -239,7 +238,7 @@ describe('session sync startup flow', () => {
           agentId: 'main',
           messages: [
             { role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.456Z' },
-            { role: 'assistant', content: 'Hi there!', timestamp: '2026-03-16T10:00:01.789Z' },
+            { role: 'assistant', content: 'Hi there!', timestamp: '2026-03-16T10:00:01.234Z' },
           ],
         },
       ],
@@ -254,14 +253,13 @@ describe('session sync startup flow', () => {
     expect(window.clawwork.persistMessage).not.toHaveBeenCalled();
   });
 
-  it('allows genuine duplicate content messages (user sends same text twice)', async () => {
+  it('syncs only new assistant messages for existing tasks (single-writer)', async () => {
     const { sessionSync, taskStore, messageStore } = await loadModules();
 
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      streamingByTask: {},
-      streamingThinkingByTask: {},
+      activeTurnByTask: {},
       processingTasks: new Set(),
       highlightedMessageId: null,
     });
@@ -312,8 +310,385 @@ describe('session sync startup flow', () => {
     await sessionSync.syncFromGateway();
 
     const msgs = messageStore.useMessageStore.getState().messagesByTask['task-legit'];
-    expect(msgs).toHaveLength(4);
-    expect(msgs.map((m: { content: string }) => m.content)).toEqual(['Hello', 'Hi!', 'Hello', 'Hi again!']);
+    expect(msgs).toHaveLength(3);
+    expect(msgs.map((m: { content: string }) => m.content)).toEqual(['Hello', 'Hi!', 'Hi again!']);
+  });
+
+  it('collapses consecutive assistant history into one visible assistant turn during startup sync', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {},
+      activeTurnByTask: {},
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    const taskRow = {
+      id: 'task-collapse',
+      sessionKey: 'agent:main:clawwork:task:task-collapse',
+      sessionId: 'session-collapse',
+      title: 'Collapse test',
+      status: 'active',
+      model: null,
+      modelProvider: null,
+      thinkingLevel: null,
+      inputTokens: null,
+      outputTokens: null,
+      contextTokens: null,
+      createdAt: '2026-03-16T00:00:00.000Z',
+      updatedAt: '2026-03-16T00:00:00.000Z',
+      tags: [],
+      artifactDir: 'tasks/task-collapse',
+      gatewayId: 'gw-1',
+    };
+
+    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    window.clawwork.loadMessages.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'u1',
+          taskId: 'task-collapse',
+          role: 'user',
+          content: '再看看今天的记忆有什么',
+          timestamp: '2026-03-16T10:00:00.000Z',
+        },
+      ],
+    });
+    window.clawwork.syncSessions.mockResolvedValue({
+      ok: true,
+      discovered: [
+        {
+          gatewayId: 'gw-1',
+          taskId: 'task-collapse',
+          sessionKey: 'agent:main:clawwork:task:task-collapse',
+          title: 'Collapse test',
+          updatedAt: '2026-03-16T10:00:03.000Z',
+          agentId: 'main',
+          messages: [
+            { role: 'user', content: '再看看今天的记忆有什么', timestamp: '2026-03-16T10:00:00.000Z' },
+            {
+              role: 'assistant',
+              content: '今天还没记录。让我看看之前有啥：',
+              timestamp: '2026-03-16T10:00:01.000Z',
+              toolCalls: [],
+            },
+            {
+              role: 'assistant',
+              content: '',
+              timestamp: '2026-03-16T10:00:02.000Z',
+              toolCalls: [
+                {
+                  id: 'read-1',
+                  name: 'read',
+                  status: 'error',
+                  result: 'from memory/2026-03-23.md',
+                  startedAt: '2026-03-16T10:00:02.000Z',
+                  completedAt: '2026-03-16T10:00:02.100Z',
+                },
+              ],
+            },
+            {
+              role: 'assistant',
+              content: '记忆文件还没创建，今天是头一次聊。有啥需要我干的？',
+              timestamp: '2026-03-16T10:00:03.000Z',
+              toolCalls: [],
+            },
+            { role: 'assistant', content: 'NO_REPLY', timestamp: '2026-03-16T10:00:03.500Z', toolCalls: [] },
+          ],
+        },
+      ],
+    });
+
+    await sessionSync.syncFromGateway();
+
+    const msgs = messageStore.useMessageStore.getState().messagesByTask['task-collapse'];
+    expect(msgs).toHaveLength(2);
+    expect(msgs[1]).toEqual(
+      expect.objectContaining({
+        role: 'assistant',
+        content: '今天还没记录。让我看看之前有啥：\n\n记忆文件还没创建，今天是头一次聊。有啥需要我干的？',
+      }),
+    );
+    expect(msgs[1].toolCalls).toHaveLength(1);
+  });
+
+  it('promotes one collapsed assistant turn during runtime sync instead of appending multiple assistant bubbles', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({
+      tasks: [
+        {
+          id: 'task-runtime',
+          sessionKey: 'agent:main:clawwork:task:task-runtime',
+          sessionId: 'session-runtime',
+          title: 'Runtime test',
+          status: 'active',
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: 'tasks/task-runtime',
+          gatewayId: 'gw-1',
+        },
+      ],
+      activeTaskId: 'task-runtime',
+      hydrated: true,
+    });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {
+        'task-runtime': [
+          {
+            id: 'u1',
+            taskId: 'task-runtime',
+            role: 'user',
+            content: '今天他的天气怎么样? 获取当前电脑的 IP',
+            artifacts: [],
+            toolCalls: [],
+            timestamp: '2026-03-16T10:00:00.000Z',
+          },
+        ],
+      },
+      activeTurnByTask: {
+        'task-runtime': {
+          id: 'turn-1',
+          streamingText: '',
+          streamingThinking: '',
+          toolCalls: [
+            {
+              id: 'exec-1',
+              name: 'exec',
+              status: 'done',
+              result: 'fetch url',
+              startedAt: '2026-03-16T10:00:01.000Z',
+              completedAt: '2026-03-16T10:00:01.100Z',
+            },
+            {
+              id: 'read-1',
+              name: 'read',
+              status: 'error',
+              result: 'from memory/2026-03-23.md',
+              startedAt: '2026-03-16T10:00:01.200Z',
+              completedAt: '2026-03-16T10:00:01.300Z',
+            },
+          ],
+          finalized: true,
+          content: '天气（上海）： 15°C',
+          runId: 'run-1',
+          timestamp: '2026-03-16T10:00:03.000Z',
+        },
+      },
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    window.clawwork.chatHistory.mockResolvedValue({
+      ok: true,
+      result: {
+        messages: [
+          {
+            role: 'user',
+            timestamp: Date.parse('2026-03-16T10:00:00.000Z'),
+            content: [{ type: 'text', text: '今天他的天气怎么样? 获取当前电脑的 IP' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:01.000Z'),
+            content: [{ type: 'text', text: '今天他的天气怎么样? 我先看下天气和 IP。' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:02.000Z'),
+            content: [{ type: 'toolCall', id: 'exec-1', name: 'exec', arguments: '{}' }],
+          },
+          {
+            role: 'toolResult',
+            timestamp: Date.parse('2026-03-16T10:00:02.100Z'),
+            content: [{ type: 'toolResult', id: 'exec-1', result: 'fetch url' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:03.000Z'),
+            content: [{ type: 'text', text: '天气（上海）： 15°C' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:03.100Z'),
+            content: [{ type: 'text', text: 'NO_REPLY' }],
+          },
+        ],
+      },
+    });
+
+    await sessionSync.syncSessionMessages('task-runtime');
+
+    const state = messageStore.useMessageStore.getState();
+    const msgs = state.messagesByTask['task-runtime'];
+    expect(state.activeTurnByTask['task-runtime']).toBeUndefined();
+    expect(msgs).toHaveLength(2);
+    expect(msgs[1]).toEqual(
+      expect.objectContaining({
+        role: 'assistant',
+        content: '今天他的天气怎么样? 我先看下天气和 IP。\n\n天气（上海）： 15°C',
+      }),
+    );
+    expect(msgs[1].toolCalls).toHaveLength(2);
+    expect(msgs[1].toolCalls).toEqual([
+      expect.objectContaining({ id: 'exec-1', status: 'done', result: 'fetch url' }),
+      expect.objectContaining({ id: 'read-1', status: 'error', result: 'from memory/2026-03-23.md' }),
+    ]);
+    expect(window.clawwork.persistMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('prefers terminal tool status from active turn over stale running canonical tool calls during promote', async () => {
+    const { messageStore } = await loadModules();
+
+    messageStore.useMessageStore.setState({
+      messagesByTask: { 'task-promote': [] },
+      activeTurnByTask: {
+        'task-promote': {
+          id: 'turn-promote',
+          streamingText: '',
+          streamingThinking: '',
+          toolCalls: [
+            {
+              id: 'exec-1',
+              name: 'exec',
+              status: 'done',
+              result: 'uname -a',
+              startedAt: '2026-03-16T10:00:00.000Z',
+              completedAt: '2026-03-16T10:00:01.000Z',
+            },
+          ],
+          finalized: true,
+          content: 'CPU info',
+          timestamp: '2026-03-16T10:00:01.500Z',
+        },
+      },
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    messageStore.useMessageStore.getState().promoteActiveTurn('task-promote', {
+      id: 'canonical-1',
+      taskId: 'task-promote',
+      role: 'assistant',
+      content: 'CPU info',
+      artifacts: [],
+      toolCalls: [
+        {
+          id: 'exec-1',
+          name: 'exec',
+          status: 'running',
+          startedAt: '2026-03-16T10:00:00.000Z',
+        },
+      ],
+      timestamp: '2026-03-16T10:00:01.500Z',
+    });
+
+    const saved = messageStore.useMessageStore.getState().messagesByTask['task-promote'];
+    expect(saved).toHaveLength(1);
+    expect(saved[0].toolCalls).toEqual([
+      expect.objectContaining({
+        id: 'exec-1',
+        status: 'done',
+        result: 'uname -a',
+        completedAt: '2026-03-16T10:00:01.000Z',
+      }),
+    ]);
+  });
+
+  it('persists merged terminal tool status during runtime sync instead of stale canonical running state', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({
+      tasks: [
+        {
+          id: 'task-sync-persist',
+          sessionKey: 'agent:main:clawwork:task:task-sync-persist',
+          sessionId: 'session-sync-persist',
+          title: 'Sync persist',
+          status: 'active',
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: 'tasks/task-sync-persist',
+          gatewayId: 'gw-1',
+        },
+      ],
+      activeTaskId: 'task-sync-persist',
+      hydrated: true,
+    });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {
+        'task-sync-persist': [
+          {
+            id: 'u1',
+            taskId: 'task-sync-persist',
+            role: 'user',
+            content: '查 CPU',
+            artifacts: [],
+            toolCalls: [],
+            timestamp: '2026-03-16T10:00:00.000Z',
+          },
+        ],
+      },
+      activeTurnByTask: {
+        'task-sync-persist': {
+          id: 'turn-sync-persist',
+          streamingText: '',
+          streamingThinking: '',
+          toolCalls: [
+            {
+              id: 'exec-1',
+              name: 'exec',
+              status: 'done',
+              result: 'uname -a',
+              startedAt: '2026-03-16T10:00:00.500Z',
+              completedAt: '2026-03-16T10:00:01.000Z',
+            },
+          ],
+          finalized: true,
+          content: 'CPU info',
+          runId: 'run-sync-persist',
+          timestamp: '2026-03-16T10:00:01.000Z',
+        },
+      },
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    window.clawwork.chatHistory.mockResolvedValue({
+      ok: true,
+      result: {
+        messages: [
+          {
+            role: 'user',
+            timestamp: Date.parse('2026-03-16T10:00:00.000Z'),
+            content: [{ type: 'text', text: '查 CPU' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:01.000Z'),
+            content: [
+              { type: 'text', text: 'CPU info' },
+              { type: 'toolCall', id: 'exec-1', name: 'exec', arguments: '{}' },
+            ],
+          },
+        ],
+      },
+    });
+
+    await sessionSync.syncSessionMessages('task-sync-persist');
+
+    expect(window.clawwork.persistMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        taskId: 'task-sync-persist',
+        role: 'assistant',
+        toolCalls: [expect.objectContaining({ id: 'exec-1', status: 'done', result: 'uname -a' })],
+      }),
+    );
   });
 
   it('reuses resolved hydration state across later gateway sync calls', async () => {
@@ -322,8 +697,7 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      streamingByTask: {},
-      streamingThinkingByTask: {},
+      activeTurnByTask: {},
       processingTasks: new Set(),
       highlightedMessageId: null,
     });
@@ -360,5 +734,131 @@ describe('session sync startup flow', () => {
     expect(window.clawwork.loadTasks).toHaveBeenCalledTimes(1);
     expect(window.clawwork.loadMessages).toHaveBeenCalledTimes(1);
     expect(window.clawwork.syncSessions).toHaveBeenCalledTimes(2);
+  });
+
+  it('hydrates persisted tool calls from local storage', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {},
+      activeTurnByTask: {},
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    window.clawwork.loadTasks.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'task-tools',
+          sessionKey: 'agent:main:clawwork:task:task-tools',
+          sessionId: 'session-tools',
+          title: 'Task tools',
+          status: 'active',
+          model: null,
+          modelProvider: null,
+          thinkingLevel: null,
+          inputTokens: null,
+          outputTokens: null,
+          contextTokens: null,
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: 'tasks/task-tools',
+          gatewayId: 'gw-1',
+        },
+      ],
+    });
+    window.clawwork.loadMessages.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'a-tool',
+          taskId: 'task-tools',
+          role: 'assistant',
+          content: 'CPU info',
+          timestamp: '2026-03-16T10:00:01.000Z',
+          toolCalls: [
+            {
+              id: 'exec-1',
+              name: 'exec',
+              status: 'done',
+              result: 'uname -a',
+              startedAt: '2026-03-16T10:00:00.000Z',
+              completedAt: '2026-03-16T10:00:01.000Z',
+            },
+          ],
+        },
+      ],
+    });
+
+    await sessionSync.hydrateFromLocal();
+
+    const msgs = messageStore.useMessageStore.getState().messagesByTask['task-tools'];
+    expect(msgs).toHaveLength(1);
+    expect(msgs[0].toolCalls).toEqual([
+      expect.objectContaining({ id: 'exec-1', name: 'exec', status: 'done', result: 'uname -a' }),
+    ]);
+  });
+
+  it('persists tool calls when syncing assistant messages', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {},
+      activeTurnByTask: {},
+      processingTasks: new Set(),
+      highlightedMessageId: null,
+    });
+
+    window.clawwork.syncSessions.mockResolvedValue({
+      ok: true,
+      discovered: [
+        {
+          gatewayId: 'gw-1',
+          taskId: 'task-persist-tools',
+          sessionKey: 'agent:main:clawwork:task:task-persist-tools',
+          title: 'Persist tools',
+          updatedAt: '2026-03-16T10:00:03.000Z',
+          agentId: 'main',
+          model: 'model-1',
+          modelProvider: 'openclaw',
+          thinkingLevel: 'medium',
+          inputTokens: 1,
+          outputTokens: 2,
+          contextTokens: 3,
+          messages: [
+            { role: 'user', content: '读 CPU', timestamp: '2026-03-16T10:00:00.000Z', toolCalls: [] },
+            {
+              role: 'assistant',
+              content: 'CPU info',
+              timestamp: '2026-03-16T10:00:01.000Z',
+              toolCalls: [
+                {
+                  id: 'exec-1',
+                  name: 'exec',
+                  status: 'done',
+                  result: 'uname -a',
+                  startedAt: '2026-03-16T10:00:00.500Z',
+                  completedAt: '2026-03-16T10:00:01.000Z',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    await sessionSync.syncFromGateway();
+
+    expect(window.clawwork.persistMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        taskId: 'task-persist-tools',
+        role: 'assistant',
+        toolCalls: [expect.objectContaining({ id: 'exec-1', name: 'exec', status: 'done' })],
+      }),
+    );
   });
 });

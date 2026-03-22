@@ -433,7 +433,8 @@ export class GatewayClient {
         error: { message: errMsg, code: frame.error?.code },
         data: { method: pending.method },
       });
-      const err = new Error(errMsg) as Error & { details?: Record<string, unknown> };
+      const err = new Error(errMsg) as Error & { code?: string; details?: Record<string, unknown> };
+      err.code = frame.error?.code;
       if (frame.error?.details) {
         err.details = frame.error.details;
       }
@@ -458,7 +459,9 @@ export class GatewayClient {
           data: { method },
           error: { message: 'not connected' },
         });
-        reject(new Error('not connected'));
+        const notConnErr = new Error('not connected') as Error & { code?: string };
+        notConnErr.code = 'GATEWAY_NOT_CONNECTED';
+        reject(notConnErr);
         return;
       }
 
@@ -481,7 +484,9 @@ export class GatewayClient {
           data: { method },
           error: { message: `request timeout: ${method}` },
         });
-        reject(new Error(`request timeout: ${method}`));
+        const timeoutErr = new Error(`request timeout: ${method}`) as Error & { code?: string };
+        timeoutErr.code = 'TIMEOUT';
+        reject(timeoutErr);
       }, REQ_TIMEOUT_MS);
 
       this.pendingRequests.set(id, {
@@ -698,7 +703,9 @@ export class GatewayClient {
         data: { method: pending.method },
         error: { message: 'connection closed' },
       });
-      pending.reject(new Error('connection closed'));
+      const closeErr = new Error('connection closed') as Error & { code?: string };
+      closeErr.code = 'GATEWAY_CONNECTION_CLOSED';
+      pending.reject(closeErr);
       this.pendingRequests.delete(id);
     }
     if (this.ws) {

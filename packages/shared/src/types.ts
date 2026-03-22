@@ -107,6 +107,28 @@ export interface ToolCall {
   completedAt?: string;
 }
 
+export type ErrorSource = 'local' | 'gateway' | 'upstream' | 'agent' | 'tool' | 'sync' | 'db';
+export type ErrorStage = 'send' | 'stream' | 'final' | 'lifecycle' | 'sync' | 'persist';
+export type Retryable = 'yes' | 'no' | 'unknown';
+
+export interface AppError {
+  source: ErrorSource;
+  stage: ErrorStage;
+  code?: string;
+  rawMessage: string;
+  details?: Record<string, unknown>;
+  retryable: Retryable;
+}
+
+export interface IpcResult<T = unknown> {
+  ok: boolean;
+  result?: T;
+  error?: string;
+  errorCode?: string;
+  errorDetails?: Record<string, unknown>;
+  pairingRequired?: boolean;
+}
+
 // ------------------------------------------------------------
 // Progress tracking (extracted from AI responses)
 // ------------------------------------------------------------

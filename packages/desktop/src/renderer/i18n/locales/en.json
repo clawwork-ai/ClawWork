@@ -208,7 +208,21 @@
   },
   "errors": {
     "requestFailed": "Request failed",
-    "sendFailed": "Send failed"
+    "sendFailed": "Send failed",
+    "serverAborted": "Task interrupted by server",
+    "unknown": "Unknown error",
+    "failed": "failed",
+    "stage": {
+      "send": "Send",
+      "stream": "Stream",
+      "final": "Finalize",
+      "lifecycle": "Agent",
+      "sync": "Sync",
+      "persist": "Persist"
+    }
+  },
+  "agent": {
+    "modelFallback": "Switched to model: {{model}}"
   },
   "chatInput": {
     "describeTask": "Describe your task…",

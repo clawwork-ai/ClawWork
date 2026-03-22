@@ -113,6 +113,7 @@ export function registerDataHandlers(): void {
         content: string;
         timestamp: string;
         imageAttachments?: unknown[];
+        toolCalls?: unknown[];
       },
     ) => {
       if (!isDbReady()) return ipcError(new Error('database not ready'));
@@ -126,6 +127,15 @@ export function registerDataHandlers(): void {
             content: msg.content,
             timestamp: msg.timestamp,
             imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
+            toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
+          })
+          .onConflictDoUpdate({
+            target: [messages.taskId, messages.role, messages.timestamp],
+            set: {
+              content: msg.content,
+              imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
+              toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
+            },
           })
           .run();
         if (msg.role === 'assistant' && msg.content.length > 0) {
@@ -138,9 +148,6 @@ export function registerDataHandlers(): void {
         }
         return { ok: true };
       } catch (err) {
-        if (err instanceof Error && /UNIQUE constraint failed|messages_logical_unique/i.test(err.message)) {
-          return { ok: true };
-        }
         console.error('[data] create-message failed:', err);
         return ipcError(err);
       }
@@ -196,12 +203,18 @@ export function registerDataHandlers(): void {
         ok: true,
         rows: rows.map((r) => {
           let imageAttachments: unknown[] | undefined;
+          let toolCalls: unknown[] | undefined;
           if (r.imageAttachments) {
             try {
               imageAttachments = JSON.parse(r.imageAttachments as string);
             } catch {}
           }
-          return { ...r, imageAttachments };
+          if (r.toolCalls) {
+            try {
+              toolCalls = JSON.parse(r.toolCalls as string);
+            } catch {}
+          }
+          return { ...r, imageAttachments, toolCalls };
         }),
       };
     } catch (err) {

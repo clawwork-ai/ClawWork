@@ -137,6 +137,73 @@ See memory files for detailed phase history and technical pitfalls discovered du
 | `mediaLocalRoots` security check             | File sends may be rejected             | [#20258](https://github.com/openclaw/openclaw/issues/20258), [#36477](https://github.com/openclaw/openclaw/issues/36477) |
 | Session auto-reset at 4 AM                   | Long-running Task context gets cleared | Requires server-side config to disable auto-reset                                                                        |
 
+## Message Persistence Architecture (CRITICAL — do not modify without full review)
+
+### Root Principle: Single Writer per Message Role
+
+Each message role has exactly ONE code path that writes to the SQLite database. Violating this invariant **will** cause message duplication. This architecture was established after multiple duplication regressions caused by dual-write patterns.
+
+| Message Role | Sole DB Writer                            | Source of Truth            | File              |
+| ------------ | ----------------------------------------- | -------------------------- | ----------------- |
+| `user`       | `ChatInput` (after `chat.send` succeeds)  | Client (we are the author) | `ChatInput.tsx`   |
+| `assistant`  | `syncSessionMessages` / `syncFromGateway` | Gateway (`chat.history`)   | `session-sync.ts` |
+| `system`     | `addMessage` (client-generated)           | Client (local status)      | `messageStore.ts` |
+
+### Assistant Message State Machine
+
+```
+                                         sync succeeds
+  ┌────────┐  first delta  ┌───────────┐  state=final  ┌─────────┐  ──────────►  ┌───────────┐
+  │  idle  │ ────────────► │ streaming │ ────────────► │ pending │               │ canonical │
+  └────────┘               └───────────┘               └─────────┘  ◄──────────  └───────────┘
+                                                           │        sync fails       ▲
+                                                           └─► retry (backoff) ──────┘
+                                                           └─► reconnect ────────────┘
+                                                           └─► startup sync ─────────┘
+```
+
+| State     | Storage                          | In DB | In UI                          |
+| --------- | -------------------------------- | ----- | ------------------------------ |
+| streaming | `streamingByTask[taskId]`        | No    | Yes (live text)                |
+| pending   | `pendingAssistantByTask[taskId]` | No    | Yes (finalized, awaiting sync) |
+| canonical | `messagesByTask[taskId]`         | Yes   | Yes (persisted history)        |
+
+**Invariant**: These three storages never contain the same message simultaneously. Streaming becomes pending on `final`. Pending becomes canonical on sync success. Pending is cleared (not promoted) on `error`/`aborted`.
+
+### Key Functions and Their Roles
+
+| Function              | Role                                                                                                                                                      | MUST NOT                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `finalizeStream`      | State transition: streaming → pending. Clears streaming buffers unconditionally.                                                                          | Write to DB. Write to `messagesByTask`.                                             |
+| `syncSessionMessages` | Runtime sync: pending → canonical. Fetches `chat.history`, persists to DB, calls `promotePending`. Serialized per task.                                   | Be called for `error`/`aborted` events.                                             |
+| `syncFromGateway`     | Startup sync: recover history from Gateway on connect. For existing tasks, only syncs assistant messages. For new tasks, syncs all.                       | Write user messages for existing tasks (ChatInput is the sole user message writer). |
+| `promotePending`      | Atomic Zustand update: append canonical to `messagesByTask` + merge pending's `thinkingContent`/`toolCalls`/`runId` + clear pending. Single `set()` call. | Execute as two separate updates (would cause UI flicker/duplication).               |
+| `retrySyncPending`    | On Gateway reconnect, retries sync for all tasks with pending messages.                                                                                   | —                                                                                   |
+
+### Sync Timing
+
+- **Runtime sync**: Triggered immediately after each `state === 'final'` event. Retries with backoff (2s, 4s, 8s) on failure.
+- **Startup sync**: Triggered once on first Gateway connect. Recovers messages that were pending when the app crashed.
+- **Reconnect sync**: `retrySyncPending()` retries all pending tasks when Gateway reconnects.
+
+### DB Unique Index
+
+`messages_dedup ON messages(task_id, role, timestamp)` — This is a **single-writer idempotency guard**, not a dedup strategy. Since the sync path is the sole writer for assistant messages, and all timestamps come from Gateway, the index prevents accidental re-insertion of the same message if sync runs twice.
+
+### PROHIBITED Patterns
+
+**DO NOT introduce any of the following. Each has caused regressions:**
+
+- `finalizeStream` calling `persistMessage` — Creates dual-write with sync path
+- Content-based dedup (`role:content` matching) — Fragile; streaming content differs from Gateway content (leading whitespace, encoding)
+- `content.trim()` as identity/dedup mechanism — Message content is user data, not an identity key
+- Timestamp-based dedup as the "fix" — Timestamps are a side effect of single-writer, not the mechanism that prevents duplication
+- Persisting assistant messages from any path other than `session-sync.ts`
+
+### Protocol Limitation
+
+OpenClaw Gateway `chat.history` does not return per-message IDs. The Gateway's `timestamp` (epoch ms) is the closest to a stable message identifier. The `runId` is present in streaming events but not in history responses. This is why single-writer architecture is necessary — without message IDs, any dual-write scheme requires fragile dedup.
+
 ## Coding Conventions
 
 - TypeScript strict mode; `any` is not allowed
@@ -174,9 +241,32 @@ sqlite3 clawwork.db "SELECT task_id, role, substr(content,1,50), COUNT(*) as cnt
 - `renderer.event.dropped.*` — event dropped (missing session, unknown task, etc.)
 - `renderer.toolcall.upserted` — tool call added/updated
 
-### Main Process Debug Events
+### Main Process Logs (Gateway WS Traffic)
 
-`window.clawwork.reportDebugEvent` forwards renderer events to the main process. These are captured in debug bundle exports (`fix(debug)` PR #125). Use the debug export feature to collect a full event trace.
+Gateway WS runs in Electron main process via Node.js `ws` library — **not visible in DevTools Network tab** (that only shows Vite HMR on :5173).
+
+**Terminal output:** `pnpm dev` terminal prints all `DebugLogger` output in real time:
+
+```
+[info] [gateway] gateway.connect.start {...}
+[debug] [gateway] gateway.req.sent {...}
+[debug] [gateway] gateway.event.received {...}
+```
+
+**Log file:** persisted as ndjson at `app.getPath('logs')` → `~/Library/Logs/@clawwork/desktop/debug-YYYY-MM-DD.ndjson`
+
+```bash
+# Real-time Gateway traffic
+tail -f ~/Library/Logs/@clawwork/desktop/debug-$(date +%Y-%m-%d).ndjson | grep gateway
+
+# Filter specific event types
+tail -f ~/Library/Logs/@clawwork/desktop/debug-$(date +%Y-%m-%d).ndjson | grep 'gateway.event.received'
+
+# Pretty-print with jq
+tail -f ~/Library/Logs/@clawwork/desktop/debug-$(date +%Y-%m-%d).ndjson | jq 'select(.domain=="gateway")'
+```
+
+**Renderer forwarding:** `window.clawwork.reportDebugEvent` forwards renderer events to the main process. These are captured in debug bundle exports (`fix(debug)` PR #125).
 
 ### Zustand State Inspection
 
@@ -199,13 +289,16 @@ window.__ZUSTAND_STORES__?.messageStore?.getState()?.messagesByTask['<taskId>'];
 | Streaming stuck / no final     | DevTools `[debug]` filter → look for `final.received` without `finalized`     |
 | Messages from wrong task       | DevTools `[debug]` filter → check `sessionKey` → `taskId` mapping             |
 | State sync issues (reconnect)  | DevTools `[debug]` filter → look for `syncFromGateway` calls and their timing |
+| Gateway WS not connecting      | `pnpm dev` terminal → look for `gateway.connect.start` / `gateway.ws.error`   |
+| Gateway request timeout/error  | `tail -f` ndjson log → filter `gateway.req.timeout` or `gateway.res.error`    |
+| Gateway event not reaching UI  | ndjson log confirms `gateway.event.received` → DevTools check renderer side   |
 
 ### Past Bug Patterns
 
-| Pattern                               | Root Cause                                                                                                          | Fix Reference                                                                     |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Every message doubled after bot reply | `syncFromGateway` triggered 500ms after each `state==='final'`; client vs server timestamp mismatch broke dedup key | Removed post-final sync trigger; changed dedup to content-counting (no timestamp) |
-| Startup hydration duplicates          | Race between `hydrateFromLocal` and `syncFromGateway`                                                               | Serialized via `hydrationPromise` + DB unique index (#126)                        |
+| Pattern                                 | Root Cause                                                                                                                                                              | Fix                                                                                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Assistant message doubled after restart | `finalizeStream` AND `syncFromGateway` both wrote assistant messages to DB (dual-write). Content/timestamp differed between streaming accumulation and Gateway history. | Eliminated dual-write: `finalizeStream` only writes to Zustand pending state; sync path is the sole DB writer for assistant messages. See "Message Persistence Architecture" section. |
+| Startup hydration duplicates            | Race between `hydrateFromLocal` and `syncFromGateway`                                                                                                                   | Serialized via `hydrationPromise` + DB unique index (#126)                                                                                                                            |
 
 ## Design Documents
 

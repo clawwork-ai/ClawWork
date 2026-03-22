@@ -76,6 +76,10 @@ const ChatMessage = memo(function ChatMessage({
     return () => clearTimeout(timer);
   }, [highlighted, onHighlightDone]);
 
+  if (!isUser && !isSystem && !message.content && message.toolCalls.length === 0 && !message.thinkingContent) {
+    return null;
+  }
+
   if (isSystem) {
     return (
       <div className="flex justify-center py-3">
