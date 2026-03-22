@@ -27,6 +27,7 @@ import {
   type DeviceIdentity,
 } from './device-identity.js';
 import { getDebugLogger } from '../debug/index.js';
+import { ensureGatewayWindowsSystemTrust } from './tls-trust.js';
 
 const WS_CLOSE_POLICY_VIOLATION = 1008;
 const WS_HANDSHAKE_TIMEOUT_MS = 10_000;
@@ -102,6 +103,7 @@ export class GatewayClient {
 
   connect(): void {
     if (this.destroyed) return;
+    ensureGatewayWindowsSystemTrust();
     this.cleanup();
     this.lastError = null;
 

@@ -46,6 +46,7 @@
     "simple-git": "^3.33.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
+    "win-ca": "^3.5.1",
     "ws": "^8.18.0",
     "zustand": "^5.0.11"
   },
