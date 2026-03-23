@@ -23,6 +23,7 @@ const GITHUB_RELEASE_BASE = 'https://github.com/clawwork-ai/clawwork/releases/ta
 let initialized = false;
 let state: UpdaterState = 'idle';
 let inFlightCheck: Promise<UpdateCheckResult> | null = null;
+let installingUpdate = false;
 
 function broadcast(channel: string, data: unknown): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -53,6 +54,10 @@ function classifyError(err: unknown): UpdateErrorCode {
 
 export function isAutoUpdaterAvailable(): boolean {
   return !is.dev && app.isPackaged;
+}
+
+export function isInstallingUpdate(): boolean {
+  return installingUpdate;
 }
 
 export function initAutoUpdater(): void {
@@ -160,6 +165,21 @@ export function installUpdate(): { ok: boolean; error?: string } {
   if (state !== 'downloaded') {
     return { ok: false, error: 'no-downloaded-update' };
   }
-  autoUpdater.quitAndInstall(false, true);
+  installingUpdate = true;
+  getDebugLogger().info({
+    domain: 'updater',
+    event: 'updater.install.requested',
+    data: {
+      version: app.getVersion(),
+      exePath: app.getPath('exe'),
+      appPath: app.getAppPath(),
+      isPackaged: app.isPackaged,
+      isInApplications: process.platform !== 'darwin' || app.getPath('exe').startsWith('/Applications/'),
+    },
+  });
+  setImmediate(() => {
+    getDebugLogger().info({ domain: 'updater', event: 'updater.install.quit-and-install.called' });
+    autoUpdater.quitAndInstall(false, true);
+  });
   return { ok: true };
 }

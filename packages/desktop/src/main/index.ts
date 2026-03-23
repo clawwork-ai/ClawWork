@@ -17,6 +17,7 @@ import { configureVoicePermissionHandlers, registerVoiceHandlers } from './ipc/v
 import { registerTrayHandlers } from './ipc/tray-handlers.js';
 import { registerQuickLaunchHandlers } from './ipc/quick-launch-handlers.js';
 import { registerContextHandlers } from './ipc/context-handlers.js';
+import { isInstallingUpdate } from './auto-updater.js';
 import { initTray, destroyTray, updateTrayWindow } from './tray.js';
 import { initQuickLaunch, destroyQuickLaunch, updateQuickLaunchMainWindow } from './quick-launch.js';
 import { getWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
@@ -202,7 +203,7 @@ app.whenReady().then(() => {
   initQuickLaunch(mainWindow);
 
   mainWindow.on('close', (e) => {
-    if (!isQuitting) {
+    if (!isQuitting && !isInstallingUpdate()) {
       e.preventDefault();
       mainWindow.hide();
     }
@@ -229,7 +230,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   isQuitting = true;
-  getDebugLogger().info({ domain: 'app', event: 'app.before-quit' });
+  getDebugLogger().info({ domain: 'app', event: 'app.before-quit', data: { installingUpdate: isInstallingUpdate() } });
   globalShortcut.unregisterAll();
   destroyAllGateways();
   destroyTray();
