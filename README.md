@@ -105,12 +105,12 @@ ClawWork talks to OpenClaw through the Gateway WebSocket API. Each task gets its
 ┌──────────────────────┐        WebSocket         ┌──────────────────────┐
 │  ClawWork Desktop    │ ◄──────────────────────► │  OpenClaw Gateway    │
 │                      │                          │                      │
-│  Task A              │   chat.send             │  Agent runtime        │
-│  Task B              │   chat stream           │  Session manager      │
-│  Task C              │   tool events           │  Parallel sessions    │
-│                      │   approval requests     │                      │
+│  Task A              │   chat.send              │  Agent runtime       │
+│  Task B              │   chat stream            │  Session manager     │
+│  Task C              │   tool events            │  Parallel sessions   │
+│                      │   approval requests      │                      │
 │  React UI            │                          │                      │
-│  SQLite index        │   route by sessionKey   │                      │
+│  SQLite index        │   route by sessionKey    │                      │
 │  Local workspace     │                          │                      │
 └──────────────────────┘                          └──────────────────────┘
 ```
