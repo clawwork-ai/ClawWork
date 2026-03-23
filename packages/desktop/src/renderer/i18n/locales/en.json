@@ -176,6 +176,7 @@
     "noResults": "No results found"
   },
   "contextMenu": {
+    "rename": "Rename",
     "markCompleted": "Mark Completed",
     "archive": "Archive",
     "reactivate": "Reactivate",

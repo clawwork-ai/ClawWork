@@ -24,6 +24,7 @@ const INITIAL_STATE: MenuState = {
 };
 
 export interface SessionActions {
+  rename: (taskId: string) => void;
   compact: (taskId: string) => void;
   reset: (taskId: string) => void;
   deleteTask: (taskId: string) => void;
@@ -47,6 +48,13 @@ export function useTaskContextMenu(
 
   const items: MenuItem[] = [];
   const connected = state.isOpen && sessionActions ? sessionActions.isConnected(state.taskId) : false;
+
+  if (sessionActions) {
+    items.push({
+      label: i18n.t('contextMenu.rename'),
+      action: () => sessionActions.rename(state.taskId),
+    });
+  }
 
   if (state.taskStatus === 'active') {
     items.push({

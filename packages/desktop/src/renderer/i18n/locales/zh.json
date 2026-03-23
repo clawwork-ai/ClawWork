@@ -176,6 +176,7 @@
     "noResults": "未找到结果"
   },
   "contextMenu": {
+    "rename": "重命名",
     "markCompleted": "标记完成",
     "archive": "归档",
     "reactivate": "重新激活",

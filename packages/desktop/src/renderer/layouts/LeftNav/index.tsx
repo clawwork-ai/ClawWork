@@ -152,6 +152,7 @@ export default function LeftNav() {
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [confirmTaskId, setConfirmTaskId] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const findTask = (taskId: string) => useTaskStore.getState().tasks.find((t) => t.id === taskId);
 
@@ -199,6 +200,7 @@ export default function LeftNav() {
 
   const sessionActions: SessionActions = useMemo(
     () => ({
+      rename: (taskId: string) => setEditingTaskId(taskId),
       compact: handleCompact,
       reset: (taskId: string) => {
         setConfirmTaskId(taskId);
@@ -502,6 +504,8 @@ export default function LeftNav() {
                       active={task.id === activeTaskId}
                       onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
                       multiGateway={hasMultipleGateways}
+                      editing={editingTaskId === task.id}
+                      onEditDone={() => setEditingTaskId(null)}
                     />
                   ))}
                 </>
@@ -518,6 +522,8 @@ export default function LeftNav() {
                       active={task.id === activeTaskId}
                       onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
                       multiGateway={hasMultipleGateways}
+                      editing={editingTaskId === task.id}
+                      onEditDone={() => setEditingTaskId(null)}
                     />
                   ))}
                 </>

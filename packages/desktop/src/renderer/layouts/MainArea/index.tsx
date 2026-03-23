@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import ConnectionBanner from '@/components/ConnectionBanner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -204,6 +204,46 @@ function WelcomeScreen() {
 function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
   const { t } = useTranslation();
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
+  const updateTaskTitle = useTaskStore((s) => s.updateTaskTitle);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  const startTitleEdit = useCallback(() => {
+    if (!activeTask) return;
+    setTitleDraft(activeTask.title);
+    setEditingTitle(true);
+    requestAnimationFrame(() => {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    });
+  }, [activeTask]);
+
+  const commitTitleEdit = useCallback(() => {
+    const trimmed = titleDraft.trim();
+    if (activeTask && trimmed && trimmed !== activeTask.title) {
+      updateTaskTitle(activeTask.id, trimmed);
+    }
+    setEditingTitle(false);
+  }, [titleDraft, activeTask, updateTaskTitle]);
+
+  const cancelTitleEdit = useCallback(() => {
+    setEditingTitle(false);
+  }, []);
+
+  const handleTitleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commitTitleEdit();
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelTitleEdit();
+      }
+    },
+    [commitTitleEdit, cancelTitleEdit],
+  );
   const rightPanelOpen = useUiStore((s) => s.rightPanelOpen);
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const hasMultipleGateways = Object.keys(gatewayInfoMap).length > 1;
@@ -244,9 +284,28 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
       <div className="titlebar-no-drag flex items-center gap-2.5">
         {activeTask ? (
           <>
-            <h2 className="font-medium text-[var(--text-primary)] truncate">
-              {activeTask.title || t('common.newTask')}
-            </h2>
+            {editingTitle ? (
+              <input
+                ref={titleInputRef}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={commitTitleEdit}
+                onKeyDown={handleTitleKeyDown}
+                className="font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-[240px]"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h2
+                    className="font-medium text-[var(--text-primary)] truncate cursor-pointer"
+                    onDoubleClick={startTitleEdit}
+                  >
+                    {activeTask.title || t('common.newTask')}
+                  </h2>
+                </TooltipTrigger>
+                <TooltipContent>{t('contextMenu.rename')}</TooltipContent>
+              </Tooltip>
+            )}
             <span
               className={cn(
                 'text-xs px-2 py-0.5 rounded-md',

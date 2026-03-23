@@ -1,4 +1,4 @@
-import { type MouseEvent } from 'react';
+import { type MouseEvent, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { MessageSquare, Circle, Loader2, Server, Cpu, Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -18,12 +18,48 @@ interface TaskItemProps {
   onContextMenu: (e: MouseEvent) => void;
   collapsed?: boolean;
   multiGateway?: boolean;
+  editing?: boolean;
+  onEditDone?: () => void;
 }
 
-export default function TaskItem({ task, active, onContextMenu, collapsed, multiGateway }: TaskItemProps) {
+export default function TaskItem({
+  task,
+  active,
+  onContextMenu,
+  collapsed,
+  multiGateway,
+  editing,
+  onEditDone,
+}: TaskItemProps) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
+  const updateTaskTitle = useTaskStore((s) => s.updateTaskTitle);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState(task.title);
+
+  useEffect(() => {
+    if (editing) {
+      setDraft(task.title);
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      });
+    }
+  }, [editing, task.title]);
+
+  const commitRename = useCallback(() => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== task.title) {
+      updateTaskTitle(task.id, trimmed);
+    }
+    onEditDone?.();
+  }, [draft, task.title, task.id, updateTaskTitle, onEditDone]);
+
+  const cancelRename = useCallback(() => {
+    onEditDone?.();
+  }, [onEditDone]);
   const clearUnread = useUiStore((s) => s.clearUnread);
   const hasUnread = useUiStore((s) => s.unreadTaskIds.has(task.id));
   const setMainView = useUiStore((s) => s.setMainView);
@@ -101,7 +137,29 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, multi
       <MessageSquare size={16} className="mt-0.5 flex-shrink-0 opacity-50" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="font-medium truncate flex-1">{task.title || t('common.newTask')}</span>
+          {editing ? (
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitRename();
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancelRename();
+                }
+                e.stopPropagation();
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="font-medium flex-1 min-w-0 bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1 py-0 text-[var(--text-primary)] outline-none text-sm"
+            />
+          ) : (
+            <span className="font-medium truncate flex-1">{task.title || t('common.newTask')}</span>
+          )}
           {isStreaming ? (
             <Loader2 size={12} className="flex-shrink-0 animate-spin text-[var(--accent)]" />
           ) : hasUnread ? (
