@@ -272,7 +272,9 @@
     "copyMessage": "Copy message",
     "copyCode": "Copy code",
     "copied": "Copied",
-    "thinkingProcess": "Thinking process"
+    "thinkingProcess": "Thinking process",
+    "toolCallSummary": "{{count}} tool calls executed",
+    "toolCallSummaryWithErrors": "{{count}} tool calls executed ({{errorCount}} failed)"
   },
   "dialog": {
     "selectWorkspaceDir": "Select Workspace Directory",

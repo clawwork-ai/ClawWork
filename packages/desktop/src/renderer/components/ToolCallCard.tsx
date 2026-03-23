@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 
 interface ToolCallCardProps {
   toolCall: ToolCall;
+  defaultOpen?: boolean;
 }
 
 function StatusIcon({ status }: { status: ToolCall['status'] }) {
@@ -21,8 +22,8 @@ function StatusIcon({ status }: { status: ToolCall['status'] }) {
   }
 }
 
-const ToolCallCard = memo(function ToolCallCard({ toolCall }: ToolCallCardProps) {
-  const [open, setOpen] = useState(false);
+const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolCallCardProps) {
+  const [open, setOpen] = useState(defaultOpen ?? false);
 
   const duration = useMemo(() => {
     if (!toolCall.completedAt) return null;

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Brain, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,14 @@ const StreamingMessage = memo(function StreamingMessage({
 }: StreamingMessageProps) {
   const { t } = useTranslation();
   const [thinkingOpen, setThinkingOpen] = useState(true);
+
+  const lastRunningId = useMemo(() => {
+    if (!toolCalls?.length) return null;
+    for (let i = toolCalls.length - 1; i >= 0; i--) {
+      if (toolCalls[i].status === 'running') return toolCalls[i].id;
+    }
+    return null;
+  }, [toolCalls]);
 
   return (
     <motion.div
@@ -75,9 +83,16 @@ const StreamingMessage = memo(function StreamingMessage({
         )}
         {toolCalls?.length ? (
           <div className="mb-2 space-y-1">
-            {toolCalls.map((tc) => (
-              <ToolCallCard key={tc.id} toolCall={tc} />
-            ))}
+            {toolCalls.map((tc) => {
+              const isLatestRunning = tc.id === lastRunningId;
+              return (
+                <ToolCallCard
+                  key={`${tc.id}-${isLatestRunning ? 'expanded' : 'collapsed'}`}
+                  toolCall={tc}
+                  defaultOpen={isLatestRunning}
+                />
+              );
+            })}
           </div>
         ) : null}
         {content && (

@@ -272,7 +272,9 @@
     "copyMessage": "复制消息",
     "copyCode": "复制代码",
     "copied": "已复制",
-    "thinkingProcess": "思考过程"
+    "thinkingProcess": "思考过程",
+    "toolCallSummary": "执行了 {{count}} 个工具调用",
+    "toolCallSummaryWithErrors": "执行了 {{count}} 个工具调用（{{errorCount}} 个失败）"
   },
   "dialog": {
     "selectWorkspaceDir": "选择工作空间目录",

@@ -1,10 +1,11 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Message } from '@clawwork/shared';
-import { Bot, User, Brain, ChevronDown, FileCode } from 'lucide-react';
+import { Bot, User, Brain, ChevronDown, ChevronRight, FileCode, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import ToolCallCard from './ToolCallCard';
 import MarkdownContent from './MarkdownContent';
 
@@ -52,6 +53,53 @@ function FileBlockChip({
       <span className="text-[var(--text-secondary)] font-medium truncate max-w-[200px]">{fileName}</span>
       <span className="text-[var(--text-muted)] flex-shrink-0">{file.lineCount}L</span>
     </button>
+  );
+}
+
+function ToolCallSummary({ toolCalls }: { toolCalls: Message['toolCalls'] }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const errorCount = toolCalls.filter((tc) => tc.status === 'error').length;
+
+  return (
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
+      <CollapsibleTrigger asChild>
+        <button
+          className={cn(
+            'mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+            'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
+            'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
+          )}
+        >
+          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <Wrench size={14} />
+          <span>
+            {errorCount > 0
+              ? t('chatMessage.toolCallSummaryWithErrors', { count: toolCalls.length, errorCount })
+              : t('chatMessage.toolCallSummary', { count: toolCalls.length })}
+          </span>
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent forceMount>
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.15 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-1 space-y-1">
+                {toolCalls.map((tc) => (
+                  <ToolCallCard key={tc.id} toolCall={tc} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -201,13 +249,7 @@ const ChatMessage = memo(function ChatMessage({
             ))}
           </div>
         ) : null}
-        {message.toolCalls.length > 0 && (
-          <div className="mt-2 space-y-1">
-            {message.toolCalls.map((tc) => (
-              <ToolCallCard key={tc.id} toolCall={tc} />
-            ))}
-          </div>
-        )}
+        {message.toolCalls.length > 0 && <ToolCallSummary toolCalls={message.toolCalls} />}
       </div>
     </motion.div>
   );
