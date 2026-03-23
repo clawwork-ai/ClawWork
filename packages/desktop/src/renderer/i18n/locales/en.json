@@ -30,6 +30,7 @@
     "welcomeDesc2": "Files produced along the way are auto-archived.",
     "starOnGithub": "Enjoying ClawWork? Give us a star on GitHub",
     "toggleContextPanel": "Toggle context panel",
+    "moreActions": "More actions",
     "selectGateway": "Select server",
     "selectAgent": "Select agent",
     "defaultAgent": "Default"
@@ -182,7 +183,9 @@
     "reactivate": "Reactivate",
     "compactSession": "Compact Session",
     "resetSession": "Reset Session",
-    "deleteTask": "Delete Task"
+    "deleteTask": "Delete Task",
+    "saveToMarkdown": "Save to Markdown",
+    "exportToFiles": "Export to Files"
   },
   "connection": {
     "connected": "Connected",
@@ -328,5 +331,8 @@
     "retry": "Retry",
     "approved": "Device approved! Connection established.",
     "stillPending": "Not approved yet. Please check the Devices page in OpenClaw Web UI."
+  },
+  "export": {
+    "exportedToFiles": "Exported to Files"
   }
 }

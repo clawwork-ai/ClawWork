@@ -28,6 +28,8 @@ export interface SessionActions {
   compact: (taskId: string) => void;
   reset: (taskId: string) => void;
   deleteTask: (taskId: string) => void;
+  exportMarkdown: (taskId: string) => void;
+  exportMarkdownAs: (taskId: string) => void;
   isConnected: (taskId: string) => boolean;
 }
 
@@ -78,6 +80,14 @@ export function useTaskContextMenu(
       label: i18n.t('contextMenu.resetSession'),
       action: () => sessionActions.reset(state.taskId),
       disabled: !connected,
+    });
+    items.push({
+      label: i18n.t('contextMenu.saveToMarkdown'),
+      action: () => sessionActions.exportMarkdownAs(state.taskId),
+    });
+    items.push({
+      label: i18n.t('contextMenu.exportToFiles'),
+      action: () => sessionActions.exportMarkdown(state.taskId),
     });
     items.push({
       label: i18n.t('contextMenu.deleteTask'),

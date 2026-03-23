@@ -30,6 +30,7 @@
     "welcomeDesc2": "过程中产生的文件会自动归档管理。",
     "starOnGithub": "觉得好用？在 GitHub 上给我们一颗 Star",
     "toggleContextPanel": "切换上下文面板",
+    "moreActions": "更多操作",
     "selectGateway": "选择服务器",
     "selectAgent": "选择智能体",
     "defaultAgent": "默认"
@@ -182,7 +183,9 @@
     "reactivate": "重新激活",
     "compactSession": "压缩会话",
     "resetSession": "重置会话",
-    "deleteTask": "删除任务"
+    "deleteTask": "删除任务",
+    "saveToMarkdown": "保存为 Markdown",
+    "exportToFiles": "导出到文件管理"
   },
   "connection": {
     "connected": "已连接",
@@ -328,5 +331,8 @@
     "retry": "重试",
     "approved": "设备已批准！连接成功。",
     "stillPending": "尚未批准。请检查 OpenClaw Web UI 的设备页面。"
+  },
+  "export": {
+    "exportedToFiles": "已导出到文件管理"
   }
 }

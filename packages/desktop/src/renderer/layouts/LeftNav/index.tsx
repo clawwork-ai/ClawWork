@@ -44,6 +44,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import TaskItem from './TaskItem';
 import ConnectionStatus from './ConnectionStatus';
 import type { TaskStatus } from '@clawwork/shared';
@@ -210,6 +211,8 @@ export default function LeftNav() {
         setConfirmTaskId(taskId);
         setConfirmAction('delete');
       },
+      exportMarkdown: exportToFiles,
+      exportMarkdownAs: exportToLocal,
       isConnected: (taskId: string) => {
         const task = findTask(taskId);
         return task ? gwStatusMap[task.gatewayId] === 'connected' : false;

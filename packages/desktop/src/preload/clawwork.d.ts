@@ -259,6 +259,8 @@ export interface ClawWorkAPI {
   }) => Promise<IpcResult>;
   saveImageFromUrl: (params: { taskId: string; messageId: string; url: string; alt?: string }) => Promise<IpcResult>;
   searchArtifacts: (query: string) => Promise<IpcResult>;
+  exportSessionMarkdown: (taskId: string) => Promise<IpcResult>;
+  exportSessionMarkdownAs: (taskId: string) => Promise<IpcResult>;
 
   // Workspace
   openWorkspaceFolder: () => Promise<void>;
