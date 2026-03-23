@@ -3,24 +3,43 @@ name: Update Homebrew Tap
 on:
   release:
     types: [published]
+  workflow_call:
+    secrets:
+      HOMEBREW_TAP_TOKEN:
+        required: false
+    inputs:
+      tag:
+        type: string
+        required: false
+        description: 'Git tag to publish to Homebrew tap (for example: v0.0.2)'
+      cask_name:
+        type: string
+        required: false
+        default: 'clawwork'
+        description: 'Cask name (e.g., clawwork or clawwork@devel)'
   workflow_dispatch:
     inputs:
       tag:
         description: 'Git tag to publish to Homebrew tap (for example: v0.0.2)'
         required: true
         type: string
+      cask_name:
+        description: 'Cask name (e.g., clawwork or clawwork@devel)'
+        required: false
+        type: string
+        default: 'clawwork'
 
 permissions:
   contents: read
 
 jobs:
   update-homebrew-tap:
-    if: ${{ github.event_name != 'release' || github.event.release.prerelease != true }}
     runs-on: ubuntu-latest
     env:
       CLAWWORK_REPO: clawwork-ai/clawwork
       TAP_DIR: homebrew-clawwork
-      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || (github.event_name == 'workflow_call' && inputs.tag) || github.event.release.tag_name }}
+      CASK_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.cask_name || (github.event_name == 'workflow_call' && inputs.cask_name) || 'clawwork' }}
 
     steps:
       - name: Checkout source repository
@@ -39,6 +58,7 @@ jobs:
           CLAWWORK_REPO: ${{ env.CLAWWORK_REPO }}
           TAP_DIR: ${{ env.TAP_DIR }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          CASK_NAME: ${{ env.CASK_NAME }}
         run: |
           bash scripts/update-homebrew-tap.sh
 
@@ -56,6 +76,6 @@ jobs:
             exit 0
           fi
 
-          git add Casks/clawwork.rb
-          git commit -m "chore: update clawwork cask for ${RELEASE_TAG}"
+          git add "Casks/${CASK_NAME}.rb"
+          git commit -m "chore: update ${CASK_NAME} cask for ${RELEASE_TAG}"
           git push origin HEAD:main

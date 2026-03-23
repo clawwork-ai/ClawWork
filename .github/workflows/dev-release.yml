@@ -142,3 +142,16 @@ jobs:
           make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-homebrew-devel:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Homebrew tap update for devel
+        run: |
+          gh workflow run update-homebrew.yml \
+            --repo clawwork-ai/clawwork \
+            -f tag=dev \
+            -f cask_name=clawwork@devel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

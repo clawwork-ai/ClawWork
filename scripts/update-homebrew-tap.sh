@@ -5,11 +5,15 @@ set -euo pipefail
 CLAWWORK_REPO="${CLAWWORK_REPO:-clawwork-ai/clawwork}"
 TAP_DIR="${TAP_DIR:-homebrew-clawwork}"
 RELEASE_TAG="${RELEASE_TAG:-${GITHUB_REF_NAME:-}}"
+CASK_NAME="${CASK_NAME:-clawwork}"
 
 if [[ -z "${RELEASE_TAG}" ]]; then
   echo "RELEASE_TAG is required" >&2
   exit 1
 fi
+
+# Handle @devel suffix for cask name (clawwork@devel -> clawwork@devel.rb)
+CASK_FILE="${CASK_NAME}.rb"
 
 asset_json="$(gh release view "${RELEASE_TAG}" -R "${CLAWWORK_REPO}" --json assets --jq '.assets[] | select(.name | endswith("-mac-universal.dmg"))' | head -n 1)"
 
@@ -34,7 +38,7 @@ fi
 
 mkdir -p "${TAP_DIR}/Casks"
 
-cat > "${TAP_DIR}/Casks/clawwork.rb" <<EOF
+cat > "${TAP_DIR}/Casks/${CASK_FILE}" <<EOF
 cask "clawwork" do
   version "${version}"
   sha256 "${sha256}"
