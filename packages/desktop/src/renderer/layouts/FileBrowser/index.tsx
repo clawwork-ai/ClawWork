@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useCallback, useRef, useState, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, ChevronRight, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,8 @@ import { motion as motionPresets } from '@/styles/design-tokens';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileCard from '@/components/FileCard';
 import FilePreview from '@/components/FilePreview';
+import { TaskContextMenuPopover, type MenuItem } from '@/components/ContextMenu';
+import { useResizePanel } from '@/hooks/useResizePanel';
 import type { Artifact } from '@clawwork/shared';
 import type { ArtifactSearchResult } from '@/stores/fileStore';
 
@@ -43,6 +45,8 @@ function SnippetHighlight({ snippet }: { snippet: string }) {
   );
 }
 
+type FileMenuState = { artifact: Artifact; position: { x: number; y: number } } | null;
+
 export default function FileBrowser() {
   const { t } = useTranslation();
   const artifacts = useFileStore((s) => s.artifacts);
@@ -66,6 +70,46 @@ export default function FileBrowser() {
   const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [fileMenu, setFileMenu] = useState<FileMenuState>(null);
+
+  const openFileMenu = useCallback((e: MouseEvent, artifact: Artifact) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFileMenu({ artifact, position: { x: e.clientX, y: e.clientY } });
+  }, []);
+
+  const closeFileMenu = useCallback(() => {
+    setFileMenu(null);
+  }, []);
+
+  const handleNavigateToTask = useCallback(
+    (taskId: string, messageId: string) => {
+      setActiveTask(taskId);
+      setHighlightedMessage(messageId);
+      setMainView('chat');
+    },
+    [setActiveTask, setHighlightedMessage, setMainView],
+  );
+
+  const fileMenuItems = useMemo((): MenuItem[] => {
+    if (!fileMenu) return [];
+    const a = fileMenu.artifact;
+    return [
+      {
+        label: t('filePreview.openInEditor'),
+        action: () => window.clawwork.openArtifactFile(a.localPath),
+      },
+      {
+        label: t('filePreview.revealInFolder'),
+        action: () => window.clawwork.showArtifactInFolder(a.localPath),
+      },
+      {
+        label: t('filePreview.goToSourceShort'),
+        action: () => handleNavigateToTask(a.taskId, a.messageId),
+      },
+    ];
+  }, [fileMenu, t, handleNavigateToTask]);
 
   useEffect(() => {
     return () => setSelectedArtifact(null);
@@ -132,14 +176,16 @@ export default function FileBrowser() {
     return Array.from(ids);
   }, [artifacts]);
 
-  const handleNavigateToTask = useCallback(
-    (taskId: string, messageId: string) => {
-      setActiveTask(taskId);
-      setHighlightedMessage(messageId);
-      setMainView('chat');
-    },
-    [setActiveTask, setHighlightedMessage, setMainView],
-  );
+  const {
+    width: panelWidth,
+    isDragging,
+    handleMouseDown,
+  } = useResizePanel({
+    defaultWidth: 360,
+    minWidth: 280,
+    maxWidth: 700,
+    storageKey: 'clawwork:file-preview-width',
+  });
 
   const isSearchMode = searchQuery.trim().length > 0;
 
@@ -258,6 +304,7 @@ export default function FileBrowser() {
                     taskTitle={taskMap.get(a.taskId) ?? a.taskId}
                     selected={a.id === selectedId}
                     onClick={() => setSelectedArtifact(a.id === selectedId ? null : a.id)}
+                    onContextMenu={(e) => openFileMenu(e, a)}
                   />
                 ))}
               </div>
@@ -272,8 +319,23 @@ export default function FileBrowser() {
             {...motionPresets.slideIn}
             initial={{ opacity: 0, x: 16 }}
             exit={{ opacity: 0, x: 16 }}
-            className="relative w-[360px] flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)]"
+            className="relative flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)]"
+            style={{ width: panelWidth }}
           >
+            <div
+              onMouseDown={handleMouseDown}
+              className={cn(
+                'absolute left-0 top-0 bottom-0 w-1 -translate-x-1/2 z-10 cursor-col-resize',
+                'group flex items-center justify-center',
+              )}
+            >
+              <div
+                className={cn(
+                  'w-[3px] h-8 rounded-full transition-colors duration-150',
+                  isDragging ? 'bg-[var(--accent)]' : 'bg-transparent group-hover:bg-[var(--text-muted)]',
+                )}
+              />
+            </div>
             <button
               onClick={() => setSelectedArtifact(null)}
               title="Close preview"
@@ -292,6 +354,13 @@ export default function FileBrowser() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <TaskContextMenuPopover
+        open={fileMenu !== null}
+        position={fileMenu?.position ?? null}
+        items={fileMenuItems}
+        onClose={closeFileMenu}
+      />
     </div>
   );
 }

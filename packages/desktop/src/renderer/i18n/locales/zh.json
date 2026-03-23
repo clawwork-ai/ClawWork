@@ -203,7 +203,10 @@
   },
   "filePreview": {
     "goToSource": "跳转到源消息",
-    "cannotPreview": "无法预览此文件类型"
+    "cannotPreview": "无法预览此文件类型",
+    "openInEditor": "在编辑器中打开",
+    "revealInFolder": "在访达中显示",
+    "goToSourceShort": "跳转到源消息"
   },
   "archived": {
     "empty": "暂无归档对话"

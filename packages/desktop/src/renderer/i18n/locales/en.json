@@ -203,7 +203,10 @@
   },
   "filePreview": {
     "goToSource": "Go to source message",
-    "cannotPreview": "Cannot preview this file type"
+    "cannotPreview": "Cannot preview this file type",
+    "openInEditor": "Open in Editor",
+    "revealInFolder": "Reveal in Finder",
+    "goToSourceShort": "Go to Source"
   },
   "archived": {
     "empty": "No archived chats"

@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, net } from 'electron';
+import { ipcMain, BrowserWindow, net, shell } from 'electron';
 import { readFileSync } from 'fs';
 import { resolve, sep } from 'path';
 import { eq } from 'drizzle-orm';
@@ -75,11 +75,8 @@ export function registerArtifactHandlers(): void {
     const workspacePath = getWorkspacePath();
     if (!workspacePath) return { ok: false, error: 'workspace not configured' };
     try {
-      const normalizedBase = resolve(workspacePath);
-      const fullPath = resolve(normalizedBase, params.localPath);
-      if (!fullPath.startsWith(normalizedBase + sep) && fullPath !== normalizedBase) {
-        return { ok: false, error: 'invalid path' };
-      }
+      const fullPath = resolveArtifactPath(workspacePath, params.localPath);
+      if (!fullPath) return { ok: false, error: 'invalid path' };
       const encoding = isTextFile(params.localPath) ? 'utf-8' : 'base64';
       const content = readFileSync(fullPath, encoding);
       return { ok: true, result: { content, encoding } };
@@ -183,6 +180,33 @@ export function registerArtifactHandlers(): void {
     },
   );
 
+  ipcMain.handle('artifact:open-file', async (_event, params: { localPath: string }) => {
+    const workspacePath = getWorkspacePath();
+    if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+    try {
+      const fullPath = resolveArtifactPath(workspacePath, params.localPath);
+      if (!fullPath) return { ok: false, error: 'invalid path' };
+      const result = await shell.openPath(fullPath);
+      if (result) return { ok: false, error: result };
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    }
+  });
+
+  ipcMain.handle('artifact:show-in-folder', async (_event, params: { localPath: string }) => {
+    const workspacePath = getWorkspacePath();
+    if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+    try {
+      const fullPath = resolveArtifactPath(workspacePath, params.localPath);
+      if (!fullPath) return { ok: false, error: 'invalid path' };
+      shell.showItemInFolder(fullPath);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    }
+  });
+
   ipcMain.handle('artifact:search', async (_event, params: { query: string }) => {
     const sqlite = getSqlite();
     if (!sqlite) return { ok: false, error: 'db not ready' };
@@ -224,4 +248,11 @@ function isTextFile(localPath: string): boolean {
   const dot = localPath.lastIndexOf('.');
   if (dot === -1) return true;
   return TEXT_EXTS.has(localPath.slice(dot).toLowerCase());
+}
+
+function resolveArtifactPath(workspacePath: string, localPath: string): string | null {
+  const base = resolve(workspacePath);
+  const full = resolve(base, localPath);
+  if (!full.startsWith(base + sep) && full !== base) return null;
+  return full;
 }
