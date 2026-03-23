@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
 import { readConfig, ensureDeviceId } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
-import type { ChatAttachment } from '@clawwork/shared';
+import type { ApprovalDecision, ChatAttachment, ExecApprovalResolveParams } from '@clawwork/shared';
 import { getDebugLogger } from '../debug/index.js';
 import type { GatewayClient } from '../ws/gateway-client.js';
 
@@ -450,16 +450,17 @@ export function registerWsHandlers(): void {
     'ws:exec-approval-resolve',
     async (
       _event,
-      payload: {
+      payload: ExecApprovalResolveParams & {
         gatewayId: string;
-        id: string;
-        decision: string;
       },
     ) => {
       const gw = getGatewayClient(payload.gatewayId);
       if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
       try {
-        await gw.sendReq('exec.approval.resolve', { id: payload.id, decision: payload.decision });
+        await gw.sendReq('exec.approval.resolve', {
+          id: payload.id,
+          decision: payload.decision as ApprovalDecision,
+        });
         return { ok: true };
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'unknown error';

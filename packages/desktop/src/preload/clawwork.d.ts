@@ -332,7 +332,7 @@ export interface ClawWorkAPI {
   ) => Promise<IpcResult>;
   getSessionUsage: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
 
-  resolveExecApproval: (gatewayId: string, id: string, decision: string) => Promise<IpcResult>;
+  resolveExecApproval: (gatewayId: string, id: string, decision: ApprovalDecision) => Promise<IpcResult>;
 
   resetSession: (gatewayId: string, sessionKey: string, reason?: 'new' | 'reset') => Promise<IpcResult>;
   deleteSession: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
@@ -367,3 +367,4 @@ declare global {
     clawwork: ClawWorkAPI;
   }
 }
+import type { ApprovalDecision } from '@clawwork/shared';

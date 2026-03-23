@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
+import type { ApprovalDecision } from '@clawwork/shared';
 import type { ClawWorkAPI, GatewayServerConfig } from './clawwork';
 
 function buildApi(): ClawWorkAPI {
@@ -168,7 +169,7 @@ function buildApi(): ClawWorkAPI {
     getSessionUsage: (gatewayId: string, sessionKey: string) =>
       ipcRenderer.invoke('ws:session-usage', { gatewayId, sessionKey }),
 
-    resolveExecApproval: (gatewayId: string, id: string, decision: string) =>
+    resolveExecApproval: (gatewayId: string, id: string, decision: ApprovalDecision) =>
       ipcRenderer.invoke('ws:exec-approval-resolve', { gatewayId, id, decision }),
 
     resetSession: (gatewayId: string, sessionKey: string, reason?: 'new' | 'reset') =>

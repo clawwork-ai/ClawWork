@@ -261,26 +261,64 @@ export interface FileReadResult {
 
 export type ApprovalDecision = 'allow-once' | 'allow-always' | 'deny';
 
+export interface ExecApprovalMutableFileOperand {
+  argvIndex: number;
+  path: string;
+  sha256: string;
+}
+
+export interface ExecApprovalSystemRunBinding {
+  argv: string[];
+  cwd?: string | null;
+  agentId?: string | null;
+  sessionKey?: string | null;
+  envHash?: string | null;
+}
+
+export interface ExecApprovalSystemRunPlan {
+  argv: string[];
+  cwd?: string | null;
+  commandText: string;
+  commandPreview?: string | null;
+  agentId?: string | null;
+  sessionKey?: string | null;
+  mutableFileOperand?: ExecApprovalMutableFileOperand | null;
+}
+
+export interface ExecApprovalRequestDetails {
+  command: string;
+  commandPreview?: string | null;
+  commandArgv?: string[];
+  envKeys?: string[];
+  systemRunBinding?: ExecApprovalSystemRunBinding | null;
+  systemRunPlan?: ExecApprovalSystemRunPlan | null;
+  cwd?: string | null;
+  nodeId?: string | null;
+  host?: string | null;
+  security?: string | null;
+  ask?: string | null;
+  agentId?: string | null;
+  resolvedPath?: string | null;
+  sessionKey?: string | null;
+  turnSourceChannel?: string | null;
+  turnSourceTo?: string | null;
+  turnSourceAccountId?: string | null;
+  turnSourceThreadId?: string | number | null;
+}
+
 export interface ExecApprovalRequest {
   id: string;
-  request: {
-    command: string;
-    cwd?: string | null;
-    host?: string | null;
-    security?: string | null;
-    ask?: string | null;
-    agentId?: string | null;
-    sessionKey?: string | null;
-  };
+  request: ExecApprovalRequestDetails;
   createdAtMs: number;
   expiresAtMs: number;
 }
 
 export interface ExecApprovalResolved {
   id: string;
-  decision?: string | null;
+  decision?: ApprovalDecision | null;
   resolvedBy?: string | null;
   ts?: number | null;
+  request?: ExecApprovalRequestDetails | null;
 }
 
 // ------------------------------------------------------------
