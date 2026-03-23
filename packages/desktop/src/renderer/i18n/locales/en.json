@@ -153,10 +153,7 @@
   },
   "rightPanel": {
     "context": "Context",
-    "progress": "Progress",
     "artifacts": "Artifacts",
-    "noProgress": "No progress info yet",
-    "xOfYCompleted": "{{done}}/{{total}} completed",
     "inputTokens": "Input",
     "outputTokens": "Output",
     "contextUsage": "Context",

@@ -128,15 +128,6 @@ export interface IpcResult<T = unknown> {
 }
 
 // ------------------------------------------------------------
-// Progress tracking (extracted from AI responses)
-// ------------------------------------------------------------
-
-export interface ProgressStep {
-  label: string;
-  status: 'pending' | 'in_progress' | 'completed';
-}
-
-// ------------------------------------------------------------
 // Chat Attachments (for Gateway chat.send)
 // ------------------------------------------------------------
 

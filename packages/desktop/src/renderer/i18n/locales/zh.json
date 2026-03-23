@@ -153,10 +153,7 @@
   },
   "rightPanel": {
     "context": "上下文",
-    "progress": "进度",
     "artifacts": "产物",
-    "noProgress": "暂无进度信息",
-    "xOfYCompleted": "{{done}}/{{total}} 已完成",
     "inputTokens": "输入",
     "outputTokens": "输出",
     "contextUsage": "上下文",
