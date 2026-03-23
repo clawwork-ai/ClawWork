@@ -91,6 +91,8 @@ function buildApi(): ClawWorkAPI {
     searchArtifacts: (query: string) => ipcRenderer.invoke('artifact:search', { query }),
     openArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:open-file', { localPath }),
     showArtifactInFolder: (localPath: string) => ipcRenderer.invoke('artifact:show-in-folder', { localPath }),
+    exportSessionMarkdown: (taskId: string) => ipcRenderer.invoke('session:export-markdown', { taskId }),
+    exportSessionMarkdownAs: (taskId: string) => ipcRenderer.invoke('session:export-markdown-as', { taskId }),
 
     openWorkspaceFolder: () => ipcRenderer.invoke('workspace:open-folder'),
     isWorkspaceConfigured: () => ipcRenderer.invoke('workspace:is-configured') as Promise<boolean>,

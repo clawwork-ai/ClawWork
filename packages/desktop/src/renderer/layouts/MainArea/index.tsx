@@ -17,6 +17,9 @@ import {
   DollarSign,
   RefreshCw,
   AlertTriangle,
+  MoreHorizontal,
+  FileDown,
+  FolderDown,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
@@ -28,6 +31,12 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import ChatMessage from '@/components/ChatMessage';
 import StreamingMessage from '@/components/StreamingMessage';
 import ThinkingIndicator from '@/components/ThinkingIndicator';
@@ -36,6 +45,7 @@ import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
 import FileBrowser from '../FileBrowser';
 import logo from '@/assets/logo.png';
+import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import { useUsageStore } from '@/stores/usageStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayDispatcher';
 
@@ -541,14 +551,40 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
           <h2 className="font-medium text-[var(--text-muted)]">ClawWork</h2>
         )}
       </div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={onTogglePanel} className="titlebar-no-drag">
-            {rightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{t('mainArea.toggleContextPanel')}</TooltipContent>
-      </Tooltip>
+      <div className="titlebar-no-drag flex items-center gap-1">
+        {activeTask && (
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal size={18} />
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>{t('mainArea.moreActions')}</TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportToLocal(activeTask.id)}>
+                <FileDown size={14} />
+                {t('contextMenu.saveToMarkdown')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToFiles(activeTask.id)}>
+                <FolderDown size={14} />
+                {t('contextMenu.exportToFiles')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={onTogglePanel}>
+              {rightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('mainArea.toggleContextPanel')}</TooltipContent>
+        </Tooltip>
+      </div>
     </header>
   );
 }

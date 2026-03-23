@@ -261,6 +261,8 @@ export interface ClawWorkAPI {
   searchArtifacts: (query: string) => Promise<IpcResult>;
   openArtifactFile: (localPath: string) => Promise<IpcResult>;
   showArtifactInFolder: (localPath: string) => Promise<IpcResult>;
+  exportSessionMarkdown: (taskId: string) => Promise<IpcResult>;
+  exportSessionMarkdownAs: (taskId: string) => Promise<IpcResult>;
 
   // Workspace
   openWorkspaceFolder: () => Promise<void>;
