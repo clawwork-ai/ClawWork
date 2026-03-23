@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import { getDb, getSqlite } from '../db/index.js';
 import { artifacts } from '../db/schema.js';
 import { saveArtifact, saveArtifactFromBuffer } from '../artifact/save.js';
-import { commitArtifact } from '../artifact/git.js';
 import { getWorkspacePath } from '../workspace/config.js';
 import { searchArtifacts } from '../db/search.js';
 
@@ -32,13 +31,6 @@ export function registerArtifactHandlers(): void {
         fileName: params.fileName,
         mediaType: params.mediaType,
       });
-
-      const sha = await commitArtifact(workspacePath, artifact.localPath);
-      if (sha) {
-        const db = getDb();
-        db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
-        artifact.gitSha = sha;
-      }
 
       const win = BrowserWindow.getAllWindows()[0];
       if (win) {
@@ -142,12 +134,6 @@ export function registerArtifactHandlers(): void {
           artifactType: 'code',
           contentText: params.content,
         });
-        const sha = await commitArtifact(workspacePath, artifact.localPath, `save: ${artifact.name}`);
-        if (sha) {
-          const db = getDb();
-          db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
-          artifact.gitSha = sha;
-        }
         const win = BrowserWindow.getAllWindows()[0];
         if (win) win.webContents.send('artifact:saved', artifact);
         return { ok: true, result: artifact };
@@ -188,12 +174,6 @@ export function registerArtifactHandlers(): void {
           buffer,
           artifactType: 'image',
         });
-        const sha = await commitArtifact(workspacePath, artifact.localPath, `save: ${artifact.name}`);
-        if (sha) {
-          const db = getDb();
-          db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
-          artifact.gitSha = sha;
-        }
         const win = BrowserWindow.getAllWindows()[0];
         if (win) win.webContents.send('artifact:saved', artifact);
         return { ok: true, result: artifact };

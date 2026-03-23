@@ -9,7 +9,7 @@ This document is the short list of rules that should survive refactors, contribu
 - Task is the primary product object.
 - One Task maps to one OpenClaw session.
 - The three-panel layout is a core product affordance.
-- Artifact persistence is local-first: filesystem first, SQLite index second, Git history third.
+- Artifact persistence is local-first: filesystem first, SQLite index second.
 
 ## Session And Protocol Invariants
 
@@ -23,7 +23,7 @@ This document is the short list of rules that should survive refactors, contribu
 ## Ownership Invariants
 
 - `packages/shared/` owns protocol, constants, and shared types.
-- `packages/desktop/src/main/` owns WebSocket, filesystem, database, Git, workspace config, IPC handlers, and OS integration.
+- `packages/desktop/src/main/` owns WebSocket, filesystem, database, workspace config, IPC handlers, and OS integration.
 - `packages/desktop/src/preload/` owns the typed renderer bridge.
 - `packages/desktop/src/renderer/` owns UI state and presentation.
 - The renderer must cross the process boundary only through `window.clawwork` from preload.
@@ -33,7 +33,6 @@ This document is the short list of rules that should survive refactors, contribu
 
 - Artifact files are stored on disk and treated as the source of durable output.
 - SQLite is the metadata and search index, not the canonical file store.
-- Git tracks local artifact history; it is not the application state machine.
 - Preserve stable workspace paths and per-task artifact directories.
 
 ## UI Invariants

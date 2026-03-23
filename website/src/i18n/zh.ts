@@ -8,7 +8,7 @@ export const zh: Translations = {
   },
   hero: {
     headline: '开源 OpenClaw 桌面客户端',
-    tagline: '并行运行多个 AI 任务，实时观察每次工具调用，所有输出自动提交到 Git。',
+    tagline: '并行运行多个 AI 任务，实时观察每次工具调用，所有输出自动本地保存。',
     badgeMacOS: 'macOS',
     badgeWindows: 'Windows',
     badgeLinux: 'Linux（即将推出）',
@@ -30,8 +30,8 @@ export const zh: Translations = {
         description: '任务列表、带内联工具卡的对话区、上下文面板并排显示。',
       },
       {
-        title: 'Git 版本化产物',
-        description: '每次 AI 输出自动提交到本地 Git 仓库。按任务组织，SHA 可追溯。',
+        title: '本地优先产物',
+        description: 'AI 输出自动保存到专属工作区——按任务分类、SQLite FTS 全文索引、数据完全属于你。',
       },
       {
         title: '全文检索',

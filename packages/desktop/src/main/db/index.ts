@@ -49,7 +49,6 @@ CREATE TABLE IF NOT EXISTS artifacts (
   local_path TEXT NOT NULL,
   mime_type TEXT NOT NULL DEFAULT '',
   size INTEGER NOT NULL DEFAULT 0,
-  git_sha TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
 );
 `;

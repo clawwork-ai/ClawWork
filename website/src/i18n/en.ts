@@ -40,7 +40,7 @@ export const en: Translations = {
   },
   hero: {
     headline: 'Open Source OpenClaw Client',
-    tagline: 'Run parallel AI tasks. Watch every tool call. Every output saved to Git.',
+    tagline: 'Run parallel AI tasks. Watch every tool call. Every output saved locally.',
     badgeMacOS: 'macOS',
     badgeWindows: 'Windows',
     badgeLinux: 'Linux (coming soon)',
@@ -62,8 +62,9 @@ export const en: Translations = {
         description: 'Tasks, conversation with inline tool cards, and context panel side by side.',
       },
       {
-        title: 'Git-Backed Artifacts',
-        description: 'Every AI output auto-committed to a local Git repo. SHA-traceable, organized by task.',
+        title: 'Local-First Artifacts',
+        description:
+          'Every AI output persisted to a dedicated workspace — organized by task, indexed by SQLite FTS, and yours to keep.',
       },
       {
         title: 'Full-Text Search',

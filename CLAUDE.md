@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-ClawWork is an OpenClaw desktop client inspired by Claude Cowork: three-panel layout, parallel multi-task execution, and structured progress tracking. It adds file management capabilities on top — all AI artifacts are automatically persisted to a local Git repo, searchable and traceable.
+ClawWork is an OpenClaw desktop client inspired by Claude Cowork: three-panel layout, parallel multi-task execution, and structured progress tracking. It adds file management capabilities on top — all AI artifacts are automatically persisted locally, searchable and traceable.
 
 **Not** an OpenClaw admin console. **Not** a general-purpose IM client. **Not** a collaboration tool.
 
@@ -19,7 +19,7 @@ ClawWork is an OpenClaw desktop client inspired by Claude Cowork: three-panel la
 │                     │       │                          │
 │ ┌─────────────────┐ │       │  React 19 UI             │
 │ │ Gateway :18789  │ │       │  SQLite (metadata index)  │
-│ │ Agent Engine    │ │       │  Git Repo (artifact VCS)  │
+│ │ Agent Engine    │ │       │                          │
 │ └─────────────────┘ │       │                          │
 └─────────────────────┘       └──────────────────────────┘
 ```
@@ -65,7 +65,6 @@ Desktop → Gateway (:18789): `chat.send` sends user messages (`deliver: false` 
 | Fonts            | Inter Variable (UI) + JetBrains Mono (code) |
 | State Management | Zustand 5                                   |
 | Database         | better-sqlite3 + Drizzle ORM                |
-| Git Operations   | simple-git                                  |
 | Icons            | lucide-react                                |
 | Build            | Vite 6 (via electron-vite)                  |
 | Packaging        | electron-builder (macOS Universal Binary)   |

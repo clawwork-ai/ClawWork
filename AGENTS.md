@@ -19,7 +19,7 @@ If the task touches Gateway behavior, also inspect `~/git/openclaw` before chang
 - ClawWork is an OpenClaw desktop operator client, not an admin console, IM client, or collaboration product.
 - Task is the primary product object.
 - One Task maps to one OpenClaw session.
-- Artifact persistence is local-first: filesystem first, SQLite index second, Git history third.
+- Artifact persistence is local-first: filesystem first, SQLite index second.
 - The three-panel layout is a core product affordance, not optional chrome.
 
 ## Architecture Invariants
@@ -27,7 +27,7 @@ If the task touches Gateway behavior, also inspect `~/git/openclaw` before chang
 - Session key format is `agent:<agentId>:clawwork:task:<taskId>`.
 - Build session keys with `buildSessionKey()` from `@clawwork/shared`.
 - Gateway protocol and shared domain types live in `packages/shared/src/`.
-- The Electron main process owns WebSocket, filesystem, database, Git, workspace config, and OS integration.
+- The Electron main process owns WebSocket, filesystem, database, workspace config, and OS integration.
 - The renderer owns UI state and presentation.
 - The renderer must cross the process boundary only through `window.clawwork` from preload.
 - Gateway broadcasts all session events; routing must stay explicit and keyed by `sessionKey`.

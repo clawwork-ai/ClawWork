@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, GitBranch, CheckSquare, Square, Loader2, Cpu, ArrowUp, ArrowDown, Brain } from 'lucide-react';
+import { FileText, CheckSquare, Square, Loader2, Cpu, ArrowUp, ArrowDown, Brain } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore, EMPTY_MESSAGES } from '@/stores/messageStore';
@@ -89,7 +89,6 @@ export default function RightPanel() {
         <TabsList className="mx-4 mt-10">
           <TabsTrigger value="progress">{t('rightPanel.progress')}</TabsTrigger>
           <TabsTrigger value="artifacts">{t('rightPanel.artifacts')}</TabsTrigger>
-          <TabsTrigger value="git">Git</TabsTrigger>
         </TabsList>
 
         <ScrollArea className="flex-1">
@@ -189,13 +188,6 @@ export default function RightPanel() {
                   </button>
                 ))
               )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="git" className="p-4">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)]">
-              <GitBranch size={15} className="opacity-60" />
-              <span className="truncate">{t('rightPanel.noCommits')}</span>
             </div>
           </TabsContent>
         </ScrollArea>

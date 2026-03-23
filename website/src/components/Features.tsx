@@ -1,10 +1,10 @@
-import { Layers, Columns3, GitBranch, Search, Eye, Network } from 'lucide-react';
+import { Layers, Columns3, HardDrive, Search, Eye, Network } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useI18n } from '../i18n/context';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { FeatureCard } from './FeatureCard';
 
-const ICONS: LucideIcon[] = [Layers, Columns3, GitBranch, Search, Eye, Network];
+const ICONS: LucideIcon[] = [Layers, Columns3, HardDrive, Search, Eye, Network];
 
 function RevealCard({
   delay,

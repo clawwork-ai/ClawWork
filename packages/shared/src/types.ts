@@ -91,8 +91,6 @@ export interface Artifact {
   localPath: string;
   mimeType: string;
   size: number;
-  /** Git commit SHA from auto-commit, empty if not yet committed */
-  gitSha: string;
   contentText?: string;
   createdAt: string;
 }

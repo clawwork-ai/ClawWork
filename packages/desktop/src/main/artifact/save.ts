@@ -90,7 +90,6 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
     localPath,
     mimeType,
     size: stat.size,
-    gitSha: '',
     createdAt: now,
   };
 
@@ -106,7 +105,6 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
       localPath: artifact.localPath,
       mimeType: artifact.mimeType,
       size: artifact.size,
-      gitSha: artifact.gitSha,
       createdAt: artifact.createdAt,
     })
     .run();
@@ -147,7 +145,6 @@ export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParam
     localPath,
     mimeType,
     size: buffer.length,
-    gitSha: '',
     contentText: contentText ?? '',
     createdAt: now,
   };
@@ -164,7 +161,6 @@ export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParam
       localPath: artifact.localPath,
       mimeType: artifact.mimeType,
       size: artifact.size,
-      gitSha: artifact.gitSha,
       createdAt: artifact.createdAt,
       contentText: contentText ?? '',
     })

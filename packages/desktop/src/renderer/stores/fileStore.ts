@@ -15,7 +15,6 @@ export interface ArtifactSearchResult {
   mimeType: string;
   size: number;
   createdAt: string;
-  gitSha: string;
   filePath: string;
   messageId: string;
   contentSnippet?: string;

@@ -3,7 +3,6 @@ import { readFileSync } from 'fs';
 import { resolve, sep } from 'path';
 import { extractImagesFromMarkdown, extractCodeBlocksFromMarkdown } from './extract.js';
 import { saveArtifactFromBuffer } from './save.js';
-import { commitArtifactBatch } from './git.js';
 import { getDb } from '../db/index.js';
 import { artifacts } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
@@ -106,17 +105,6 @@ export async function autoExtractArtifacts(params: AutoExtractParams): Promise<v
   }
 
   if (saved.length === 0) return;
-
-  const sha = await commitArtifactBatch(
-    workspacePath,
-    saved.map((a) => a.localPath),
-  );
-  if (sha) {
-    for (const artifact of saved) {
-      db.update(artifacts).set({ gitSha: sha }).where(eq(artifacts.id, artifact.id)).run();
-      artifact.gitSha = sha;
-    }
-  }
 
   const win = BrowserWindow.getAllWindows()[0];
   if (win) {

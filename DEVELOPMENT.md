@@ -37,7 +37,7 @@ ClawWork is a thin but opinionated desktop layer on top of OpenClaw Gateway.
 - one WebSocket connection per configured gateway
 - one Task = one OpenClaw session
 - many Tasks can run in parallel
-- one workspace = SQLite index + local Git repo + per-task artifact directories
+- one workspace = SQLite index + per-task artifact directories
 
 Session key format:
 
@@ -50,7 +50,6 @@ Rules that shape the whole codebase:
 - Gateway broadcasts all session events; the client must filter by `sessionKey`
 - messages are serial within a session, parallel across sessions
 - artifact files are local files first, database records second
-- Git is for local history of artifacts, not app state sync
 
 ## System Architecture
 
@@ -60,7 +59,7 @@ OpenClaw Gateway (:18789)
               |- ws/          gateway client, auth, reconnect, heartbeat
               |- ipc/         main <-> renderer boundary
               |- db/          SQLite + Drizzle + FTS
-              |- artifact/    file persistence + Git commit
+              |- artifact/    file persistence
               |- workspace/   config + workspace bootstrap
               |- context/     file context scan/read/classify
               |- debug/       ring buffer + NDJSON export
@@ -98,7 +97,7 @@ packages/
       ws/                  GatewayClient and connection lifecycle
       ipc/                 renderer-safe API surface
       db/                  schema, FTS, queries
-      artifact/            save file, detect mime, record DB, commit Git
+      artifact/            save file, detect mime, record DB
       workspace/           app config and workspace init
       context/             @ file context indexing and bounded reads
       debug/               observability and export bundle
@@ -150,12 +149,12 @@ Task is the product primitive, not chat thread cosmetics.
 - session sync reconstructs local tasks from Gateway sessions and histories
 - every bug here is usually a routing bug, session-key bug, or optimistic UI bug
 
-### 3. Workspace, artifacts, and Git
+### 3. Workspace and artifacts
 
 ClawWork persists AI output locally and treats files as first-class product value.
 
-- workspace root contains `.clawwork.db`, `.git/`, `.clawwork-debug/`, and per-task directories
-- `artifact/` saves files, records metadata, and creates Git history
+- workspace root contains `.clawwork.db`, `.clawwork-debug/`, and per-task directories
+- `artifact/` saves files and records metadata
 - never design features that assume cloud-only persistence
 - preserve stable local paths; users may script against the workspace
 
@@ -233,7 +232,7 @@ Gateway approval event
 - TypeScript strict; `any` is a bug unless proven otherwise
 - no comments in code
 - desktop imports shared protocol/types; do not fork types locally
-- main process owns filesystem, DB, Git, WS, and OS integration
+- main process owns filesystem, DB, WS, and OS integration
 - preload is the only renderer bridge; keep it explicit and typed
 - prefer simple data flow over clever abstractions
 - preserve task isolation; avoid hidden cross-task state
