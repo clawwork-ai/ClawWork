@@ -71,6 +71,12 @@ function getModelLabel(model: string | undefined, fallback?: string): string {
   return model.split('/').pop() ?? model;
 }
 
+function formatContextWindow(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K`;
+  return String(tokens);
+}
+
 /** Validate and create blob preview URLs for image files. Returns accepted images. */
 function processImageFiles(files: File[]): PendingImage[] {
   const accepted: PendingImage[] = [];
@@ -993,6 +999,11 @@ export default function ChatInput() {
                       R
                     </span>
                   )}
+                  {currentModelEntry?.contextWindow && (
+                    <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                      {formatContextWindow(currentModelEntry.contextWindow)}
+                    </span>
+                  )}
                   <ChevronDown size={14} className="opacity-50" />
                 </button>
               </DropdownMenuTrigger>
@@ -1013,6 +1024,11 @@ export default function ChatInput() {
                           {m.reasoning && (
                             <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
                               R
+                            </span>
+                          )}
+                          {m.contextWindow && (
+                            <span className="ml-auto pl-2 px-1 py-px rounded text-[11px] font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                              {formatContextWindow(m.contextWindow)}
                             </span>
                           )}
                         </DropdownMenuItem>
