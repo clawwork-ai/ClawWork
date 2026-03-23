@@ -22,6 +22,7 @@ package-lock.json
 
 # Local AI tooling
 .opencode/
+.claude/settings.local.json
 
 # IDE
 .idea/
