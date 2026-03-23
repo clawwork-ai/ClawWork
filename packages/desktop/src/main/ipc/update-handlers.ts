@@ -25,16 +25,6 @@ let fallbackCacheExpiresAt = 0;
 const CACHE_TTL_MS = 30 * 60 * 1000;
 let fallbackInFlight: Promise<UpdateCheckResult> | null = null;
 
-function compareVersions(a: string, b: string): number {
-  const pa = a.split('.').map(Number);
-  const pb = b.split('.').map(Number);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-    if (diff !== 0) return diff;
-  }
-  return 0;
-}
-
 async function githubApiFallback(): Promise<UpdateCheckResult> {
   if (fallbackInFlight) return fallbackInFlight;
 
@@ -58,7 +48,7 @@ async function githubApiFallback(): Promise<UpdateCheckResult> {
       const data = (await resp.json()) as ReleaseInfo;
       const latestVersion = data.tag_name.replace(/^v/, '');
       const releaseUrl = data.html_url;
-      const hasUpdate = compareVersions(latestVersion, currentVersion) > 0;
+      const hasUpdate = latestVersion !== currentVersion;
 
       cachedFallbackResult = { currentVersion, latestVersion, hasUpdate, releaseUrl };
       fallbackCacheExpiresAt = now + CACHE_TTL_MS;
