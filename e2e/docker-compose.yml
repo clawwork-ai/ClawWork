@@ -1,6 +1,6 @@
 services:
   openclaw-gateway:
-    image: ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION:-latest}
+    image: ghcr.io/openclaw/openclaw@${OPENCLAW_DIGEST:-sha256:a5a4c83b773aca85a8ba99cf155f09afa33946c0aa5cc6a9ccb6162738b5da02}
     ports:
       - '28789:18789'
     healthcheck:

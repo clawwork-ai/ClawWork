@@ -63,9 +63,9 @@ jobs:
           echo "${DISPLAY:-unset}"
 
       - name: Pull OpenClaw image
-        run: docker pull ghcr.io/openclaw/openclaw:$OPENCLAW_VERSION
+        run: docker pull ghcr.io/openclaw/openclaw@$OPENCLAW_DIGEST
         env:
-          OPENCLAW_VERSION: latest
+          OPENCLAW_DIGEST: sha256:a5a4c83b773aca85a8ba99cf155f09afa33946c0aa5cc6a9ccb6162738b5da02
 
       - name: Start OpenClaw Gateway
         run: docker compose -f e2e/docker-compose.yml up -d --wait
