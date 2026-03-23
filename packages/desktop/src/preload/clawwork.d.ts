@@ -103,6 +103,23 @@ interface UpdateCheckResult {
   latestVersion: string;
   hasUpdate: boolean;
   releaseUrl: string;
+  releaseNotes?: string | null;
+}
+
+interface UpdateDownloadProgress {
+  percent: number;
+  bytesPerSecond: number;
+  transferred: number;
+  total: number;
+}
+
+interface UpdateDownloadedInfo {
+  version: string;
+}
+
+interface UpdateError {
+  message: string;
+  code: 'dev-not-supported' | 'network' | 'no-release-metadata' | 'signature' | 'unknown';
 }
 
 interface SearchResult {
@@ -275,7 +292,13 @@ export interface ClawWorkAPI {
   testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) => Promise<IpcResult>;
 
   // Updates
+  getAppVersion: () => Promise<string>;
   checkForUpdates: () => Promise<UpdateCheckResult>;
+  downloadUpdate: () => Promise<{ ok: boolean; error?: string }>;
+  installUpdate: () => Promise<{ ok: boolean; error?: string }>;
+  onUpdateDownloadProgress: (callback: (progress: UpdateDownloadProgress) => void) => () => void;
+  onUpdateDownloaded: (callback: (info: UpdateDownloadedInfo) => void) => () => void;
+  onUpdateError: (callback: (error: UpdateError) => void) => () => void;
 
   // Search
   globalSearch: (query: string) => Promise<SearchResponse>;

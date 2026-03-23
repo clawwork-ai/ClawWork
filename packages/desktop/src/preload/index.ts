@@ -114,7 +114,42 @@ function buildApi(): ClawWorkAPI {
     testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) =>
       ipcRenderer.invoke('settings:test-gateway', url, auth),
 
+    getAppVersion: () => ipcRenderer.invoke('app:get-version'),
     checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates'),
+    downloadUpdate: () => ipcRenderer.invoke('app:download-update'),
+    installUpdate: () => ipcRenderer.invoke('app:install-update'),
+    onUpdateDownloadProgress: (callback) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {
+        callback(data as { percent: number; bytesPerSecond: number; transferred: number; total: number });
+      };
+      ipcRenderer.on('update:download-progress', listener);
+      return () => {
+        ipcRenderer.removeListener('update:download-progress', listener);
+      };
+    },
+    onUpdateDownloaded: (callback) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {
+        callback(data as { version: string });
+      };
+      ipcRenderer.on('update:downloaded', listener);
+      return () => {
+        ipcRenderer.removeListener('update:downloaded', listener);
+      };
+    },
+    onUpdateError: (callback) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {
+        callback(
+          data as {
+            message: string;
+            code: 'dev-not-supported' | 'network' | 'no-release-metadata' | 'signature' | 'unknown';
+          },
+        );
+      };
+      ipcRenderer.on('update:error', listener);
+      return () => {
+        ipcRenderer.removeListener('update:error', listener);
+      };
+    },
 
     globalSearch: (query: string) => ipcRenderer.invoke('search:global', query),
 

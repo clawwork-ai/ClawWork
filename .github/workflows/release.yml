@@ -92,31 +92,35 @@ jobs:
       - name: Build Electron app
         run: pnpm --filter @clawwork/desktop build
 
-      - name: Package (${{ matrix.platform }})
-        run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish never -c.buildVersion="$BUILD_VERSION"
+      - name: Package and publish (${{ matrix.platform }})
+        run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION"
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_VERSION: ${{ github.run_number }}
+          EP_PRE_RELEASE: ${{ contains(env.RELEASE_TAG, '-rc') || contains(env.RELEASE_TAG, '-beta') || contains(env.RELEASE_TAG, '-alpha') }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
-      - name: Upload artifacts to release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ env.RELEASE_TAG }}
-          files: |
-            packages/desktop/dist/*.dmg
-            packages/desktop/dist/*.zip
-            packages/desktop/dist/*.exe
-            packages/desktop/dist/*.blockmap
-          draft: false
-          tag_name: ${{ env.RELEASE_TAG }}
-          prerelease: ${{ contains(env.RELEASE_TAG, '-rc') || contains(env.RELEASE_TAG, '-beta') || contains(env.RELEASE_TAG, '-alpha') }}
+  verify-release:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Verify update metadata files
+        run: |
+          ASSETS=$(gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json assets -q '.assets[].name')
+          echo "Release assets:"
+          echo "$ASSETS"
+          echo "$ASSETS" | grep -q "latest-mac.yml" || { echo "::error::latest-mac.yml missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "latest.yml" || { echo "::error::latest.yml missing from release"; exit 1; }
+          echo "All update metadata files present"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-homebrew:
-    needs: release
+    needs: [release, verify-release]
     if: ${{ !contains(inputs.tag || github.ref_name, '-rc') && !contains(inputs.tag || github.ref_name, '-beta') && !contains(inputs.tag || github.ref_name, '-alpha') }}
     runs-on: ubuntu-latest
     steps:

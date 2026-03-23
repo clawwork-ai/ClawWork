@@ -1,4 +1,11 @@
 import { ipcMain, app, net } from 'electron';
+import {
+  initAutoUpdater,
+  isAutoUpdaterAvailable,
+  checkForUpdatesViaUpdater,
+  downloadUpdate,
+  installUpdate,
+} from '../auto-updater.js';
 
 interface ReleaseInfo {
   tag_name: string;
@@ -10,17 +17,31 @@ interface UpdateCheckResult {
   latestVersion: string;
   hasUpdate: boolean;
   releaseUrl: string;
+  releaseNotes?: string | null;
 }
 
-let cachedResult: UpdateCheckResult | null = null;
-let cacheExpiresAt = 0;
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+let cachedFallbackResult: UpdateCheckResult | null = null;
+let fallbackCacheExpiresAt = 0;
+const CACHE_TTL_MS = 30 * 60 * 1000;
+let fallbackInFlight: Promise<UpdateCheckResult> | null = null;
 
-export function registerUpdateHandlers(): void {
-  ipcMain.handle('app:check-for-updates', async (): Promise<UpdateCheckResult> => {
+function compareVersions(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+async function githubApiFallback(): Promise<UpdateCheckResult> {
+  if (fallbackInFlight) return fallbackInFlight;
+
+  const promise = (async (): Promise<UpdateCheckResult> => {
     const now = Date.now();
-    if (cachedResult && now < cacheExpiresAt) {
-      return cachedResult;
+    if (cachedFallbackResult && now < fallbackCacheExpiresAt) {
+      return cachedFallbackResult;
     }
 
     const currentVersion = app.getVersion();
@@ -31,29 +52,49 @@ export function registerUpdateHandlers(): void {
       });
 
       if (!resp.ok) {
-        return { currentVersion, latestVersion: currentVersion, hasUpdate: false, releaseUrl: '' };
+        throw new Error(`GitHub API returned ${resp.status}`);
       }
 
       const data = (await resp.json()) as ReleaseInfo;
       const latestVersion = data.tag_name.replace(/^v/, '');
       const releaseUrl = data.html_url;
-
       const hasUpdate = compareVersions(latestVersion, currentVersion) > 0;
-      cachedResult = { currentVersion, latestVersion, hasUpdate, releaseUrl };
-      cacheExpiresAt = now + CACHE_TTL_MS;
-      return cachedResult;
-    } catch {
-      return { currentVersion, latestVersion: currentVersion, hasUpdate: false, releaseUrl: '' };
+
+      cachedFallbackResult = { currentVersion, latestVersion, hasUpdate, releaseUrl };
+      fallbackCacheExpiresAt = now + CACHE_TTL_MS;
+      return cachedFallbackResult;
+    } finally {
+      fallbackInFlight = null;
     }
-  });
+  })();
+
+  fallbackInFlight = promise;
+  return promise;
 }
 
-function compareVersions(a: string, b: string): number {
-  const pa = a.split('.').map(Number);
-  const pb = b.split('.').map(Number);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-    if (diff !== 0) return diff;
-  }
-  return 0;
+export function registerUpdateHandlers(): void {
+  initAutoUpdater();
+
+  ipcMain.handle('app:get-version', (): string => app.getVersion());
+
+  ipcMain.handle('app:check-for-updates', async (): Promise<UpdateCheckResult> => {
+    if (isAutoUpdaterAvailable()) {
+      return checkForUpdatesViaUpdater();
+    }
+    return githubApiFallback();
+  });
+
+  ipcMain.handle('app:download-update', async (): Promise<{ ok: boolean; error?: string }> => {
+    if (!isAutoUpdaterAvailable()) {
+      return { ok: false, error: 'dev-not-supported' };
+    }
+    return downloadUpdate();
+  });
+
+  ipcMain.handle('app:install-update', (): { ok: boolean; error?: string } => {
+    if (!isAutoUpdaterAvailable()) {
+      return { ok: false, error: 'dev-not-supported' };
+    }
+    return installUpdate();
+  });
 }
