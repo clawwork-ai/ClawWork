@@ -16,8 +16,9 @@ import {
   RotateCcw,
   File,
   FolderPlus,
+  ListTodo,
 } from 'lucide-react';
-import type { MessageImageAttachment, ModelCatalogEntry, ToolEntry, FileIndexEntry } from '@clawwork/shared';
+import type { MessageImageAttachment, ModelCatalogEntry, ToolEntry, Task, Artifact } from '@clawwork/shared';
 import { toast } from 'sonner';
 import { markAbortedByUser } from '@/hooks/useGatewayDispatcher';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from '@/lib/error-format';
@@ -46,7 +47,8 @@ import ToolsCatalog from './ToolsCatalog';
 import SlashArgPicker from './SlashArgPicker';
 import type { ArgOption } from './SlashArgPicker';
 import VoiceIntroDialog from './VoiceIntroDialog';
-import FilePicker from './FilePicker';
+import MentionPicker, { type MentionItem, type MentionTab } from './MentionPicker';
+import { useFileStore } from '../stores/fileStore';
 import {
   filterSlashCommands,
   parseSlashQuery,
@@ -133,11 +135,14 @@ export default function ChatInput() {
   const slashCommands = filterSlashCommands(slashQuery);
   const [dashboardOpen, setDashboardOpen] = useState(false);
 
-  const [filePickerVisible, setFilePickerVisible] = useState(false);
-  const [fileQuery, setFileQuery] = useState('');
-  const [filePickerIndex, setFilePickerIndex] = useState(0);
-  const [selectedFiles, setSelectedFiles] = useState<FileIndexEntry[]>([]);
-  const filePickerItemsRef = useRef<FileIndexEntry[]>([]);
+  const [mentionVisible, setMentionVisible] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionTab, setMentionTab] = useState<MentionTab>('tasks');
+  const [selectedTasks, setSelectedTasks] = useState<Task[]>([]);
+  const [selectedArtifacts, setSelectedArtifacts] = useState<Artifact[]>([]);
+  const mentionItemsRef = useRef<MentionItem[]>([]);
+  const mentionWasVisible = useRef(false);
 
   const [argPickerVisible, setArgPickerVisible] = useState(false);
   const [argPickerCommand, setArgPickerCommand] = useState<SlashCommand | null>(null);
@@ -239,6 +244,11 @@ export default function ChatInput() {
   }, []);
 
   const activeTask = useTaskStore((s) => s.tasks.find((t) => t.id === s.activeTaskId));
+  const allTasks = useTaskStore((s) => s.tasks);
+  const mentionableTasks = useMemo(
+    () => allTasks.filter((t) => t.id !== activeTask?.id && t.title),
+    [allTasks, activeTask?.id],
+  );
 
   const isProcessing = useMessageStore((s) => (activeTask ? s.processingTasks.has(activeTask.id) : false));
   const isStreaming = useMessageStore((s) => {
@@ -363,7 +373,8 @@ export default function ChatInput() {
   useEffect(() => {
     const key = activeTaskId ?? '';
     setContextFolders(foldersByTaskRef.current[key] ?? []);
-    setSelectedFiles([]);
+    setSelectedTasks([]);
+    setSelectedArtifacts([]);
   }, [activeTaskId]);
 
   const handleAddContextFolder = useCallback(async () => {
@@ -417,55 +428,82 @@ export default function ChatInput() {
     });
   }, []);
 
-  const updateFilePicker = useCallback(() => {
+  const updateMentionPicker = useCallback(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     const pos = ta.selectionStart ?? 0;
     const before = ta.value.slice(0, pos);
     const atMatch = before.match(/@([^\s@]*)$/);
     if (atMatch) {
-      setFilePickerVisible(true);
-      setFileQuery(atMatch[1]);
-      setFilePickerIndex(0);
+      if (!mentionWasVisible.current) {
+        const hasArtifacts = useFileStore.getState().artifacts.length > 0;
+        setMentionTab(hasArtifacts ? 'files' : 'tasks');
+      }
+      mentionWasVisible.current = true;
+      setMentionVisible(true);
+      setMentionQuery(atMatch[1]);
+      setMentionIndex(0);
     } else {
-      setFilePickerVisible(false);
+      mentionWasVisible.current = false;
+      setMentionVisible(false);
     }
   }, []);
 
-  const commitFileSelection = useCallback(
-    (entry: FileIndexEntry) => {
-      const ta = textareaRef.current;
-      if (!ta) return;
+  const closeMentionPicker = useCallback(() => {
+    mentionWasVisible.current = false;
+    setMentionVisible(false);
+    setMentionQuery('');
+    setMentionIndex(0);
+  }, []);
 
-      if (selectedFiles.some((f) => f.absolutePath === entry.absolutePath)) {
-        setFilePickerVisible(false);
-        return;
+  const stripAtQuery = useCallback(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const pos = ta.selectionStart ?? 0;
+    const before = ta.value.slice(0, pos);
+    const after = ta.value.slice(pos);
+    const atStart = before.lastIndexOf('@');
+    if (atStart === -1) return;
+    const newBefore = before.slice(0, atStart);
+    ta.value = newBefore + after;
+    ta.style.height = 'auto';
+    ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
+    ta.setSelectionRange(newBefore.length, newBefore.length);
+    ta.focus();
+  }, []);
+
+  const commitMention = useCallback(
+    (item: MentionItem) => {
+      if (item.kind === 'task') {
+        if (selectedTasks.some((t) => t.id === item.task.id)) {
+          closeMentionPicker();
+          return;
+        }
+        stripAtQuery();
+        setSelectedTasks((prev) => [...prev, item.task]);
+      } else {
+        if (selectedArtifacts.some((a) => a.id === item.artifact.id)) {
+          closeMentionPicker();
+          return;
+        }
+        stripAtQuery();
+        setSelectedArtifacts((prev) => [...prev, item.artifact]);
       }
-
-      const pos = ta.selectionStart ?? 0;
-      const before = ta.value.slice(0, pos);
-      const after = ta.value.slice(pos);
-      const atStart = before.lastIndexOf('@');
-      if (atStart === -1) return;
-
-      const newBefore = before.slice(0, atStart);
-      ta.value = newBefore + after;
-      ta.style.height = 'auto';
-      ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
-      const newPos = newBefore.length;
-      ta.setSelectionRange(newPos, newPos);
-      ta.focus();
-
-      setSelectedFiles((prev) => [...prev, entry]);
-      setFilePickerVisible(false);
-      setFileQuery('');
-      setFilePickerIndex(0);
+      closeMentionPicker();
     },
-    [selectedFiles],
+    [selectedTasks, selectedArtifacts, closeMentionPicker, stripAtQuery],
   );
 
-  const removeSelectedFile = useCallback((absolutePath: string) => {
-    setSelectedFiles((prev) => prev.filter((f) => f.absolutePath !== absolutePath));
+  const removeSelectedTask = useCallback((taskId: string) => {
+    setSelectedTasks((prev) => prev.filter((t) => t.id !== taskId));
+  }, []);
+
+  const removeSelectedArtifact = useCallback((id: string) => {
+    setSelectedArtifacts((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  const handleMentionItemsChange = useCallback((items: MentionItem[]) => {
+    mentionItemsRef.current = items;
   }, []);
 
   const handleSend = useCallback(async () => {
@@ -493,46 +531,69 @@ export default function ChatInput() {
     textarea.value = '';
     textarea.style.height = 'auto';
     const images = [...pendingImages];
-    const files = [...selectedFiles];
+    const taskMentions = [...selectedTasks];
+    const artifactMentions = [...selectedArtifacts];
     setPendingImages([]);
-    setSelectedFiles([]);
+    setSelectedTasks([]);
+    setSelectedArtifacts([]);
 
     try {
       let finalContent = content || '';
       const extraAttachments: { mimeType: string; fileName: string; content: string }[] = [];
 
-      if (files.length > 0) {
+      if (taskMentions.length > 0) {
+        let taskContextSize = 0;
+        const blocks = await Promise.all(
+          taskMentions.map(async (mt) => {
+            const res = await window.clawwork.loadMessages(mt.id);
+            if (!res.ok || !res.rows) return '';
+            const msgs = res.rows.filter((m) => m.role === 'user' || m.role === 'assistant');
+            const lines: string[] = [];
+            for (const m of msgs) {
+              const line = `[${m.role}]\n${m.content}`;
+              taskContextSize += new TextEncoder().encode(line).length;
+              if (taskContextSize > MAX_TEXT_TOTAL) {
+                toast.error('Task context exceeds 500KB limit');
+                break;
+              }
+              lines.push(line);
+            }
+            if (lines.length === 0) return '';
+            return `<task-context name="${mt.title}" id="${mt.id}">\n${lines.join('\n\n')}\n</task-context>`;
+          }),
+        );
+        const combined = blocks.filter(Boolean).join('\n\n');
+        if (combined) {
+          finalContent = combined + '\n\n' + finalContent;
+        }
+      }
+
+      if (artifactMentions.length > 0) {
         const readResults = await Promise.all(
-          files.map((f) =>
-            window.clawwork.readContextFile(f.absolutePath, contextFolders).then((res) => ({ file: f, res })),
+          artifactMentions.map((a) =>
+            window.clawwork.readArtifactFile(a.localPath).then((res) => ({ artifact: a, res })),
           ),
         );
 
         const textBlocks: string[] = [];
         let totalTextSize = 0;
 
-        for (const { file: f, res } of readResults) {
+        for (const { artifact: a, res } of readResults) {
           if (!res.ok || !res.result) continue;
-          const read = res.result as {
-            content: string;
-            mimeType: string;
-            size: number;
-            truncated: boolean;
-            tier: string;
-          };
+          const read = res.result as { content: string; encoding: string };
 
-          if (read.tier === 'text') {
+          if (read.encoding === 'utf-8') {
             const blockSize = new TextEncoder().encode(read.content).length;
             totalTextSize += blockSize;
             if (totalTextSize > MAX_TEXT_TOTAL) {
               toast.error('Total file context exceeds 500KB limit');
               break;
             }
-            textBlocks.push(`<file path="${f.relativePath}">\n${read.content}\n</file>`);
-          } else if (read.tier === 'image' || read.tier === 'document') {
+            textBlocks.push(`<file path="${a.name}">\n${read.content}\n</file>`);
+          } else {
             extraAttachments.push({
-              mimeType: read.mimeType,
-              fileName: f.fileName,
+              mimeType: a.mimeType || 'application/octet-stream',
+              fileName: a.name,
               content: read.content,
             });
           }
@@ -553,7 +614,8 @@ export default function ChatInput() {
       if (!task.title) {
         const titleSource =
           content ||
-          (files.length ? `[@${files[0].fileName}]` : '') ||
+          (taskMentions.length ? `[@${taskMentions[0].title}]` : '') ||
+          (artifactMentions.length ? `[@${artifactMentions[0].name}]` : '') ||
           (images.length ? `[${t('chatInput.image')}]` : '');
         const title = titleSource.slice(0, 30).replace(/\n/g, ' ').trim();
         updateTaskTitle(task.id, title + (titleSource.length > 30 ? '\u2026' : ''));
@@ -651,7 +713,8 @@ export default function ChatInput() {
     updateTaskTitle,
     isOffline,
     pendingImages,
-    selectedFiles,
+    selectedTasks,
+    selectedArtifacts,
     contextFolders,
     stopVoiceInput,
     commitPendingTask,
@@ -765,26 +828,33 @@ export default function ChatInput() {
         return;
       }
 
-      if (filePickerVisible) {
+      if (mentionVisible) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const tabs: MentionTab[] = ['tasks', 'files'];
+          setMentionTab((cur) => tabs[(tabs.indexOf(cur) + 1) % tabs.length]);
+          setMentionIndex(0);
+          return;
+        }
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          setFilePickerIndex((i) => i + 1);
+          setMentionIndex((i) => Math.min(i + 1, mentionItemsRef.current.length - 1));
           return;
         }
         if (e.key === 'ArrowUp') {
           e.preventDefault();
-          setFilePickerIndex((i) => Math.max(0, i - 1));
+          setMentionIndex((i) => Math.max(0, i - 1));
           return;
         }
-        if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+        if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
-          const item = filePickerItemsRef.current[filePickerIndex];
-          if (item && item.tier !== 'unsupported') commitFileSelection(item);
+          const item = mentionItemsRef.current[mentionIndex];
+          if (item) commitMention(item);
           return;
         }
         if (e.key === 'Escape') {
           e.preventDefault();
-          setFilePickerVisible(false);
+          closeMentionPicker();
           return;
         }
       }
@@ -856,9 +926,10 @@ export default function ChatInput() {
       }
     },
     [
-      filePickerVisible,
-      filePickerIndex,
-      commitFileSelection,
+      mentionVisible,
+      mentionIndex,
+      commitMention,
+      closeMentionPicker,
       argPickerVisible,
       argPickerOptions,
       argPickerIndex,
@@ -883,8 +954,8 @@ export default function ChatInput() {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
     if (argPickerVisible) closeArgPicker();
     updateSlashMenu();
-    updateFilePicker();
-  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateFilePicker]);
+    updateMentionPicker();
+  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateMentionPicker]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const items = e.clipboardData?.items;
@@ -1150,18 +1221,20 @@ export default function ChatInput() {
             />
           )}
 
-          <FilePicker
-            visible={filePickerVisible}
-            query={fileQuery}
-            folders={contextFolders}
-            selectedIndex={filePickerIndex}
-            onSelect={commitFileSelection}
-            onHoverIndex={setFilePickerIndex}
-            onClose={() => setFilePickerVisible(false)}
-            onItemsChange={(items) => {
-              filePickerItemsRef.current = items;
+          <MentionPicker
+            visible={mentionVisible}
+            query={mentionQuery}
+            tasks={mentionableTasks}
+            activeTab={mentionTab}
+            selectedIndex={mentionIndex}
+            onSelectTask={(task) => commitMention({ kind: 'task', task })}
+            onSelectArtifact={(a) => commitMention({ kind: 'file', artifact: a })}
+            onTabChange={(tab) => {
+              setMentionTab(tab);
+              setMentionIndex(0);
             }}
-            onAddFolder={handleAddContextFolder}
+            onHoverIndex={setMentionIndex}
+            onItemsChange={handleMentionItemsChange}
           />
 
           {argPickerVisible && argPickerCommand && (
@@ -1213,20 +1286,38 @@ export default function ChatInput() {
             </motion.div>
 
             <div className="flex-1 relative min-h-[24px]">
-              {selectedFiles.length > 0 && (
+              {(selectedTasks.length > 0 || selectedArtifacts.length > 0) && (
                 <div className="flex flex-wrap gap-1.5 pb-2">
-                  {selectedFiles.map((f) => (
+                  {selectedTasks.map((task) => (
                     <span
-                      key={f.absolutePath}
+                      key={`task-${task.id}`}
+                      className={cn(
+                        'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
+                        'bg-[var(--accent)]/10 text-[var(--accent)]',
+                      )}
+                    >
+                      <ListTodo size={14} className="flex-shrink-0" />
+                      {task.title}
+                      <button
+                        onClick={() => removeSelectedTask(task.id)}
+                        className="ml-0.5 opacity-50 hover:opacity-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                  {selectedArtifacts.map((a) => (
+                    <span
+                      key={a.id}
                       className={cn(
                         'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
                         'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       )}
                     >
                       <File size={14} className="flex-shrink-0" />
-                      {f.fileName}
+                      {a.name}
                       <button
-                        onClick={() => removeSelectedFile(f.absolutePath)}
+                        onClick={() => removeSelectedArtifact(a.id)}
                         className="ml-0.5 opacity-50 hover:opacity-100"
                       >
                         <X size={12} />
