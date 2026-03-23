@@ -172,6 +172,52 @@ export interface AgentListResponse {
   agents: AgentInfo[];
 }
 
+export interface AgentCreateParams {
+  name: string;
+  workspace: string;
+  emoji?: string;
+  avatar?: string;
+}
+
+export interface AgentCreateResponse {
+  agentId: string;
+  name: string;
+  workspace: string;
+}
+
+export interface AgentUpdateParams {
+  agentId: string;
+  name?: string;
+  workspace?: string;
+  model?: string;
+  avatar?: string;
+  emoji?: string;
+}
+
+export interface AgentDeleteParams {
+  agentId: string;
+  deleteFiles?: boolean;
+}
+
+export interface AgentFileEntry {
+  name: string;
+  path: string;
+  missing: boolean;
+  size?: number;
+  updatedAtMs?: number;
+}
+
+export interface AgentFilesListResponse {
+  agentId: string;
+  workspace: string;
+  files: AgentFileEntry[];
+}
+
+export interface AgentFileContentResponse {
+  agentId: string;
+  file: AgentFileEntry & { content?: string };
+}
+
 export interface ModelCatalogEntry {
   id: string;
   name?: string;

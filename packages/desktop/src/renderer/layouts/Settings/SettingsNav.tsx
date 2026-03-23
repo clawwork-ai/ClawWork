@@ -1,14 +1,15 @@
 import { motion } from 'framer-motion';
-import { Settings2, MonitorDot, Server, Info } from 'lucide-react';
+import { Settings2, MonitorDot, Server, Bot, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
-export type SettingsSection = 'general' | 'system' | 'gateways' | 'about';
+export type SettingsSection = 'general' | 'system' | 'gateways' | 'agents' | 'about';
 
 const NAV_ITEMS: { key: SettingsSection; icon: typeof Settings2; labelKey: string }[] = [
   { key: 'general', icon: Settings2, labelKey: 'settings.general' },
   { key: 'system', icon: MonitorDot, labelKey: 'settings.system' },
   { key: 'gateways', icon: Server, labelKey: 'settings.gateways' },
+  { key: 'agents', icon: Bot, labelKey: 'settings.agents' },
   { key: 'about', icon: Info, labelKey: 'settings.about' },
 ];
 

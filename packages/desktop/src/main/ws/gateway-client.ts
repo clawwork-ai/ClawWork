@@ -563,6 +563,38 @@ export class GatewayClient {
     return this.sendReq('agents.list', {});
   }
 
+  async createAgent(params: {
+    name: string;
+    workspace: string;
+    emoji?: string;
+    avatar?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.create', params);
+  }
+
+  async updateAgent(params: {
+    agentId: string;
+    name?: string;
+    workspace?: string;
+    model?: string;
+    avatar?: string;
+    emoji?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.update', params);
+  }
+
+  async deleteAgent(params: { agentId: string; deleteFiles?: boolean }): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.delete', params);
+  }
+
+  async listAgentFiles(agentId: string): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.files.list', { agentId });
+  }
+
+  async getAgentFile(agentId: string, name: string): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.files.get', { agentId, name });
+  }
+
   async patchSession(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.sendReq('sessions.patch', params);
   }

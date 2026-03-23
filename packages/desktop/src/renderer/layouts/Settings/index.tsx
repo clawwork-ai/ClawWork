@@ -8,12 +8,14 @@ import SettingsNav, { type SettingsSection } from './SettingsNav';
 import GeneralSection from './sections/GeneralSection';
 import SystemSection from './sections/SystemSection';
 import GatewaysSection from './sections/GatewaysSection';
+import AgentsSection from './sections/AgentsSection';
 import AboutSection from './sections/AboutSection';
 
 const SECTION_COMPONENTS: Record<SettingsSection, ComponentType> = {
   general: GeneralSection,
   system: SystemSection,
   gateways: GatewaysSection,
+  agents: AgentsSection,
   about: AboutSection,
 };
 

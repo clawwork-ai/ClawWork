@@ -21,6 +21,25 @@ function buildApi(): ClawWorkAPI {
     listGateways: () => ipcRenderer.invoke('ws:list-gateways'),
     listModels: (gatewayId: string) => ipcRenderer.invoke('ws:models-list', { gatewayId }),
     listAgents: (gatewayId: string) => ipcRenderer.invoke('ws:agents-list', { gatewayId }),
+    createAgent: (gatewayId: string, params: { name: string; workspace: string; emoji?: string; avatar?: string }) =>
+      ipcRenderer.invoke('ws:agents-create', { gatewayId, ...params }),
+    updateAgent: (
+      gatewayId: string,
+      params: {
+        agentId: string;
+        name?: string;
+        workspace?: string;
+        model?: string;
+        avatar?: string;
+        emoji?: string;
+      },
+    ) => ipcRenderer.invoke('ws:agents-update', { gatewayId, ...params }),
+    deleteAgent: (gatewayId: string, params: { agentId: string; deleteFiles?: boolean }) =>
+      ipcRenderer.invoke('ws:agents-delete', { gatewayId, ...params }),
+    listAgentFiles: (gatewayId: string, agentId: string) =>
+      ipcRenderer.invoke('ws:agents-files-list', { gatewayId, agentId }),
+    getAgentFile: (gatewayId: string, agentId: string, name: string) =>
+      ipcRenderer.invoke('ws:agents-files-get', { gatewayId, agentId, name }),
     patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) =>
       ipcRenderer.invoke('ws:session-patch', { gatewayId, sessionKey, patch }),
     getToolsCatalog: (gatewayId: string, agentId?: string) =>

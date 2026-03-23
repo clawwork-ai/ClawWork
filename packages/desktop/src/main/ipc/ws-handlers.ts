@@ -352,17 +352,64 @@ export function registerWsHandlers(): void {
     }
   });
 
-  ipcMain.handle('ws:agents-list', async (_event, payload: { gatewayId: string }) => {
-    const gw = getGatewayClient(payload.gatewayId);
-    if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
-    try {
-      const result = await gw.listAgents();
-      return { ok: true, result };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'unknown error';
-      return { ok: false, error: msg };
-    }
-  });
+  ipcMain.handle('ws:agents-list', async (_event, payload: { gatewayId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.listAgents()),
+  );
+
+  ipcMain.handle(
+    'ws:agents-create',
+    async (_event, payload: { gatewayId: string; name: string; workspace: string; emoji?: string; avatar?: string }) =>
+      gatewayRpc(payload.gatewayId, (gw) =>
+        gw.createAgent({
+          name: payload.name,
+          workspace: payload.workspace,
+          emoji: payload.emoji,
+          avatar: payload.avatar,
+        }),
+      ),
+  );
+
+  ipcMain.handle(
+    'ws:agents-update',
+    async (
+      _event,
+      payload: {
+        gatewayId: string;
+        agentId: string;
+        name?: string;
+        workspace?: string;
+        model?: string;
+        avatar?: string;
+        emoji?: string;
+      },
+    ) =>
+      gatewayRpc(payload.gatewayId, (gw) =>
+        gw.updateAgent({
+          agentId: payload.agentId,
+          name: payload.name,
+          workspace: payload.workspace,
+          model: payload.model,
+          avatar: payload.avatar,
+          emoji: payload.emoji,
+        }),
+      ),
+  );
+
+  ipcMain.handle(
+    'ws:agents-delete',
+    async (_event, payload: { gatewayId: string; agentId: string; deleteFiles?: boolean }) =>
+      gatewayRpc(payload.gatewayId, (gw) =>
+        gw.deleteAgent({ agentId: payload.agentId, deleteFiles: payload.deleteFiles }),
+      ),
+  );
+
+  ipcMain.handle('ws:agents-files-list', async (_event, payload: { gatewayId: string; agentId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.listAgentFiles(payload.agentId)),
+  );
+
+  ipcMain.handle('ws:agents-files-get', async (_event, payload: { gatewayId: string; agentId: string; name: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getAgentFile(payload.agentId, payload.name)),
+  );
 
   ipcMain.handle(
     'ws:session-patch',

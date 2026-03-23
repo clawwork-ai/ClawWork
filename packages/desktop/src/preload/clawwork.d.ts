@@ -208,6 +208,24 @@ export interface ClawWorkAPI {
   // Model / Agent / Session config
   listModels: (gatewayId: string) => Promise<IpcResult>;
   listAgents: (gatewayId: string) => Promise<IpcResult>;
+  createAgent: (
+    gatewayId: string,
+    params: { name: string; workspace: string; emoji?: string; avatar?: string },
+  ) => Promise<IpcResult>;
+  updateAgent: (
+    gatewayId: string,
+    params: {
+      agentId: string;
+      name?: string;
+      workspace?: string;
+      model?: string;
+      avatar?: string;
+      emoji?: string;
+    },
+  ) => Promise<IpcResult>;
+  deleteAgent: (gatewayId: string, params: { agentId: string; deleteFiles?: boolean }) => Promise<IpcResult>;
+  listAgentFiles: (gatewayId: string, agentId: string) => Promise<IpcResult>;
+  getAgentFile: (gatewayId: string, agentId: string, name: string) => Promise<IpcResult>;
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
 
