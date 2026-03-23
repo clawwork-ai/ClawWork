@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, Bot, Crown, Loader2, FileText, X, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -334,6 +334,7 @@ export default function AgentsSection() {
     .filter(([, status]) => status === 'connected')
     .map(([id]) => id)
     .sort();
+  const connectedKey = connectedGatewayIds.join(',');
 
   const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -357,10 +358,10 @@ export default function AgentsSection() {
         ? storeDefaultGatewayId
         : (connectedGatewayIds[0] ?? null);
     setSelectedGatewayId(preferred);
-  }, [connectedGatewayIds.join(','), storeDefaultGatewayId]);
+  }, [connectedKey, connectedGatewayIds, selectedGatewayId, storeDefaultGatewayId]);
 
   const catalog = selectedGatewayId ? agentCatalogByGateway[selectedGatewayId] : null;
-  const agents = catalog?.agents ?? [];
+  const agents = useMemo(() => catalog?.agents ?? [], [catalog]);
   const defaultAgentId = catalog?.defaultId ?? 'main';
   const models = (selectedGatewayId ? modelCatalogByGateway[selectedGatewayId] : null) ?? EMPTY_MODELS;
 
@@ -377,7 +378,7 @@ export default function AgentsSection() {
     if (selectedGatewayId && !agentCatalogByGateway[selectedGatewayId]) {
       refreshAgents();
     }
-  }, [selectedGatewayId]);
+  }, [selectedGatewayId, agentCatalogByGateway, refreshAgents]);
 
   const deletingAgent = deletingAgentId ? agents.find((a) => a.id === deletingAgentId) : null;
 
@@ -402,7 +403,7 @@ export default function AgentsSection() {
     if (!selectedGatewayId || agents.length === 0) return;
     const ids = agents.map((a) => a.id);
     Promise.all(ids.map((id) => fetchAgentMeta(id)));
-  }, [selectedGatewayId, agents.length, fetchAgentMeta]);
+  }, [selectedGatewayId, agents, fetchAgentMeta]);
 
   const openAddForm = useCallback(() => {
     setEditingAgentId(null);
