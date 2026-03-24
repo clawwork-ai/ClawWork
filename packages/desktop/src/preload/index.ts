@@ -1,6 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-import type { ApprovalDecision } from '@clawwork/shared';
+import type {
+  ApprovalDecision,
+  CronJobCreate,
+  CronJobPatch,
+  CronListParams,
+  CronRunParams,
+  CronRunsParams,
+} from '@clawwork/shared';
 import type { ClawWorkAPI, GatewayServerConfig } from './clawwork';
 
 function buildApi(): ClawWorkAPI {
@@ -304,6 +311,19 @@ function buildApi(): ClawWorkAPI {
         ipcRenderer.removeListener('notification:navigate-task', listener);
       };
     },
+
+    listCronJobs: (gatewayId: string, params?: CronListParams) =>
+      ipcRenderer.invoke('ws:cron-list', { gatewayId, ...params }),
+    getCronStatus: (gatewayId: string) => ipcRenderer.invoke('ws:cron-status', { gatewayId }),
+    addCronJob: (gatewayId: string, params: CronJobCreate) =>
+      ipcRenderer.invoke('ws:cron-add', { gatewayId, ...params }),
+    updateCronJob: (gatewayId: string, jobId: string, patch: CronJobPatch) =>
+      ipcRenderer.invoke('ws:cron-update', { gatewayId, jobId, patch }),
+    removeCronJob: (gatewayId: string, jobId: string) => ipcRenderer.invoke('ws:cron-remove', { gatewayId, jobId }),
+    runCronJob: (gatewayId: string, jobId: string, mode?: CronRunParams['mode']) =>
+      ipcRenderer.invoke('ws:cron-run', { gatewayId, jobId, mode }),
+    listCronRuns: (gatewayId: string, params?: CronRunsParams) =>
+      ipcRenderer.invoke('ws:cron-runs', { gatewayId, ...params }),
   };
 }
 

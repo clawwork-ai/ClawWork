@@ -44,6 +44,7 @@ import ChatInput from '@/components/ChatInput';
 import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
 import FileBrowser from '../FileBrowser';
+import CronPanel from '@/layouts/CronPanel';
 import logo from '@/assets/logo.png';
 import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import { useUsageStore } from '@/stores/usageStore';
@@ -290,7 +291,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
     (sessionCost != null && sessionCost > 0);
 
   return (
-    <header className="titlebar-drag flex items-center justify-between h-12 px-5 border-b border-[var(--border)] flex-shrink-0 relative z-[51]">
+    <header className="titlebar-drag flex items-center justify-between h-12 px-5 border-b border-[var(--border)] flex-shrink-0">
       <div className="titlebar-no-drag flex items-center gap-2.5">
         {activeTask ? (
           <>
@@ -804,6 +805,10 @@ export default function MainArea({ onTogglePanel }: MainAreaProps) {
         ) : mainView === 'archived' ? (
           <motion.div key="archived" {...motionPresets.fadeIn} className="flex-1 min-h-0">
             <ArchivedTasks />
+          </motion.div>
+        ) : mainView === 'cron' ? (
+          <motion.div key="cron" {...motionPresets.fadeIn} className="flex-1 min-h-0">
+            <CronPanel />
           </motion.div>
         ) : (
           <motion.div key="chat" {...motionPresets.fadeIn} className="flex flex-col flex-1 min-h-0">

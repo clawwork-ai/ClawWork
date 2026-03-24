@@ -22,7 +22,7 @@ interface UseVoiceInputOptions {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   hasActiveTask: boolean;
   activeTaskKey?: string | null;
-  mainView: 'chat' | 'files' | 'archived';
+  mainView: 'chat' | 'files' | 'archived' | 'cron';
   settingsOpen: boolean;
   loadIntroSeen: () => Promise<boolean>;
   markIntroSeen: () => Promise<void>;

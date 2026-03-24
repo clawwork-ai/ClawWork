@@ -29,6 +29,13 @@ describe('buildSessionKey', () => {
     expect(parseTaskIdFromSessionKey(key)).toBe(taskId);
     expect(parseAgentIdFromSessionKey(key)).toBe('code-review');
   });
+
+  it('round-trips with deviceId', () => {
+    const taskId = 'task-uuid';
+    const key = buildSessionKey(taskId, 'main', 'device-42');
+    expect(key).toBe('agent:main:clawwork:device-42:task:task-uuid');
+    expect(parseTaskIdFromSessionKey(key)).toBe(taskId);
+  });
 });
 
 describe('parseTaskIdFromSessionKey', () => {
@@ -38,6 +45,10 @@ describe('parseTaskIdFromSessionKey', () => {
 
   it('extracts task id from non-main agent session key', () => {
     expect(parseTaskIdFromSessionKey('agent:research:clawwork:task:task-99')).toBe('task-99');
+  });
+
+  it('extracts task id from device-scoped session key', () => {
+    expect(parseTaskIdFromSessionKey('agent:main:clawwork:my-device:task:task-55')).toBe('task-55');
   });
 
   it('handles legacy session key format', () => {
@@ -70,6 +81,18 @@ describe('isClawWorkSession', () => {
 
   it('returns true for non-main agent clawwork keys', () => {
     expect(isClawWorkSession('agent:research:clawwork:task:t1')).toBe(true);
+  });
+
+  it('returns true for device-scoped clawwork keys', () => {
+    expect(isClawWorkSession('agent:main:clawwork:my-device:task:t1')).toBe(true);
+  });
+
+  it('matches device-scoped key when deviceId matches', () => {
+    expect(isClawWorkSession('agent:main:clawwork:my-device:task:t1', 'my-device')).toBe(true);
+  });
+
+  it('rejects device-scoped key when deviceId does not match', () => {
+    expect(isClawWorkSession('agent:main:clawwork:my-device:task:t1', 'other-device')).toBe(false);
   });
 
   it('returns false for other session keys', () => {

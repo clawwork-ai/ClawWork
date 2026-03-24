@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { AgentInfo, ModelCatalogEntry, ToolsCatalog } from '@clawwork/shared';
 import i18n from '../i18n';
 
-type MainView = 'chat' | 'files' | 'archived';
+type MainView = 'chat' | 'files' | 'archived' | 'cron';
 
 export type Theme = 'dark' | 'light' | 'auto';
 

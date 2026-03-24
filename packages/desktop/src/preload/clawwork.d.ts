@@ -419,6 +419,14 @@ export interface ClawWorkAPI {
 
   sendNotification: (params: { title: string; body: string; taskId?: string }) => Promise<IpcResult>;
   onNotificationNavigateTask: (callback: (taskId: string) => void) => () => void;
+
+  listCronJobs: (gatewayId: string, params?: CronListParams) => Promise<IpcResult<CronListResult>>;
+  getCronStatus: (gatewayId: string) => Promise<IpcResult<CronStatusResult>>;
+  addCronJob: (gatewayId: string, params: CronJobCreate) => Promise<IpcResult<CronJob>>;
+  updateCronJob: (gatewayId: string, jobId: string, patch: CronJobPatch) => Promise<IpcResult<CronJob>>;
+  removeCronJob: (gatewayId: string, jobId: string) => Promise<IpcResult>;
+  runCronJob: (gatewayId: string, jobId: string, mode?: 'due' | 'force') => Promise<IpcResult<CronRunResult>>;
+  listCronRuns: (gatewayId: string, params?: CronRunsParams) => Promise<IpcResult>;
 }
 
 declare global {
@@ -426,4 +434,14 @@ declare global {
     clawwork: ClawWorkAPI;
   }
 }
-import type { ApprovalDecision } from '@clawwork/shared';
+import type {
+  ApprovalDecision,
+  CronJob,
+  CronJobCreate,
+  CronJobPatch,
+  CronListParams,
+  CronListResult,
+  CronRunResult,
+  CronRunsParams,
+  CronStatusResult,
+} from '@clawwork/shared';

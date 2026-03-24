@@ -645,6 +645,36 @@ export class GatewayClient {
     return this.sendReq('sessions.usage', params as unknown as Record<string, unknown>);
   }
 
+  async listCronJobs(params?: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.list', params ?? {});
+  }
+
+  async getCronStatus(): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.status', {});
+  }
+
+  async addCronJob(params: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.add', params);
+  }
+
+  async updateCronJob(jobId: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.update', { jobId, patch });
+  }
+
+  async removeCronJob(jobId: string): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.remove', { jobId });
+  }
+
+  async runCronJob(jobId: string, mode?: string): Promise<Record<string, unknown>> {
+    const params: Record<string, unknown> = { jobId };
+    if (mode) params.mode = mode;
+    return this.sendReq('cron.run', params);
+  }
+
+  async listCronRuns(params?: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.sendReq('cron.runs', params ?? {});
+  }
+
   get isConnected(): boolean {
     return this.authenticated && this.ws?.readyState === WebSocket.OPEN;
   }

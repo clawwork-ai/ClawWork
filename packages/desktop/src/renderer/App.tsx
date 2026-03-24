@@ -239,8 +239,6 @@ export default function App() {
   return (
     <TooltipProvider>
       <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
-        <div className="titlebar-drag fixed top-0 left-0 right-0 h-8 z-50" />
-
         <motion.aside
           animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
           transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}

@@ -586,6 +586,39 @@ export function registerWsHandlers(): void {
     reconnectGateway(payload.gatewayId);
     return { ok: true };
   });
+
+  ipcMain.handle('ws:cron-list', async (_event, payload: { gatewayId: string; [k: string]: unknown }) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.listCronJobs(params));
+  });
+
+  ipcMain.handle('ws:cron-status', async (_event, payload: { gatewayId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getCronStatus()),
+  );
+
+  ipcMain.handle('ws:cron-add', async (_event, payload: { gatewayId: string; [k: string]: unknown }) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.addCronJob(params));
+  });
+
+  ipcMain.handle(
+    'ws:cron-update',
+    async (_event, payload: { gatewayId: string; jobId: string; patch: Record<string, unknown> }) =>
+      gatewayRpc(payload.gatewayId, (gw) => gw.updateCronJob(payload.jobId, payload.patch)),
+  );
+
+  ipcMain.handle('ws:cron-remove', async (_event, payload: { gatewayId: string; jobId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.removeCronJob(payload.jobId)),
+  );
+
+  ipcMain.handle('ws:cron-run', async (_event, payload: { gatewayId: string; jobId: string; mode?: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.runCronJob(payload.jobId, payload.mode)),
+  );
+
+  ipcMain.handle('ws:cron-runs', async (_event, payload: { gatewayId: string; [k: string]: unknown }) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.listCronRuns(params));
+  });
 }
 
 function safeJsonParse(raw: string): Record<string, unknown> | undefined {

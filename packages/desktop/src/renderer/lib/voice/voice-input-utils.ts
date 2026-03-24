@@ -1,4 +1,4 @@
-type MainView = 'chat' | 'files' | 'archived';
+type MainView = 'chat' | 'files' | 'archived' | 'cron';
 
 interface InsertTranscriptParams {
   value: string;

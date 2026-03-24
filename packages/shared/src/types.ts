@@ -448,3 +448,195 @@ export interface SessionsUsageResult {
   sessions: SessionUsageEntry[];
   totals: CostUsageTotals;
 }
+
+// ------------------------------------------------------------
+// Cron / Scheduled Tasks (Gateway cron.* RPCs)
+// ------------------------------------------------------------
+
+export type CronSchedule =
+  | { kind: 'at'; at: string }
+  | { kind: 'every'; everyMs: number; anchorMs?: number }
+  | { kind: 'cron'; expr: string; tz?: string; staggerMs?: number };
+
+export type CronSessionTarget = 'main' | 'isolated' | 'current' | `session:${string}`;
+export type CronWakeMode = 'next-heartbeat' | 'now';
+
+export type CronPayload =
+  | { kind: 'systemEvent'; text: string }
+  | {
+      kind: 'agentTurn';
+      message: string;
+      model?: string;
+      fallbacks?: string[];
+      thinking?: string;
+      timeoutSeconds?: number;
+      allowUnsafeExternalContent?: boolean;
+      lightContext?: boolean;
+      deliver?: boolean;
+      channel?: string;
+      to?: string;
+      bestEffortDeliver?: boolean;
+    };
+
+export type CronDeliveryMode = 'none' | 'announce' | 'webhook';
+
+export interface CronFailureDestination {
+  channel?: string;
+  to?: string;
+  accountId?: string;
+  mode?: 'announce' | 'webhook';
+}
+
+export interface CronDelivery {
+  mode: CronDeliveryMode;
+  channel?: string;
+  to?: string;
+  accountId?: string;
+  bestEffort?: boolean;
+  failureDestination?: CronFailureDestination;
+}
+
+export interface CronFailureAlert {
+  after?: number;
+  channel?: string;
+  to?: string;
+  cooldownMs?: number;
+  mode?: 'announce' | 'webhook';
+  accountId?: string;
+}
+
+export type CronRunStatus = 'ok' | 'error' | 'skipped';
+export type CronDeliveryStatus = 'delivered' | 'not-delivered' | 'unknown' | 'not-requested';
+
+export interface CronJobState {
+  nextRunAtMs?: number;
+  runningAtMs?: number;
+  lastRunAtMs?: number;
+  lastRunStatus?: CronRunStatus;
+  lastError?: string;
+  lastDurationMs?: number;
+  consecutiveErrors?: number;
+  lastDelivered?: boolean;
+  lastDeliveryStatus?: CronDeliveryStatus;
+  lastDeliveryError?: string;
+  lastFailureAlertAtMs?: number;
+}
+
+export interface CronJob {
+  id: string;
+  name: string;
+  enabled: boolean;
+  createdAtMs: number;
+  updatedAtMs: number;
+  agentId?: string;
+  sessionKey?: string;
+  description?: string;
+  deleteAfterRun?: boolean;
+  schedule: CronSchedule;
+  sessionTarget: CronSessionTarget;
+  wakeMode: CronWakeMode;
+  payload: CronPayload;
+  delivery?: CronDelivery;
+  failureAlert?: CronFailureAlert | false;
+  state: CronJobState;
+}
+
+export type CronJobCreate = Omit<CronJob, 'id' | 'createdAtMs' | 'updatedAtMs' | 'state'>;
+
+export interface CronJobPatch {
+  name?: string;
+  description?: string;
+  enabled?: boolean;
+  agentId?: string;
+  sessionKey?: string;
+  deleteAfterRun?: boolean;
+  schedule?: CronSchedule;
+  sessionTarget?: CronSessionTarget;
+  wakeMode?: CronWakeMode;
+  payload?: CronPayload;
+  delivery?: CronDelivery;
+  failureAlert?: CronFailureAlert | false;
+}
+
+export interface CronRunLogEntry {
+  ts: number;
+  jobId: string;
+  action: 'finished';
+  status?: CronRunStatus;
+  error?: string;
+  summary?: string;
+  delivered?: boolean;
+  deliveryStatus?: CronDeliveryStatus;
+  deliveryError?: string;
+  sessionId?: string;
+  sessionKey?: string;
+  runAtMs?: number;
+  durationMs?: number;
+  nextRunAtMs?: number;
+  model?: string;
+  provider?: string;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+    total_tokens?: number;
+    cache_read_tokens?: number;
+    cache_write_tokens?: number;
+  };
+  jobName?: string;
+}
+
+export interface CronListParams {
+  enabled?: 'all' | 'enabled' | 'disabled';
+  query?: string;
+  sortBy?: 'nextRunAtMs' | 'updatedAtMs' | 'name';
+  sortDir?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface CronListResult {
+  jobs: CronJob[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+  nextOffset?: number;
+}
+
+export interface CronStatusResult {
+  enabled: boolean;
+  storePath: string;
+  jobs: number;
+  nextWakeAtMs?: number;
+}
+
+export interface CronRunParams {
+  jobId: string;
+  mode?: 'due' | 'force';
+}
+
+export interface CronRunResult {
+  enqueued?: boolean;
+  runId?: string;
+  ran?: boolean;
+  reason?: string;
+}
+
+export interface CronRunsParams {
+  scope?: 'job' | 'all';
+  jobId?: string;
+  limit?: number;
+  offset?: number;
+  statuses?: CronRunStatus[];
+  deliveryStatuses?: CronDeliveryStatus[];
+  query?: string;
+  sortDir?: 'asc' | 'desc';
+}
+
+export interface CronRunsResult {
+  entries: CronRunLogEntry[];
+  total: number;
+  offset: number;
+  limit: number;
+  hasMore: boolean;
+}

@@ -7,7 +7,6 @@ export const GATEWAY_WS_PORT = 18789;
 
 /** ClawWork session key prefix (default agent=main, kept for backward compat) */
 export const SESSION_KEY_PREFIX = 'agent:main:clawwork:task:';
-
 const CLAWWORK_DEVICE_SESSION_RE = /^agent:([^:]+):clawwork:([^:]+):task:(.+)$/;
 const CLAWWORK_SESSION_RE = /^agent:([^:]+):clawwork:task:(.+)$/;
 const LEGACY_SESSION_KEY_RE = /^agent:[^:]+:task-(.+)$/;

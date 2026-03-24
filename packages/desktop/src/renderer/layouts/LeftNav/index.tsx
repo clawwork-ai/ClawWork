@@ -19,6 +19,7 @@ import {
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
+  Clock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
@@ -385,6 +386,17 @@ export default function LeftNav() {
         <div className="w-6 h-px bg-[var(--border)] my-1" />
 
         <IconButton
+          icon={Clock}
+          tooltip={t('leftNav.scheduledTasks')}
+          onClick={() => setMainView('cron')}
+          className={
+            mainView === 'cron'
+              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+          }
+        />
+
+        <IconButton
           icon={Archive}
           tooltip={t('leftNav.archivedChats')}
           onClick={() => setMainView('archived')}
@@ -534,6 +546,20 @@ export default function LeftNav() {
             </div>
           </ScrollArea>
         </div>
+      </div>
+
+      <div className="flex-shrink-0 px-4 pb-1">
+        <NavButton
+          icon={Clock}
+          label={t('leftNav.scheduledTasks')}
+          active={mainView === 'cron'}
+          onClick={() => setMainView('cron')}
+          badge={
+            <span className="ml-auto text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[var(--accent-dim)] text-[var(--accent)]">
+              beta
+            </span>
+          }
+        />
       </div>
 
       <div className="flex-shrink-0 px-4 py-2 border-t border-[var(--border)]">
