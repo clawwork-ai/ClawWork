@@ -3,6 +3,7 @@ import type { Translations } from './en';
 export const zh: Translations = {
   nav: {
     features: '功能',
+    architecture: '架构',
     quickStart: '快速开始',
     github: 'GitHub',
   },
@@ -17,6 +18,10 @@ export const zh: Translations = {
     title: '安装',
     orDownload: '或从',
     githubReleases: 'GitHub Releases',
+  },
+  architecture: {
+    title: '工作原理',
+    subtitle: '通过单一 WebSocket 连接一个或多个 OpenClaw 网关。每个任务拥有独立会话。所有数据本地存储。',
   },
   features: {
     title: '为什么选择 ClawWork',

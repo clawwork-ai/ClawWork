@@ -35,12 +35,11 @@ favicon: ''
 <div class="cw-gradient-border" style="margin-top:24px;padding:12px 24px;background:rgba(17,24,39,0.6);width:fit-content;">
 <p style="font-size:1rem;color:#d1d5db;font-weight:300;font-style:italic;margin:0;">"Not a better chat window —<br/>a <strong style="color:#4ade80;font-weight:600;">parallel task workbench</strong>."</p>
 </div>
-<div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;">
-<span style="padding:4px 12px;background:rgba(74,222,128,0.1);color:#4ade80;font-size:12px;border-radius:9999px;border:1px solid rgba(74,222,128,0.3);font-weight:600;">Electron 34</span>
-<span style="padding:4px 12px;background:rgba(34,211,238,0.1);color:#22d3ee;font-size:12px;border-radius:9999px;border:1px solid rgba(34,211,238,0.3);font-weight:600;">React 19</span>
-<span style="padding:4px 12px;background:rgba(192,132,252,0.1);color:#c084fc;font-size:12px;border-radius:9999px;border:1px solid rgba(192,132,252,0.3);font-weight:600;">Gateway Protocol</span>
-</div>
-<div style="display:flex;align-items:center;gap:12px;margin-top:32px;font-size:0.875rem;opacity:0.4;">
+<a href="https://github.com/clawwork-ai/clawwork" target="_blank" style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;text-decoration:none !important;border-bottom:none !important;color:#9ca3af;font-size:0.8rem;font-family:monospace;">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+clawwork-ai/clawwork
+</a>
+<div style="display:flex;align-items:center;gap:12px;margin-top:12px;font-size:0.875rem;opacity:0.4;">
 <span>samzong</span><span>·</span><span>OpenClaw Community</span><span>·</span><span>2026</span>
 </div>
 </div>
@@ -52,21 +51,62 @@ favicon: ''
 
 ---
 
-## transition: fade-out
-
 # Community Signal
 
-<div class="grid grid-cols-2 gap-8 mt-8">
+<div class="grid grid-cols-2 gap-8 mt-4">
 
-<div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-  <div class="font-semibold mb-3 text-sm opacity-60">GitHub Star Notification</div>
-  <img src="/images/peter-github-star.png" class="rounded-lg border border-gray-600" alt="Peter starred ClawWork on GitHub" />
+<div class="bg-gray-800/50 rounded-xl p-6 border border-yellow-400/25" style="border-top:2px solid rgba(251,191,36,0.4);">
+<div class="font-semibold mb-3 text-sm text-yellow-400/70">GitHub Star Notification</div>
+<img src="/images/peter-github-star.png" class="rounded-lg border border-gray-600" style="max-height: 240px; width: auto; object-fit: contain;" alt="Peter starred ClawWork on GitHub" />
+<div class="mt-3 text-sm opacity-50 italic">The person who built OpenClaw thinks this project is worth watching.</div>
+</div>
+
+<div class="bg-gray-800/50 rounded-xl p-6 border border-green-400/25" style="border-top:2px solid rgba(74,222,128,0.4);">
+<div class="font-semibold mb-3 text-sm text-green-400/70">Star History</div>
+<img src="https://api.star-history.com/svg?repos=clawwork-ai/ClawWork&type=Date" class="rounded-lg" style="max-height: 240px; width: 100%; object-fit: contain;" alt="Star History Chart" />
 </div>
 
 </div>
 
-<div class="mt-8 text-center text-sm opacity-50 italic">
-  The person who built OpenClaw thinks this project is worth watching.
+---
+
+# About Me
+
+<div style="display:grid;grid-template-columns:200px 1fr;gap:32px;margin-top:8px;height:85%;">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+<img src="https://github.com/samzong.png" style="width:120px;height:120px;border-radius:50%;border:3px solid rgba(74,222,128,0.3);box-shadow:0 0 30px rgba(74,222,128,0.08);" alt="Samzong" />
+<div style="font-size:22px;font-weight:700;color:#4ade80;margin-top:4px;">Samzong</div>
+<div style="font-size:13px;opacity:0.4;margin-top:-4px;">(船长)</div>
+<a href="https://github.com/samzong" target="_blank" style="font-size:12px;opacity:0.4;color:#9ca3af;text-decoration:none !important;border-bottom:none !important;">github.com/samzong</a>
+<div style="font-size:11px;opacity:0.35;text-align:center;line-height:1.6;margin-top:8px;">Inference scheduling<br/>Multi-model routing<br/>Production LLMOps<br/>Cloud-native AI</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+<div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:12px;border:1.5px solid rgba(74,222,128,0.35);background:rgba(74,222,128,0.06);">
+<img src="/images/clawwork-logo.png" style="width:40px;height:40px;border-radius:10px;" alt="ClawWork" />
+<div style="flex:1;">
+<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:16px;font-weight:700;color:#4ade80;">Author of ClawWork</span><span style="font-size:13px;opacity:0.5;">⭐ 287</span></div>
+<div style="font-size:12px;opacity:0.5;margin-top:4px;">Open Source OpenClaw Desktop Client — parallel tasks, structured artifacts, scheduled automation</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;margin-top:6px;">
+<div style="display:flex;flex-direction:column;gap:6px;">
+<div style="font-size:15px;font-weight:700;color:#22d3ee;">Open Source</div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://github.com/vllm-project.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#4ade80;font-weight:600;">Committer</span><span style="color:#d1d5db;">semantic-router</span><span style="opacity:0.35;margin-left:auto;">⭐ 3.5k</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://github.com/llm-d.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#22d3ee;font-weight:600;">Contrib</span><span style="color:#d1d5db;">llm-d</span><span style="opacity:0.35;margin-left:auto;">⭐ 2.7k</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://github.com/Project-HAMi.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#22d3ee;font-weight:600;">Contrib</span><span style="color:#d1d5db;">HAMi · Kueue</span><span style="opacity:0.35;margin-left:auto;">⭐ 3.1k · 2.4k</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://github.com/istio.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#22d3ee;font-weight:600;">Contrib</span><span style="color:#d1d5db;">Istio · Karmada · K8s</span><span style="opacity:0.35;margin-left:auto;">⭐ 38k+</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;">
+<div style="font-size:15px;font-weight:700;color:#c084fc;">Side Projects</div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://raw.githubusercontent.com/samzong/chrome-tabboost/main/src/assets/icons/icon128.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#d1d5db;font-weight:600;">Chrome TabBoost</span><span style="opacity:0.35;margin-left:auto;">⭐ 81</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://raw.githubusercontent.com/samzong/MacMusicPlayer/main/MacMusicPlayer/Assets.xcassets/AppIcon.appiconset/icon_256x256_2x.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#d1d5db;font-weight:600;">MacMusicPlayer</span><span style="opacity:0.35;margin-left:auto;">⭐ 75</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://raw.githubusercontent.com/samzong/ConfigForge/main/ConfigForge/Assets.xcassets/Logo.imageset/logo.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#d1d5db;font-weight:600;">ConfigForge</span><span style="opacity:0.35;margin-left:auto;">⭐ 41</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://raw.githubusercontent.com/samzong/gmc/main/logo.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#d1d5db;font-weight:600;">gmc</span><span style="opacity:0.35;margin-left:auto;">⭐ 10</span></div>
+<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(31,41,55,0.4);border-radius:6px;border:1px solid rgba(55,65,81,0.5);font-size:13px;"><img src="https://raw.githubusercontent.com/samzong/hf-model-downloader/main/assets/icon.png" style="width:20px;height:20px;border-radius:4px;" /><span style="color:#d1d5db;font-weight:600;">hf-model-downloader</span><span style="opacity:0.35;margin-left:auto;">⭐ 23</span></div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:2px;opacity:0.45;"><img src="https://raw.githubusercontent.com/samzong/mdctl/main/mdctl.png" style="width:20px;height:20px;border-radius:4px;" title="mdctl" /><img src="https://raw.githubusercontent.com/samzong/ai-icon-generator/main/public/logo.png" style="width:20px;height:20px;border-radius:4px;" title="ai-icon-generator" /><img src="https://raw.githubusercontent.com/samzong/SaveEye/main/SaveEye/Resources/Assets.xcassets/Logo.imageset/logo.png" style="width:20px;height:20px;border-radius:4px;" title="SaveEye" /><img src="https://raw.githubusercontent.com/samzong/LogoWallpaper/main/LogoWallpaper/Assets.xcassets/AppIcon.appiconset/logo-256.png" style="width:20px;height:20px;border-radius:4px;" title="LogoWallpaper" /><span style="font-size:11px;color:#9ca3af;">+5 more</span></div>
+</div>
+</div>
+</div>
 </div>
 
 ---
@@ -136,47 +176,29 @@ A desktop client for OpenClaw, **built for parallel work**.
 
 # Architecture at a Glance
 
-Single WebSocket, **Multiple Sessions**
+<div class="grid grid-cols-2 gap-8 mt-4" style="align-items: start;">
 
-<div class="grid grid-cols-2 gap-12 mt-6">
-
-<div class="flex flex-col items-center gap-4">
-  <div class="px-6 py-3 rounded-xl border-2 border-green-400 bg-gray-800/60 font-mono text-sm shadow-lg shadow-green-400/10">
-    🖥 ClawWork Desktop
-  </div>
-  <div class="text-green-400 text-xl">⇅</div>
-  <div class="text-xs font-mono opacity-50">WebSocket</div>
-  <div class="px-6 py-3 rounded-xl border border-gray-600 bg-gray-800/40 font-mono text-sm">
-    Gateway :18789
-  </div>
-  <div class="flex gap-3 mt-2">
-    <div class="px-4 py-2 rounded-lg border border-green-400/50 bg-gray-800/40 text-xs text-center">
-      Session A<br/><span class="opacity-50">Task 1</span>
-    </div>
-    <div class="px-4 py-2 rounded-lg border border-cyan-400/50 bg-gray-800/40 text-xs text-center">
-      Session B<br/><span class="opacity-50">Task 2</span>
-    </div>
-    <div class="px-4 py-2 rounded-lg border border-purple-400/50 bg-gray-800/40 text-xs text-center">
-      Session C<br/><span class="opacity-50">Task 3</span>
-    </div>
-  </div>
+<div>
+  <img src="/images/architecture.svg" class="rounded-xl" style="max-height: 380px; width: 100%; object-fit: contain;" alt="ClawWork Architecture" />
 </div>
 
 <div>
 
-**Session Key Format**
+Single WebSocket, **Multiple Gateways, Parallel Sessions**
 
-```
-agent:<agentId>:clawwork:task:<taskId>
-```
-
-- One connection multiplexes all sessions
-- Each task gets isolated message stream
-- Streaming events routed by `sessionKey`
-- No cross-talk between tasks
-
-<div class="mt-4 p-4 bg-green-400/5 border border-green-400/20 rounded-xl text-sm">
-  <strong class="text-green-400">Desktop vs Text Client:</strong> ClawWork uses dedicated RPC (<code>exec.approval.resolve</code>) for tool approvals — not chat messages.
+<div class="mt-4 space-y-3">
+  <div class="px-3 py-2 bg-green-400/5 border border-green-400/20 rounded-lg text-xs">
+    <strong class="text-green-400">Session Key</strong>
+    <p class="m-0 mt-1 opacity-70"><code>agent:&lt;id&gt;:clawwork:task:&lt;taskId&gt;</code></p>
+  </div>
+  <div class="px-3 py-2 bg-cyan-400/5 border border-cyan-400/20 rounded-lg text-xs">
+    <strong class="text-cyan-400">Isolation</strong>
+    <p class="m-0 mt-1 opacity-70">Events routed by sessionKey — no cross-talk between tasks</p>
+  </div>
+  <div class="px-3 py-2 bg-purple-400/5 border border-purple-400/20 rounded-lg text-xs">
+    <strong class="text-purple-400">Desktop RPC</strong>
+    <p class="m-0 mt-1 opacity-70">Dedicated <code>exec.approval.resolve</code> — not chat messages</p>
+  </div>
 </div>
 
 </div>
@@ -185,52 +207,78 @@ agent:<agentId>:clawwork:task:<taskId>
 
 ---
 
-## layout: default
-
 # Three-Panel Layout
+
+<div class="grid grid-cols-2 gap-8 mt-4" style="align-items: start;">
+
+<div>
+  <img src="/images/three-panel-full.png" class="rounded-xl border border-gray-700 shadow-2xl" style="max-height: 380px; width: 100%; object-fit: contain;" alt="ClawWork three-panel layout" />
+</div>
+
+<div>
 
 Left — Center — Right, everything visible at once
 
-<div class="mt-4">
-  <img src="/images/three-panel-full.png" class="rounded-xl border border-gray-700 shadow-2xl" alt="ClawWork three-panel layout" />
-</div>
-
-<div class="mt-3 grid grid-cols-3 gap-4 text-center text-sm">
-  <div class="p-2 bg-gray-800/40 rounded-lg border border-gray-700/50">
+<div class="mt-4 space-y-3">
+  <div class="p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
     <strong class="text-green-400">Left Nav</strong>
-    <p class="text-xs opacity-50 mt-1">Task list + gateway selector</p>
+    <p class="text-xs opacity-60 mt-1 m-0">Task list + gateway selector + cron jobs</p>
   </div>
-  <div class="p-2 bg-gray-800/40 rounded-lg border border-gray-700/50">
+  <div class="p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
     <strong class="text-cyan-400">Center</strong>
-    <p class="text-xs opacity-50 mt-1">Chat / File browser / Archive</p>
+    <p class="text-xs opacity-60 mt-1 m-0">Chat with streaming, tool cards, approval prompts</p>
   </div>
-  <div class="p-2 bg-gray-800/40 rounded-lg border border-gray-700/50">
+  <div class="p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
     <strong class="text-purple-400">Right Panel</strong>
-    <p class="text-xs opacity-50 mt-1">Progress + Artifacts</p>
+    <p class="text-xs opacity-60 mt-1 m-0">Progress tracking + artifact browser</p>
   </div>
 </div>
 
-<div class="mt-3 flex items-center gap-4 text-sm opacity-60">
-  <span>Resizable drag dividers</span>
+<div class="mt-4 flex items-center gap-3 text-sm opacity-50">
+  <span>Resizable dividers</span>
   <kbd class="px-2 py-0.5 bg-gray-800 border border-gray-600 rounded text-xs font-mono">⌘K</kbd>
   <span>Collapse sidebar</span>
+</div>
+
+</div>
+
 </div>
 
 ---
 
 # Multi-Session in Action
 
-Three tasks running in parallel — each with isolated context
+<div class="grid grid-cols-2 gap-8 mt-4" style="align-items: start;">
 
-<div class="mt-6">
-  <img src="/images/multi-session-parallel.png" class="rounded-xl border border-gray-700 shadow-2xl" alt="Three tasks running in parallel" />
+<div>
+  <img src="/images/multi-session-parallel.png" class="rounded-xl border border-gray-700 shadow-2xl" style="max-height: 380px; width: 100%; object-fit: contain;" alt="Three tasks running in parallel" />
 </div>
 
-<div class="mt-4 p-4 bg-white/2 border border-gray-700 rounded-xl flex gap-8 text-sm">
-  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-400"></div> Status badges</div>
-  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-cyan-400"></div> Animated spinners</div>
-  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-purple-400"></div> Unread indicators</div>
-  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-400"></div> Relative timestamps</div>
+<div>
+
+Three tasks running in parallel — each with isolated context
+
+<div class="mt-4 space-y-3">
+  <div class="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
+    <div class="w-2.5 h-2.5 rounded-full bg-green-400 shrink-0"></div>
+    <span class="text-sm">Status badges — running, idle, done</span>
+  </div>
+  <div class="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
+    <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 shrink-0"></div>
+    <span class="text-sm">Animated spinners for active sessions</span>
+  </div>
+  <div class="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
+    <div class="w-2.5 h-2.5 rounded-full bg-purple-400 shrink-0"></div>
+    <span class="text-sm">Unread indicators per task</span>
+  </div>
+  <div class="flex items-center gap-3 p-3 bg-gray-800/40 rounded-lg border border-gray-700/50">
+    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 shrink-0"></div>
+    <span class="text-sm">Relative timestamps</span>
+  </div>
+</div>
+
+</div>
+
 </div>
 
 ---
@@ -285,7 +333,7 @@ Every file the Agent produces, automatically collected
 
 <div>
   <h3 class="text-green-400 font-semibold mb-3">File Browser</h3>
-  <img src="/images/file-browser.png" class="rounded-xl border border-gray-700" alt="Artifact file browser" />
+  <img src="/images/file-browser.png" class="rounded-xl border border-gray-700" style="max-height: 300px; width: auto; object-fit: contain;" alt="Artifact file browser" />
 </div>
 
 <div>
@@ -313,7 +361,7 @@ You always know how much runway you have
 <div class="grid grid-cols-2 gap-8 mt-6">
 
 <div>
-  <img src="/images/token-usage.png" class="rounded-xl border border-gray-700" alt="Token usage dashboard" />
+  <img src="/images/token-usage.png" class="rounded-xl border border-gray-700" style="max-height: 300px; width: auto; object-fit: contain;" alt="Token usage dashboard" />
 </div>
 
 <div>
@@ -375,64 +423,73 @@ You always know how much runway you have
 
 Things we learned the hard way — so you don't have to
 
-<div class="mt-6 space-y-3 max-w-3xl">
-  <div class="flex items-center gap-4 bg-gray-800/40 rounded-xl p-4 border border-gray-700/50">
-    <div class="w-9 h-9 rounded-lg bg-red-400/15 flex items-center justify-center shrink-0">⚠</div>
-    <p class="text-sm"><strong>Gateway broadcasts ALL session events</strong> — client must filter by sessionKey</p>
+<div class="grid grid-cols-2 gap-3 mt-4">
+
+<div class="space-y-3">
+  <div class="flex items-center gap-3 bg-gray-800/40 rounded-xl p-3 border border-gray-700/50">
+    <div class="w-8 h-8 rounded-lg bg-red-400/15 flex items-center justify-center shrink-0 text-sm">⚠</div>
+    <p class="text-xs m-0"><strong>Gateway broadcasts ALL events</strong> — client must filter by sessionKey</p>
   </div>
-  <div class="flex items-center gap-4 bg-gray-800/40 rounded-xl p-4 border border-gray-700/50">
-    <div class="w-9 h-9 rounded-lg bg-yellow-400/15 flex items-center justify-center shrink-0">⚠</div>
-    <p class="text-sm"><code>chat.history</code> has <strong>no per-message ID</strong> — timestamps are the closest stable identifier</p>
+  <div class="flex items-center gap-3 bg-gray-800/40 rounded-xl p-3 border border-gray-700/50">
+    <div class="w-8 h-8 rounded-lg bg-yellow-400/15 flex items-center justify-center shrink-0 text-sm">⚠</div>
+    <p class="text-xs m-0">Streaming content may <strong>differ from history</strong> (whitespace, encoding)</p>
   </div>
-  <div class="flex items-center gap-4 bg-gray-800/40 rounded-xl p-4 border border-gray-700/50">
-    <div class="w-9 h-9 rounded-lg bg-yellow-400/15 flex items-center justify-center shrink-0">⚠</div>
-    <p class="text-sm">Streaming content may <strong>differ from history content</strong> (whitespace, encoding)</p>
-  </div>
-  <div class="flex items-center gap-4 bg-gray-800/40 rounded-xl p-4 border border-gray-700/50">
-    <div class="w-9 h-9 rounded-lg bg-green-400/15 flex items-center justify-center shrink-0">💡</div>
-    <p class="text-sm"><code class="text-green-400">deliver: false</code> is essential — otherwise messages get sent to external channels</p>
-  </div>
-  <div class="flex items-center gap-4 bg-gray-800/40 rounded-xl p-4 border border-gray-700/50">
-    <div class="w-9 h-9 rounded-lg bg-green-400/15 flex items-center justify-center shrink-0">💡</div>
-    <p class="text-sm">Single-writer architecture is <strong>not optional</strong> for reliable message persistence</p>
+  <div class="flex items-center gap-3 bg-gray-800/40 rounded-xl p-3 border border-gray-700/50">
+    <div class="w-8 h-8 rounded-lg bg-green-400/15 flex items-center justify-center shrink-0 text-sm">💡</div>
+    <p class="text-xs m-0"><strong>Single-writer</strong> architecture is not optional for reliable persistence</p>
   </div>
 </div>
 
-<p class="mt-4 text-sm opacity-40 italic">Real issues. Some with open GitHub issues. Happy to discuss after.</p>
+<div class="space-y-3">
+  <div class="flex items-center gap-3 bg-gray-800/40 rounded-xl p-3 border border-gray-700/50">
+    <div class="w-8 h-8 rounded-lg bg-yellow-400/15 flex items-center justify-center shrink-0 text-sm">⚠</div>
+    <p class="text-xs m-0"><code>chat.history</code> has <strong>no per-message ID</strong> — timestamps are the closest stable identifier</p>
+  </div>
+  <div class="flex items-center gap-3 bg-gray-800/40 rounded-xl p-3 border border-gray-700/50">
+    <div class="w-8 h-8 rounded-lg bg-green-400/15 flex items-center justify-center shrink-0 text-sm">💡</div>
+    <p class="text-xs m-0"><code class="text-green-400">deliver: false</code> is essential — otherwise messages get sent to external channels</p>
+  </div>
+</div>
+
+</div>
+
+<p class="mt-3 text-xs opacity-40 italic">Real issues. Some with open GitHub issues. Happy to discuss after.</p>
 
 ---
 
 # Current Status & What's Next
 
-<div class="grid grid-cols-2 gap-10 mt-6">
+<div class="grid grid-cols-2 gap-10 mt-4">
 
 <div>
-  <h3 class="text-green-400 font-semibold mb-4">✓ Done</h3>
-  <ul class="space-y-2 text-sm">
-    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Full three-panel layout with resize & collapse</li>
+  <h3 class="text-green-400 font-semibold mb-3">✓ Shipping (v0.0.10)</h3>
+  <ul class="space-y-1.5 text-sm">
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Three-panel layout with resize & collapse</li>
     <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Multi-session parallel task execution</li>
-    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Streaming with real-time progress extraction</li>
-    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Artifact aggregation with file browser & search</li>
-    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> SQLite persistence, Gateway reconnect recovery</li>
-    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> macOS Universal Binary packaging</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Streaming, tool cards, approval prompts</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Artifact auto-extract, file browser & FTS</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Agent management & tools catalog</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Usage & cost dashboard</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> In-app auto-update & session export</li>
+    <li class="flex items-center gap-2"><span class="text-green-400 font-bold">✓</span> Cron scheduling, desktop notifications</li>
   </ul>
 </div>
 
 <div>
-  <h3 class="text-cyan-400 font-semibold mb-4">○ Next</h3>
-  <ul class="space-y-2 text-sm opacity-70">
-    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Artifact version tracking (Git-backed)</li>
-    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Cross-task artifact referencing</li>
-    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Plugin system for custom artifact handlers</li>
-    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Windows / Linux builds</li>
+  <h3 class="text-cyan-400 font-semibold mb-3">○ Next</h3>
+  <ul class="space-y-1.5 text-sm opacity-70">
+    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Linux packages</li>
+    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Conversation branching</li>
+    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Artifact diff view</li>
+    <li class="flex items-center gap-2"><span class="opacity-40">○</span> Custom themes</li>
   </ul>
 
-  <div class="mt-6 p-4 bg-green-400/5 border border-green-400/15 rounded-xl">
+  <div class="mt-4 p-3 bg-green-400/5 border border-green-400/15 rounded-xl">
     <div class="text-[10px] uppercase tracking-wider opacity-50 mb-1">Dev Velocity</div>
     <div class="text-2xl font-extrabold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
-      10 Days, 13 Releases
+      12 Days, 10 Releases
     </div>
-    <p class="text-sm opacity-50">v0.0.1 → v0.0.9 (Mar 13–22)</p>
+    <p class="text-sm opacity-50">v0.0.1 → v0.0.10 (Mar 13–24)</p>
   </div>
 </div>
 
@@ -445,31 +502,40 @@ class: text-center
 
 ---
 
-# Stop Switching Tabs.<br/>Start Running Tasks.
+# Stop Switching Tabs, Start Running Tasks.
 
-<div class="mt-6 inline-block px-8 py-4 bg-gray-800 rounded-xl border border-gray-600 font-mono text-lg">
-  github.com/<span class="text-green-400">samzong</span>/<span class="text-cyan-400">clawwork</span>
+<div class="mt-8">
+  <a href="https://github.com/clawwork-ai/clawwork" target="_blank" style="text-decoration:none;">
+    <div style="display:inline-flex;align-items:center;gap:20px;padding:24px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:16px;transition:border-color 0.2s;">
+      <svg width="32" height="32" viewBox="0 0 16 16" fill="#f3f4f4"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <div style="text-align:left;">
+        <div style="font-family:monospace;font-size:1.1rem;color:#f3f4f4;font-weight:600;">clawwork-ai/clawwork</div>
+        <div style="font-size:0.8rem;color:#9ca3af;margin-top:4px;">Open Source OpenClaw Desktop Client</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-left:20px;">
+        <div style="display:flex;align-items:center;gap:4px;color:#fbbf24;font-size:0.85rem;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
+          Star
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;color:#9ca3af;font-size:0.85rem;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.878a2.25 2.25 0 111.5 0v.878a2.25 2.25 0 01-2.25 2.25h-1.5v2.128a2.251 2.251 0 11-1.5 0V8.5h-1.5A2.25 2.25 0 013.5 6.25v-.878a2.25 2.25 0 111.5 0zM5 3.25a.75.75 0 10-1.5 0 .75.75 0 001.5 0zm6.75.75a.75.75 0 10 0-1.5.75.75 0 000 1.5zM8 12.25a.75.75 0 10-1.5 0 .75.75 0 001.5 0z"/></svg>
+          Fork
+        </div>
+      </div>
+    </div>
+  </a>
 </div>
 
-<div class="mt-8 flex gap-12 justify-center">
-  <div class="flex flex-col items-center gap-2">
-    <div class="w-12 h-12 rounded-xl bg-green-400/10 flex items-center justify-center text-2xl">🔌</div>
-    <span class="text-sm opacity-50">Point to :18789</span>
-  </div>
-  <div class="text-gray-600 text-2xl self-center">→</div>
-  <div class="flex flex-col items-center gap-2">
-    <div class="w-12 h-12 rounded-xl bg-cyan-400/10 flex items-center justify-center text-2xl">⚡</div>
-    <span class="text-sm opacity-50">Run parallel tasks</span>
-  </div>
-  <div class="text-gray-600 text-2xl self-center">→</div>
-  <div class="flex flex-col items-center gap-2">
-    <div class="w-12 h-12 rounded-xl bg-purple-400/10 flex items-center justify-center text-2xl">🤝</div>
-    <span class="text-sm opacity-50">PRs welcome</span>
-  </div>
-</div>
-
-<div class="mt-8 text-sm opacity-50 italic">
+<div class="mt-6 text-sm opacity-40 italic">
   "Not a chat window — a task workbench."
+</div>
+
+<div class="mt-6 flex gap-8 justify-center text-sm opacity-50">
+  <span>Apache 2.0</span>
+  <span>·</span>
+  <span>macOS & Windows</span>
+  <span>·</span>
+  <span>PRs welcome</span>
 </div>
 
 ---
@@ -501,13 +567,13 @@ class: text-center
 
 ---
 
-# Bonus: 10 Days, 13 Releases
+# Release History
 
-v0.0.1 → v0.0.9 · Mar 13–22, 2026
+v0.0.1 → v0.0.10 · Mar 13 – Mar 24, 2026
 
-<div class="grid grid-cols-2 gap-10 mt-6 text-sm">
+<div class="grid grid-cols-2 gap-6 mt-4 text-sm">
 
-<div class="space-y-3">
+<div class="space-y-2">
   <div class="flex gap-3 items-start">
     <div class="w-2 h-2 rounded-full bg-green-400 mt-1.5 shrink-0"></div>
     <div><span class="text-green-400 font-mono font-semibold">v0.0.1</span> <span class="opacity-60">Three-panel layout, multi-task, streaming</span></div>
@@ -530,14 +596,14 @@ v0.0.1 → v0.0.9 · Mar 13–22, 2026
   </div>
 </div>
 
-<div class="space-y-3">
+<div class="space-y-2">
   <div class="flex gap-3 items-start">
     <div class="w-2 h-2 rounded-full bg-green-400 mt-1.5 shrink-0"></div>
     <div><span class="text-green-400 font-mono font-semibold">v0.0.6</span> <span class="opacity-60">System tray, tool approval, stop generating</span></div>
   </div>
   <div class="flex gap-3 items-start">
     <div class="w-2 h-2 rounded-full bg-green-400 mt-1.5 shrink-0"></div>
-    <div><span class="text-green-400 font-mono font-semibold">v0.0.7</span> <span class="opacity-60">@ file context, tools catalog, usage dashboard, Apple notarization</span></div>
+    <div><span class="text-green-400 font-mono font-semibold">v0.0.7</span> <span class="opacity-60">@ file context, tools catalog, usage dashboard</span></div>
   </div>
   <div class="flex gap-3 items-start">
     <div class="w-2 h-2 rounded-full bg-green-400 mt-1.5 shrink-0"></div>
@@ -545,12 +611,21 @@ v0.0.1 → v0.0.9 · Mar 13–22, 2026
   </div>
   <div class="flex gap-3 items-start">
     <div class="w-2 h-2 rounded-full bg-green-400 mt-1.5 shrink-0"></div>
-    <div><span class="text-green-400 font-mono font-semibold">v0.0.9</span> <span class="opacity-60">Device-scoped sessions, 9 security fixes, sync stability</span></div>
+    <div><span class="text-green-400 font-mono font-semibold">v0.0.9</span> <span class="opacity-60">9 security fixes, device-scoped sessions, sync stability</span></div>
+  </div>
+  <div class="flex gap-3 items-start">
+    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-1.5 shrink-0"></div>
+    <div><span class="text-cyan-400 font-mono font-semibold">v0.0.10</span> <span class="opacity-60">Auto-update, agent management, session export, debug bundle</span></div>
   </div>
 </div>
 
 </div>
 
-<div class="mt-6 inline-block p-3 bg-green-400/5 border border-green-400/15 rounded-xl text-sm">
-  Community contributions from <strong class="text-green-400">day 2</strong>. Two external contributors merged PRs.
+<div class="mt-4 flex gap-4">
+  <div class="p-2 bg-green-400/5 border border-green-400/15 rounded-lg text-xs">
+    Community contributions from <strong class="text-green-400">day 2</strong> — external PRs merged
+  </div>
+  <div class="p-2 bg-cyan-400/5 border border-cyan-400/15 rounded-lg text-xs">
+    <strong class="text-cyan-400">Next:</strong> Cron tasks, notifications, gateway version display
+  </div>
 </div>

@@ -3,6 +3,7 @@ import { useI18n } from '../i18n/context';
 
 const NAV_LINKS = [
   { key: 'features' as const, href: '#features' },
+  { key: 'architecture' as const, href: '#architecture' },
   { key: 'quickStart' as const, href: '#quick-start' },
 ];
 

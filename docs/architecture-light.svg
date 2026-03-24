@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="840" height="540" viewBox="0 0 840 540">
+  <defs>
+    <radialGradient id="topGlowL" cx="50%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#0B8A0A" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#0B8A0A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="windowShadowL">
+      <feDropShadow dx="0" dy="2" stdDeviation="10" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="840" height="540" fill="#FAFAFA"/>
+  <rect width="840" height="300" fill="url(#topGlowL)"/>
+
+  <!-- ==================== APP WINDOW ==================== -->
+  <g transform="translate(90, 28)" filter="url(#windowShadowL)">
+    <!-- Window frame -->
+    <rect width="660" height="310" rx="10" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Title bar -->
+    <rect width="660" height="34" rx="10" fill="#F5F5F5"/>
+    <rect y="22" width="660" height="12" fill="#F5F5F5"/>
+    <line y1="34" x2="660" y2="34" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Traffic lights -->
+    <circle cx="18" cy="17" r="5.5" fill="#FF5F57"/>
+    <circle cx="36" cy="17" r="5.5" fill="#FEBC2E"/>
+    <circle cx="54" cy="17" r="5.5" fill="#28C840"/>
+
+    <!-- Logo + Title -->
+    <svg x="284" y="5" width="22" height="22" viewBox="0 0 128 128">
+      <g transform="translate(0,128) scale(0.1,-0.1)" fill="#D42020" stroke="none">
+        <path d="M749 1068 c-36 -13 -91 -39 -123 -58 -72 -43 -177 -153 -211 -220 -50 -98 -68 -215 -44 -290 6 -19 10 -62 10 -96 -2 -71 23 -118 79 -147 74 -39 194 0 262 84 18 22 48 48 68 57 126 60 211 240 182 392 -11 63 -47 150 -62 150 -4 0 -13 -13 -18 -29 -17 -48 -82 -111 -153 -146 -37 -19 -76 -46 -88 -61 -12 -15 -21 -22 -21 -16 0 19 49 69 80 82 16 7 30 17 30 22 0 6 14 39 32 75 22 46 53 84 106 134 41 38 72 72 69 75 -3 4 -34 8 -69 10 -48 4 -78 -1 -129 -18z"/>
+      </g>
+    </svg>
+    <text x="335" y="22" text-anchor="middle" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="500">ClawWork</text>
+
+    <!-- Panel dividers -->
+    <line x1="160" y1="34" x2="160" y2="310" stroke="#E8E8E8" stroke-width="1"/>
+    <line x1="475" y1="34" x2="475" y2="310" stroke="#E8E8E8" stroke-width="1"/>
+
+    <!-- ===== LEFT PANEL: Tasks ===== -->
+    <text x="14" y="57" fill="#666" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="1">TASKS</text>
+
+    <!-- Active task -->
+    <rect x="8" y="67" width="144" height="32" rx="6" fill="#E8F5E8"/>
+    <circle cx="21" cy="83" r="4" fill="#0B8A0A"/>
+    <text x="32" y="88" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="500">Research API docs</text>
+
+    <!-- Idle tasks -->
+    <rect x="8" y="105" width="144" height="32" rx="6" fill="#F3F3F3"/>
+    <circle cx="21" cy="121" r="4" fill="#CCC"/>
+    <text x="32" y="126" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">Refactor auth flow</text>
+
+    <rect x="8" y="143" width="144" height="32" rx="6" fill="#F3F3F3"/>
+    <circle cx="21" cy="159" r="4" fill="#CCC"/>
+    <text x="32" y="164" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">Write unit tests</text>
+
+    <!-- Cron section -->
+    <text x="14" y="200" fill="#666" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="1">SCHEDULED</text>
+
+    <rect x="8" y="210" width="144" height="28" rx="6" fill="#F0FAF0" stroke="#0B8A0A" stroke-width="0.8" stroke-opacity="0.3"/>
+    <text x="21" y="228" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11">Daily report</text>
+    <text x="134" y="228" text-anchor="end" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="9" opacity="0.6">09:00</text>
+
+    <rect x="8" y="244" width="144" height="28" rx="6" fill="#F0FAF0" stroke="#0B8A0A" stroke-width="0.8" stroke-opacity="0.3"/>
+    <text x="21" y="262" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11">Weekly digest</text>
+    <text x="134" y="262" text-anchor="end" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="9" opacity="0.6">Mon</text>
+
+    <!-- ===== CENTER PANEL: Active Work ===== -->
+    <text x="172" y="57" fill="#666" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="1">ACTIVE WORK</text>
+
+    <!-- Streaming reply -->
+    <text x="172" y="80" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5">I'll analyze the API endpoints and</text>
+    <text x="172" y="98" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5">document the authentication flow</text>
+    <!-- Cursor -->
+    <rect x="387" y="88" width="2" height="14" rx="1" fill="#0B8A0A"/>
+
+    <!-- Tool call card -->
+    <rect x="172" y="114" width="290" height="46" rx="8" fill="#F5FAF5" stroke="#0B8A0A" stroke-width="0.5" stroke-opacity="0.25"/>
+    <circle cx="189" cy="132" r="4.5" fill="#0B8A0A"/>
+    <text x="200" y="136" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="500">read_file</text>
+    <text x="200" y="152" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11">src/auth/middleware.ts</text>
+
+    <!-- Approval card -->
+    <rect x="172" y="168" width="290" height="46" rx="8" fill="#FFFAF0" stroke="#E8A817" stroke-width="0.5" stroke-opacity="0.4"/>
+    <circle cx="189" cy="186" r="4.5" fill="#E8A817"/>
+    <text x="200" y="190" fill="#B8860B" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="500">exec — approval needed</text>
+    <text x="200" y="206" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11">npm run db:migrate</text>
+
+    <!-- Thinking trace -->
+    <rect x="172" y="224" width="290" height="32" rx="6" fill="#F7F7FA"/>
+    <text x="185" y="244" fill="#888" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11" font-style="italic">Analyzing dependency graph...</text>
+
+    <!-- Cost bar -->
+    <rect x="172" y="270" width="290" height="24" rx="4" fill="#F3F3F3" stroke="#E0E0E0" stroke-width="0.5"/>
+    <text x="183" y="286" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">12.4k tokens · $0.03 · Sonnet 4</text>
+
+    <!-- ===== RIGHT PANEL: Artifacts ===== -->
+    <text x="487" y="57" fill="#666" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" letter-spacing="1">ARTIFACTS</text>
+
+    <!-- Files -->
+    <rect x="483" y="67" width="168" height="30" rx="6" fill="#F3F3F3"/>
+    <text x="498" y="87" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">auth-flow.md</text>
+
+    <rect x="483" y="102" width="168" height="30" rx="6" fill="#F3F3F3"/>
+    <text x="498" y="122" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">diagram.png</text>
+
+    <rect x="483" y="137" width="168" height="30" rx="6" fill="#F3F3F3"/>
+    <text x="498" y="157" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">middleware.ts</text>
+
+    <rect x="483" y="172" width="168" height="30" rx="6" fill="#F3F3F3"/>
+    <text x="498" y="192" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12">test-report.md</text>
+
+    <!-- Search bar -->
+    <rect x="483" y="218" width="168" height="28" rx="14" fill="#F7F7F7" stroke="#DDD" stroke-width="0.8"/>
+    <text x="504" y="236" fill="#AAA" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="11">Search artifacts...</text>
+
+    <!-- Auto-extract badge -->
+    <rect x="483" y="264" width="168" height="28" rx="6" fill="#E8F5E8" stroke="#0B8A0A" stroke-width="0.6" stroke-opacity="0.3"/>
+    <text x="498" y="282" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">Auto-extracted · 4 new</text>
+  </g>
+
+  <!-- ==================== CONNECTIONS ==================== -->
+
+  <!-- Left connections: Window → Gateways (fan out to 3) -->
+  <line x1="220" y1="342" x2="120" y2="400" stroke="#CCC" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="260" y1="342" x2="280" y2="400" stroke="#CCC" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="300" y1="342" x2="440" y2="400" stroke="#DDD" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <text x="140" y="374" fill="#888" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" letter-spacing="0.8">WEBSOCKET</text>
+
+  <!-- Right connection: Window → Workspace -->
+  <line x1="620" y1="342" x2="680" y2="400" stroke="#0B8A0A" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="3,3"/>
+  <text x="640" y="374" fill="#888" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" letter-spacing="0.8">LOCAL-FIRST</text>
+
+  <!-- ==================== GATEWAY INSTANCES ==================== -->
+
+  <!-- Gateway 1: Production -->
+  <rect x="30" y="400" width="180" height="75" rx="10" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+  <circle cx="48" cy="420" r="4" fill="#0B8A0A"/>
+  <text x="58" y="424" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="600">Production</text>
+  <text x="48" y="444" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">12 agents · 8 tools</text>
+  <text x="48" y="462" fill="#999" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">Multi-model routing</text>
+
+  <!-- Gateway 2: Staging -->
+  <rect x="220" y="400" width="180" height="75" rx="10" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+  <circle cx="238" cy="420" r="4" fill="#E8A817"/>
+  <text x="248" y="424" fill="#1A1A1A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="600">Staging</text>
+  <text x="238" y="444" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">4 agents · 15 tools</text>
+  <text x="238" y="462" fill="#999" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">Multi-model routing</text>
+
+  <!-- Gateway 3: Local -->
+  <rect x="410" y="400" width="180" height="75" rx="10" fill="#FAFAFA" stroke="#E8E8E8" stroke-width="1"/>
+  <circle cx="428" cy="420" r="4" fill="#CCC"/>
+  <text x="438" y="424" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12" font-weight="600">Local Dev</text>
+  <text x="428" y="444" fill="#999" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">2 agents · 3 tools</text>
+  <text x="428" y="462" fill="#BBB" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">localhost:18789</text>
+
+  <!-- Label under gateways -->
+  <text x="300" y="498" text-anchor="middle" fill="#999" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" letter-spacing="1.5">OPENCLAW GATEWAYS</text>
+
+  <!-- ==================== WORKSPACE BOX ==================== -->
+  <rect x="600" y="400" width="210" height="75" rx="10" fill="#F0FAF0" stroke="#0B8A0A" stroke-width="0.8" stroke-opacity="0.3"/>
+  <text x="705" y="424" text-anchor="middle" fill="#0B8A0A" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600">Your Workspace</text>
+  <text x="705" y="444" text-anchor="middle" fill="#777" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">SQLite + FTS5 · Searchable</text>
+  <text x="705" y="462" text-anchor="middle" fill="#999" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="10.5">Tasks · Messages · Artifacts</text>
+
+</svg>

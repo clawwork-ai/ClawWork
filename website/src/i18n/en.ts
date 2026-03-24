@@ -1,6 +1,7 @@
 export interface Translations {
   nav: {
     features: string;
+    architecture: string;
     quickStart: string;
     github: string;
   };
@@ -15,6 +16,10 @@ export interface Translations {
     title: string;
     orDownload: string;
     githubReleases: string;
+  };
+  architecture: {
+    title: string;
+    subtitle: string;
   };
   features: {
     title: string;
@@ -35,6 +40,7 @@ export interface Translations {
 export const en: Translations = {
   nav: {
     features: 'Features',
+    architecture: 'Architecture',
     quickStart: 'Quick Start',
     github: 'GitHub',
   },
@@ -49,6 +55,11 @@ export const en: Translations = {
     title: 'Install',
     orDownload: 'Or download from',
     githubReleases: 'GitHub Releases',
+  },
+  architecture: {
+    title: 'How It Works',
+    subtitle:
+      'A single WebSocket connects to one or more OpenClaw Gateways. Each task gets its own session. Everything is stored locally.',
   },
   features: {
     title: 'Why ClawWork',
