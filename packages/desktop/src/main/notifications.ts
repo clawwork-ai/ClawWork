@@ -8,11 +8,11 @@ export function sendDesktopNotification(params: { title: string; body: string; t
   if (params.taskId) {
     n.on('click', () => {
       const win = BrowserWindow.getAllWindows()[0];
-      if (win) {
-        win.show();
-        win.focus();
-        win.webContents.send('notification:navigate-task', params.taskId);
-      }
+      if (!win || win.isDestroyed()) return;
+      if (win.isMinimized()) win.restore();
+      if (!win.isVisible()) win.show();
+      win.focus();
+      win.webContents.send('notification:navigate-task', params.taskId);
     });
   }
 

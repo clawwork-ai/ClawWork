@@ -166,6 +166,21 @@ interface AgentEvent {
  * Subscribes to Gateway events and dispatches into Zustand stores.
  * Mount once at App root level.
  */
+type NotificationSettingKey = 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect';
+
+function maybeNotify(
+  settingKey: NotificationSettingKey,
+  params: { title: string; body: string; taskId?: string },
+): void {
+  window.clawwork
+    .getSettings()
+    .then((settings) => {
+      if (settings?.notifications?.[settingKey] === false) return;
+      window.clawwork.sendNotification(params);
+    })
+    .catch(() => {});
+}
+
 export function useGatewayEventDispatcher(): void {
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTaskIdRef = useRef(activeTaskId);
@@ -193,13 +208,10 @@ export function useGatewayEventDispatcher(): void {
         const approvalSessionKey = approvalReq.request?.sessionKey;
         const approvalTaskId = approvalSessionKey ? parseTaskIdFromSessionKey(approvalSessionKey) : null;
         if (approvalTaskId && (!document.hasFocus() || activeTaskIdRef.current !== approvalTaskId)) {
-          window.clawwork.getSettings().then((settings) => {
-            if (settings?.notifications?.approvalRequest === false) return;
-            window.clawwork.sendNotification({
-              title: i18n.t('notifications.approvalRequired'),
-              body: approvalReq.request?.commandPreview || approvalReq.request?.command || '',
-              taskId: approvalTaskId,
-            });
+          maybeNotify('approvalRequest', {
+            title: i18n.t('notifications.approvalRequired'),
+            body: approvalReq.request?.commandPreview || approvalReq.request?.command || '',
+            taskId: approvalTaskId,
           });
         }
       } else if (data.event === 'exec.approval.resolved') {
@@ -265,14 +277,11 @@ export function useGatewayEventDispatcher(): void {
         debugEvent('renderer.chat.finalized', { taskId, sessionKey });
         autoTitleIfNeeded(taskId);
         if (!document.hasFocus() || activeTaskIdRef.current !== taskId) {
-          window.clawwork.getSettings().then((settings) => {
-            if (settings?.notifications?.taskComplete === false) return;
-            const task = useTaskStore.getState().tasks.find((t) => t.id === taskId);
-            window.clawwork.sendNotification({
-              title: i18n.t('notifications.taskComplete'),
-              body: task?.title || taskId,
-              taskId,
-            });
+          const task = useTaskStore.getState().tasks.find((t) => t.id === taskId);
+          maybeNotify('taskComplete', {
+            title: i18n.t('notifications.taskComplete'),
+            body: task?.title || taskId,
+            taskId,
           });
         }
         syncSessionMessages(taskId).catch((err) => {
@@ -589,13 +598,10 @@ export function useGatewayEventDispatcher(): void {
       } else if (!s.connected && wasConnected) {
         connectedGatewaysRef.current.delete(s.gatewayId);
         toast.warning(i18n.t('connection.lostConnection'), { description: i18n.t('connection.reconnecting') });
-        window.clawwork.getSettings().then((settings) => {
-          if (settings?.notifications?.gatewayDisconnect === false) return;
-          const gwInfo = useUiStore.getState().gatewayInfoMap[s.gatewayId];
-          window.clawwork.sendNotification({
-            title: i18n.t('notifications.gatewayDisconnected'),
-            body: gwInfo?.name || s.gatewayId,
-          });
+        const gwInfo = useUiStore.getState().gatewayInfoMap[s.gatewayId];
+        maybeNotify('gatewayDisconnect', {
+          title: i18n.t('notifications.gatewayDisconnected'),
+          body: gwInfo?.name || s.gatewayId,
         });
       }
     });

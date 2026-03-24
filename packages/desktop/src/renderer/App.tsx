@@ -193,23 +193,20 @@ export default function App() {
   }, [createTask, updateTaskTitle, addMessage, setProcessing]);
 
   useEffect(() => {
-    const cleanupNav = window.clawwork.onTrayNavigateTask((taskId) => {
+    const navigateToTask = (taskId: string): void => {
       setActiveTask(taskId);
       setSettingsOpen(false);
       setMainView('chat');
-    });
+    };
+    const cleanupNav = window.clawwork.onTrayNavigateTask(navigateToTask);
+    const cleanupNotification = window.clawwork.onNotificationNavigateTask(navigateToTask);
     const cleanupSettings = window.clawwork.onTrayOpenSettings(() => {
       setSettingsOpen(true);
     });
-    const cleanupNotification = window.clawwork.onNotificationNavigateTask((taskId) => {
-      setActiveTask(taskId);
-      setSettingsOpen(false);
-      setMainView('chat');
-    });
     return () => {
       cleanupNav();
-      cleanupSettings();
       cleanupNotification();
+      cleanupSettings();
     };
   }, [setActiveTask, setSettingsOpen, setMainView]);
 

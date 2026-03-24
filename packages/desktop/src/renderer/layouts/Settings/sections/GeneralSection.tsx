@@ -68,29 +68,40 @@ export default function GeneralSection() {
     [rightPanelShortcut, setRightPanelShortcut, t],
   );
 
-  const [notifyTaskComplete, setNotifyTaskComplete] = useState(true);
-  const [notifyApproval, setNotifyApproval] = useState(true);
-  const [notifyDisconnect, setNotifyDisconnect] = useState(true);
+  const [notifyState, setNotifyState] = useState({
+    taskComplete: true,
+    approvalRequest: true,
+    gatewayDisconnect: true,
+  });
 
   useEffect(() => {
     window.clawwork.getSettings().then((settings) => {
-      if (!settings) return;
+      if (!settings?.notifications) return;
       const n = settings.notifications;
-      if (n?.taskComplete === false) setNotifyTaskComplete(false);
-      if (n?.approvalRequest === false) setNotifyApproval(false);
-      if (n?.gatewayDisconnect === false) setNotifyDisconnect(false);
+      setNotifyState((prev) => ({
+        taskComplete: n.taskComplete ?? prev.taskComplete,
+        approvalRequest: n.approvalRequest ?? prev.approvalRequest,
+        gatewayDisconnect: n.gatewayDisconnect ?? prev.gatewayDisconnect,
+      }));
     });
   }, []);
 
   const handleNotificationToggle = useCallback(
-    async (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
-      const settings = await window.clawwork.getSettings();
-      await window.clawwork.updateSettings({
-        notifications: { ...settings?.notifications, [key]: value },
+    (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
+      setNotifyState((prev) => {
+        const next = { ...prev, [key]: value };
+        window.clawwork.updateSettings({ notifications: next });
+        return next;
       });
     },
     [],
   );
+
+  const notificationToggles = [
+    { key: 'taskComplete' as const, i18nKey: 'settings.notifyTaskComplete' },
+    { key: 'approvalRequest' as const, i18nKey: 'settings.notifyApproval' },
+    { key: 'gatewayDisconnect' as const, i18nKey: 'settings.notifyDisconnect' },
+  ];
 
   return (
     <div>
@@ -191,63 +202,24 @@ export default function GeneralSection() {
       <h3 className="text-base font-semibold text-[var(--text-primary)] mt-8">{t('settings.notifications')}</h3>
       <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.notificationsDesc')}</p>
       <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyTaskComplete')}</span>
-              </div>
-            }
-          >
-            <Toggle
-              checked={notifyTaskComplete}
-              onChange={(v) => {
-                setNotifyTaskComplete(v);
-                handleNotificationToggle('taskComplete', v);
-              }}
-              ariaLabel={t('settings.notifyTaskComplete')}
-            />
-          </SettingRow>
-        </div>
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyApproval')}</span>
-              </div>
-            }
-          >
-            <Toggle
-              checked={notifyApproval}
-              onChange={(v) => {
-                setNotifyApproval(v);
-                handleNotificationToggle('approvalRequest', v);
-              }}
-              ariaLabel={t('settings.notifyApproval')}
-            />
-          </SettingRow>
-        </div>
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyDisconnect')}</span>
-              </div>
-            }
-          >
-            <Toggle
-              checked={notifyDisconnect}
-              onChange={(v) => {
-                setNotifyDisconnect(v);
-                handleNotificationToggle('gatewayDisconnect', v);
-              }}
-              ariaLabel={t('settings.notifyDisconnect')}
-            />
-          </SettingRow>
-        </div>
+        {notificationToggles.map(({ key, i18nKey }) => (
+          <div key={key} className="px-5 py-4">
+            <SettingRow
+              label={
+                <div className="flex items-center gap-3">
+                  <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                  <span className="text-sm text-[var(--text-primary)]">{t(i18nKey)}</span>
+                </div>
+              }
+            >
+              <Toggle
+                checked={notifyState[key]}
+                onChange={(v) => handleNotificationToggle(key, v)}
+                ariaLabel={t(i18nKey)}
+              />
+            </SettingRow>
+          </div>
+        ))}
       </div>
     </div>
   );
