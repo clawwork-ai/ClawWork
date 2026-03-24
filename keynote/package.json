@@ -1,0 +1,19 @@
+{
+  "name": "@clawwork/keynote",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ClawWork presentation slides powered by Slidev",
+  "scripts": {
+    "dev": "slidev --open",
+    "build": "slidev build",
+    "export": "slidev export",
+    "preview": "slidev build && vite preview --open"
+  },
+  "dependencies": {
+    "@slidev/cli": "^52.0.0",
+    "@slidev/theme-default": "latest"
+  },
+  "devDependencies": {
+    "@slidev/types": "^52.0.0"
+  }
+}

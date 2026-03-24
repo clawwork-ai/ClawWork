@@ -6,6 +6,7 @@
     "postinstall": "node scripts/ensure-electron.mjs",
     "prepare": "husky",
     "dev": "pnpm --filter @clawwork/desktop dev",
+    "dev:slides": "pnpm --filter @clawwork/keynote dev",
     "build": "pnpm -r build",
     "check:architecture": "node scripts/check-architecture.mjs",
     "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",

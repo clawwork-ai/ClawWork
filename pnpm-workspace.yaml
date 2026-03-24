@@ -1,4 +1,5 @@
 packages:
   - 'packages/shared'
   - 'packages/desktop'
+  - 'keynote'
   - 'website'

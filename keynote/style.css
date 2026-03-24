@@ -1,0 +1,152 @@
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-green {
+  background: #0ffd0d;
+  width: 500px;
+  height: 500px;
+}
+.glow-cyan {
+  background: #00d4ff;
+  width: 400px;
+  height: 400px;
+}
+.glow-purple {
+  background: #764ba2;
+  width: 400px;
+  height: 400px;
+}
+
+@keyframes cw-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes cw-float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes cw-pulse {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.22;
+    transform: scale(1.05);
+  }
+}
+@keyframes cw-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+@keyframes cw-scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(2000%);
+  }
+}
+
+.cw-float {
+  animation: cw-float 5s ease-in-out infinite;
+}
+.cw-float-slow {
+  animation: cw-float-slow 6s ease-in-out infinite 1.5s;
+}
+.cw-pulse {
+  animation: cw-pulse 4s ease-in-out infinite;
+}
+
+.cw-shimmer {
+  background: linear-gradient(90deg, #0ffd0d 0%, #00d4ff 25%, #b388ff 50%, #00d4ff 75%, #0ffd0d 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: cw-shimmer 4s linear infinite;
+}
+
+.cw-gradient-border {
+  position: relative;
+  border-radius: 16px;
+}
+.cw-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0ffd0d, #00d4ff, #b388ff);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.cw-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cw-scanline {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.cw-scanline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(15, 253, 13, 0.08), transparent);
+  animation: cw-scan 8s linear infinite;
+}
+
+.cw-logo-glow {
+  filter: drop-shadow(0 0 24px rgba(15, 253, 13, 0.4)) drop-shadow(0 0 48px rgba(15, 253, 13, 0.12));
+}
+
+.cw-screenshot-glow {
+  position: absolute;
+  inset: -12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(15, 253, 13, 0.15), rgba(0, 212, 255, 0.1), rgba(179, 136, 255, 0.15));
+  filter: blur(12px);
+  z-index: 0;
+}
+
+.slidev-layout {
+  position: relative;
+}
