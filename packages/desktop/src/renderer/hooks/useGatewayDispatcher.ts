@@ -187,8 +187,21 @@ export function useGatewayEventDispatcher(): void {
       } else if (data.event === 'agent') {
         handleAgentEvent(data.payload as unknown as AgentEvent);
       } else if (data.event === 'exec.approval.requested') {
-        useApprovalStore.getState().addApproval(data.gatewayId, data.payload as unknown as ExecApprovalRequest);
+        const approvalReq = data.payload as unknown as ExecApprovalRequest;
+        useApprovalStore.getState().addApproval(data.gatewayId, approvalReq);
         toast.warning(i18n.t('approval.newRequest'));
+        const approvalSessionKey = approvalReq.request?.sessionKey;
+        const approvalTaskId = approvalSessionKey ? parseTaskIdFromSessionKey(approvalSessionKey) : null;
+        if (approvalTaskId && (!document.hasFocus() || activeTaskIdRef.current !== approvalTaskId)) {
+          window.clawwork.getSettings().then((settings) => {
+            if (settings?.notifications?.approvalRequest === false) return;
+            window.clawwork.sendNotification({
+              title: i18n.t('notifications.approvalRequired'),
+              body: approvalReq.request?.commandPreview || approvalReq.request?.command || '',
+              taskId: approvalTaskId,
+            });
+          });
+        }
       } else if (data.event === 'exec.approval.resolved') {
         useApprovalStore.getState().removeApproval((data.payload as unknown as ExecApprovalResolved).id);
       }
@@ -251,6 +264,17 @@ export function useGatewayEventDispatcher(): void {
         store.finalizeStream(taskId, { runId: payload.runId });
         debugEvent('renderer.chat.finalized', { taskId, sessionKey });
         autoTitleIfNeeded(taskId);
+        if (!document.hasFocus() || activeTaskIdRef.current !== taskId) {
+          window.clawwork.getSettings().then((settings) => {
+            if (settings?.notifications?.taskComplete === false) return;
+            const task = useTaskStore.getState().tasks.find((t) => t.id === taskId);
+            window.clawwork.sendNotification({
+              title: i18n.t('notifications.taskComplete'),
+              body: task?.title || taskId,
+              taskId,
+            });
+          });
+        }
         syncSessionMessages(taskId).catch((err) => {
           debugEvent('renderer.sync.post-final.failed', {
             taskId,
@@ -565,6 +589,14 @@ export function useGatewayEventDispatcher(): void {
       } else if (!s.connected && wasConnected) {
         connectedGatewaysRef.current.delete(s.gatewayId);
         toast.warning(i18n.t('connection.lostConnection'), { description: i18n.t('connection.reconnecting') });
+        window.clawwork.getSettings().then((settings) => {
+          if (settings?.notifications?.gatewayDisconnect === false) return;
+          const gwInfo = useUiStore.getState().gatewayInfoMap[s.gatewayId];
+          window.clawwork.sendNotification({
+            title: i18n.t('notifications.gatewayDisconnected'),
+            body: gwInfo?.name || s.gatewayId,
+          });
+        });
       }
     });
     return removeGatewayStatus;

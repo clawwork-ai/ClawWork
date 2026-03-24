@@ -283,6 +283,18 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('context:list-files', { folders, query }),
     readContextFile: (absolutePath: string, folders: string[]) =>
       ipcRenderer.invoke('context:read-file', { absolutePath, folders }),
+
+    sendNotification: (params: { title: string; body: string; taskId?: string }) =>
+      ipcRenderer.invoke('notification:send', params),
+    onNotificationNavigateTask: (callback: (taskId: string) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, taskId: string): void => {
+        callback(taskId);
+      };
+      ipcRenderer.on('notification:navigate-task', listener);
+      return () => {
+        ipcRenderer.removeListener('notification:navigate-task', listener);
+      };
+    },
   };
 }
 

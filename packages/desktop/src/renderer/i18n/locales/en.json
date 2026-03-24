@@ -152,7 +152,12 @@
     "agentNoFiles": "No bootstrap files found",
     "agentLoadingFiles": "Loading files...",
     "agentFilePreview": "File Preview",
-    "cannotDeleteMain": "The main agent cannot be deleted"
+    "cannotDeleteMain": "The main agent cannot be deleted",
+    "notifications": "Notifications",
+    "notificationsDesc": "Desktop notifications for background events",
+    "notifyTaskComplete": "Task completion",
+    "notifyApproval": "Approval requests",
+    "notifyDisconnect": "Gateway disconnection"
   },
   "setup": {
     "welcome": "Welcome to ClawWork",
@@ -360,6 +365,11 @@
     "retry": "Retry",
     "approved": "Device approved! Connection established.",
     "stillPending": "Not approved yet. Please check the Devices page in OpenClaw Web UI."
+  },
+  "notifications": {
+    "taskComplete": "Task Complete",
+    "approvalRequired": "Approval Required",
+    "gatewayDisconnected": "Gateway Disconnected"
   },
   "export": {
     "exportedToFiles": "Exported to Files"

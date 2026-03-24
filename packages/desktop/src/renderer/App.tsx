@@ -201,9 +201,15 @@ export default function App() {
     const cleanupSettings = window.clawwork.onTrayOpenSettings(() => {
       setSettingsOpen(true);
     });
+    const cleanupNotification = window.clawwork.onNotificationNavigateTask((taskId) => {
+      setActiveTask(taskId);
+      setSettingsOpen(false);
+      setMainView('chat');
+    });
     return () => {
       cleanupNav();
       cleanupSettings();
+      cleanupNotification();
     };
   }, [setActiveTask, setSettingsOpen, setMainView]);
 

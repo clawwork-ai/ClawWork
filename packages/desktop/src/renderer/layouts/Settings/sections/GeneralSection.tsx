@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Moon, Sun, Monitor, Bell } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { modKey } from '@/lib/utils';
@@ -13,6 +13,7 @@ import {
 } from '@/stores/uiStore';
 import SettingRow from '../components/SettingRow';
 import SegmentedControl from '../components/SegmentedControl';
+import Toggle from '../components/Toggle';
 
 const LANGUAGES: { value: Language; label: string }[] = [
   { value: 'en', label: 'English' },
@@ -65,6 +66,30 @@ export default function GeneralSection() {
       toast.success(t('settings.shortcutUpdated'));
     },
     [rightPanelShortcut, setRightPanelShortcut, t],
+  );
+
+  const [notifyTaskComplete, setNotifyTaskComplete] = useState(true);
+  const [notifyApproval, setNotifyApproval] = useState(true);
+  const [notifyDisconnect, setNotifyDisconnect] = useState(true);
+
+  useEffect(() => {
+    window.clawwork.getSettings().then((settings) => {
+      if (!settings) return;
+      const n = settings.notifications;
+      if (n?.taskComplete === false) setNotifyTaskComplete(false);
+      if (n?.approvalRequest === false) setNotifyApproval(false);
+      if (n?.gatewayDisconnect === false) setNotifyDisconnect(false);
+    });
+  }, []);
+
+  const handleNotificationToggle = useCallback(
+    async (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
+      const settings = await window.clawwork.getSettings();
+      await window.clawwork.updateSettings({
+        notifications: { ...settings?.notifications, [key]: value },
+      });
+    },
+    [],
   );
 
   return (
@@ -158,6 +183,68 @@ export default function GeneralSection() {
                 { value: 'Period' as const, label: `${modKey} .` },
                 { value: 'BracketRight' as const, label: `${modKey} ]` },
               ]}
+            />
+          </SettingRow>
+        </div>
+      </div>
+
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mt-8">{t('settings.notifications')}</h3>
+      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.notificationsDesc')}</p>
+      <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyTaskComplete')}</span>
+              </div>
+            }
+          >
+            <Toggle
+              checked={notifyTaskComplete}
+              onChange={(v) => {
+                setNotifyTaskComplete(v);
+                handleNotificationToggle('taskComplete', v);
+              }}
+              ariaLabel={t('settings.notifyTaskComplete')}
+            />
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyApproval')}</span>
+              </div>
+            }
+          >
+            <Toggle
+              checked={notifyApproval}
+              onChange={(v) => {
+                setNotifyApproval(v);
+                handleNotificationToggle('approvalRequest', v);
+              }}
+              ariaLabel={t('settings.notifyApproval')}
+            />
+          </SettingRow>
+        </div>
+        <div className="px-5 py-4">
+          <SettingRow
+            label={
+              <div className="flex items-center gap-3">
+                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                <span className="text-sm text-[var(--text-primary)]">{t('settings.notifyDisconnect')}</span>
+              </div>
+            }
+          >
+            <Toggle
+              checked={notifyDisconnect}
+              onChange={(v) => {
+                setNotifyDisconnect(v);
+                handleNotificationToggle('gatewayDisconnect', v);
+              }}
+              ariaLabel={t('settings.notifyDisconnect')}
             />
           </SettingRow>
         </div>

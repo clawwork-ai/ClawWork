@@ -152,7 +152,12 @@
     "agentNoFiles": "未找到引导文件",
     "agentLoadingFiles": "加载文件中...",
     "agentFilePreview": "文件预览",
-    "cannotDeleteMain": "主智能体不可删除"
+    "cannotDeleteMain": "主智能体不可删除",
+    "notifications": "通知",
+    "notificationsDesc": "后台事件的桌面通知",
+    "notifyTaskComplete": "任务完成通知",
+    "notifyApproval": "授权请求通知",
+    "notifyDisconnect": "Gateway 断开通知"
   },
   "setup": {
     "welcome": "欢迎使用 ClawWork",
@@ -360,6 +365,11 @@
     "retry": "重试",
     "approved": "设备已批准！连接成功。",
     "stillPending": "尚未批准。请检查 OpenClaw Web UI 的设备页面。"
+  },
+  "notifications": {
+    "taskComplete": "任务完成",
+    "approvalRequired": "需要执行授权",
+    "gatewayDisconnected": "Gateway 已断开"
   },
   "export": {
     "exportedToFiles": "已导出到文件管理"

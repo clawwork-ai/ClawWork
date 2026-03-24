@@ -27,6 +27,12 @@ export interface QuickLaunchConfig {
   shortcut: string;
 }
 
+export interface NotificationConfig {
+  taskComplete?: boolean;
+  approvalRequest?: boolean;
+  gatewayDisconnect?: boolean;
+}
+
 export interface AppConfig {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
@@ -41,6 +47,7 @@ export interface AppConfig {
   voiceInput?: VoiceInputConfig;
   quickLaunch?: QuickLaunchConfig;
   trayEnabled?: boolean;
+  notifications?: NotificationConfig;
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
   deviceId?: string;

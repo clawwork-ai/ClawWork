@@ -76,6 +76,12 @@ interface QuickLaunchConfigResult {
   sendShortcut: string;
 }
 
+interface NotificationSettings {
+  taskComplete?: boolean;
+  approvalRequest?: boolean;
+  gatewayDisconnect?: boolean;
+}
+
 interface AppSettings {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
@@ -92,6 +98,7 @@ interface AppSettings {
   };
   quickLaunch?: QuickLaunchSettings;
   trayEnabled?: boolean;
+  notifications?: NotificationSettings;
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
 }
@@ -405,6 +412,9 @@ export interface ClawWorkAPI {
   getQuickLaunchConfig: () => Promise<QuickLaunchConfigResult>;
   updateQuickLaunchConfig: (enabled: boolean, shortcut?: string) => Promise<boolean>;
   onQuickLaunchSubmit: (callback: (message: string) => void) => () => void;
+
+  sendNotification: (params: { title: string; body: string; taskId?: string }) => Promise<IpcResult>;
+  onNotificationNavigateTask: (callback: (taskId: string) => void) => () => void;
 }
 
 declare global {
