@@ -89,6 +89,7 @@ function GatewayCard({
   status,
   isDefault,
   isEditing,
+  serverVersion,
   onEdit,
   onRemove,
   onSetDefault,
@@ -97,6 +98,7 @@ function GatewayCard({
   status: GatewayConnectionStatus;
   isDefault: boolean;
   isEditing: boolean;
+  serverVersion?: string;
   onEdit: () => void;
   onRemove: () => void;
   onSetDefault: () => void;
@@ -136,6 +138,11 @@ function GatewayCard({
             <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--bg-tertiary)] text-[var(--text-muted)] font-medium">
               {typeLabel}
             </span>
+            {serverVersion && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--info)]/10 text-[var(--info)] font-mono font-medium">
+                v{serverVersion}
+              </span>
+            )}
           </div>
           <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5 truncate">{gw.url}</p>
         </div>
@@ -387,6 +394,7 @@ function GatewayForm({
 export default function GatewaysSection() {
   const { t } = useTranslation();
   const gatewayStatusMap = useUiStore((s) => s.gatewayStatusMap);
+  const gatewayVersionMap = useUiStore((s) => s.gatewayVersionMap);
   const setDefaultGatewayId = useUiStore((s) => s.setDefaultGatewayId);
   const setGatewayInfoMap = useUiStore((s) => s.setGatewayInfoMap);
 
@@ -598,6 +606,7 @@ export default function GatewaysSection() {
                   status={gatewayStatusMap[gw.id] ?? 'disconnected'}
                   isDefault={gw.id === defaultGwId}
                   isEditing={editingId === gw.id && showForm}
+                  serverVersion={gatewayVersionMap[gw.id]}
                   onEdit={() => openEditForm(gw)}
                   onRemove={() => setDeletingGwId(gw.id)}
                   onSetDefault={() => handleSetDefault(gw.id)}

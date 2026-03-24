@@ -23,6 +23,7 @@ interface GatewayStatusEvent {
   gatewayId: string;
   connected: boolean;
   error?: string;
+  serverVersion?: string;
   reconnectAttempt?: number;
   maxAttempts?: number;
   gaveUp?: boolean;
@@ -58,7 +59,7 @@ export interface GatewayServerConfig {
 }
 
 interface GatewayStatusMap {
-  [gatewayId: string]: { connected: boolean; name: string; error?: string };
+  [gatewayId: string]: { connected: boolean; name: string; error?: string; serverVersion?: string };
 }
 
 interface GatewayListItem extends GatewayServerConfig {

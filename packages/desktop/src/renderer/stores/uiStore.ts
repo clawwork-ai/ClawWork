@@ -64,6 +64,9 @@ interface UiState {
   gatewayStatusMap: Record<string, GatewayConnectionStatus>;
   setGatewayStatusByGateway: (gatewayId: string, status: GatewayConnectionStatus) => void;
 
+  gatewayVersionMap: Record<string, string>;
+  setGatewayVersion: (gatewayId: string, version: string | undefined) => void;
+
   gatewayReconnectInfo: Record<string, { attempt: number; max: number; gaveUp: boolean }>;
   setGatewayReconnectInfo: (gatewayId: string, info: { attempt: number; max: number; gaveUp: boolean } | null) => void;
 
@@ -144,6 +147,20 @@ export const useUiStore = create<UiState>((set, get) => ({
     set((s) => ({
       gatewayStatusMap: { ...s.gatewayStatusMap, [gatewayId]: status },
     })),
+
+  gatewayVersionMap: {},
+  setGatewayVersion: (gatewayId, version) =>
+    set((s) => {
+      const current = s.gatewayVersionMap[gatewayId];
+      if (!version) {
+        if (current === undefined) return s;
+        const next = { ...s.gatewayVersionMap };
+        delete next[gatewayId];
+        return { gatewayVersionMap: next };
+      }
+      if (current === version) return s;
+      return { gatewayVersionMap: { ...s.gatewayVersionMap, [gatewayId]: version } };
+    }),
 
   gatewayReconnectInfo: {},
   setGatewayReconnectInfo: (gatewayId, info) =>

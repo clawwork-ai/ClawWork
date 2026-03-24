@@ -68,6 +68,7 @@ export class GatewayClient {
   private deviceIdentity: DeviceIdentity;
   private lastError: string | null = null;
   private lastErrorCode: string | null = null;
+  private serverVersion: string | undefined;
   private onPairingSuccess?: (gatewayId: string) => void;
 
   constructor(config: GatewayClientConfig, opts?: GatewayClientOptions) {
@@ -144,6 +145,7 @@ export class GatewayClient {
         },
       });
       this.authenticated = false;
+      this.serverVersion = undefined;
       this.stopHeartbeat();
       if (this.mainWindow) {
         sendToWindow(this.mainWindow, 'gateway-status', {
@@ -331,12 +333,16 @@ export class GatewayClient {
           this.reconnectAttempts = 0;
           this.lastError = null;
           this.lastErrorCode = null;
+          const server = payload['server'] as Record<string, unknown> | undefined;
+          const rawVersion = server?.['version'];
+          this.serverVersion = typeof rawVersion === 'string' ? rawVersion : undefined;
           this.storeDeviceTokenFromPayload(payload);
           this.startHeartbeat();
           if (this.mainWindow) {
             sendToWindow(this.mainWindow, 'gateway-status', {
               gatewayId: this.gatewayId,
               connected: true,
+              serverVersion: this.serverVersion,
             });
           }
         } else {
@@ -649,6 +655,10 @@ export class GatewayClient {
 
   get lastConnectionErrorCode(): string | null {
     return this.lastErrorCode;
+  }
+
+  get version(): string | undefined {
+    return this.serverVersion;
   }
 
   private startHeartbeat(): void {

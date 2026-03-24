@@ -543,6 +543,9 @@ export function useGatewayEventDispatcher(): void {
             ? ('disconnected' as const)
             : ('connecting' as const);
         setGatewayStatusByGateway(gwId, status);
+        if (info.serverVersion) {
+          useUiStore.getState().setGatewayVersion(gwId, info.serverVersion);
+        }
         if (info.connected) {
           connectedGatewaysRef.current.add(gwId);
         }
@@ -575,6 +578,7 @@ export function useGatewayEventDispatcher(): void {
       const wasConnected = connectedGatewaysRef.current.has(s.gatewayId);
       const next = s.connected ? ('connected' as const) : s.error ? ('disconnected' as const) : ('connecting' as const);
       setGatewayStatusByGateway(s.gatewayId, next);
+      useUiStore.getState().setGatewayVersion(s.gatewayId, s.serverVersion);
 
       if (s.reconnectAttempt !== undefined && s.maxAttempts !== undefined) {
         useUiStore.getState().setGatewayReconnectInfo(s.gatewayId, {
