@@ -283,6 +283,15 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('context:list-files', { folders, query }),
     readContextFile: (absolutePath: string, folders: string[]) =>
       ipcRenderer.invoke('context:read-file', { absolutePath, folders }),
+    watchContextFolder: (folderPath: string) => ipcRenderer.invoke('context:watch-folder', folderPath),
+    unwatchContextFolder: (folderPath: string) => ipcRenderer.invoke('context:unwatch-folder', folderPath),
+    onContextFilesChanged: (callback: (folderPath: string) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, folderPath: string): void => callback(folderPath);
+      ipcRenderer.on('context:files-changed', listener);
+      return () => {
+        ipcRenderer.removeListener('context:files-changed', listener);
+      };
+    },
   };
 }
 
