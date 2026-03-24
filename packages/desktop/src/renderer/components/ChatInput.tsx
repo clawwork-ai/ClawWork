@@ -18,7 +18,14 @@ import {
   FolderPlus,
   ListTodo,
 } from 'lucide-react';
-import type { MessageImageAttachment, ModelCatalogEntry, ToolEntry, Task, Artifact } from '@clawwork/shared';
+import type {
+  MessageImageAttachment,
+  ModelCatalogEntry,
+  ToolEntry,
+  Task,
+  Artifact,
+  FileIndexEntry,
+} from '@clawwork/shared';
 import { toast } from 'sonner';
 import { markAbortedByUser } from '@/hooks/useGatewayDispatcher';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from '@/lib/error-format';
@@ -367,15 +374,60 @@ export default function ChatInput() {
   }, [modelCatalog]);
 
   const [contextFolders, setContextFolders] = useState<string[]>([]);
+  const [contextFileCount, setContextFileCount] = useState(0);
   const activeTaskId = activeTask?.id ?? null;
   const foldersByTaskRef = useRef<Record<string, string[]>>({});
+  const prevTaskIdRef = useRef<string>('');
+  const refreshIdRef = useRef(0);
+
+  const refreshContextFiles = useCallback(async (folders: string[]) => {
+    const id = ++refreshIdRef.current;
+    if (folders.length === 0) {
+      setContextFileCount(0);
+      return;
+    }
+    const res = await window.clawwork.listContextFiles(folders);
+    if (id !== refreshIdRef.current) return;
+    if (res.ok && res.result) {
+      const files = res.result as unknown as FileIndexEntry[];
+      setContextFileCount(files.filter((f) => f.tier === 'text').length);
+    }
+  }, []);
 
   useEffect(() => {
     const key = activeTaskId ?? '';
-    setContextFolders(foldersByTaskRef.current[key] ?? []);
+    const prevKey = prevTaskIdRef.current;
+
+    const prevFolders = foldersByTaskRef.current[prevKey] ?? [];
+    for (const f of prevFolders) window.clawwork.unwatchContextFolder(f);
+
+    const nextFolders = foldersByTaskRef.current[key] ?? [];
+    for (const f of nextFolders) window.clawwork.watchContextFolder(f);
+    setContextFolders(nextFolders);
+    refreshContextFiles(nextFolders);
+
+    prevTaskIdRef.current = key;
     setSelectedTasks([]);
     setSelectedArtifacts([]);
-  }, [activeTaskId]);
+  }, [activeTaskId, refreshContextFiles]);
+
+  useEffect(() => {
+    const cleanup = window.clawwork.onContextFilesChanged((changedFolder) => {
+      if (contextFolders.includes(changedFolder)) {
+        refreshContextFiles(contextFolders);
+      }
+    });
+    return cleanup;
+  }, [contextFolders, refreshContextFiles]);
+
+  useEffect(() => {
+    const taskFolders = foldersByTaskRef.current;
+    const prevRef = prevTaskIdRef;
+    return () => {
+      const folders = taskFolders[prevRef.current] ?? [];
+      for (const f of folders) window.clawwork.unwatchContextFolder(f);
+    };
+  }, []);
 
   const handleAddContextFolder = useCallback(async () => {
     const res = await window.clawwork.selectContextFolder();
@@ -387,19 +439,24 @@ export default function ChatInput() {
         foldersByTaskRef.current[key] = next;
         return next;
       });
+      await window.clawwork.watchContextFolder(path);
+      refreshContextFiles([...(foldersByTaskRef.current[activeTaskId ?? ''] ?? [])]);
     }
-  }, [activeTaskId]);
+  }, [activeTaskId, refreshContextFiles]);
 
   const handleRemoveContextFolder = useCallback(
     (path: string) => {
+      window.clawwork.unwatchContextFolder(path);
       setContextFolders((prev) => {
         const next = prev.filter((f) => f !== path);
         const key = activeTaskId ?? '';
         foldersByTaskRef.current[key] = next;
         return next;
       });
+      const remaining = foldersByTaskRef.current[activeTaskId ?? ''] ?? [];
+      refreshContextFiles(remaining);
     },
-    [activeTaskId],
+    [activeTaskId, refreshContextFiles],
   );
 
   // Revoke blob URLs on cleanup
@@ -715,7 +772,6 @@ export default function ChatInput() {
     pendingImages,
     selectedTasks,
     selectedArtifacts,
-    contextFolders,
     stopVoiceInput,
     commitPendingTask,
     updateTaskMetadata,
@@ -1466,7 +1522,7 @@ export default function ChatInput() {
             <span
               key={folder}
               className={cn(
-                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-[160px]',
+                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-[200px]',
                 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
               )}
             >
@@ -1479,6 +1535,11 @@ export default function ChatInput() {
               </button>
             </span>
           ))}
+          {contextFolders.length > 0 && contextFileCount > 0 && (
+            <span className="text-xs text-[var(--text-muted)] flex-shrink-0 tabular-nums">
+              {contextFileCount} files
+            </span>
+          )}
           <p className="flex-1 text-sm text-[var(--text-muted)] text-right tracking-wide">
             {isOffline
               ? t('chatInput.offlineHint')

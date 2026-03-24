@@ -1,6 +1,7 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import { scanFolder } from '../context/file-index.js';
 import { readContextFile, validatePathSecurity } from '../context/file-reader.js';
+import { watchFolder, unwatchFolder } from '../context/file-watcher.js';
 
 export function registerContextHandlers(): void {
   ipcMain.handle('context:select-folder', async () => {
@@ -41,6 +42,16 @@ export function registerContextHandlers(): void {
       const msg = err instanceof Error ? err.message : 'unknown error';
       return { ok: false, error: msg };
     }
+  });
+
+  ipcMain.handle('context:watch-folder', (_event, folderPath: string) => {
+    watchFolder(folderPath);
+    return { ok: true };
+  });
+
+  ipcMain.handle('context:unwatch-folder', (_event, folderPath: string) => {
+    unwatchFolder(folderPath);
+    return { ok: true };
   });
 
   ipcMain.handle('context:read-file', (_event, params: { absolutePath: string; folders: string[] }) => {
