@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'website/**'
+      - 'keynote/**'
       - '.github/workflows/website.yml'
   pull_request:
     paths:
       - 'website/**'
+      - 'keynote/**'
       - '.github/workflows/website.yml'
   workflow_dispatch:
 
@@ -37,10 +39,16 @@ jobs:
       - name: Typecheck
         run: pnpm --filter @clawwork/website exec tsc --noEmit
 
-      - name: Build
+      - name: Build website
         run: pnpm --filter @clawwork/website build
         env:
           VITE_BASE: /ClawWork/
+
+      - name: Build keynote
+        run: pnpm --filter @clawwork/keynote build --base /ClawWork/keynote/
+
+      - name: Merge outputs
+        run: cp -r keynote/dist website/dist/keynote
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'

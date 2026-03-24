@@ -502,9 +502,9 @@ class: text-center
 
 ---
 
-# Stop Switching Tabs, Start Running Tasks.
+# Stop Switching Tabs, Start Running Tasks
 
-<div class="mt-8">
+<div class="mt-8" style="display:flex;justify-content:center;">
   <a href="https://github.com/clawwork-ai/clawwork" target="_blank" style="text-decoration:none;">
     <div style="display:inline-flex;align-items:center;gap:20px;padding:24px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:16px;transition:border-color 0.2s;">
       <svg width="32" height="32" viewBox="0 0 16 16" fill="#f3f4f4"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -628,4 +628,43 @@ v0.0.1 → v0.0.10 · Mar 13 – Mar 24, 2026
   <div class="p-2 bg-cyan-400/5 border border-cyan-400/15 rounded-lg text-xs">
     <strong class="text-cyan-400">Next:</strong> Cron tasks, notifications, gateway version display
   </div>
+</div>
+
+---
+
+layout: center
+class: text-center
+
+---
+
+<div class="cw-grid"></div>
+<div class="glow-orb glow-green cw-pulse" style="top:-100px;left:30%;"></div>
+<div class="glow-orb glow-purple cw-pulse" style="bottom:-80px;right:20%;"></div>
+
+<div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+
+<div style="margin-bottom:32px;">
+<img src="/images/clawwork-logo.png" class="cw-float cw-logo-glow" style="width:48px;height:48px;" alt="ClawWork" />
+</div>
+
+<h1 style="font-size:3.6rem;font-weight:900;letter-spacing:-0.02em;line-height:1.1;">
+<span class="cw-shimmer">Thanks!</span>
+</h1>
+
+<p style="font-size:1.1rem;font-weight:300;color:#9ca3af;margin-top:16px;">Questions, ideas, or PRs — all welcome.</p>
+
+<div style="display:flex;justify-content:center;gap:32px;margin-top:40px;">
+<a href="https://github.com/clawwork-ai/clawwork" target="_blank" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none !important;border-bottom:none !important;color:#d1d5db;font-size:0.9rem;font-family:monospace;">
+<svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+clawwork-ai/clawwork
+</a>
+<a href="https://github.com/samzong" target="_blank" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none !important;border-bottom:none !important;color:#9ca3af;font-size:0.9rem;">
+@samzong
+</a>
+</div>
+
+<div style="margin-top:48px;font-size:0.75rem;opacity:0.3;">
+Apache 2.0 · macOS & Windows · Built with OpenClaw
+</div>
+
 </div>
