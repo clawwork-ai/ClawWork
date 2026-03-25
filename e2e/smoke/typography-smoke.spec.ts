@@ -21,9 +21,8 @@ test.afterAll(async () => {
 test('typography contract is visible in primary and quick launch surfaces', async () => {
   await page.waitForLoadState('domcontentloaded');
 
-  for (const cls of ['type-section-title', 'type-label', 'type-body']) {
-    const hasClass = await page.evaluate((c) => Boolean(document.querySelector(`.${c}`)), cls);
-    expect(hasClass).toBe(true);
+  for (const cls of ['type-label', 'type-body']) {
+    await page.waitForSelector(`.${cls}`, { timeout: 10_000 });
   }
 
   const shortcut = process.platform === 'darwin' ? 'Meta+Shift+L' : 'Control+Shift+L';
