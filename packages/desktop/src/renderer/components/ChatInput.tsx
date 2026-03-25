@@ -717,7 +717,7 @@ export default function ChatInput() {
             const blockSize = new TextEncoder().encode(read.content).length;
             totalLocalSize += blockSize;
             if (totalLocalSize > MAX_TEXT_TOTAL) {
-              toast.error('Total file context exceeds 500KB limit');
+              toast.error(t('chatInput.fileContextLimitExceeded'));
               break;
             }
             localBlocks.push(`<file path="${f.relativePath}">\n${read.content}\n</file>`);

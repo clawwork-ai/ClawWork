@@ -12,7 +12,6 @@ import { useTaskStore } from './stores/taskStore';
 import { useMessageStore } from './stores/messageStore';
 import { useFileStore } from './stores/fileStore';
 import { useGatewayEventDispatcher } from './hooks/useGatewayDispatcher';
-import { useResolvedTheme } from './hooks/useTheme';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
 import { cn } from '@/lib/utils';
@@ -45,7 +44,7 @@ export default function App() {
   const setRightPanelWidth = useUiStore((s) => s.setRightPanelWidth);
   const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
-  const resolvedTheme = useResolvedTheme();
+  const themeMode = useUiStore((s) => s.theme);
 
   useGatewayEventDispatcher();
   useUpdateCheck();
@@ -220,7 +219,7 @@ export default function App() {
           }}
         />
         <Toaster
-          theme={resolvedTheme}
+          theme={themeMode === 'auto' ? 'system' : themeMode}
           position="bottom-right"
           toastOptions={{
             style: {
@@ -283,7 +282,7 @@ export default function App() {
           )}
         </AnimatePresence>
         <Toaster
-          theme={resolvedTheme}
+          theme={themeMode === 'auto' ? 'system' : themeMode}
           position="bottom-right"
           toastOptions={{
             style: {
