@@ -182,12 +182,12 @@ export default function CronRunHistory({ jobId, jobName, jobSessionKey, gatewayI
   return (
     <div className="border-t border-[var(--border)] bg-[var(--bg-secondary)] flex flex-col">
       <div className="flex items-center justify-between px-4 py-2 flex-shrink-0">
-        <h3 className="text-sm font-medium text-[var(--text-primary)]">
+        <h3 className="type-label text-[var(--text-primary)]">
           {t('cron.runHistory.title')}: {jobName}
         </h3>
         <div className="flex items-center gap-1">
           {jobSessionKey && (
-            <Button variant="ghost" size="sm" onClick={handleOpenTask} className="text-xs gap-1">
+            <Button variant="ghost" size="sm" onClick={handleOpenTask} className="gap-1">
               <ExternalLink size={12} />
               {t('cron.runHistory.openTask')}
             </Button>
@@ -228,7 +228,7 @@ export default function CronRunHistory({ jobId, jobName, jobSessionKey, gatewayI
                 </div>
               ) : entry.summary && entry.summary.length > 40 ? (
                 <div className="bg-[var(--bg-tertiary)] px-4 py-3">
-                  <p className="type-body-sm text-[var(--text-secondary)] whitespace-pre-wrap break-words">
+                  <p className="type-support whitespace-pre-wrap break-words text-[var(--text-secondary)]">
                     {entry.summary}
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export default function CronRunHistory({ jobId, jobName, jobSessionKey, gatewayI
       </ScrollArea>
 
       {!loading && total > 0 && (
-        <div className="flex items-center justify-between px-4 py-2 border-t border-[var(--border)] flex-shrink-0 text-xs text-[var(--text-secondary)]">
+        <div className="type-support flex flex-shrink-0 items-center justify-between border-t border-[var(--border)] px-4 py-2 text-[var(--text-secondary)]">
           <span>{t('cron.runHistory.showing', { start: pageStart, end: pageEnd, total })}</span>
           <div className="flex items-center gap-1">
             <Button

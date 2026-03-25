@@ -36,8 +36,8 @@ export default function ListItem({
     >
       {leading ? <div className="shrink-0">{leading}</div> : null}
       <div className="min-w-0 flex-1">
-        <div className="type-label-md truncate text-[var(--text-primary)]">{title}</div>
-        {subtitle ? <div className="mt-0.5 type-body-sm truncate text-[var(--text-muted)]">{subtitle}</div> : null}
+        <div className="type-label truncate text-[var(--text-primary)]">{title}</div>
+        {subtitle ? <div className="mt-0.5 type-support truncate text-[var(--text-muted)]">{subtitle}</div> : null}
       </div>
       {meta ? <div className="shrink-0 type-meta text-[var(--text-muted)]">{meta}</div> : null}
       {trailing ? <div className="shrink-0">{trailing}</div> : null}

@@ -35,7 +35,7 @@ export default function SettingsNav({
             onClick={() => onChange(item.key)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'relative flex items-center gap-2.5 w-full h-9 px-3 rounded-lg text-sm transition-colors cursor-pointer',
+              'type-label relative flex items-center gap-2.5 w-full h-9 px-3 rounded-lg transition-colors cursor-pointer',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
               isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
             )}

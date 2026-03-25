@@ -1176,7 +1176,7 @@ export default function ChatInput() {
                   >
                     <X size={12} />
                   </button>
-                  <span className="absolute bottom-0 left-0 right-0 text-2xs text-center text-[var(--text-muted)] bg-[var(--overlay-scrim)] rounded-b-lg truncate px-1">
+                  <span className="type-support absolute bottom-0 left-0 right-0 rounded-b-lg bg-[var(--overlay-scrim)] px-1 text-center truncate text-[var(--text-muted)]">
                     {img.file.name}
                   </span>
                 </motion.div>
@@ -1193,7 +1193,7 @@ export default function ChatInput() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
+                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                   )}
@@ -1201,12 +1201,10 @@ export default function ChatInput() {
                   <Cpu size={16} className="flex-shrink-0" />
                   <span className="max-w-24 truncate">{modelLabel}</span>
                   {currentModelEntry?.reasoning && (
-                    <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
-                      R
-                    </span>
+                    <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">R</span>
                   )}
                   {currentModelEntry?.contextWindow && (
-                    <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                    <span className="type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
                       {formatContextWindow(currentModelEntry.contextWindow)}
                     </span>
                   )}
@@ -1228,12 +1226,12 @@ export default function ChatInput() {
                         >
                           <span className="truncate">{m.name ?? m.id}</span>
                           {m.reasoning && (
-                            <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
+                            <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">
                               R
                             </span>
                           )}
                           {m.contextWindow && (
-                            <span className="ml-auto pl-2 px-1 py-px rounded text-2xs font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                            <span className="ml-auto pl-2 type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
                               {formatContextWindow(m.contextWindow)}
                             </span>
                           )}
@@ -1257,7 +1255,7 @@ export default function ChatInput() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
+                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                     currentThinking !== 'off' && 'text-[var(--accent)]',
@@ -1287,7 +1285,7 @@ export default function ChatInput() {
               <TooltipTrigger asChild>
                 <button
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
+                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
                     'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                     'hover:bg-[var(--bg-hover)] transition-colors',
                   )}
@@ -1312,7 +1310,7 @@ export default function ChatInput() {
                   <TooltipTrigger asChild>
                     <button
                       className={cn(
-                        'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
+                        'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
                         'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                         'hover:bg-[var(--bg-hover)] transition-colors',
                       )}
@@ -1327,7 +1325,7 @@ export default function ChatInput() {
                   <TooltipTrigger asChild>
                     <button
                       className={cn(
-                        'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
+                        'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
                         'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                         'hover:bg-[var(--bg-hover)] transition-colors',
                       )}
@@ -1430,7 +1428,7 @@ export default function ChatInput() {
                     <span
                       key={f.absolutePath}
                       className={cn(
-                        'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
+                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
                         'bg-[var(--accent)]/10 text-[var(--accent)]',
                       )}
                     >
@@ -1448,7 +1446,7 @@ export default function ChatInput() {
                     <span
                       key={`task-${task.id}`}
                       className={cn(
-                        'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
+                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
                         'bg-[var(--accent)]/10 text-[var(--accent)]',
                       )}
                     >
@@ -1466,7 +1464,7 @@ export default function ChatInput() {
                     <span
                       key={a.id}
                       className={cn(
-                        'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
+                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
                         'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       )}
                     >
@@ -1514,13 +1512,15 @@ export default function ChatInput() {
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
                           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
                         </span>
-                        <span className="text-sm text-[var(--text-secondary)]">{t('voiceInput.listeningStatus')}</span>
+                        <span className="type-body text-[var(--text-secondary)]">
+                          {t('voiceInput.listeningStatus')}
+                        </span>
                       </>
                     )}
                     {isVoiceTranscribing && (
                       <>
                         <Loader2 size={14} className="animate-spin text-[var(--accent)]" />
-                        <span className="text-sm text-[var(--text-secondary)]">{t('voiceInput.transcribing')}</span>
+                        <span className="type-body text-[var(--text-secondary)]">{t('voiceInput.transcribing')}</span>
                       </>
                     )}
                   </motion.div>
@@ -1554,9 +1554,6 @@ export default function ChatInput() {
                 </TooltipTrigger>
                 <TooltipContent>{voiceTooltip}</TooltipContent>
               </Tooltip>
-              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
-                {t('voiceInput.beta')}
-              </span>
             </div>
             <AnimatePresence mode="wait">
               {isGenerating ? (
@@ -1608,7 +1605,7 @@ export default function ChatInput() {
                 onClick={handleAddContextFolder}
                 disabled={disabled}
                 className={cn(
-                  'inline-flex items-center gap-1 px-1.5 py-1 rounded-lg text-xs flex-shrink-0',
+                  'type-support inline-flex flex-shrink-0 items-center gap-1 rounded-lg px-1.5 py-1',
                   'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                   'hover:bg-[var(--bg-hover)] transition-colors',
                 )}
@@ -1622,7 +1619,7 @@ export default function ChatInput() {
             <span
               key={folder}
               className={cn(
-                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-48',
+                'type-mono-data inline-flex max-w-48 flex-shrink-0 items-center gap-1 rounded-md px-2 py-1',
                 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
               )}
             >
@@ -1636,11 +1633,9 @@ export default function ChatInput() {
             </span>
           ))}
           {contextFolders.length > 0 && contextFileCount > 0 && (
-            <span className="text-xs text-[var(--text-muted)] flex-shrink-0 tabular-nums">
-              {contextFileCount} files
-            </span>
+            <span className="type-mono-data flex-shrink-0 text-[var(--text-muted)]">{contextFileCount} files</span>
           )}
-          <p className="flex-1 text-sm text-[var(--text-muted)] text-right tracking-wide">
+          <p className="type-support flex-1 text-right text-[var(--text-muted)]">
             {isOffline
               ? t('chatInput.offlineHint')
               : sendShortcut === 'cmdEnter'

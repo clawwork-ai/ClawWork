@@ -9,7 +9,7 @@ import SettingGroup from '@/components/semantic/SettingGroup';
 import InlineNotice from '@/components/semantic/InlineNotice';
 
 const linkClass = cn(
-  'flex items-center justify-center gap-2 h-9 px-4 rounded-lg text-sm font-medium transition-colors',
+  'type-label flex h-9 items-center justify-center gap-2 rounded-lg px-4 transition-colors',
   'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[var(--border)]',
   'hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:scale-[0.98]',
 );
@@ -135,21 +135,21 @@ export default function AboutSection() {
 
   return (
     <div>
-      <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.about')}</h3>
-      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.aboutDesc')}</p>
+      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.about')}</h3>
+      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.aboutDesc')}</p>
       <SettingGroup>
         <div className="space-y-3 px-5 py-4">
           <SettingRow label={t('settings.version')}>
-            <span className="text-sm text-[var(--text-primary)] font-mono">
+            <span className="type-mono-data text-[var(--text-primary)]">
               {currentVersion ? `v${currentVersion}` : '—'}
             </span>
           </SettingRow>
           {deviceId && (
             <div>
               <SettingRow label={t('settings.deviceId')}>
-                <span className="text-xs text-[var(--text-secondary)] font-mono select-all">{deviceId}</span>
+                <span className="type-mono-data select-all text-[var(--text-secondary)]">{deviceId}</span>
               </SettingRow>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{t('settings.deviceIdDesc')}</p>
+              <p className="type-support mt-1 text-[var(--text-muted)]">{t('settings.deviceIdDesc')}</p>
             </div>
           )}
         </div>
@@ -158,7 +158,7 @@ export default function AboutSection() {
           <div className="px-5 py-4">
             <InlineNotice tone="info">
               <div>
-                <p className="mb-2 text-sm font-medium">
+                <p className="type-label mb-2 text-[var(--text-primary)]">
                   {t('settings.newVersionAvailable', { version: versionInfo.latestVersion })}
                 </p>
                 <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default function AboutSection() {
                       href={versionInfo.releaseUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] underline"
+                      className="type-support text-[var(--text-muted)] hover:text-[var(--text-secondary)] underline"
                     >
                       {t('settings.downloadManually')}
                     </a>
@@ -185,7 +185,7 @@ export default function AboutSection() {
         {updateState === 'downloading' && (
           <div className="px-5 py-4">
             <div className="rounded-lg px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border)]">
-              <p className="text-sm text-[var(--text-secondary)] mb-2">
+              <p className="type-body mb-2 text-[var(--text-secondary)]">
                 {t('settings.downloadProgress', { percent: downloadPercent })}
               </p>
               <div className="h-2 rounded-full bg-[var(--bg-hover)] overflow-hidden">
@@ -202,7 +202,7 @@ export default function AboutSection() {
           <div className="px-5 py-4">
             <InlineNotice tone="info">
               <div>
-                <p className="mb-2 text-sm font-medium">
+                <p className="type-label mb-2 text-[var(--text-primary)]">
                   {t('settings.newVersionAvailable', { version: versionInfo?.latestVersion })}
                 </p>
                 <Button variant="default" size="sm" onClick={handleInstall} className="gap-1.5">

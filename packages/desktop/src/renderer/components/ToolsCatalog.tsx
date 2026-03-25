@@ -41,8 +41,8 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
                 ) : (
                   <Wrench size={14} className="text-[var(--text-muted)]" />
                 )}
-                <span className="text-xs font-medium text-[var(--text-primary)]">{group.label}</span>
-                <span className="text-2xs text-[var(--text-muted)] ml-auto">{group.tools.length}</span>
+                <span className="type-label text-[var(--text-primary)]">{group.label}</span>
+                <span className="type-meta ml-auto text-[var(--text-muted)]">{group.tools.length}</span>
               </div>
             </SectionCard>
             {group.tools.map((tool) => (

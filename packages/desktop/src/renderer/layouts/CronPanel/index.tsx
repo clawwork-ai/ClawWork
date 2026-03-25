@@ -255,9 +255,9 @@ export default function CronPanel() {
     <div className="flex flex-col h-full">
       <header className="titlebar-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">{t('cron.title')}</h2>
+          <h2 className="type-section-title text-[var(--text-primary)]">{t('cron.title')}</h2>
           {schedulerStatus && (
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="type-support text-[var(--text-muted)]">
               {t('cron.jobCount', { count: schedulerStatus.jobs })}
             </span>
           )}
@@ -286,7 +286,7 @@ export default function CronPanel() {
                 <DropdownMenuItem
                   key={id}
                   onClick={() => setSelectedGatewayId(id)}
-                  className={cn('text-xs', id === selectedGatewayId && 'bg-[var(--accent-dim)]')}
+                  className={cn('type-label', id === selectedGatewayId && 'bg-[var(--accent-dim)]')}
                 >
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
@@ -294,7 +294,7 @@ export default function CronPanel() {
                   />
                   <span className="truncate">{info.name}</span>
                   {id === selectedGatewayId && schedulerStatus && !schedulerStatus.enabled && (
-                    <span className="ml-auto text-xs text-[var(--text-muted)]">{t('cron.schedulerStopped')}</span>
+                    <span className="ml-auto type-support text-[var(--text-muted)]">{t('cron.schedulerStopped')}</span>
                   )}
                 </DropdownMenuItem>
               ))}
@@ -322,7 +322,7 @@ export default function CronPanel() {
                 setOffset(0);
               }}
               className={cn(
-                'px-3 py-1 rounded-md text-xs font-medium transition-colors duration-150',
+                'type-label rounded-md px-3 py-1 transition-colors duration-150',
                 filter === tab.key
                   ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
@@ -345,7 +345,7 @@ export default function CronPanel() {
               }}
               placeholder={t('cron.searchPlaceholder')}
               className={cn(
-                'h-7 w-44 pl-8 pr-3 rounded-md text-xs',
+                'type-body h-7 w-44 rounded-md pl-8 pr-3',
                 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
                 'text-[var(--text-secondary)] outline-none',
                 'focus:border-[var(--border-accent)] focus:bg-[var(--bg-secondary)]',
@@ -452,14 +452,14 @@ export default function CronPanel() {
 
       {total > 0 && (
         <div className="flex items-center justify-between px-6 py-2 border-t border-[var(--border)] flex-shrink-0">
-          <span className="text-xs text-[var(--text-muted)]">
+          <span className="type-support text-[var(--text-muted)]">
             {t('cron.pagination', { start: pageStart, end: pageEnd, total })}
           </span>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="sm"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2"
               disabled={!hasPrev}
               onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
             >
@@ -468,7 +468,7 @@ export default function CronPanel() {
             <Button
               variant="outline"
               size="sm"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2"
               disabled={!hasNext}
               onClick={() => setOffset(offset + PAGE_SIZE)}
             >

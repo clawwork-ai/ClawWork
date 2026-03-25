@@ -33,10 +33,10 @@ export default function VoiceIntroDialog({ open, onConfirm, onCancel }: VoiceInt
 
         <div className="mt-4 space-y-3">
           <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3">
-            <p className="text-sm font-medium text-[var(--text-primary)]">{t('voiceInput.introStepHold')}</p>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">{t('voiceInput.introStepInsert')}</p>
+            <p className="type-label text-[var(--text-primary)]">{t('voiceInput.introStepHold')}</p>
+            <p className="type-support mt-1 text-[var(--text-secondary)]">{t('voiceInput.introStepInsert')}</p>
           </div>
-          <p className="text-sm text-[var(--text-secondary)]">{t('voiceInput.introStepBeta')}</p>
+          <p className="type-support text-[var(--text-secondary)]">{t('voiceInput.introStepBeta')}</p>
         </div>
 
         <DialogFooter className="mt-6">

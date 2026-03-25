@@ -64,7 +64,7 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
   const sections = (['task', 'message', 'artifact'] as const).filter((type) => grouped[type].length > 0);
 
   if (sections.length === 0) {
-    return <div className="px-4 py-6 text-center text-sm text-[var(--text-muted)]">{t('search.noResults')}</div>;
+    return <div className="type-body px-4 py-6 text-center text-[var(--text-muted)]">{t('search.noResults')}</div>;
   }
 
   return (
@@ -72,7 +72,7 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
       <div className="p-2 space-y-3">
         {sections.map((type) => (
           <div key={type}>
-            <p className="text-xs uppercase tracking-wider text-[var(--text-muted)] px-2 pb-1">
+            <p className="type-meta px-2 pb-1 text-[var(--text-muted)]">
               {t(LABEL_KEYS[type])} ({grouped[type].length})
             </p>
             {grouped[type].map((result, idx) => {
@@ -91,8 +91,10 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
                 >
                   <Icon size={15} className="mt-0.5 flex-shrink-0 text-[var(--text-muted)]" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-[var(--text-primary)] truncate">{result.title || t('common.noTitle')}</p>
-                    <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
+                    <p className="type-label truncate text-[var(--text-primary)]">
+                      {result.title || t('common.noTitle')}
+                    </p>
+                    <p className="type-support mt-0.5 truncate text-[var(--text-secondary)]">
                       {highlightSnippet(result.snippet)}
                     </p>
                   </div>

@@ -1,36 +1,26 @@
 import { type MouseEvent, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { MessageSquare, Circle, Loader2, Server, Cpu, Bot } from 'lucide-react';
+import { MessageSquare, Circle, Loader2, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
-import { useMessageStore } from '@/stores/messageStore';
+import { useMessageStore, type ActiveTurn } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
+import type { Message } from '@clawwork/shared';
 import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import type { Task } from '@clawwork/shared';
-
-const GATEWAY_INJECTED_MODEL = 'gateway-injected';
 
 interface TaskItemProps {
   task: Task;
   active: boolean;
   onContextMenu: (e: MouseEvent) => void;
   collapsed?: boolean;
-  multiGateway?: boolean;
   editing?: boolean;
   onEditDone?: () => void;
 }
 
-export default function TaskItem({
-  task,
-  active,
-  onContextMenu,
-  collapsed,
-  multiGateway,
-  editing,
-  onEditDone,
-}: TaskItemProps) {
+export default function TaskItem({ task, active, onContextMenu, collapsed, editing, onEditDone }: TaskItemProps) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
@@ -67,15 +57,21 @@ export default function TaskItem({
     const turn = s.activeTurnByTask[task.id];
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
-  const gwInfo = useUiStore((s) => s.gatewayInfoMap[task.gatewayId]);
-  const agentInfo = useUiStore((s) => {
-    if (!task.agentId) return undefined;
-    const catalog = s.agentCatalogByGateway[task.gatewayId];
-    if (!catalog || task.agentId === catalog.defaultId) return undefined;
-    return catalog.agents.find((a) => a.id === task.agentId);
+  const preview = useMessageStore((s) => {
+    const turn: ActiveTurn | undefined = s.activeTurnByTask[task.id];
+    let text = '';
+    if (turn && !turn.finalized) {
+      if (turn.toolCalls.length > 0) text = turn.toolCalls[turn.toolCalls.length - 1].name;
+      else if (turn.streamingText) text = turn.streamingText;
+      else if (turn.streamingThinking) text = t('chat.thinking');
+    }
+    if (!text) {
+      const msgs: Message[] = s.messagesByTask[task.id] ?? [];
+      const last = msgs[msgs.length - 1];
+      if (last) text = last.toolCalls?.length > 0 ? last.toolCalls[last.toolCalls.length - 1].name : last.content;
+    }
+    return text.replace(/\n+/g, ' ').slice(0, 80);
   });
-  const modelLabel = task.model === GATEWAY_INJECTED_MODEL ? 'Default' : task.model?.split('/').pop();
-  const modelTooltip = task.model === GATEWAY_INJECTED_MODEL ? 'Default' : task.model;
 
   const handleClick = (): void => {
     setActiveTask(task.id);
@@ -97,7 +93,7 @@ export default function TaskItem({
             {active && <span className="absolute left-0 top-1 bottom-1 w-1 rounded-full bg-[var(--accent)]" />}
             <span
               className={cn(
-                'w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors',
+                'type-label flex h-8 w-8 items-center justify-center rounded-md transition-colors',
                 active
                   ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
@@ -125,7 +121,7 @@ export default function TaskItem({
       onClick={handleClick}
       onContextMenu={onContextMenu}
       className={cn(
-        'titlebar-no-drag w-full flex items-start gap-3 px-3 py-2.5 rounded-md text-left transition-all relative',
+        'titlebar-no-drag w-full flex flex-col px-3 py-2.5 rounded-md text-left transition-all relative',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
         active
           ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]'
@@ -134,89 +130,47 @@ export default function TaskItem({
       style={active ? { boxShadow: 'var(--shadow-card)' } : undefined}
     >
       {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[var(--accent)]" />}
-      <MessageSquare size={16} className="mt-0.5 flex-shrink-0 opacity-50" />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          {editing ? (
-            <input
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commitRename}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  commitRename();
-                }
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  cancelRename();
-                }
-                e.stopPropagation();
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="font-medium flex-1 min-w-0 bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1 py-0 text-[var(--text-primary)] outline-none text-sm"
-            />
-          ) : (
-            <span className="font-medium truncate flex-1">{task.title || t('common.newTask')}</span>
-          )}
-          {isStreaming ? (
-            <Loader2 size={12} className="flex-shrink-0 animate-spin text-[var(--accent)]" />
-          ) : hasUnread ? (
-            <Circle size={6} className="flex-shrink-0 fill-[var(--accent)] text-[var(--accent)]" />
-          ) : null}
-        </div>
-        <div className="flex items-center gap-x-1.5 gap-y-1 mt-1 flex-wrap">
-          {task.status === 'completed' && (
-            <span className="text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
-              {t('common.completed')}
-            </span>
-          )}
-          {multiGateway && gwInfo && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate"
-                  style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
-                >
-                  <Server size={10} className="flex-shrink-0 opacity-60" />
-                  {gwInfo.name}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>{gwInfo.name}</TooltipContent>
-            </Tooltip>
-          )}
-          {agentInfo && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate">
-                  {agentInfo.identity?.emoji ? (
-                    <span className="text-xs leading-none">{agentInfo.identity.emoji}</span>
-                  ) : (
-                    <Bot size={10} className="flex-shrink-0 opacity-60" />
-                  )}
-                  {agentInfo.name ?? agentInfo.id}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>{agentInfo.name ?? agentInfo.id}</TooltipContent>
-            </Tooltip>
-          )}
-          {modelLabel && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate">
-                  <Cpu size={10} className="flex-shrink-0 opacity-60" />
-                  {modelLabel}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>{modelTooltip}</TooltipContent>
-            </Tooltip>
-          )}
-          <span className="text-xs leading-tight text-[var(--text-muted)]">
-            {formatRelativeTime(new Date(task.updatedAt))}
-          </span>
-        </div>
+      <div className="flex w-full items-center gap-1.5">
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                commitRename();
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelRename();
+              }
+              e.stopPropagation();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="type-label min-w-0 flex-1 rounded border border-[var(--ring-accent)] bg-[var(--bg-primary)] px-1 py-0 text-[var(--text-primary)] outline-none"
+          />
+        ) : (
+          <span className="type-label min-w-0 flex-1 truncate">{task.title || t('common.newTask')}</span>
+        )}
+        {isStreaming && <Loader2 size={12} className="flex-shrink-0 animate-spin text-[var(--accent)]" />}
+        {hasUnread && !isStreaming && (
+          <Circle size={6} className="flex-shrink-0 fill-[var(--accent)] text-[var(--accent)]" />
+        )}
+        <span className="type-support flex-shrink-0 text-[var(--text-muted)]">
+          {formatRelativeTime(new Date(task.updatedAt))}
+        </span>
       </div>
+      <p
+        className={cn(
+          'type-support mt-0.5 truncate',
+          isStreaming ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]',
+        )}
+      >
+        {isStreaming && preview.includes('.') && <Wrench size={10} className="mr-1 inline-block align-[-1px]" />}
+        {preview || '\u00A0'}
+      </p>
     </motion.button>
   );
 }

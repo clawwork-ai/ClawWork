@@ -113,8 +113,8 @@ export default function GeneralSection() {
 
   return (
     <div>
-      <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.general')}</h3>
-      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.generalDesc')}</p>
+      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.general')}</h3>
+      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.generalDesc')}</p>
       <SettingGroup>
         <SettingRow label={t('settings.theme')}>
           <SegmentedControl
@@ -168,7 +168,7 @@ export default function GeneralSection() {
             value={language}
             onChange={(e) => setLanguage(e.target.value as Language)}
             aria-label={t('settings.language')}
-            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
+            className="type-body rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-primary)]"
           >
             {SUPPORTED_LANGUAGES.map((l) => (
               <option key={l.code} value={l.code}>
@@ -215,8 +215,8 @@ export default function GeneralSection() {
         </SettingRow>
       </SettingGroup>
 
-      <h3 className="text-base font-semibold text-[var(--text-primary)] mt-8">{t('settings.notifications')}</h3>
-      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.notificationsDesc')}</p>
+      <h3 className="type-section-title mt-8 text-[var(--text-primary)]">{t('settings.notifications')}</h3>
+      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.notificationsDesc')}</p>
       <SettingGroup>
         {notificationToggles.map(({ key, i18nKey }) => (
           <SettingRow
@@ -224,7 +224,7 @@ export default function GeneralSection() {
             label={
               <div className="flex items-center gap-3">
                 <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <span className="text-sm text-[var(--text-primary)]">{t(i18nKey)}</span>
+                <span className="type-label text-[var(--text-primary)]">{t(i18nKey)}</span>
               </div>
             }
           >

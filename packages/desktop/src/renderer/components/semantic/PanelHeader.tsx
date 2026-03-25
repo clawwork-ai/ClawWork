@@ -12,8 +12,8 @@ export default function PanelHeader({ title, subtitle, actions, className }: Pan
   return (
     <header className={cn('flex items-start justify-between gap-4', className)}>
       <div className="min-w-0">
-        <div className="type-title-sm text-[var(--text-primary)]">{title}</div>
-        {subtitle ? <div className="mt-1 type-body-sm text-[var(--text-muted)]">{subtitle}</div> : null}
+        <div className="type-section-title text-[var(--text-primary)]">{title}</div>
+        {subtitle ? <div className="mt-1 type-support text-[var(--text-muted)]">{subtitle}</div> : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
     </header>

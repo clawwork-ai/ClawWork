@@ -217,7 +217,7 @@ export default function MarkdownContent({
                 return (
                   <div className="group/code relative max-w-full">
                     {lang && (
-                      <span className="absolute left-3 top-2.5 text-xs text-[var(--text-muted)] select-none pointer-events-none">
+                      <span className="type-support pointer-events-none absolute left-3 top-2.5 select-none text-[var(--text-muted)]">
                         {lang}
                       </span>
                     )}

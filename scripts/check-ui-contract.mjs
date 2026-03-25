@@ -8,6 +8,7 @@ const violations = [];
 const EXCLUDED_FILES = new Set([
   'packages/desktop/src/renderer/styles/theme.css',
   'packages/desktop/src/renderer/styles/design-tokens.ts',
+  'packages/desktop/src/renderer/styles/typography.css',
 ]);
 
 const RULES = [
@@ -29,8 +30,18 @@ const RULES = [
   },
   {
     category: 'arbitrary-font-size',
-    regex: /\btext-\[(?:\d+(?:\.\d+)?(?:px|rem|em)|\d+%)\]\b/g,
+    regex: /\btext-\[(?:\d+(?:\.\d+)?(?:px|rem|em)|\d+%)\]/g,
     message: 'Use the shared typography scale instead of arbitrary font sizes.',
+  },
+  {
+    category: 'raw-tailwind-text-size',
+    regex: /\btext-(?:2xs|xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)\b/g,
+    message: 'Use semantic type-* utility classes instead of raw Tailwind text size classes.',
+  },
+  {
+    category: 'quick-launch-font-size',
+    regex: /font-size\s*:\s*[^;]+;/g,
+    message: 'Use shared typography tokens or utilities instead of local font-size declarations.',
   },
   {
     category: 'raw-motion-duration',
@@ -98,14 +109,21 @@ function isAllowed(filePath, matchText, category) {
   return false;
 }
 
+function isRuleExcluded(filePath, category) {
+  if (EXCLUDED_FILES.has(filePath)) return true;
+  if (filePath.endsWith('quick-launch.html'))
+    return category !== 'raw-tailwind-text-size' && category !== 'quick-launch-font-size';
+  if (category === 'quick-launch-font-size') return true;
+  if (category === 'raw-tailwind-text-size' && filePath.includes('components/ui/')) return true;
+  return false;
+}
+
 function addViolation(filePath, content, index, category, message, match) {
   const { line, column } = getLineAndColumn(content, index);
   violations.push({ filePath, line, column, category, message, match: match.trim() || match });
 }
 
-const rendererFiles = walk('packages/desktop/src/renderer').filter(
-  (filePath) => /\.(ts|tsx|css)$/.test(filePath) && !EXCLUDED_FILES.has(filePath),
-);
+const rendererFiles = walk('packages/desktop/src/renderer').filter((filePath) => /\.(ts|tsx|css|html)$/.test(filePath));
 
 const COMPONENT_USAGE_RULES = [
   {
@@ -205,6 +223,9 @@ for (const filePath of rendererFiles) {
   const content = readFileSync(absolutePath, 'utf8');
 
   for (const rule of RULES) {
+    if (isRuleExcluded(filePath, rule.category)) {
+      continue;
+    }
     const matches = content.matchAll(rule.regex);
     for (const match of matches) {
       const matchText = match[0].trimStart();

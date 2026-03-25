@@ -102,7 +102,7 @@ export default function CronJobCard({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-[var(--text-primary)] truncate">{job.name}</span>
+              <span className="type-label truncate text-[var(--text-primary)]">{job.name}</span>
               <div className="flex items-center gap-2 shrink-0">
                 {state.runningAtMs && <Loader2 size={14} className="animate-spin text-[var(--accent)]" />}
                 {state.lastRunStatus && (
@@ -117,23 +117,23 @@ export default function CronJobCard({
                   <span className="inline-block h-2 w-2 rounded-full bg-[var(--text-muted)]" />
                 )}
                 {state.lastRunAtMs && (
-                  <span className="text-xs text-[var(--text-muted)]">{formatRelativeMs(state.lastRunAtMs)}</span>
+                  <span className="type-support text-[var(--text-muted)]">{formatRelativeMs(state.lastRunAtMs)}</span>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-xs uppercase tracking-wider font-medium px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+              <span className="type-badge rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
                 {schedBadge}
               </span>
-              <span className="text-xs text-[var(--text-secondary)] font-mono truncate">{schedText}</span>
+              <span className="type-mono-data truncate text-[var(--text-secondary)]">{schedText}</span>
             </div>
 
-            <div className="text-xs text-[var(--text-secondary)] mt-1 truncate">
+            <div className="type-support mt-1 truncate text-[var(--text-secondary)]">
               <span className="text-[var(--text-muted)]">{job.payload.kind}:</span> {preview}
             </div>
 
-            <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-muted)]">
+            <div className="flex items-center gap-2 mt-1 type-support text-[var(--text-muted)]">
               <span>{targetLabel}</span>
               {state.nextRunAtMs && (
                 <>
@@ -148,7 +148,7 @@ export default function CronJobCard({
             {(state.consecutiveErrors ?? 0) > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="inline-flex items-center gap-1 mt-1.5 text-xs text-[var(--danger)]">
+                  <div className="type-support mt-1.5 inline-flex items-center gap-1 text-[var(--danger)]">
                     <AlertTriangle size={12} />
                     <span>
                       {state.consecutiveErrors} {t('cron.consecutiveErrors')}

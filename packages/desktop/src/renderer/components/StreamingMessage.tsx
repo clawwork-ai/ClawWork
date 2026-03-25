@@ -51,7 +51,7 @@ const StreamingMessage = memo(function StreamingMessage({
             <button
               onClick={() => setThinkingOpen((v) => !v)}
               className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs',
+                'type-support inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1',
                 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                 'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
               )}
@@ -71,7 +71,7 @@ const StreamingMessage = memo(function StreamingMessage({
                 >
                   <div
                     className={cn(
-                      'mt-1.5 px-3 py-2 rounded-lg text-xs leading-relaxed',
+                      'type-support mt-1.5 rounded-lg px-3 py-2 leading-relaxed',
                       'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       'border-l-2 border-[var(--accent)] border-opacity-30',
                       'max-h-60 overflow-y-auto',

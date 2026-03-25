@@ -83,7 +83,7 @@ function AgentCard({
           )}
         >
           {emoji ? (
-            <span className="text-lg leading-none">{emoji}</span>
+            <span className="emoji-lg">{emoji}</span>
           ) : (
             <Bot size={16} className={isDefault ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'} />
           )}
@@ -91,16 +91,16 @@ function AgentCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-[var(--text-primary)] truncate">{agent.name ?? agent.id}</span>
+            <span className="type-label truncate text-[var(--text-primary)]">{agent.name ?? agent.id}</span>
             {isDefault && (
-              <span className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-medium">
+              <span className="type-badge normal-case flex items-center gap-1 rounded-md bg-[var(--accent-soft)] px-1.5 py-0.5 text-[var(--accent)]">
                 <Crown size={10} />
                 {t('settings.agentDefault')}
               </span>
             )}
           </div>
-          <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5 truncate">{agent.id}</p>
-          {workspace && <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate opacity-60">{workspace}</p>}
+          <p className="type-mono-data mt-0.5 truncate text-[var(--text-muted)]">{agent.id}</p>
+          {workspace && <p className="type-support mt-0.5 truncate text-[var(--text-muted)] opacity-60">{workspace}</p>}
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1 pl-3 border-l border-[var(--border-subtle)]">
@@ -155,7 +155,7 @@ function AgentCard({
               {loadingFiles ? (
                 <LoadingBlock mode="inline" label={t('settings.agentLoadingFiles')} className="py-2" />
               ) : files.length === 0 ? (
-                <p className="text-sm text-[var(--text-muted)] py-2">{t('settings.agentNoFiles')}</p>
+                <p className="type-support py-2 text-[var(--text-muted)]">{t('settings.agentNoFiles')}</p>
               ) : (
                 <div className="flex gap-3 h-70">
                   <div className="w-40 flex-shrink-0 space-y-0.5 overflow-y-auto">
@@ -165,7 +165,7 @@ function AgentCard({
                         type="button"
                         onClick={() => onSelectFile(f.name)}
                         className={cn(
-                          'flex items-center gap-1.5 w-full px-2 py-1.5 rounded-md text-xs text-left transition-colors',
+                          'type-support flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
                           'hover:bg-[var(--bg-tertiary)]',
                           selectedFile === f.name
                             ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
@@ -173,9 +173,9 @@ function AgentCard({
                         )}
                       >
                         <FileText size={12} className="flex-shrink-0" />
-                        <span className="font-mono truncate">{f.name}</span>
+                        <span className="type-code-inline truncate">{f.name}</span>
                         {f.missing && (
-                          <span className="text-2xs px-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex-shrink-0">
+                          <span className="type-meta normal-case flex-shrink-0 rounded bg-[var(--bg-tertiary)] px-1 text-[var(--text-muted)]">
                             {t('common.missing')}
                           </span>
                         )}
@@ -184,7 +184,7 @@ function AgentCard({
                   </div>
                   <div className="flex-1 min-w-0">
                     {!selectedFile ? (
-                      <div className="flex items-center justify-center h-full text-sm text-[var(--text-muted)]">
+                      <div className="type-support flex h-full items-center justify-center text-[var(--text-muted)]">
                         {t('settings.agentFilePreview')}
                       </div>
                     ) : loadingFileContent ? (
@@ -192,7 +192,7 @@ function AgentCard({
                         <Loader2 size={16} className="animate-spin text-[var(--text-muted)]" />
                       </div>
                     ) : (
-                      <pre className="bg-[var(--bg-tertiary)] rounded-lg p-3 text-xs font-mono text-[var(--text-secondary)] overflow-auto h-full whitespace-pre-wrap break-words">
+                      <pre className="type-code-block h-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)]">
                         {fileContent ?? ''}
                       </pre>
                     )}
@@ -235,7 +235,7 @@ function AgentForm({
     >
       <div className="surface-card space-y-4 rounded-xl p-5">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-[var(--text-primary)]">
+          <span className="type-label text-[var(--text-primary)]">
             {editingId ? t('settings.editAgent') : t('settings.addAgent')}
           </span>
           <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t('common.close')}>
@@ -244,7 +244,7 @@ function AgentForm({
         </div>
 
         <div>
-          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('settings.agentName')}</label>
+          <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentName')}</label>
           <input
             type="text"
             value={form.name}
@@ -255,9 +255,9 @@ function AgentForm({
         </div>
 
         <div>
-          <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('settings.agentWorkspace')}</label>
+          <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentWorkspace')}</label>
           {editingId ? (
-            <p className="text-sm font-mono text-[var(--text-muted)] px-3 py-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)] truncate">
+            <p className="type-mono-data rounded-md border border-[var(--border)] bg-[var(--bg-tertiary)] px-3 py-2 text-[var(--text-muted)] truncate">
               {form.workspace || '...'}
             </p>
           ) : (
@@ -273,7 +273,7 @@ function AgentForm({
 
         <div className="flex gap-3">
           <div className="w-24 flex-shrink-0">
-            <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('settings.agentEmoji')}</label>
+            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentEmoji')}</label>
             <input
               type="text"
               value={form.emoji}
@@ -284,7 +284,7 @@ function AgentForm({
             />
           </div>
           <div className="flex-1">
-            <label className="text-sm text-[var(--text-secondary)] mb-1.5 block">{t('settings.agentModel')}</label>
+            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentModel')}</label>
             <select
               value={form.model}
               onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
@@ -559,9 +559,9 @@ export default function AgentsSection() {
     return (
       <div>
         <div className="mb-1">
-          <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.agents')}</h3>
+          <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.agents')}</h3>
         </div>
-        <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.agentsDesc')}</p>
+        <p className="type-support mb-4 text-[var(--text-muted)]">{t('settings.agentsDesc')}</p>
         <SettingGroup>
           <EmptyState
             icon={<Server size={24} className="text-[var(--text-muted)]" />}
@@ -576,7 +576,7 @@ export default function AgentsSection() {
     <>
       <div>
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.agents')}</h3>
+          <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.agents')}</h3>
           <div className="flex items-center gap-2">
             {connectedGatewayIds.length > 1 && (
               <select
@@ -591,7 +591,7 @@ export default function AgentsSection() {
                   closeForm();
                 }}
                 className={cn(
-                  'h-8 px-2 rounded-md text-sm',
+                  'type-label h-8 rounded-md px-2',
                   'bg-[var(--bg-tertiary)] border border-[var(--border)]',
                   'text-[var(--text-primary)] outline-none',
                 )}
@@ -608,7 +608,7 @@ export default function AgentsSection() {
             </ToolbarButton>
           </div>
         </div>
-        <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.agentsDesc')}</p>
+        <p className="type-support mb-4 text-[var(--text-muted)]">{t('settings.agentsDesc')}</p>
 
         <div className="space-y-2">
           <AnimatePresence>
@@ -699,7 +699,7 @@ export default function AgentsSection() {
               {t('settings.confirmDeleteAgentDesc', { name: deletingAgent?.name ?? deletingAgent?.id })}
             </DialogDescription>
           </DialogHeader>
-          <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)] pt-2">
+          <label className="type-label flex items-center gap-2 pt-2 text-[var(--text-secondary)]">
             <input
               type="checkbox"
               checked={deleteFiles}

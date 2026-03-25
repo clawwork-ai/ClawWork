@@ -55,13 +55,13 @@ const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolC
           <CollapsibleTrigger asChild>
             <button
               className={cn(
-                'w-full flex items-center gap-2 px-3 py-2.5 text-sm',
+                'type-label flex w-full items-center gap-2 px-3 py-2.5',
                 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors',
               )}
             >
               {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               <StatusIcon status={toolCall.status} />
-              <span className="font-mono truncate flex-1 text-left">{toolCall.name}</span>
+              <span className="type-mono-data truncate flex-1 text-left">{toolCall.name}</span>
               {duration && <span className="text-[var(--text-muted)]">{duration}</span>}
             </button>
           </CollapsibleTrigger>
@@ -74,7 +74,7 @@ const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolC
                   animate={motionPresets.slideUp.animate}
                   exit={motionPresets.slideUp.exit}
                   transition={motionPresets.slideUp.transition}
-                  className="px-3 pb-2.5 text-xs font-mono"
+                  className="type-code-block px-3 pb-2.5"
                 >
                   {toolCall.args && (
                     <div className="mb-1">

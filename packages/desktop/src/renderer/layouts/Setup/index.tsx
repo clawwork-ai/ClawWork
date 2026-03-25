@@ -178,8 +178,8 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
               <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
               <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
             </div>
-            <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">{t('setup.welcome')}</h1>
-            <p className="text-[var(--text-muted)] leading-relaxed text-sm">
+            <h1 className="type-page-title text-[var(--text-primary)]">{t('setup.welcome')}</h1>
+            <p className="type-body leading-relaxed text-[var(--text-muted)]">
               {step === 'workspace' ? (
                 <>
                   {t('setup.desc1')}
@@ -199,7 +199,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                 <div className="flex items-center gap-1.5">
                   <div
                     className={cn(
-                      'w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors',
+                      'type-badge flex h-7 w-7 items-center justify-center rounded-full transition-colors',
                       step === s
                         ? 'bg-[var(--accent)] text-[var(--accent-foreground)]'
                         : s === 'workspace' && step === 'gateway'
@@ -211,7 +211,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                   </div>
                   <span
                     className={cn(
-                      'text-xs font-medium',
+                      'type-support',
                       step === s ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]',
                     )}
                   >
@@ -250,7 +250,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                   }
                   bodyClassName="space-y-4"
                 >
-                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{t('setup.workspaceExplain')}</p>
+                  <p className="type-support leading-relaxed text-[var(--text-muted)]">{t('setup.workspaceExplain')}</p>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -271,7 +271,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                       {t('setup.browse')}
                     </ToolbarButton>
                   </div>
-                  <p className="text-xs text-[var(--text-muted)] opacity-70">{t('setup.workspaceHint')}</p>
+                  <p className="type-support text-[var(--text-muted)] opacity-70">{t('setup.workspaceHint')}</p>
                 </SectionCard>
 
                 <ToolbarButton
@@ -302,9 +302,11 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                   }
                   bodyClassName="space-y-4"
                 >
-                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{t('setup.gatewayExplain')}</p>
+                  <p className="type-support leading-relaxed text-[var(--text-muted)]">{t('setup.gatewayExplain')}</p>
                   <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.gatewayName')}</label>
+                    <label className="type-label mb-1 block text-[var(--text-muted)]">
+                      {t('settings.gatewayName')}
+                    </label>
                     <input
                       type="text"
                       value={gwName}
@@ -314,7 +316,9 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1.5 block">{t('settings.authMethod')}</label>
+                    <label className="type-label mb-1.5 block text-[var(--text-muted)]">
+                      {t('settings.authMethod')}
+                    </label>
                     <div className="flex rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)] p-0.5 gap-0.5 mb-2">
                       {(
                         [
@@ -328,7 +332,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                           type="button"
                           onClick={() => handleGwAuthModeChange(mode)}
                           className={cn(
-                            'titlebar-no-drag flex-1 h-7 text-xs font-medium rounded-md transition-colors',
+                            'titlebar-no-drag flex-1 h-7 type-label rounded-md transition-colors',
                             gwAuthMode === mode
                               ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
                               : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
@@ -341,7 +345,9 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                   </div>
                   {gwAuthMode !== 'pairingCode' && (
                     <div>
-                      <label className="text-xs text-[var(--text-muted)] mb-1 block">{t('settings.gatewayUrl')}</label>
+                      <label className="type-label mb-1 block text-[var(--text-muted)]">
+                        {t('settings.gatewayUrl')}
+                      </label>
                       <input
                         type="text"
                         value={gwUrl}
@@ -352,11 +358,11 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                         placeholder={t('setup.defaultGatewayUrl')}
                         className={cn(inputClass, 'w-full')}
                       />
-                      <p className="text-xs text-[var(--text-muted)] opacity-70 mt-1">{t('setup.urlHint')}</p>
+                      <p className="type-support text-[var(--text-muted)] opacity-70 mt-1">{t('setup.urlHint')}</p>
                     </div>
                   )}
                   <div>
-                    <label className="text-xs text-[var(--text-muted)] mb-1.5 block">
+                    <label className="type-label mb-1.5 block text-[var(--text-muted)]">
                       {gwAuthMode === 'pairingCode' ? t('settings.pairingCode') : t('settings.authMethod')}
                     </label>
                     <input
@@ -385,11 +391,11 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                       className={cn(inputClass, 'w-full')}
                     />
                     {gwAuthMode === 'pairingCode' && gwUrl && gwUrl !== 'ws://127.0.0.1:18789' && (
-                      <p className="text-xs text-[var(--accent)] mt-1">
-                        ✓ {t('settings.setupCodeParsed')}: <span className="font-mono">{gwUrl}</span>
+                      <p className="type-support mt-1 text-[var(--accent)]">
+                        ✓ {t('settings.setupCodeParsed')}: <span className="type-mono-data">{gwUrl}</span>
                       </p>
                     )}
-                    <p className="text-xs text-[var(--text-muted)] opacity-70 mt-1">
+                    <p className="type-support text-[var(--text-muted)] opacity-70 mt-1">
                       {gwAuthMode === 'token'
                         ? t('setup.tokenHint')
                         : gwAuthMode === 'password'
@@ -410,12 +416,12 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                         {t('settings.testConnection')}
                       </ToolbarButton>
                       {testResult === 'success' && (
-                        <span className="text-xs text-[var(--accent)] flex items-center gap-1">
+                        <span className="type-support flex items-center gap-1 text-[var(--accent)]">
                           <CheckCircle2 size={12} /> {t('settings.testSuccess')}
                         </span>
                       )}
                       {testResult === 'fail' && (
-                        <span className="text-xs text-[var(--danger)]">{t('settings.testFailed')}</span>
+                        <span className="type-support text-[var(--danger)]">{t('settings.testFailed')}</span>
                       )}
                     </div>
                   )}
@@ -445,7 +451,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                 </div>
                 <button
                   onClick={handleSkipGateway}
-                  className="w-full text-center text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                  className="type-support w-full text-center text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   {t('setup.skipGateway')}
                 </button>

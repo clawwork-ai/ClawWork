@@ -59,8 +59,10 @@ describe('data table', () => {
 
     expect(headerCells[0].className).toContain('text-left');
     expect(headerCells[1].className).toContain('text-right');
+    expect(headerCells[0].className).toContain('type-meta');
     expect(bodyCells[0].className).toContain('text-left');
     expect(bodyCells[1].className).toContain('text-right');
+    expect(bodyCells[0].className).toContain('type-body');
 
     unmount();
   });

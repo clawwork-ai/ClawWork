@@ -28,7 +28,7 @@ export default function SegmentedControl<T extends string>({
           aria-checked={value === opt.value}
           onClick={() => onChange(opt.value)}
           className={cn(
-            'relative flex items-center gap-1.5 px-3.5 py-1.5 text-sm transition-colors',
+            'type-label relative flex items-center gap-1.5 px-3.5 py-1.5 transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
             value === opt.value
               ? 'text-[var(--text-primary)]'

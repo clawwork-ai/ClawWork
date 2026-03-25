@@ -75,17 +75,17 @@ export default function SlashCommandMenu({
                   }}
                 >
                   {/* Command name */}
-                  <span className="font-mono text-sm font-medium text-[var(--accent)] shrink-0">/{cmd.name}</span>
+                  <span className="type-mono-data shrink-0 text-[var(--accent)]">/{cmd.name}</span>
                   {/* Description */}
-                  <span className="text-xs truncate">{cmd.description}</span>
+                  <span className="type-support truncate">{cmd.description}</span>
                   {/* Arg hint */}
                   {cmd.argHint && (
-                    <span className="ml-auto text-xs font-mono text-[var(--text-muted)] shrink-0">{cmd.argHint}</span>
+                    <span className="type-mono-data ml-auto shrink-0 text-[var(--text-muted)]">{cmd.argHint}</span>
                   )}
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-2xs text-[var(--text-muted)]">
+            <div className="type-meta flex gap-3 border-t border-[var(--border-subtle)] px-4 py-1.5 text-[var(--text-muted)]">
               <span>
                 <kbd className="font-mono">↑↓</kbd> {t('common.navigate')}
               </span>

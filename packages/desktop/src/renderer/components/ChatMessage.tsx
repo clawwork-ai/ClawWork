@@ -45,7 +45,7 @@ function FileBlockChip({
     <button
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs mb-1.5 mr-1.5',
+        'type-support mb-1.5 mr-1.5 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
         'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
       )}
     >
@@ -66,7 +66,7 @@ function ToolCallSummary({ toolCalls }: { toolCalls: Message['toolCalls'] }) {
       <CollapsibleTrigger asChild>
         <button
           className={cn(
-            'mt-2 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm',
+            'type-label mt-2 inline-flex items-center gap-2 rounded-lg px-3 py-2',
             'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
             'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
           )}
@@ -131,7 +131,7 @@ const ChatMessage = memo(function ChatMessage({
   if (isSystem) {
     return (
       <div className="flex justify-center py-3">
-        <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-3 py-1 rounded-full">
+        <span className="type-support rounded-full bg-[var(--bg-tertiary)] px-3 py-1 text-[var(--text-muted)]">
           {message.content}
         </span>
       </div>
@@ -168,7 +168,7 @@ const ChatMessage = memo(function ChatMessage({
             <button
               onClick={() => setThinkingOpen((v) => !v)}
               className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs',
+                'type-support inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1',
                 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                 'bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] transition-colors',
               )}
@@ -188,7 +188,7 @@ const ChatMessage = memo(function ChatMessage({
                 >
                   <div
                     className={cn(
-                      'mt-1.5 px-3 py-2 rounded-lg text-xs leading-relaxed',
+                      'type-support mt-1.5 rounded-lg px-3 py-2 leading-relaxed',
                       'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       'border-l-2 border-[var(--accent)] border-opacity-30',
                       'max-h-60 overflow-y-auto',

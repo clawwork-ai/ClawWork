@@ -66,7 +66,7 @@ function describeCron(expr: string, locale: string): string | null {
 }
 
 const inputClass = [
-  'w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2 text-sm',
+  'type-body w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2',
   'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
   'hover:border-[var(--text-muted)]',
   'focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent',
@@ -74,14 +74,14 @@ const inputClass = [
 ].join(' ');
 
 const selectClass = [
-  'w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2 text-sm',
+  'type-body w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2',
   'text-[var(--text-primary)]',
   'hover:border-[var(--text-muted)]',
   'focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent',
   'transition-colors appearance-none cursor-pointer',
 ].join(' ');
 
-const labelClass = 'block text-sm font-medium text-[var(--text-secondary)] mb-1.5';
+const labelClass = 'type-label mb-1.5 block text-[var(--text-secondary)]';
 
 function toLocalDatetimeValue(value: string): string {
   const date = new Date(value);
@@ -693,7 +693,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                   key={kind}
                   type="button"
                   className={[
-                    'flex-1 px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
+                    'type-label flex-1 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
                     scheduleKind === kind
                       ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
                       : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
@@ -716,7 +716,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                       key={preset.expr}
                       type="button"
                       className={[
-                        'px-2.5 py-1 rounded-md text-xs font-medium transition-colors',
+                        'type-label rounded-md px-2.5 py-1 transition-colors',
                         cronExpr === preset.expr
                           ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
                           : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
@@ -734,9 +734,9 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                   onChange={(e) => setCronExpr(e.target.value)}
                   placeholder="0 9 * * 1-5"
                 />
-                {cronDescription && <p className="text-xs text-[var(--text-muted)]">{cronDescription}</p>}
+                {cronDescription && <p className="type-support text-[var(--text-muted)]">{cronDescription}</p>}
                 {cronExpr.trim() && !cronDescription && (
-                  <p className="text-xs text-[var(--warning)]">{t('cron.invalidExpression')}</p>
+                  <p className="type-support text-[var(--warning)]">{t('cron.invalidExpression')}</p>
                 )}
                 <input
                   type="text"
@@ -789,7 +789,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                     type="button"
                     disabled={disabled}
                     className={[
-                      'flex-1 px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
+                      'type-label flex-1 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
                       payloadKind === kind
                         ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
                         : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
@@ -826,10 +826,10 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
               <option value="main">{t('cron.sessionTarget_main')}</option>
             </select>
             {sessionTarget === 'task' && (
-              <p className="mt-1.5 text-xs text-[var(--text-muted)]">{t('cron.taskSessionNote')}</p>
+              <p className="mt-1.5 type-support text-[var(--text-muted)]">{t('cron.taskSessionNote')}</p>
             )}
             {sessionTarget === 'main' && (
-              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--warning)]">
+              <p className="mt-1.5 flex items-center gap-1.5 type-support text-[var(--warning)]">
                 <AlertTriangle size={14} />
                 {t('cron.mainSessionNote')}
               </p>
@@ -837,14 +837,14 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('cron.fieldEnabled')}</label>
+            <label className="type-label text-[var(--text-secondary)]">{t('cron.fieldEnabled')}</label>
             <Switch checked={enabled} onCheckedChange={setEnabled} aria-label={t('cron.fieldEnabled')} />
           </div>
 
           <div>
             <button
               type="button"
-              className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              className="type-label flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               onClick={() => setShowAdvanced(!showAdvanced)}
             >
               {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -944,7 +944,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                     <option value="webhook">{t('cron.delivery.webhook')}</option>
                   </select>
                   {deliveryMode === 'none' && (
-                    <p className="mt-1.5 text-xs text-[var(--text-muted)]">{t('cron.deliveryHint')}</p>
+                    <p className="mt-1.5 type-support text-[var(--text-muted)]">{t('cron.deliveryHint')}</p>
                   )}
                   {deliveryMode === 'announce' && (
                     <div className="mt-2 space-y-2">
@@ -962,7 +962,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                         onChange={(e) => setDeliveryTarget(e.target.value)}
                         placeholder={t('cron.deliveryTargetPlaceholder')}
                       />
-                      <p className="text-xs text-[var(--text-muted)]">{t('cron.deliveryAnnounceHint')}</p>
+                      <p className="type-support text-[var(--text-muted)]">{t('cron.deliveryAnnounceHint')}</p>
                     </div>
                   )}
                   {deliveryMode === 'webhook' && (
@@ -981,8 +981,8 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                 <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-[var(--text-secondary)]">{t('cron.failureAlert')}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{t('cron.failureAlertHint')}</p>
+                      <p className="type-label text-[var(--text-secondary)]">{t('cron.failureAlert')}</p>
+                      <p className="type-support text-[var(--text-muted)]">{t('cron.failureAlertHint')}</p>
                     </div>
                     <Switch
                       checked={failureAlertEnabled}
@@ -1038,9 +1038,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
 
                 {scheduleKind === 'at' && (
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-[var(--text-secondary)]">
-                      {t('cron.fieldDeleteAfterRun')}
-                    </label>
+                    <label className="type-label text-[var(--text-secondary)]">{t('cron.fieldDeleteAfterRun')}</label>
                     <Switch
                       checked={deleteAfterRun}
                       onCheckedChange={setDeleteAfterRun}
@@ -1054,7 +1052,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
         </div>
 
         {serverError && (
-          <p className="flex items-center gap-1.5 text-sm text-[var(--danger)] bg-[var(--danger-bg)] border border-[var(--danger)]/20 rounded-lg px-3 py-2">
+          <p className="type-support flex items-center gap-1.5 rounded-lg border border-[var(--danger)]/20 bg-[var(--danger-bg)] px-3 py-2 text-[var(--danger)]">
             <AlertTriangle size={14} />
             {serverError}
           </p>

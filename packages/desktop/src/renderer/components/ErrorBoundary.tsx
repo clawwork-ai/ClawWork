@@ -32,12 +32,12 @@ export default class ErrorBoundary extends Component<Props, State> {
             <AlertTriangle size={22} className="text-[var(--accent)]" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[var(--text-primary)] font-medium">{i18n.t('errors.boundaryTitle')}</p>
-            <p className="text-[var(--text-muted)] text-sm font-mono break-all">{this.state.error?.message}</p>
+            <p className="type-label text-[var(--text-primary)]">{i18n.t('errors.boundaryTitle')}</p>
+            <p className="type-mono-data break-all text-[var(--text-muted)]">{this.state.error?.message}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-medium hover:opacity-90 transition-opacity"
+            className="type-label flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-[var(--accent-foreground)] hover:opacity-90 transition-opacity"
           >
             <RefreshCw size={14} />
             {i18n.t('errors.reload')}

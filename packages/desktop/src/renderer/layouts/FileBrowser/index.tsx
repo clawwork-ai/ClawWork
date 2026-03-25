@@ -35,7 +35,7 @@ function sortArtifacts(list: Artifact[], sortBy: 'date' | 'name' | 'type'): Arti
 function SnippetHighlight({ snippet }: { snippet: string }) {
   const parts = snippet.split(/(<mark>[^<]*<\/mark>)/g);
   return (
-    <span className="text-xs text-[var(--text-muted)] line-clamp-1">
+    <span className="type-support line-clamp-1 text-[var(--text-muted)]">
       {parts.map((part, i) =>
         part.startsWith('<mark>') ? (
           <mark key={i} className="bg-[var(--accent-dim)] text-[var(--accent)] not-italic rounded px-0.5">
@@ -197,14 +197,14 @@ export default function FileBrowser() {
     <div className="flex h-full">
       <div className="flex flex-col flex-1 min-w-0">
         <header className="titlebar-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)]">{t('common.fileManager')}</h2>
+          <h2 className="type-section-title text-[var(--text-primary)]">{t('common.fileManager')}</h2>
           <div className="titlebar-no-drag flex items-center gap-2">
             <select
               value={filterTaskId ?? ''}
               onChange={(e) => setFilterTaskId(e.target.value || null)}
               className={cn(
                 'h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-xs text-[var(--text-secondary)] outline-none cursor-pointer',
+                'type-label text-[var(--text-secondary)] outline-none cursor-pointer',
               )}
             >
               <option value="">{t('fileBrowser.allTasks')}</option>
@@ -219,7 +219,7 @@ export default function FileBrowser() {
               onChange={(e) => setSortBy(e.target.value as 'date' | 'name' | 'type')}
               className={cn(
                 'h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-xs text-[var(--text-secondary)] outline-none cursor-pointer',
+                'type-label text-[var(--text-secondary)] outline-none cursor-pointer',
               )}
             >
               <option value="date">{t('fileBrowser.sortByDate')}</option>
@@ -246,7 +246,7 @@ export default function FileBrowser() {
               className={cn(
                 'w-full h-[var(--density-control-height)] pl-10 pr-9 rounded-lg',
                 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-sm text-[var(--text-secondary)] outline-none',
+                'type-body text-[var(--text-secondary)] outline-none',
                 'focus:border-[var(--border-accent)] focus:bg-[var(--bg-secondary)]',
                 'placeholder:text-[var(--text-muted)] transition-all duration-150',
               )}

@@ -123,7 +123,7 @@ export default function MentionPicker({
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors',
+                'type-label flex items-center gap-1.5 px-3 py-2 transition-colors',
                 activeTab === tab.id
                   ? 'text-[var(--accent)] border-b-2 border-[var(--accent)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
@@ -138,7 +138,7 @@ export default function MentionPicker({
 
       <div ref={listRef} className="max-h-56 overflow-y-auto py-1">
         {items.length === 0 && (
-          <div className="px-3 py-4 text-center text-xs text-[var(--text-muted)]">
+          <div className="type-support px-3 py-4 text-center text-[var(--text-muted)]">
             {activeTab === 'local'
               ? t('mentionPicker.noLocalFiles')
               : activeTab === 'tasks'
@@ -156,7 +156,7 @@ export default function MentionPicker({
                 key={f.absolutePath}
                 data-mention-selected={i === selectedIndex ? '' : undefined}
                 className={cn(
-                  'w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm',
+                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
                   'hover:bg-[var(--bg-hover)] transition-colors',
                   i === selectedIndex && 'bg-[var(--bg-hover)]',
                 )}
@@ -166,7 +166,7 @@ export default function MentionPicker({
               >
                 <FileCode size={14} className="text-[var(--accent)] flex-shrink-0" />
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{f.relativePath}</span>
-                <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{formatFileSize(f.size)}</span>
+                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(f.size)}</span>
               </button>
             );
           })}
@@ -179,7 +179,7 @@ export default function MentionPicker({
                 key={item.task.id}
                 data-mention-selected={i === selectedIndex ? '' : undefined}
                 className={cn(
-                  'w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm',
+                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
                   'hover:bg-[var(--bg-hover)] transition-colors',
                   i === selectedIndex && 'bg-[var(--bg-hover)]',
                 )}
@@ -191,7 +191,7 @@ export default function MentionPicker({
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">
                   {item.task.title || t('common.noTitle')}
                 </span>
-                <span className="flex-shrink-0 text-2xs text-[var(--text-muted)]">{item.task.status}</span>
+                <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">{item.task.status}</span>
               </button>
             );
           })}
@@ -205,7 +205,7 @@ export default function MentionPicker({
                 key={a.id}
                 data-mention-selected={i === selectedIndex ? '' : undefined}
                 className={cn(
-                  'w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm',
+                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
                   'hover:bg-[var(--bg-hover)] transition-colors',
                   i === selectedIndex && 'bg-[var(--bg-hover)]',
                 )}
@@ -215,13 +215,13 @@ export default function MentionPicker({
               >
                 {artifactIcon(a.type, 14)}
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.name}</span>
-                <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
+                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
               </button>
             );
           })}
       </div>
 
-      <div className="flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-2xs text-[var(--text-muted)]">
+      <div className="type-meta flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-[var(--text-muted)]">
         <span>
           <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">Tab</kbd> {t('common.switch')}
         </span>

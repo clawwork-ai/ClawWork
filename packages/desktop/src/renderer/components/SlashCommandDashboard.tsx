@@ -24,9 +24,7 @@ export default function SlashCommandDashboard({ open, onOpenChange, onSelectComm
         <div className="mt-4 space-y-5">
           {groups.map(({ category, commands }) => (
             <div key={category}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                {t(CATEGORY_I18N_KEYS[category])}
-              </h3>
+              <h3 className="type-meta mb-2 text-[var(--text-muted)]">{t(CATEGORY_I18N_KEYS[category])}</h3>
               <div className="space-y-0.5">
                 {commands.map((cmd) => (
                   <button
@@ -38,10 +36,10 @@ export default function SlashCommandDashboard({ open, onOpenChange, onSelectComm
                       onOpenChange(false);
                     }}
                   >
-                    <span className="shrink-0 font-mono text-sm text-[var(--accent)]">/{cmd.name}</span>
-                    <span className="flex-1 text-sm text-[var(--text-secondary)] truncate">{cmd.description}</span>
+                    <span className="type-mono-data shrink-0 text-[var(--accent)]">/{cmd.name}</span>
+                    <span className="type-support flex-1 truncate text-[var(--text-secondary)]">{cmd.description}</span>
                     {cmd.argHint && (
-                      <span className="shrink-0 font-mono text-xs text-[var(--text-muted)]">{cmd.argHint}</span>
+                      <span className="type-mono-data shrink-0 text-[var(--text-muted)]">{cmd.argHint}</span>
                     )}
                   </button>
                 ))}

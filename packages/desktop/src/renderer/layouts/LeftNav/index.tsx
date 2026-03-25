@@ -108,7 +108,7 @@ function NavButton({
     <button
       onClick={onClick}
       className={cn(
-        'titlebar-no-drag w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative',
+        'titlebar-no-drag type-label relative flex w-full items-center gap-2.5 rounded-md px-3 py-2 transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
         'active:scale-[0.98]',
         active
@@ -515,16 +515,12 @@ export default function LeftNav() {
               {visibleTasks.length === 0 && <EmptyState title={t('leftNav.emptyHint')} className="py-8" />}
               {activeTasks.length > 0 && (
                 <>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] px-3 py-2">
-                    {t('common.inProgress')} ({activeTasks.length})
-                  </p>
                   {activeTasks.map((task) => (
                     <TaskItem
                       key={task.id}
                       task={task}
                       active={task.id === activeTaskId}
                       onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                      multiGateway={hasMultipleGateways}
                       editing={editingTaskId === task.id}
                       onEditDone={() => setEditingTaskId(null)}
                     />
@@ -533,7 +529,7 @@ export default function LeftNav() {
               )}
               {completedTasks.length > 0 && (
                 <>
-                  <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] px-3 py-2 mt-3">
+                  <p className="type-meta px-3 py-2 text-[var(--text-secondary)] mt-3">
                     {t('common.completed')} ({completedTasks.length})
                   </p>
                   {completedTasks.map((task) => (
@@ -542,7 +538,6 @@ export default function LeftNav() {
                       task={task}
                       active={task.id === activeTaskId}
                       onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                      multiGateway={hasMultipleGateways}
                       editing={editingTaskId === task.id}
                       onEditDone={() => setEditingTaskId(null)}
                     />
@@ -561,7 +556,7 @@ export default function LeftNav() {
           active={mainView === 'cron'}
           onClick={() => setMainView('cron')}
           badge={
-            <span className="ml-auto text-2xs font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[var(--accent-dim)] text-[var(--accent)]">
+            <span className="type-badge ml-auto rounded-full bg-[var(--accent-dim)] px-1.5 py-0.5 text-[var(--accent)]">
               beta
             </span>
           }

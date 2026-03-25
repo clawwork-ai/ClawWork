@@ -65,19 +65,19 @@ export default function FileCard({ artifact, taskTitle, selected, onClick, onCon
             <Icon size={18} className={color} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-[var(--text-primary)] truncate leading-snug">{artifact.name}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">{formatFileSize(artifact.size)}</p>
+            <p className="type-label truncate leading-snug text-[var(--text-primary)]">{artifact.name}</p>
+            <p className="type-support mt-0.5 text-[var(--text-muted)]">{formatFileSize(artifact.size)}</p>
           </div>
           {ext && (
-            <span className="flex-shrink-0 text-2xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+            <span className="type-badge flex-shrink-0 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)] leading-none">
               {ext}
             </span>
           )}
         </div>
       </div>
       <div className="px-3 pb-2.5 flex items-center gap-1.5">
-        <span className="text-2xs text-[var(--text-muted)] truncate flex-1">{taskTitle}</span>
-        <span className="text-2xs text-[var(--text-muted)] flex-shrink-0">
+        <span className="type-support flex-1 truncate text-[var(--text-muted)]">{taskTitle}</span>
+        <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">
           {formatRelativeTime(new Date(artifact.createdAt))}
         </span>
       </div>

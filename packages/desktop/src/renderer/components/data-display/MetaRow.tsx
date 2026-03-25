@@ -10,8 +10,8 @@ interface MetaRowProps {
 export default function MetaRow({ label, value, className }: MetaRowProps) {
   return (
     <div className={cn('flex items-center justify-between gap-3', className)}>
-      <span className="type-label-sm text-[var(--text-secondary)]">{label}</span>
-      <span className="type-body-sm text-[var(--text-primary)]">{value}</span>
+      <span className="type-support text-[var(--text-secondary)]">{label}</span>
+      <span className="type-body text-[var(--text-primary)]">{value}</span>
     </div>
   );
 }

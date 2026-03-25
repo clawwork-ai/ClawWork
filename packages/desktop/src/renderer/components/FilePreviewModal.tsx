@@ -58,15 +58,15 @@ export default function FilePreviewModal({ file, onClose }: FilePreviewModalProp
               <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border-subtle)] flex-shrink-0">
                 <FileCode size={16} className="text-[var(--accent)]" />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-[var(--text-primary)] truncate block">{fileName}</span>
-                  <span className="text-xs text-[var(--text-muted)]">
+                  <span className="type-label block truncate text-[var(--text-primary)]">{fileName}</span>
+                  <span className="type-support text-[var(--text-muted)]">
                     {file.path} · {lineCount} lines
                   </span>
                 </div>
                 <button
                   onClick={handleCopy}
                   className={cn(
-                    'flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-colors',
+                    'type-support flex items-center gap-1 rounded-md px-2.5 py-1 transition-colors',
                     'hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                   )}
                 >
@@ -81,7 +81,7 @@ export default function FilePreviewModal({ file, onClose }: FilePreviewModalProp
                 </button>
               </div>
               <div className="flex-1 min-h-0 overflow-auto">
-                <pre className="px-4 py-3 text-sm leading-relaxed font-mono text-[var(--text-primary)] whitespace-pre-wrap break-words">
+                <pre className="type-code-block whitespace-pre-wrap break-words px-4 py-3 leading-relaxed text-[var(--text-primary)]">
                   {file.content}
                 </pre>
               </div>

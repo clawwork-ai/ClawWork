@@ -10,7 +10,7 @@ function RiskBadge({ security }: { security?: string | null }) {
   if (security === 'full') {
     return (
       <span
-        className="rounded px-1.5 py-0.5 text-xs font-medium"
+        className="type-badge rounded px-1.5 py-0.5"
         style={{ background: 'var(--danger-bg)', color: 'var(--danger)' }}
       >
         {t('approval.riskHigh')}
@@ -20,7 +20,7 @@ function RiskBadge({ security }: { security?: string | null }) {
   if (!security || security === 'allowlist') {
     return (
       <span
-        className="rounded px-1.5 py-0.5 text-xs font-medium"
+        className="type-badge rounded px-1.5 py-0.5"
         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
       >
         {t('approval.riskMedium')}
@@ -46,7 +46,7 @@ function Countdown({ expiresAtMs }: { expiresAtMs: number }) {
 
   return (
     <div className="space-y-1">
-      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+      <span className="type-support" style={{ color: 'var(--text-secondary)' }}>
         {t('approval.expiresIn', { seconds: remaining })}
       </span>
       <div className="h-1 w-full overflow-hidden rounded-full" style={{ background: 'var(--bg-elevated)' }}>
@@ -86,14 +86,11 @@ export default function ApprovalDialog() {
 
         <div className="space-y-4">
           <div>
-            <p
-              className="mb-1.5 text-xs font-medium uppercase tracking-wide"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <p className="type-meta mb-1.5" style={{ color: 'var(--text-secondary)' }}>
               {t('approval.command')}
             </p>
             <pre
-              className="overflow-x-auto rounded-lg px-3 py-2.5 text-sm font-mono"
+              className="type-code-block overflow-x-auto rounded-lg px-3 py-2.5"
               style={{
                 background: 'var(--bg-elevated)',
                 color: 'var(--text-primary)',
@@ -106,17 +103,17 @@ export default function ApprovalDialog() {
           </div>
 
           {(request.cwd || request.host) && (
-            <div className="flex flex-wrap gap-4 text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <div className="type-support flex flex-wrap gap-4" style={{ color: 'var(--text-secondary)' }}>
               {request.cwd && (
                 <span>
                   <span className="font-medium">{t('approval.cwd')}: </span>
-                  <span className="font-mono">{request.cwd}</span>
+                  <span className="type-code-inline">{request.cwd}</span>
                 </span>
               )}
               {request.host && (
                 <span>
                   <span className="font-medium">{t('approval.host')}: </span>
-                  <span className="font-mono">{request.host}</span>
+                  <span className="type-code-inline">{request.host}</span>
                 </span>
               )}
             </div>
@@ -125,7 +122,7 @@ export default function ApprovalDialog() {
           <Countdown expiresAtMs={expiresAtMs} />
 
           {pendingApprovals.length > 1 && (
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="type-support" style={{ color: 'var(--text-secondary)' }}>
               {t('approval.queueMore', { count: pendingApprovals.length - 1 })}
             </p>
           )}

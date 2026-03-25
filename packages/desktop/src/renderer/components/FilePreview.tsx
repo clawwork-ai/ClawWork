@@ -74,7 +74,7 @@ function CopyButton({ text }: { text: string }) {
       }}
       title={copied ? t('chatMessage.copied') : t('chatMessage.copyCode')}
       className={cn(
-        'flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors',
+        'type-support flex items-center gap-1 rounded-md px-2 py-1 transition-colors',
         'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]',
         copied && 'text-[var(--accent)]',
       )}
@@ -115,14 +115,14 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
       <header className="flex items-center justify-between gap-2 px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {ext && (
-            <span className="flex-shrink-0 text-2xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+            <span className="type-badge flex-shrink-0 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)] leading-none">
               {ext}
             </span>
           )}
-          <h3 className="text-sm font-medium text-[var(--text-primary)] truncate min-w-0">{artifact.name}</h3>
+          <h3 className="type-label min-w-0 truncate text-[var(--text-primary)]">{artifact.name}</h3>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-2xs text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
+          <span className="type-meta text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
           {isCode && content !== null && <CopyButton text={content} />}
         </div>
       </header>
@@ -133,7 +133,7 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
             <Loader2 size={20} className="animate-spin text-[var(--text-muted)]" />
           </div>
         )}
-        {error && <p className="text-sm text-[var(--danger)] text-center py-8 px-4">{error}</p>}
+        {error && <p className="type-support px-4 py-8 text-center text-[var(--danger)]">{error}</p>}
         {!loading && !error && content !== null && (
           <PreviewContent content={content} encoding={encoding} mimeType={artifact.mimeType} name={artifact.name} />
         )}
@@ -147,7 +147,7 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
           className="w-full gap-2"
         >
           <ExternalLink size={14} />
-          <span className="text-xs">{t('filePreview.goToSource')}</span>
+          {t('filePreview.goToSource')}
         </Button>
       </div>
     </motion.div>
@@ -164,7 +164,7 @@ function CodePreview({ content, lang }: { content: string; lang: string }) {
 
   return (
     <div className="overflow-x-auto">
-      <pre className="p-4 text-[0.82em] leading-relaxed font-mono">
+      <pre className="type-code-block p-4 leading-relaxed">
         <code
           className={cn('hljs', lang && `language-${lang}`)}
           style={{ background: 'none', padding: 0 }}
@@ -214,7 +214,7 @@ function PreviewContent({
   }
 
   return (
-    <p className="text-sm text-[var(--text-muted)] text-center py-8 px-4">
+    <p className="type-support px-4 py-8 text-center text-[var(--text-muted)]">
       {t('filePreview.cannotPreview')} ({mimeType})
     </p>
   );

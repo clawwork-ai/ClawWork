@@ -112,16 +112,16 @@ export default function SystemSection() {
 
   return (
     <div>
-      <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.system')}</h3>
-      <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.systemDesc')}</p>
+      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.system')}</h3>
+      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.systemDesc')}</p>
       <SettingGroup>
         <SettingRow
           label={
             <div className="flex items-center gap-3">
               <MonitorDot size={14} className="text-[var(--text-muted)] flex-shrink-0" />
               <div>
-                <span className="text-sm text-[var(--text-primary)]">{t('settings.trayIcon')}</span>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.trayIconDesc')}</p>
+                <span className="type-label text-[var(--text-primary)]">{t('settings.trayIcon')}</span>
+                <p className="type-support mt-0.5 text-[var(--text-muted)]">{t('settings.trayIconDesc')}</p>
               </div>
             </div>
           }
@@ -133,8 +133,8 @@ export default function SystemSection() {
             <div className="flex items-center gap-3">
               <Zap size={14} className="text-[var(--text-muted)] flex-shrink-0" />
               <div>
-                <span className="text-sm text-[var(--text-primary)]">{t('settings.quickLaunch')}</span>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.quickLaunchDesc')}</p>
+                <span className="type-label text-[var(--text-primary)]">{t('settings.quickLaunch')}</span>
+                <p className="type-support mt-0.5 text-[var(--text-muted)]">{t('settings.quickLaunchDesc')}</p>
               </div>
             </div>
           }
@@ -149,7 +149,7 @@ export default function SystemSection() {
                   onKeyDown={handleShortcutRecord}
                   onBlur={() => setRecordingShortcut(false)}
                   className={cn(
-                    'w-36 text-center text-sm font-mono px-2.5 py-1 rounded-md',
+                    'type-mono-data w-36 text-center px-2.5 py-1 rounded-md',
                     'bg-[var(--accent-soft)] border border-[var(--accent)]/40',
                     'text-[var(--accent)] outline-none animate-pulse',
                     'focus:ring-2 focus:ring-[var(--ring-accent)]',
@@ -161,7 +161,7 @@ export default function SystemSection() {
                   aria-label={t('settings.quickLaunchShortcut')}
                   onClick={() => setRecordingShortcut(true)}
                   className={cn(
-                    'text-sm font-mono px-2.5 py-1 rounded-md',
+                    'type-mono-data px-2.5 py-1 rounded-md',
                     'bg-[var(--bg-tertiary)] border border-[var(--border)]',
                     'text-[var(--text-primary)] hover:border-[var(--accent)]/40 transition-colors',
                     'cursor-pointer',
@@ -181,8 +181,8 @@ export default function SystemSection() {
           <div className="flex items-center gap-3">
             <FolderOpen size={14} className="text-[var(--text-muted)] flex-shrink-0" />
             <div>
-              <span className="text-sm text-[var(--text-primary)]">{t('settings.workspace')}</span>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.workspaceHint')}</p>
+              <span className="type-label text-[var(--text-primary)]">{t('settings.workspace')}</span>
+              <p className="type-support mt-0.5 text-[var(--text-muted)]">{t('settings.workspaceHint')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function SystemSection() {
               className={cn(
                 'flex-1 min-w-0 px-3 py-2 rounded-md',
                 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-[var(--text-primary)] text-xs font-mono break-all',
+                'type-mono-data text-[var(--text-primary)] break-all',
               )}
             >
               {workspacePath}

@@ -32,7 +32,7 @@ export default function InlineNotice({ tone, children, action, className }: Inli
   return (
     <div className={cn('flex items-start gap-2 rounded-lg border px-3 py-2', NOTICE_TONE[tone].className, className)}>
       <Icon size={16} className="mt-0.5 shrink-0" />
-      <div className="min-w-0 flex-1 type-body-sm">{children}</div>
+      <div className="min-w-0 flex-1 type-support">{children}</div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );

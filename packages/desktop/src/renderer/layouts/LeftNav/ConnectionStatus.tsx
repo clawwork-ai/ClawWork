@@ -65,7 +65,7 @@ export default function ConnectionStatus({ gatewayStatus, className, collapsed }
         exit={{ opacity: 0 }}
         transition={{ duration: motionDuration.normal }}
         className={cn(
-          'flex items-center gap-2 px-3 py-1.5 text-xs',
+          'type-support flex items-center gap-2 px-3 py-1.5',
           isClickable && 'cursor-pointer hover:text-[var(--text-secondary)] transition-colors',
           className,
         )}

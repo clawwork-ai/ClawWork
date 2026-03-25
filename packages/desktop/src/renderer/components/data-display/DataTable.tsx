@@ -80,7 +80,7 @@ export default function DataTable<T>({
                 <td
                   key={column.key}
                   className={cn(
-                    'px-3 py-[var(--density-table-row-padding-y)] text-sm text-[var(--text-secondary)]',
+                    'type-body px-3 py-[var(--density-table-row-padding-y)] text-[var(--text-secondary)]',
                     cellAlignment(column.kind),
                     column.className,
                   )}

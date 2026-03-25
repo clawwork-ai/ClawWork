@@ -1,0 +1,111 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+@theme {
+  --font-family-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace;
+  --font-size-2xs: 11px;
+  --font-size-2xs--line-height: 16px;
+  --font-size-xs: 13px;
+  --font-size-xs--line-height: 18px;
+  --font-size-sm: 14px;
+  --font-size-sm--line-height: 20px;
+  --font-size-base: 16px;
+  --font-size-base--line-height: 24px;
+  --font-size-xl: 20px;
+  --font-size-xl--line-height: 28px;
+  --font-size-2xl: 24px;
+  --font-size-2xl--line-height: 32px;
+}
+
+:root {
+  --tracking-tight: -0.02em;
+  --tracking-normal: -0.011em;
+  --tracking-wide: 0.08em;
+}
+
+@layer utilities {
+  .type-page-title {
+    font-size: var(--font-size-2xl);
+    line-height: var(--font-size-2xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-dialog-title {
+    font-size: var(--font-size-xl);
+    line-height: var(--font-size-xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-section-title {
+    font-size: var(--font-size-base);
+    line-height: var(--font-size-base--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-label {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 500;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-body {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-support {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-meta {
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-size-2xs--line-height);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .type-badge {
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-size-2xs--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .type-code-inline,
+  .type-code-block,
+  .type-mono-data {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-mono-data {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .emoji-sm {
+    font-size: var(--font-size-sm);
+    line-height: 1;
+  }
+
+  .emoji-md {
+    font-size: var(--font-size-base);
+    line-height: 1;
+  }
+
+  .emoji-lg {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+  }
+}

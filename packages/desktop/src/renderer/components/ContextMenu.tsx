@@ -225,7 +225,9 @@ export function TaskContextMenuPopover({ open, position, items, onClose }: TaskC
         >
           <ListItem
             title={
-              <span className={cn('text-xs', item.danger ? 'text-[var(--danger)]' : 'text-[var(--text-secondary)]')}>
+              <span
+                className={cn('type-support', item.danger ? 'text-[var(--danger)]' : 'text-[var(--text-secondary)]')}
+              >
                 {item.label}
               </span>
             }

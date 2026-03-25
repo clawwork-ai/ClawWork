@@ -53,8 +53,8 @@ export default function SlashArgPicker({
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: motionDuration.fast, ease: motionEase.exit }}
           >
-            <div className="px-4 py-1.5 border-b border-[var(--border-subtle)] text-xs text-[var(--text-muted)]">
-              <span className="font-mono text-[var(--accent)]">/{commandName}</span>
+            <div className="type-support border-b border-[var(--border-subtle)] px-4 py-1.5 text-[var(--text-muted)]">
+              <span className="type-mono-data text-[var(--accent)]">/{commandName}</span>
             </div>
             <ul className="max-h-52 overflow-y-auto py-1">
               {options.map((opt, index) => (
@@ -77,14 +77,14 @@ export default function SlashArgPicker({
                     onSelect(opt);
                   }}
                 >
-                  <span className="font-mono text-sm font-medium shrink-0">{opt.label}</span>
+                  <span className="type-mono-data shrink-0">{opt.label}</span>
                   {opt.detail && (
-                    <span className="ml-auto text-xs text-[var(--text-muted)] truncate">{opt.detail}</span>
+                    <span className="type-support ml-auto truncate text-[var(--text-muted)]">{opt.detail}</span>
                   )}
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-2xs text-[var(--text-muted)]">
+            <div className="type-meta flex gap-3 border-t border-[var(--border-subtle)] px-4 py-1.5 text-[var(--text-muted)]">
               <span>
                 <kbd className="font-mono">↑↓</kbd> {t('common.navigate')}
               </span>

@@ -13,7 +13,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none transition-colors',
+      'type-body relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 outline-none transition-colors',
       'focus:bg-[var(--bg-hover)] focus:text-[var(--text-primary)]',
       'data-[state=open]:bg-[var(--bg-hover)]',
       'text-[var(--text-secondary)]',
@@ -54,7 +54,7 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Label
     ref={ref}
-    className={cn('px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-[var(--text-muted)]', className)}
+    className={cn('type-meta px-2 py-1 text-[var(--text-muted)]', className)}
     {...props}
   />
 ));
@@ -92,7 +92,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 text-sm outline-none transition-colors',
+      'type-body relative flex cursor-pointer select-none items-center gap-2 rounded-md px-2.5 py-1.5 outline-none transition-colors',
       'focus:bg-[var(--bg-hover)] focus:text-[var(--text-primary)]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       danger && 'text-[var(--danger)] focus:bg-[var(--danger-bg)] focus:text-[var(--danger)]',

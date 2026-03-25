@@ -16,8 +16,8 @@ export default function EmptyState({ icon, title, description, action, className
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-tertiary)]">{icon}</div>
       ) : null}
       <div className="space-y-1">
-        <div className="type-title-sm text-[var(--text-primary)]">{title}</div>
-        {description ? <div className="type-body-sm text-[var(--text-muted)]">{description}</div> : null}
+        <div className="type-section-title text-[var(--text-primary)]">{title}</div>
+        {description ? <div className="type-support text-[var(--text-muted)]">{description}</div> : null}
       </div>
       {action ? <div>{action}</div> : null}
     </div>

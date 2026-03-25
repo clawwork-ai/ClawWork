@@ -134,9 +134,9 @@ function WelcomeScreen() {
         <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
         <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
       </div>
-      <h3 className="text-2xl font-semibold text-[var(--text-primary)] mb-1.5 tracking-tight">ClawWork</h3>
-      <p className="text-sm text-[var(--text-muted)] mb-6">{t('mainArea.welcomeSubtitle')}</p>
-      <p className="text-[var(--text-secondary)] max-w-sm leading-relaxed text-sm">
+      <h3 className="type-page-title mb-1.5 text-[var(--text-primary)]">ClawWork</h3>
+      <p className="type-body mb-6 text-[var(--text-muted)]">{t('mainArea.welcomeSubtitle')}</p>
+      <p className="type-body max-w-sm leading-relaxed text-[var(--text-secondary)]">
         {t('mainArea.welcomeDesc1')}
         <br />
         {t('mainArea.welcomeDesc2')}
@@ -152,7 +152,7 @@ function WelcomeScreen() {
                 setGwExpanded(false);
               }}
               className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
+                'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer',
                 'border',
                 gw.id === selectedGwId
                   ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
@@ -166,7 +166,7 @@ function WelcomeScreen() {
           {!gwExpanded && hiddenGwCount > 0 && (
             <button
               onClick={() => setGwExpanded(true)}
-              className="inline-flex items-center gap-0.5 px-2.5 py-1.5 rounded-full text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
+              className="type-support inline-flex items-center gap-0.5 rounded-full px-2.5 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
             >
               +{hiddenGwCount}
               <ChevronRight size={10} />
@@ -185,25 +185,21 @@ function WelcomeScreen() {
                 setAgentExpanded(false);
               }}
               className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
+                'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer',
                 'border',
                 agent.id === selectedAgentId
                   ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
                   : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]',
               )}
             >
-              {agent.identity?.emoji ? (
-                <span className="text-sm leading-none">{agent.identity.emoji}</span>
-              ) : (
-                <Bot size={12} />
-              )}
+              {agent.identity?.emoji ? <span className="emoji-sm">{agent.identity.emoji}</span> : <Bot size={12} />}
               <span className="max-w-24 truncate">{agent.name ?? agent.id}</span>
             </button>
           ))}
           {!agentExpanded && hiddenAgentCount > 0 && (
             <button
               onClick={() => setAgentExpanded(true)}
-              className="inline-flex items-center gap-0.5 px-2.5 py-1.5 rounded-full text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
+              className="type-support inline-flex items-center gap-0.5 rounded-full px-2.5 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
             >
               +{hiddenAgentCount}
               <ChevronRight size={10} />
@@ -216,7 +212,7 @@ function WelcomeScreen() {
         href="https://github.com/clawwork-ai/clawwork"
         target="_blank"
         rel="noreferrer"
-        className="mt-6 text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+        className="type-support mt-6 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
       >
         {t('mainArea.starOnGithub')} ⭐
       </a>
@@ -314,13 +310,13 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                 onChange={(e) => setTitleDraft(e.target.value)}
                 onBlur={commitTitleEdit}
                 onKeyDown={handleTitleKeyDown}
-                className="font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-60"
+                className="type-label text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-60"
               />
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h2
-                    className="font-medium text-[var(--text-primary)] truncate cursor-pointer"
+                    className="type-label text-[var(--text-primary)] truncate cursor-pointer"
                     onDoubleClick={startTitleEdit}
                   >
                     {activeTask.title || t('common.newTask')}
@@ -331,7 +327,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
             )}
             <span
               className={cn(
-                'text-xs px-2 py-0.5 rounded-md',
+                'type-badge rounded-md px-2 py-0.5',
                 activeTask.status === 'active'
                   ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
@@ -343,7 +339,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span
-                    className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                    className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]"
                     style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
                   >
                     <Server size={10} />
@@ -356,9 +352,9 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
             {agentInfo && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+                  <span className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
                     {agentInfo.identity?.emoji ? (
-                      <span className="text-sm leading-none">{agentInfo.identity.emoji}</span>
+                      <span className="emoji-sm">{agentInfo.identity.emoji}</span>
                     ) : (
                       <Bot size={10} />
                     )}
@@ -369,7 +365,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
               </Tooltip>
             )}
             {activeTask?.model && (
-              <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
+              <span className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
                 <Cpu size={10} />
                 <span className="max-w-24 truncate">{activeTask.model}</span>
               </span>
@@ -377,7 +373,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
             {hasUsageData && (
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-hover)] rounded px-1 py-0.5 transition-colors cursor-pointer">
+                  <button className="type-support inline-flex items-center gap-1 rounded px-1 py-0.5 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer">
                     {inputTokens != null && (
                       <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[var(--bg-tertiary)]">
                         <ArrowUp size={9} />
@@ -477,24 +473,22 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
 
                     {usageStatus && usageStatus.providers.length > 0 && (
                       <div className="space-y-2 border-t border-[var(--border)] pt-3">
-                        <span className="text-xs font-medium text-[var(--text-secondary)]">
-                          {t('usage.rateLimits')}
-                        </span>
+                        <span className="type-label text-[var(--text-secondary)]">{t('usage.rateLimits')}</span>
                         {usageStatus.providers.map((provider) => (
                           <div key={provider.provider} className="space-y-1.5">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-[var(--text-primary)]">{provider.displayName}</span>
+                              <span className="type-support text-[var(--text-primary)]">{provider.displayName}</span>
                               {provider.plan ? <StatusTag tone="accent">{provider.plan}</StatusTag> : null}
                             </div>
                             {provider.error && (
-                              <div className="text-2xs text-[var(--danger)] flex items-center gap-1">
+                              <div className="type-meta flex items-center gap-1 text-[var(--danger)]">
                                 <AlertTriangle size={10} />
                                 {provider.error}
                               </div>
                             )}
                             {provider.windows.map((w, i) => (
                               <div key={i} className="space-y-0.5">
-                                <div className="flex items-center justify-between text-2xs text-[var(--text-muted)]">
+                                <div className="type-meta flex items-center justify-between text-[var(--text-muted)]">
                                   <span>{w.label}</span>
                                   <span className={cn(w.usedPercent >= 90 && 'text-[var(--danger)]')}>
                                     {Math.round(w.usedPercent)}%
@@ -514,7 +508,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                                   />
                                 </div>
                                 {w.resetAt && (
-                                  <div className="text-2xs text-[var(--text-muted)]">
+                                  <div className="type-meta text-[var(--text-muted)]">
                                     {t('usage.resetsAt', { time: new Date(w.resetAt).toLocaleTimeString() })}
                                   </div>
                                 )}
@@ -540,7 +534,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
             )}
           </>
         ) : (
-          <h2 className="font-medium text-[var(--text-muted)]">ClawWork</h2>
+          <h2 className="type-label text-[var(--text-muted)]">ClawWork</h2>
         )}
       </div>
       <div className="titlebar-no-drag flex items-center gap-1">
@@ -755,8 +749,8 @@ function ArchivedTasks() {
     <div className="flex flex-col h-full pt-14">
       <header className="flex items-center gap-2.5 h-12 px-5 border-b border-[var(--border)] flex-shrink-0">
         <Archive size={18} className="text-[var(--text-muted)]" />
-        <h2 className="font-medium text-[var(--text-primary)]">{t('leftNav.archivedChats')}</h2>
-        <span className="text-xs text-[var(--text-muted)]">({totalArchived})</span>
+        <h2 className="type-label text-[var(--text-primary)]">{t('leftNav.archivedChats')}</h2>
+        <span className="type-support text-[var(--text-muted)]">({totalArchived})</span>
       </header>
       {totalArchived > 0 && (
         <div className="px-5 py-3 flex-shrink-0">

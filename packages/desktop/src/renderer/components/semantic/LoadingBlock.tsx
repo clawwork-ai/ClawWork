@@ -19,7 +19,7 @@ export default function LoadingBlock({ label, mode = 'section', className }: Loa
   return (
     <div className={cn('flex items-center gap-2 text-[var(--text-muted)]', MODE_CLASS[mode], className)}>
       <Loader2 size={16} className="animate-spin" />
-      {label ? <span className="type-body-sm">{label}</span> : null}
+      {label ? <span className="type-support">{label}</span> : null}
     </div>
   );
 }
