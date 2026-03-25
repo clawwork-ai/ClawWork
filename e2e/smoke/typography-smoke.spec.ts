@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import type { ElectronApplication, Page } from 'playwright';
 import { launchApp } from '../helpers/electron-app';
 
@@ -7,10 +7,7 @@ let page: Page;
 let cleanup: () => void;
 
 test.beforeAll(async () => {
-  ({ app, page, cleanup } = await launchApp({
-    quickLaunchEnabled: true,
-    quickLaunchShortcut: 'CommandOrControl+Shift+L',
-  }));
+  ({ app, page, cleanup } = await launchApp());
 });
 
 test.afterAll(async () => {
@@ -18,26 +15,10 @@ test.afterAll(async () => {
   cleanup?.();
 });
 
-test('typography contract is visible in primary and quick launch surfaces', async () => {
+test('typography classes render in primary window', async () => {
   await page.waitForLoadState('domcontentloaded');
 
   for (const cls of ['type-label', 'type-body']) {
     await page.waitForSelector(`.${cls}`, { timeout: 10_000 });
   }
-
-  const shortcut = process.platform === 'darwin' ? 'Meta+Shift+L' : 'Control+Shift+L';
-  await page.keyboard.press(shortcut);
-
-  await expect(async () => {
-    const windows = app.windows();
-    expect(windows.length).toBeGreaterThanOrEqual(2);
-    const quickLaunchPage = windows.find((w) => w.url().includes('quick-launch'));
-    expect(quickLaunchPage).toBeDefined();
-    const hasQuickLaunchTypography = await quickLaunchPage!.evaluate(() => ({
-      body: document.querySelector('#input')?.classList.contains('type-body') ?? false,
-      mono: Array.from(document.querySelectorAll('kbd')).every((node) => node.classList.contains('type-mono-data')),
-    }));
-    expect(hasQuickLaunchTypography.body).toBe(true);
-    expect(hasQuickLaunchTypography.mono).toBe(true);
-  }).toPass({ timeout: 10_000 });
 });

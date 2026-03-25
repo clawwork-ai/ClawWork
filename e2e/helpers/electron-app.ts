@@ -44,8 +44,6 @@ export async function launchApp(options?: {
   gateway?: boolean;
   userDataDir?: string;
   workspaceDir?: string;
-  quickLaunchEnabled?: boolean;
-  quickLaunchShortcut?: string;
 }): Promise<LaunchResult> {
   const electronBin = resolveElectronBinary();
   dumpDiagnostics(electronBin);
@@ -57,8 +55,8 @@ export async function launchApp(options?: {
     workspacePath: workspaceDir,
     trayEnabled: false,
     quickLaunch: {
-      enabled: options?.quickLaunchEnabled ?? false,
-      shortcut: options?.quickLaunchShortcut ?? 'Alt+Space',
+      enabled: false,
+      shortcut: 'Alt+Space',
     },
     gateways: options?.gateway
       ? [
