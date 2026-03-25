@@ -21,10 +21,12 @@ mac:
   target:
     - target: dmg
       arch:
-        - universal
+        - arm64
+        - x64
     - target: zip
       arch:
-        - universal
+        - arm64
+        - x64
   category: public.app-category.developer-tools
   icon: build/icon.icns
   hardenedRuntime: true

@@ -21,9 +21,15 @@ jobs:
         include:
           - os: macos-latest
             platform: mac
-            build_args: '--mac --universal'
+            arch: arm64
+            build_args: '--mac --arm64'
+          - os: macos-latest
+            platform: mac
+            arch: x64
+            build_args: '--mac --x64'
           - os: windows-latest
             platform: win
+            arch: x64
             build_args: '--win --x64'
 
     runs-on: ${{ matrix.os }}
@@ -88,7 +94,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dev-${{ matrix.platform }}
+          name: dev-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
             packages/desktop/dist/*.dmg
             packages/desktop/dist/*.zip

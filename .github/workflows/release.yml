@@ -22,9 +22,15 @@ jobs:
         include:
           - os: macos-latest
             platform: mac
-            build_args: '--mac --universal'
+            arch: arm64
+            build_args: '--mac --arm64'
+          - os: macos-latest
+            platform: mac
+            arch: x64
+            build_args: '--mac --x64'
           - os: windows-latest
             platform: win
+            arch: x64
             build_args: '--win --x64'
 
     runs-on: ${{ matrix.os }}
@@ -113,7 +119,8 @@ jobs:
           ASSETS=$(gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json assets -q '.assets[].name')
           echo "Release assets:"
           echo "$ASSETS"
-          echo "$ASSETS" | grep -q "latest-mac.yml" || { echo "::error::latest-mac.yml missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "latest-mac-arm64.yml" || { echo "::error::latest-mac-arm64.yml missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "latest-mac.yml" || { echo "::error::latest-mac.yml (x64) missing from release"; exit 1; }
           echo "$ASSETS" | grep -q "latest.yml" || { echo "::error::latest.yml missing from release"; exit 1; }
           echo "All update metadata files present"
         env:

@@ -13,7 +13,8 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "build:mac": "electron-vite build && electron-builder --mac --universal",
+    "build:mac": "electron-vite build && electron-builder --mac --arm64",
+    "build:mac:x64": "electron-vite build && electron-builder --mac --x64",
     "build:win": "electron-vite build && electron-builder --win --x64",
     "preview": "electron-vite preview",
     "test": "vitest run",
