@@ -64,22 +64,55 @@ function setupDevScreenshot(win: BrowserWindow): void {
 function buildAppMenu(): Menu {
   const isMac = process.platform === 'darwin';
   const template: Electron.MenuItemConstructorOptions[] = [
-    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    ...(isMac
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: 'about' as const },
+              { type: 'separator' as const },
+              { role: 'services' as const },
+              { type: 'separator' as const },
+              { role: 'hide' as const, accelerator: 'Command+H' },
+              { role: 'hideOthers' as const, accelerator: 'Command+Alt+H' },
+              { role: 'unhide' as const },
+              { type: 'separator' as const },
+              { role: 'quit' as const, accelerator: 'Command+Q' },
+            ],
+          },
+        ]
+      : []),
+    {
+      label: 'File',
+      submenu: [isMac ? { role: 'close' as const, accelerator: 'Command+W' } : { role: 'quit' as const }],
+    },
     { role: 'editMenu' as const },
     {
       label: 'View',
       submenu: [
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
-        { type: 'separator' },
-        { role: 'reload' },
-        { role: 'toggleDevTools' },
-        { type: 'separator' },
-        { role: 'togglefullscreen' },
+        { role: 'resetZoom' as const },
+        { role: 'zoomIn' as const },
+        { role: 'zoomOut' as const },
+        { type: 'separator' as const },
+        { role: 'reload' as const },
+        { role: 'toggleDevTools' as const },
+        { type: 'separator' as const },
+        { role: 'togglefullscreen' as const },
       ],
     },
-    ...(isMac ? [{ role: 'windowMenu' as const }] : []),
+    ...(isMac
+      ? [
+          {
+            label: 'Window',
+            submenu: [
+              { role: 'minimize' as const, accelerator: 'Command+M' },
+              { role: 'zoom' as const },
+              { type: 'separator' as const },
+              { role: 'front' as const },
+            ],
+          },
+        ]
+      : []),
   ];
   return Menu.buildFromTemplate(template);
 }
