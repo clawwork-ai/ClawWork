@@ -87,7 +87,7 @@ interface AppSettings {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
   density?: 'compact' | 'comfortable' | 'spacious';
-  language?: 'en' | 'zh';
+  language?: string;
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;
   sendShortcut?: 'enter' | 'cmdEnter';

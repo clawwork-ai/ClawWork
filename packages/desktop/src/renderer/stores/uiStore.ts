@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import type { AgentInfo, ModelCatalogEntry, ToolsCatalog } from '@clawwork/shared';
 import i18n from '../i18n';
+import type { Language } from '../i18n/languages';
 
 type MainView = 'chat' | 'files' | 'archived' | 'cron';
 
 export type Theme = 'dark' | 'light' | 'auto';
 export type DensityMode = 'compact' | 'comfortable' | 'spacious';
 
-export type Language = 'en' | 'zh';
+export type { Language };
 
 export type SendShortcut = 'enter' | 'cmdEnter';
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import cronstrue from 'cronstrue/i18n';
+import { getLanguageConfig } from '@/i18n/languages';
 import { AlertTriangle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -58,7 +59,7 @@ const EVERY_UNIT_MS: Record<EveryUnit, number> = {
 
 function describeCron(expr: string, locale: string): string | null {
   try {
-    return cronstrue.toString(expr, { locale: locale === 'zh' ? 'zh_CN' : 'en', use24HourTimeFormat: true });
+    return cronstrue.toString(expr, { locale: getLanguageConfig(locale).cronstrueLocale, use24HourTimeFormat: true });
   } catch {
     return null;
   }

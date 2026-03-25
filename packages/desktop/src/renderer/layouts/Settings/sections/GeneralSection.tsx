@@ -12,15 +12,11 @@ import {
   type PanelShortcutLeft,
   type PanelShortcutRight,
 } from '@/stores/uiStore';
+import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import SettingRow from '@/components/semantic/SettingRow';
 import SegmentedControl from '../components/SegmentedControl';
 import Toggle from '../components/Toggle';
 import SettingGroup from '@/components/semantic/SettingGroup';
-
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: 'en', label: 'English' },
-  { value: 'zh', label: '中文' },
-];
 
 export default function GeneralSection() {
   const { t } = useTranslation();
@@ -168,13 +164,18 @@ export default function GeneralSection() {
           />
         </SettingRow>
         <SettingRow label={t('settings.language')}>
-          <SegmentedControl
-            layoutId="seg-lang"
+          <select
             value={language}
-            onChange={setLanguage}
-            options={LANGUAGES}
-            ariaLabel="Language"
-          />
+            onChange={(e) => setLanguage(e.target.value as Language)}
+            aria-label={t('settings.language')}
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-1.5 text-sm text-[var(--text-primary)]"
+          >
+            {SUPPORTED_LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
         </SettingRow>
         <SettingRow label={t('settings.sendShortcut')}>
           <SegmentedControl

@@ -44,6 +44,9 @@ jobs:
       - name: Renderer copy contract
         run: pnpm check:renderer-copy
 
+      - name: i18n key parity
+        run: pnpm check:i18n
+
   test:
     needs: [quality]
     runs-on: ubuntu-latest

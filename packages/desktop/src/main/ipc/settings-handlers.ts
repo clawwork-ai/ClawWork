@@ -3,6 +3,7 @@ import { readConfig, updateConfig, writeConfig, buildGatewayAuth } from '../work
 import type { AppConfig, GatewayServerConfig } from '../workspace/config.js';
 import { getGatewayClient, addGateway, removeGateway } from '../ws/index.js';
 import { GatewayClient } from '../ws/gateway-client.js';
+import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 import type { GatewayAuth } from '@clawwork/shared';
 
 function getMainWindow(): BrowserWindow | null {
@@ -16,8 +17,13 @@ export function registerSettingsHandlers(): void {
   });
 
   ipcMain.handle('settings:update', (_event, partial: Partial<AppConfig>): { ok: boolean; config: AppConfig } => {
-    // Strip gateway fields — must use dedicated gateway handlers
     const { gateways: _g, defaultGatewayId: _d, ...safePartial } = partial;
+    if (
+      safePartial.language !== undefined &&
+      !(SUPPORTED_LANGUAGE_CODES as readonly string[]).includes(safePartial.language)
+    ) {
+      delete safePartial.language;
+    }
     const config = updateConfig(safePartial);
     return { ok: true, config };
   });

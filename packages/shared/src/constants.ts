@@ -59,6 +59,9 @@ export const RECONNECT_DELAY_MS = 3_000;
 /** Max reconnect attempts before giving up */
 export const MAX_RECONNECT_ATTEMPTS = 10;
 
+export const SUPPORTED_LANGUAGE_CODES = ['en', 'zh', 'zh-TW', 'ja', 'ko', 'pt', 'de', 'es'] as const;
+export type LanguageCode = (typeof SUPPORTED_LANGUAGE_CODES)[number];
+
 /** Default workspace directory name (under user home) */
 export const DEFAULT_WORKSPACE_DIR = 'ClawWork-Workspace';
 

@@ -199,15 +199,27 @@
       var container = document.getElementById('container');
       var sendHint = document.getElementById('send-hint');
       var sendShortcut = 'enter';
-      var locale = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
       var messages = {
-        en: {
-          placeholder: 'Ask anything...',
-        },
-        zh: {
-          placeholder: '输入你的任务...',
-        },
+        en: { placeholder: 'Ask anything...' },
+        zh: { placeholder: '输入你的任务...' },
+        'zh-TW': { placeholder: '輸入你的任務...' },
+        ja: { placeholder: 'タスクを入力...' },
+        ko: { placeholder: '작업을 입력하세요...' },
+        pt: { placeholder: 'Descreva sua tarefa...' },
+        de: { placeholder: 'Beschreibe deine Aufgabe...' },
+        es: { placeholder: 'Describe tu tarea...' },
       };
+
+      function detectLocale() {
+        var raw = (navigator.language || 'en').toLowerCase();
+        if (raw === 'zh-tw' || raw === 'zh-hk' || raw === 'zh-hant' || raw.indexOf('zh-hant') === 0) return 'zh-TW';
+        if (raw.indexOf('zh') === 0) return 'zh';
+        var primary = raw.split('-')[0];
+        if (messages[primary]) return primary;
+        return 'en';
+      }
+
+      var locale = detectLocale();
 
       function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -246,6 +258,10 @@
           sendShortcut = config.sendShortcut || 'enter';
           var theme = settings && settings.theme ? settings.theme : 'auto';
           applyTheme(theme === 'auto' ? resolveSystemTheme() : theme);
+          if (settings && settings.language && messages[settings.language]) {
+            locale = settings.language;
+            applyLocale();
+          }
           updateHint();
         });
       } else {

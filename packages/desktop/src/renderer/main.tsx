@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client';
 import 'highlight.js/styles/github-dark.css';
 import './styles/theme.css';
 import i18n from './i18n';
-import { useUiStore, type Language } from './stores/uiStore';
+import { useUiStore } from './stores/uiStore';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeProvider';
+import { resolveSystemLanguage, type Language } from './i18n/languages';
+import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
+import type { LanguageCode } from '@clawwork/shared';
 
 if (!window.clawwork) {
   const root = document.getElementById('root')!;
@@ -26,22 +29,42 @@ if (!window.clawwork) {
   );
 }
 
-// Restore persisted language preference
-window.clawwork.getSettings().then((settings) => {
-  const lang = settings?.language as Language | undefined;
-  if (lang && lang !== i18n.language) {
-    i18n.changeLanguage(lang);
-    useUiStore.setState({ language: lang });
-  }
-});
+function isValidLang(v: unknown): v is LanguageCode {
+  return typeof v === 'string' && (SUPPORTED_LANGUAGE_CODES as readonly string[]).includes(v);
+}
 
-const root = createRoot(document.getElementById('root')!);
-root.render(
-  <React.StrictMode>
-    <ThemeProvider>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </ThemeProvider>
-  </React.StrictMode>,
-);
+async function bootstrap() {
+  let lang: Language = resolveSystemLanguage();
+  let needsPersist = false;
+  let settingsReadFailed = false;
+  try {
+    const settings = await window.clawwork.getSettings();
+    const persisted = settings?.language;
+    if (isValidLang(persisted)) {
+      lang = persisted;
+    } else {
+      needsPersist = true;
+    }
+  } catch {
+    settingsReadFailed = true;
+  }
+
+  try {
+    if (lang !== i18n.language) await i18n.changeLanguage(lang);
+  } catch {}
+
+  useUiStore.setState({ language: lang });
+  if (needsPersist && !settingsReadFailed) window.clawwork.updateSettings({ language: lang });
+
+  const root = createRoot(document.getElementById('root')!);
+  root.render(
+    <React.StrictMode>
+      <ThemeProvider>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </ThemeProvider>
+    </React.StrictMode>,
+  );
+}
+bootstrap();

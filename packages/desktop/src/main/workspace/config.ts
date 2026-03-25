@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { randomUUID } from 'node:crypto';
 import { CONFIG_FILE_NAME, DEFAULT_WORKSPACE_DIR } from '@clawwork/shared';
-import type { GatewayAuth } from '@clawwork/shared';
+import type { GatewayAuth, LanguageCode } from '@clawwork/shared';
 
 export interface GatewayServerConfig {
   id: string;
@@ -37,7 +37,7 @@ export interface AppConfig {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
   density?: 'compact' | 'comfortable' | 'spacious';
-  language?: 'en' | 'zh';
+  language?: LanguageCode;
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;
   sendShortcut?: 'enter' | 'cmdEnter';
