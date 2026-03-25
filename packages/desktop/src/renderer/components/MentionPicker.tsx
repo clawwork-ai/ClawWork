@@ -1,14 +1,18 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { File, FileCode, Image as ImageIcon, ListTodo } from 'lucide-react';
-import type { Task, Artifact } from '@clawwork/shared';
+import { File, FileCode, FolderOpen, Image as ImageIcon, ListTodo } from 'lucide-react';
+import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
 
-export type MentionTab = 'tasks' | 'files';
+export type MentionTab = 'local' | 'tasks' | 'files';
 
-export type MentionItem = { kind: 'task'; task: Task } | { kind: 'file'; artifact: Artifact };
+export type MentionItem =
+  | { kind: 'task'; task: Task }
+  | { kind: 'file'; artifact: Artifact }
+  | { kind: 'local'; file: FileIndexEntry };
 
-const TABS: { id: MentionTab; label: string; icon: typeof ListTodo }[] = [
+const ALL_TABS: { id: MentionTab; label: string; icon: typeof ListTodo }[] = [
+  { id: 'local', label: 'Local', icon: FolderOpen },
   { id: 'tasks', label: 'Tasks', icon: ListTodo },
   { id: 'files', label: 'Files', icon: File },
 ];
@@ -17,10 +21,13 @@ interface MentionPickerProps {
   visible: boolean;
   query: string;
   tasks: Task[];
+  localFiles: FileIndexEntry[];
+  hasContextFolders: boolean;
   activeTab: MentionTab;
   selectedIndex: number;
   onSelectTask: (task: Task) => void;
   onSelectArtifact: (artifact: Artifact) => void;
+  onSelectLocalFile: (file: FileIndexEntry) => void;
   onTabChange: (tab: MentionTab) => void;
   onHoverIndex: (index: number) => void;
   onItemsChange?: (items: MentionItem[]) => void;
@@ -36,10 +43,13 @@ export default function MentionPicker({
   visible,
   query,
   tasks,
+  localFiles,
+  hasContextFolders,
   activeTab,
   selectedIndex,
   onSelectTask,
   onSelectArtifact,
+  onSelectLocalFile,
   onTabChange,
   onHoverIndex,
   onItemsChange,
@@ -63,15 +73,26 @@ export default function MentionPicker({
     });
   }, [visible, artifacts.length, setArtifacts]);
 
+  const tabs = useMemo(() => {
+    if (hasContextFolders) return ALL_TABS;
+    return ALL_TABS.filter((t) => t.id !== 'local');
+  }, [hasContextFolders]);
+
   const items = useMemo<MentionItem[]>(() => {
     const q = query.toLowerCase();
+    if (activeTab === 'local') {
+      const filtered = q
+        ? localFiles.filter((f) => f.fileName.toLowerCase().includes(q) || f.relativePath.toLowerCase().includes(q))
+        : localFiles;
+      return filtered.map((f) => ({ kind: 'local' as const, file: f }));
+    }
     if (activeTab === 'tasks') {
       const filtered = q ? tasks.filter((t) => t.title.toLowerCase().includes(q)) : tasks;
       return filtered.map((t) => ({ kind: 'task' as const, task: t }));
     }
     const filtered = q ? artifacts.filter((a) => a.name.toLowerCase().includes(q)) : artifacts;
     return filtered.map((a) => ({ kind: 'file' as const, artifact: a }));
-  }, [activeTab, query, tasks, artifacts]);
+  }, [activeTab, query, tasks, artifacts, localFiles]);
 
   useEffect(() => {
     onItemsChange?.(items);
@@ -94,7 +115,7 @@ export default function MentionPicker({
       )}
     >
       <div className="flex border-b border-[var(--border-subtle)]">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button
@@ -118,9 +139,37 @@ export default function MentionPicker({
       <div ref={listRef} className="max-h-56 overflow-y-auto py-1">
         {items.length === 0 && (
           <div className="px-3 py-4 text-center text-xs text-[var(--text-muted)]">
-            {activeTab === 'tasks' ? 'No matching tasks' : 'No matching files'}
+            {activeTab === 'local'
+              ? 'No matching local files'
+              : activeTab === 'tasks'
+                ? 'No matching tasks'
+                : 'No matching files'}
           </div>
         )}
+
+        {activeTab === 'local' &&
+          items.map((item, i) => {
+            if (item.kind !== 'local') return null;
+            const f = item.file;
+            return (
+              <button
+                key={f.absolutePath}
+                data-mention-selected={i === selectedIndex ? '' : undefined}
+                className={cn(
+                  'w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm',
+                  'hover:bg-[var(--bg-hover)] transition-colors',
+                  i === selectedIndex && 'bg-[var(--bg-hover)]',
+                )}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onSelectLocalFile(f)}
+                onMouseEnter={() => onHoverIndex(i)}
+              >
+                <FileCode size={14} className="text-[var(--accent)] flex-shrink-0" />
+                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{f.relativePath}</span>
+                <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{formatFileSize(f.size)}</span>
+              </button>
+            );
+          })}
 
         {activeTab === 'tasks' &&
           items.map((item, i) => {
@@ -174,7 +223,7 @@ export default function MentionPicker({
 
       <div className="flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-[11px] text-[var(--text-muted)]">
         <span>
-          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">Tab</kbd> switch
+          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">←→</kbd> switch
         </span>
         <span>
           <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">↑↓</kbd> navigate

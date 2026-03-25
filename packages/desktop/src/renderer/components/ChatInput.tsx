@@ -15,6 +15,7 @@ import {
   Minimize2,
   RotateCcw,
   File,
+  FileCode,
   FolderPlus,
   ListTodo,
 } from 'lucide-react';
@@ -25,6 +26,7 @@ import type {
   Task,
   Artifact,
   FileIndexEntry,
+  FileReadResult,
 } from '@clawwork/shared';
 import { toast } from 'sonner';
 import { markAbortedByUser } from '@/hooks/useGatewayDispatcher';
@@ -148,6 +150,8 @@ export default function ChatInput() {
   const [mentionTab, setMentionTab] = useState<MentionTab>('tasks');
   const [selectedTasks, setSelectedTasks] = useState<Task[]>([]);
   const [selectedArtifacts, setSelectedArtifacts] = useState<Artifact[]>([]);
+  const [selectedLocalFiles, setSelectedLocalFiles] = useState<FileIndexEntry[]>([]);
+  const [localFilesForPicker, setLocalFilesForPicker] = useState<FileIndexEntry[]>([]);
   const mentionItemsRef = useRef<MentionItem[]>([]);
   const mentionWasVisible = useRef(false);
 
@@ -409,6 +413,7 @@ export default function ChatInput() {
     prevTaskIdRef.current = key;
     setSelectedTasks([]);
     setSelectedArtifacts([]);
+    setSelectedLocalFiles([]);
   }, [activeTaskId, refreshContextFiles]);
 
   useEffect(() => {
@@ -485,6 +490,21 @@ export default function ChatInput() {
     });
   }, []);
 
+  const loadLocalFiles = useCallback(
+    async (query?: string) => {
+      if (contextFolders.length === 0) {
+        setLocalFilesForPicker([]);
+        return;
+      }
+      const res = await window.clawwork.listContextFiles(contextFolders, query);
+      if (res.ok && res.result) {
+        const files = res.result as unknown as FileIndexEntry[];
+        setLocalFilesForPicker(files.filter((f) => f.tier === 'text'));
+      }
+    },
+    [contextFolders],
+  );
+
   const updateMentionPicker = useCallback(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -493,8 +513,13 @@ export default function ChatInput() {
     const atMatch = before.match(/@([^\s@]*)$/);
     if (atMatch) {
       if (!mentionWasVisible.current) {
-        const hasArtifacts = useFileStore.getState().artifacts.length > 0;
-        setMentionTab(hasArtifacts ? 'files' : 'tasks');
+        if (contextFolders.length > 0) {
+          setMentionTab('local');
+        } else {
+          const hasArtifacts = useFileStore.getState().artifacts.length > 0;
+          setMentionTab(hasArtifacts ? 'files' : 'tasks');
+        }
+        loadLocalFiles();
       }
       mentionWasVisible.current = true;
       setMentionVisible(true);
@@ -504,7 +529,7 @@ export default function ChatInput() {
       mentionWasVisible.current = false;
       setMentionVisible(false);
     }
-  }, []);
+  }, [contextFolders, loadLocalFiles]);
 
   const closeMentionPicker = useCallback(() => {
     mentionWasVisible.current = false;
@@ -538,6 +563,13 @@ export default function ChatInput() {
         }
         stripAtQuery();
         setSelectedTasks((prev) => [...prev, item.task]);
+      } else if (item.kind === 'local') {
+        if (selectedLocalFiles.some((f) => f.absolutePath === item.file.absolutePath)) {
+          closeMentionPicker();
+          return;
+        }
+        stripAtQuery();
+        setSelectedLocalFiles((prev) => [...prev, item.file]);
       } else {
         if (selectedArtifacts.some((a) => a.id === item.artifact.id)) {
           closeMentionPicker();
@@ -548,7 +580,7 @@ export default function ChatInput() {
       }
       closeMentionPicker();
     },
-    [selectedTasks, selectedArtifacts, closeMentionPicker, stripAtQuery],
+    [selectedTasks, selectedArtifacts, selectedLocalFiles, closeMentionPicker, stripAtQuery],
   );
 
   const removeSelectedTask = useCallback((taskId: string) => {
@@ -557,6 +589,10 @@ export default function ChatInput() {
 
   const removeSelectedArtifact = useCallback((id: string) => {
     setSelectedArtifacts((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  const removeSelectedLocalFile = useCallback((path: string) => {
+    setSelectedLocalFiles((prev) => prev.filter((f) => f.absolutePath !== path));
   }, []);
 
   const handleMentionItemsChange = useCallback((items: MentionItem[]) => {
@@ -590,9 +626,11 @@ export default function ChatInput() {
     const images = [...pendingImages];
     const taskMentions = [...selectedTasks];
     const artifactMentions = [...selectedArtifacts];
+    const localFileMentions = [...selectedLocalFiles];
     setPendingImages([]);
     setSelectedTasks([]);
     setSelectedArtifacts([]);
+    setSelectedLocalFiles([]);
 
     try {
       let finalContent = content || '';
@@ -661,6 +699,36 @@ export default function ChatInput() {
         }
       }
 
+      if (localFileMentions.length > 0) {
+        const readResults = await Promise.all(
+          localFileMentions.map((f) =>
+            window.clawwork.readContextFile(f.absolutePath, contextFolders).then((res) => ({ file: f, res })),
+          ),
+        );
+
+        const localBlocks: string[] = [];
+        let totalLocalSize = 0;
+
+        for (const { file: f, res } of readResults) {
+          if (!res.ok || !res.result) continue;
+          const read = res.result as unknown as FileReadResult;
+
+          if (read.tier === 'text') {
+            const blockSize = new TextEncoder().encode(read.content).length;
+            totalLocalSize += blockSize;
+            if (totalLocalSize > MAX_TEXT_TOTAL) {
+              toast.error('Total file context exceeds 500KB limit');
+              break;
+            }
+            localBlocks.push(`<file path="${f.relativePath}">\n${read.content}\n</file>`);
+          }
+        }
+
+        if (localBlocks.length > 0) {
+          finalContent = localBlocks.join('\n\n') + '\n\n' + finalContent;
+        }
+      }
+
       const msgImages: MessageImageAttachment[] | undefined = images.length
         ? images.map((img) => ({ fileName: img.file.name, dataUrl: img.previewUrl }))
         : undefined;
@@ -671,6 +739,7 @@ export default function ChatInput() {
       if (!task.title) {
         const titleSource =
           content ||
+          (localFileMentions.length ? `[@${localFileMentions[0].fileName}]` : '') ||
           (taskMentions.length ? `[@${taskMentions[0].title}]` : '') ||
           (artifactMentions.length ? `[@${artifactMentions[0].name}]` : '') ||
           (images.length ? `[${t('chatInput.image')}]` : '');
@@ -772,6 +841,8 @@ export default function ChatInput() {
     pendingImages,
     selectedTasks,
     selectedArtifacts,
+    selectedLocalFiles,
+    contextFolders,
     stopVoiceInput,
     commitPendingTask,
     updateTaskMetadata,
@@ -885,10 +956,17 @@ export default function ChatInput() {
       }
 
       if (mentionVisible) {
-        if (e.key === 'Tab') {
+        if (e.key === 'Tab' || e.key === 'ArrowRight') {
           e.preventDefault();
-          const tabs: MentionTab[] = ['tasks', 'files'];
+          const tabs: MentionTab[] = contextFolders.length > 0 ? ['local', 'tasks', 'files'] : ['tasks', 'files'];
           setMentionTab((cur) => tabs[(tabs.indexOf(cur) + 1) % tabs.length]);
+          setMentionIndex(0);
+          return;
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const tabs: MentionTab[] = contextFolders.length > 0 ? ['local', 'tasks', 'files'] : ['tasks', 'files'];
+          setMentionTab((cur) => tabs[(tabs.indexOf(cur) - 1 + tabs.length) % tabs.length]);
           setMentionIndex(0);
           return;
         }
@@ -986,6 +1064,7 @@ export default function ChatInput() {
       mentionIndex,
       commitMention,
       closeMentionPicker,
+      contextFolders,
       argPickerVisible,
       argPickerOptions,
       argPickerIndex,
@@ -1281,10 +1360,13 @@ export default function ChatInput() {
             visible={mentionVisible}
             query={mentionQuery}
             tasks={mentionableTasks}
+            localFiles={localFilesForPicker}
+            hasContextFolders={contextFolders.length > 0}
             activeTab={mentionTab}
             selectedIndex={mentionIndex}
             onSelectTask={(task) => commitMention({ kind: 'task', task })}
             onSelectArtifact={(a) => commitMention({ kind: 'file', artifact: a })}
+            onSelectLocalFile={(f) => commitMention({ kind: 'local', file: f })}
             onTabChange={(tab) => {
               setMentionTab(tab);
               setMentionIndex(0);
@@ -1342,8 +1424,26 @@ export default function ChatInput() {
             </motion.div>
 
             <div className="flex-1 relative min-h-[24px]">
-              {(selectedTasks.length > 0 || selectedArtifacts.length > 0) && (
+              {(selectedTasks.length > 0 || selectedArtifacts.length > 0 || selectedLocalFiles.length > 0) && (
                 <div className="flex flex-wrap gap-1.5 pb-2">
+                  {selectedLocalFiles.map((f) => (
+                    <span
+                      key={f.absolutePath}
+                      className={cn(
+                        'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg',
+                        'bg-[var(--accent)]/10 text-[var(--accent)]',
+                      )}
+                    >
+                      <FileCode size={14} className="flex-shrink-0" />
+                      {f.relativePath}
+                      <button
+                        onClick={() => removeSelectedLocalFile(f.absolutePath)}
+                        className="ml-0.5 opacity-50 hover:opacity-100"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
                   {selectedTasks.map((task) => (
                     <span
                       key={`task-${task.id}`}
