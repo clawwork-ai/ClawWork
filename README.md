@@ -12,7 +12,7 @@ Parallel tasks, structured artifacts, scheduled automation — and files you can
 [![License](https://img.shields.io/github/license/clawwork-ai/clawwork?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork)
 
-[Download](#download) · [Quick start](#quick-start) · [What you get](#what-you-get) · [What it stores](#what-clawwork-stores) · [How it works](#how-it-works) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing)
+[Download](#download) · [Quick start](#quick-start) · [What you get](#what-you-get) · [What it stores](#what-clawwork-stores) · [How it works](#how-it-works) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
 
 </div>
 
