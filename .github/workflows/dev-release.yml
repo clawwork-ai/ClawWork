@@ -110,6 +110,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Delete existing dev release
+        run: gh release delete dev --yes || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Force-update dev tag to current commit
         run: |
           git tag -f dev
