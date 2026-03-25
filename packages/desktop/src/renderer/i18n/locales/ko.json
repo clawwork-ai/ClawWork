@@ -324,7 +324,6 @@
     "tooltip": "음성 입력 (베타)",
     "unsupportedTooltip": "음성 입력에는 whisper-cpp가 필요합니다. 실행: brew install whisper-cpp",
     "listeningStatus": "녹음 중... Space를 놓으면 변환됩니다",
-    "beta": "베타",
     "permissionDenied": "마이크 접근이 거부되었습니다",
     "unsupported": "whisper-cpp를 찾을 수 없습니다. 실행: brew install whisper-cpp, 그 후 ~/models/whisper/에 모델을 다운로드하세요",
     "transcribing": "변환 중...",

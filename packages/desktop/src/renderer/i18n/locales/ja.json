@@ -324,7 +324,6 @@
     "tooltip": "音声入力 (ベータ)",
     "unsupportedTooltip": "音声入力には whisper-cpp が必要です。実行: brew install whisper-cpp",
     "listeningStatus": "録音中... Space を離すと文字起こしします",
-    "beta": "ベータ",
     "permissionDenied": "マイクへのアクセスが拒否されました",
     "unsupported": "whisper-cpp が見つかりません。実行: brew install whisper-cpp 後、モデルを ~/models/whisper/ にダウンロードしてください",
     "transcribing": "文字起こし中...",

@@ -324,7 +324,6 @@
     "tooltip": "Entrada de Voz (Beta)",
     "unsupportedTooltip": "A entrada de voz requer whisper-cpp. Execute: brew install whisper-cpp",
     "listeningStatus": "Gravando... solte Espaço para transcrever",
-    "beta": "Beta",
     "permissionDenied": "O acesso ao microfone foi negado",
     "unsupported": "whisper-cpp não encontrado. Execute: brew install whisper-cpp, depois baixe um modelo em ~/models/whisper/",
     "transcribing": "Transcrevendo...",

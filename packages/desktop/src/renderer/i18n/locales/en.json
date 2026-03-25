@@ -324,7 +324,6 @@
     "tooltip": "Voice Input (Beta)",
     "unsupportedTooltip": "Voice input requires whisper-cpp. Run: brew install whisper-cpp",
     "listeningStatus": "Recording... release Space to transcribe",
-    "beta": "Beta",
     "permissionDenied": "Microphone access was denied",
     "unsupported": "whisper-cpp not found. Run: brew install whisper-cpp, then download a model to ~/models/whisper/",
     "transcribing": "Transcribing...",

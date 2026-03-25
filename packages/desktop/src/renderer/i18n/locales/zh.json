@@ -324,7 +324,6 @@
     "tooltip": "语音输入（Beta）",
     "unsupportedTooltip": "语音输入需要 whisper-cpp，请运行: brew install whisper-cpp",
     "listeningStatus": "正在录音…松开 Space 开始识别",
-    "beta": "Beta",
     "permissionDenied": "麦克风权限被拒绝",
     "unsupported": "未找到 whisper-cpp，请运行 brew install whisper-cpp 并下载模型到 ~/models/whisper/",
     "transcribing": "正在识别…",

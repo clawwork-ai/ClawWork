@@ -324,7 +324,6 @@
     "tooltip": "語音輸入（Beta）",
     "unsupportedTooltip": "語音輸入需要 whisper-cpp。請執行：brew install whisper-cpp",
     "listeningStatus": "錄音中…放開空白鍵以轉錄",
-    "beta": "Beta",
     "permissionDenied": "麥克風存取被拒絕",
     "unsupported": "找不到 whisper-cpp。請執行：brew install whisper-cpp，然後下載模型至 ~/models/whisper/",
     "transcribing": "轉錄中…",
