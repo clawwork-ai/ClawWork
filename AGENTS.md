@@ -7,9 +7,9 @@ Canonical invariant list: `docs/architecture-invariants.md`.
 ## Required Reading Order
 
 1. `DEVELOPMENT.md`
-2. `docs/design-system.md`
-3. `docs/architecture-invariants.md`
-4. `docs/openclaw-desktop-design.md`
+2. `docs/architecture-invariants.md`
+3. `docs/openclaw-desktop-design.md`
+4. `scripts/check-ui-contract.mjs`
 5. the module you will change
 
 If the task touches Gateway behavior, also inspect `~/git/openclaw` before changing local code.
@@ -35,7 +35,7 @@ If the task touches Gateway behavior, also inspect `~/git/openclaw` before chang
 
 ## UI And Design Rules
 
-- Follow `docs/design-system.md` for every renderer change.
+- Follow `theme.css`, `design-tokens.ts`, and `pnpm check:ui-contract` for every renderer change.
 - Do not hardcode hex, rgb, or rgba colors in renderer TypeScript or TSX.
 - Use CSS variables from `theme.css` and tokens from `design-tokens.ts`.
 - Preserve the dark-first visual language, light-theme parity, and explicit interaction states.

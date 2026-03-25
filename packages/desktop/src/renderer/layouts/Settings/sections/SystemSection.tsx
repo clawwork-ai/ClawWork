@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Toggle from '../components/Toggle';
-import SettingRow from '../components/SettingRow';
+import SettingRow from '@/components/semantic/SettingRow';
+import SettingGroup from '@/components/semantic/SettingGroup';
 
 export default function SystemSection() {
   const { t } = useTranslation();
@@ -113,73 +114,69 @@ export default function SystemSection() {
     <div>
       <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.system')}</h3>
       <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.systemDesc')}</p>
-      <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <MonitorDot size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <div>
-                  <span className="text-sm text-[var(--text-primary)]">{t('settings.trayIcon')}</span>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.trayIconDesc')}</p>
-                </div>
+      <SettingGroup>
+        <SettingRow
+          label={
+            <div className="flex items-center gap-3">
+              <MonitorDot size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+              <div>
+                <span className="text-sm text-[var(--text-primary)]">{t('settings.trayIcon')}</span>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.trayIconDesc')}</p>
               </div>
-            }
-          >
-            <Toggle checked={trayEnabled} onChange={handleTrayToggle} ariaLabel={t('settings.trayIcon')} />
-          </SettingRow>
-        </div>
-        <div className="px-5 py-4">
-          <SettingRow
-            label={
-              <div className="flex items-center gap-3">
-                <Zap size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <div>
-                  <span className="text-sm text-[var(--text-primary)]">{t('settings.quickLaunch')}</span>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.quickLaunchDesc')}</p>
-                </div>
-              </div>
-            }
-          >
-            <div className="flex items-center gap-2.5 flex-shrink-0">
-              {quickLaunchEnabled &&
-                (recordingShortcut ? (
-                  <input
-                    autoFocus
-                    readOnly
-                    placeholder={t('settings.pressShortcut')}
-                    onKeyDown={handleShortcutRecord}
-                    onBlur={() => setRecordingShortcut(false)}
-                    className={cn(
-                      'w-[140px] text-center text-sm font-mono px-2.5 py-1 rounded-md',
-                      'bg-[var(--accent-soft)] border border-[var(--accent)]/40',
-                      'text-[var(--accent)] outline-none animate-pulse',
-                      'focus:ring-2 focus:ring-[var(--ring-accent)]',
-                    )}
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    aria-label={t('settings.quickLaunchShortcut')}
-                    onClick={() => setRecordingShortcut(true)}
-                    className={cn(
-                      'text-sm font-mono px-2.5 py-1 rounded-md',
-                      'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                      'text-[var(--text-primary)] hover:border-[var(--accent)]/40 transition-colors',
-                      'cursor-pointer',
-                    )}
-                  >
-                    {quickLaunchShortcut}
-                  </button>
-                ))}
-              <Toggle
-                checked={quickLaunchEnabled}
-                onChange={handleQuickLaunchToggle}
-                ariaLabel={t('settings.quickLaunch')}
-              />
             </div>
-          </SettingRow>
-        </div>
+          }
+        >
+          <Toggle checked={trayEnabled} onChange={handleTrayToggle} ariaLabel={t('settings.trayIcon')} />
+        </SettingRow>
+        <SettingRow
+          label={
+            <div className="flex items-center gap-3">
+              <Zap size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+              <div>
+                <span className="text-sm text-[var(--text-primary)]">{t('settings.quickLaunch')}</span>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">{t('settings.quickLaunchDesc')}</p>
+              </div>
+            </div>
+          }
+        >
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            {quickLaunchEnabled &&
+              (recordingShortcut ? (
+                <input
+                  autoFocus
+                  readOnly
+                  placeholder={t('settings.pressShortcut')}
+                  onKeyDown={handleShortcutRecord}
+                  onBlur={() => setRecordingShortcut(false)}
+                  className={cn(
+                    'w-36 text-center text-sm font-mono px-2.5 py-1 rounded-md',
+                    'bg-[var(--accent-soft)] border border-[var(--accent)]/40',
+                    'text-[var(--accent)] outline-none animate-pulse',
+                    'focus:ring-2 focus:ring-[var(--ring-accent)]',
+                  )}
+                />
+              ) : (
+                <button
+                  type="button"
+                  aria-label={t('settings.quickLaunchShortcut')}
+                  onClick={() => setRecordingShortcut(true)}
+                  className={cn(
+                    'text-sm font-mono px-2.5 py-1 rounded-md',
+                    'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                    'text-[var(--text-primary)] hover:border-[var(--accent)]/40 transition-colors',
+                    'cursor-pointer',
+                  )}
+                >
+                  {quickLaunchShortcut}
+                </button>
+              ))}
+            <Toggle
+              checked={quickLaunchEnabled}
+              onChange={handleQuickLaunchToggle}
+              ariaLabel={t('settings.quickLaunch')}
+            />
+          </div>
+        </SettingRow>
         <div className="px-5 py-4 space-y-3">
           <div className="flex items-center gap-3">
             <FolderOpen size={14} className="text-[var(--text-muted)] flex-shrink-0" />
@@ -218,7 +215,7 @@ export default function SystemSection() {
             </Button>
           </div>
         </div>
-      </div>
+      </SettingGroup>
     </div>
   );
 }

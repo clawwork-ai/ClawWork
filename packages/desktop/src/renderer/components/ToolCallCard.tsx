@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronRight, Loader2, Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { ToolCall } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
@@ -23,6 +24,7 @@ function StatusIcon({ status }: { status: ToolCall['status'] }) {
 }
 
 const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolCallCardProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(defaultOpen ?? false);
 
   const duration = useMemo(() => {
@@ -43,7 +45,7 @@ const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolC
       >
         <div
           className={cn(
-            'w-[3px] flex-shrink-0 rounded-l-lg',
+            'w-1 flex-shrink-0 rounded-l-lg',
             toolCall.status === 'running' && 'bg-[var(--accent)] animate-pulse',
             toolCall.status === 'done' && 'bg-[var(--accent)] opacity-60',
             toolCall.status === 'error' && 'bg-[var(--danger)]',
@@ -76,7 +78,7 @@ const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolC
                 >
                   {toolCall.args && (
                     <div className="mb-1">
-                      <p className="text-[var(--text-muted)] mb-0.5">args:</p>
+                      <p className="text-[var(--text-muted)] mb-0.5">{t('toolCall.args')}</p>
                       <pre
                         className={cn(
                           'whitespace-pre-wrap text-[var(--text-secondary)]',
@@ -89,7 +91,7 @@ const ToolCallCard = memo(function ToolCallCard({ toolCall, defaultOpen }: ToolC
                   )}
                   {toolCall.result && (
                     <div>
-                      <p className="text-[var(--text-muted)] mb-0.5">result:</p>
+                      <p className="text-[var(--text-muted)] mb-0.5">{t('toolCall.result')}</p>
                       <pre
                         className={cn(
                           'whitespace-pre-wrap text-[var(--text-secondary)]',

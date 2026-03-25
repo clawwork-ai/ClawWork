@@ -1,6 +1,5 @@
 import { Wrench, Plug } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,6 +8,9 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import type { ToolGroup, ToolEntry } from '@clawwork/shared';
+import ListItem from '@/components/semantic/ListItem';
+import SectionCard from '@/components/semantic/SectionCard';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 
 interface ToolsCatalogProps {
   groups: ToolGroup[];
@@ -24,40 +26,32 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm',
-            'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-            'hover:bg-[var(--bg-hover)] transition-colors',
-          )}
-        >
-          <Wrench size={14} className="flex-shrink-0" />
+        <ToolbarButton variant="ghost" size="sm" icon={<Wrench size={14} className="flex-shrink-0" />}>
           <span>{t('rightPanel.toolCount', { count: totalTools })}</span>
-        </button>
+        </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="max-h-[360px] overflow-y-auto w-[280px]">
+      <DropdownMenuContent align="start" className="max-h-96 w-72 overflow-y-auto">
         {groups.map((group, gi) => (
           <div key={group.id}>
             {gi > 0 && <DropdownMenuSeparator />}
-            <div className="flex items-center gap-1.5 px-2 py-1.5">
-              {group.source === 'plugin' ? (
-                <Plug size={14} className="text-[var(--text-muted)]" />
-              ) : (
-                <Wrench size={14} className="text-[var(--text-muted)]" />
-              )}
-              <span className="text-xs font-medium text-[var(--text-primary)]">{group.label}</span>
-              <span className="text-[11px] text-[var(--text-muted)] ml-auto">{group.tools.length}</span>
-            </div>
-            {group.tools.map((tool) => (
-              <DropdownMenuItem
-                key={tool.id}
-                className="flex flex-col items-start gap-0 py-1.5"
-                onSelect={() => onToolSelect?.(tool)}
-              >
-                <span className="text-xs text-[var(--text-secondary)]">{tool.label}</span>
-                {tool.description && (
-                  <span className="text-xs text-[var(--text-muted)] line-clamp-1">{tool.description}</span>
+            <SectionCard bodyClassName="px-2 py-1.5" className="border-none bg-transparent shadow-none">
+              <div className="flex items-center gap-1.5">
+                {group.source === 'plugin' ? (
+                  <Plug size={14} className="text-[var(--text-muted)]" />
+                ) : (
+                  <Wrench size={14} className="text-[var(--text-muted)]" />
                 )}
+                <span className="text-xs font-medium text-[var(--text-primary)]">{group.label}</span>
+                <span className="text-2xs text-[var(--text-muted)] ml-auto">{group.tools.length}</span>
+              </div>
+            </SectionCard>
+            {group.tools.map((tool) => (
+              <DropdownMenuItem key={tool.id} className="p-0" onSelect={() => onToolSelect?.(tool)}>
+                <ListItem
+                  title={tool.label}
+                  subtitle={tool.description ? <span className="line-clamp-1">{tool.description}</span> : undefined}
+                  className="rounded-md px-2 py-1.5"
+                />
               </DropdownMenuItem>
             ))}
           </div>

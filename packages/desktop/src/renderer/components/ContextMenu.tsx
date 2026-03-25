@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import type { TaskStatus } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import i18n from '../i18n';
+import ListItem from '@/components/semantic/ListItem';
 
 export interface MenuItem {
   label: string;
@@ -208,7 +209,7 @@ export function TaskContextMenuPopover({ open, position, items, onClose }: TaskC
       ref={menuRef}
       role="menu"
       style={{ position: 'fixed', left: pos.x, top: pos.y }}
-      className="z-50 min-w-[8rem] overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-1 text-[var(--text-primary)] shadow-[var(--shadow-elevated)] animate-in fade-in-0 zoom-in-95"
+      className="z-50 w-max min-w-36 max-w-80 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-1 text-[var(--text-primary)] shadow-[var(--shadow-elevated)] animate-in fade-in-0 zoom-in-95"
     >
       {items.map((item) => (
         <button
@@ -220,17 +221,19 @@ export function TaskContextMenuPopover({ open, position, items, onClose }: TaskC
             item.action();
             onClose();
           }}
-          className={cn(
-            'relative flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors',
-            'hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]',
-            'focus-visible:bg-[var(--bg-hover)] focus-visible:text-[var(--text-primary)] focus-visible:outline-none',
-            'disabled:pointer-events-none disabled:opacity-50',
-            item.danger
-              ? 'text-[var(--danger)] hover:bg-[var(--danger-bg)] hover:text-[var(--danger)] focus-visible:bg-[var(--danger-bg)] focus-visible:text-[var(--danger)]'
-              : 'text-[var(--text-secondary)]',
-          )}
+          className={cn('w-full text-left disabled:pointer-events-none disabled:opacity-50')}
         >
-          {item.label}
+          <ListItem
+            title={
+              <span className={cn('text-xs', item.danger ? 'text-[var(--danger)]' : 'text-[var(--text-secondary)]')}>
+                {item.label}
+              </span>
+            }
+            className={cn(
+              'min-h-0 rounded-md px-2 py-1.5',
+              item.danger ? 'hover:bg-[var(--danger-bg)]' : 'hover:bg-[var(--bg-hover)]',
+            )}
+          />
         </button>
       ))}
     </div>,

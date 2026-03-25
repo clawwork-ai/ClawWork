@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Plus, Search, RefreshCw, ChevronDown, Server, AlertTriangle, Loader2 } from 'lucide-react';
+import { Clock, Plus, Search, RefreshCw, ChevronDown, Server, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motion as motionPresets, STAGGER_STEP } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -26,6 +26,9 @@ import CronJobCard from './CronJobCard';
 import CronJobDialog from './CronJobDialog';
 import CronRunHistory from './CronRunHistory';
 import type { CronJob, CronListResult, CronRunResult, CronStatusResult } from '@clawwork/shared';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
+import EmptyState from '@/components/semantic/EmptyState';
+import InlineNotice from '@/components/semantic/InlineNotice';
 
 const PAGE_SIZE = 20;
 
@@ -262,7 +265,7 @@ export default function CronPanel() {
         <div className="titlebar-no-drag flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
+              <ToolbarButton variant="outline" size="sm">
                 <span
                   className={cn(
                     'w-1.5 h-1.5 rounded-full flex-shrink-0',
@@ -270,13 +273,13 @@ export default function CronPanel() {
                   )}
                 />
                 <Server className="w-3.5 h-3.5" />
-                <span className="max-w-[100px] truncate">
+                <span className="max-w-24 truncate">
                   {selectedGatewayId
                     ? (gatewayInfoMap[selectedGatewayId]?.name ?? selectedGatewayId)
                     : t('cron.selectGateway')}
                 </span>
                 <ChevronDown className="w-3 h-3 opacity-50" />
-              </Button>
+              </ToolbarButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {connectedGateways.map(([id, info]) => (
@@ -298,10 +301,14 @@ export default function CronPanel() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={handleCreate} disabled={!selectedGatewayConnected}>
-            <Plus className="w-3.5 h-3.5" />
+          <ToolbarButton
+            size="sm"
+            onClick={handleCreate}
+            disabled={!selectedGatewayConnected}
+            icon={<Plus className="w-3.5 h-3.5" />}
+          >
             {t('cron.newJob')}
-          </Button>
+          </ToolbarButton>
         </div>
       </header>
 
@@ -346,32 +353,40 @@ export default function CronPanel() {
               )}
             />
           </div>
-          <Button
+          <ToolbarButton
             variant="outline"
             size="sm"
             className="h-7 w-7 p-0"
             onClick={() => refreshData()}
             disabled={!selectedGatewayConnected || loading}
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
-          </Button>
+            icon={<RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />}
+          />
         </div>
       </div>
 
       {!selectedGatewayConnected && selectedGatewayId && (
-        <div className="mx-6 mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border)]">
-          <Server className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
-          <span className="text-xs text-[var(--text-muted)]">{t('cron.notConnected')}</span>
+        <div className="mx-6 mt-4">
+          <InlineNotice tone="info">
+            <span className="inline-flex items-center gap-2">
+              <Server className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+              {t('cron.notConnected')}
+            </span>
+          </InlineNotice>
         </div>
       )}
 
       {error && (
-        <div className="mx-6 mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--danger)]/10 border border-[var(--danger)]/20">
-          <AlertTriangle className="w-4 h-4 text-[var(--danger)] flex-shrink-0" />
-          <span className="text-xs text-[var(--danger)] flex-1">{error}</span>
-          <Button variant="ghost" size="sm" className="h-6 text-xs text-[var(--danger)]" onClick={() => refreshData()}>
-            {t('cron.retry')}
-          </Button>
+        <div className="mx-6 mt-4">
+          <InlineNotice
+            tone="error"
+            action={
+              <ToolbarButton variant="ghost" size="sm" className="text-[var(--danger)]" onClick={() => refreshData()}>
+                {t('cron.retry')}
+              </ToolbarButton>
+            }
+          >
+            {error}
+          </InlineNotice>
         </div>
       )}
 
@@ -382,21 +397,22 @@ export default function CronPanel() {
               <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
             </div>
           ) : jobs.length === 0 && !error ? (
-            <motion.div
-              {...motionPresets.fadeIn}
-              className="flex flex-col items-center justify-center gap-4 py-20 text-center"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-[var(--bg-tertiary)] flex items-center justify-center">
-                <Clock size={24} className="text-[var(--text-muted)]" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-[var(--text-primary)]">{t('cron.emptyTitle')}</p>
-                <p className="text-xs text-[var(--text-muted)] max-w-[240px]">{t('cron.emptySubtitle')}</p>
-              </div>
-              <Button size="sm" className="gap-1.5 text-xs" onClick={handleCreate} disabled={!selectedGatewayConnected}>
-                <Plus className="w-3.5 h-3.5" />
-                {t('cron.createFirst')}
-              </Button>
+            <motion.div {...motionPresets.fadeIn} className="py-20">
+              <EmptyState
+                icon={<Clock size={24} className="text-[var(--text-muted)]" />}
+                title={t('cron.emptyTitle')}
+                description={t('cron.emptySubtitle')}
+                action={
+                  <ToolbarButton
+                    size="sm"
+                    onClick={handleCreate}
+                    disabled={!selectedGatewayConnected}
+                    icon={<Plus className="w-3.5 h-3.5" />}
+                  >
+                    {t('cron.createFirst')}
+                  </ToolbarButton>
+                }
+              />
             </motion.div>
           ) : (
             <AnimatePresence mode="popLayout">
@@ -405,7 +421,7 @@ export default function CronPanel() {
                   <motion.div
                     key={job.id}
                     {...motionPresets.listItem}
-                    transition={{ ...motionPresets.listItem.transition, delay: i * 0.03 }}
+                    transition={{ ...motionPresets.listItem.transition, delay: i * STAGGER_STEP }}
                   >
                     <CronJobCard
                       job={job}

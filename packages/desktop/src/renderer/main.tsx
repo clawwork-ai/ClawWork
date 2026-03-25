@@ -6,6 +6,7 @@ import i18n from './i18n';
 import { useUiStore, type Language } from './stores/uiStore';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './context/ThemeProvider';
 
 if (!window.clawwork) {
   const root = document.getElementById('root')!;
@@ -37,8 +38,10 @@ window.clawwork.getSettings().then((settings) => {
 const root = createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <ThemeProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </ThemeProvider>
   </React.StrictMode>,
 );

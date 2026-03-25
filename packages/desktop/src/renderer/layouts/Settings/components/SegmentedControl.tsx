@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { motionSpring } from '@/styles/design-tokens';
 
 interface SegmentedControlProps<T extends string> {
   value: T;
@@ -37,8 +38,8 @@ export default function SegmentedControl<T extends string>({
           {value === opt.value && (
             <motion.div
               layoutId={layoutId}
-              className="absolute inset-0 rounded-md bg-[var(--bg-elevated)] shadow-sm border border-[var(--border-subtle)]"
-              transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+              className="absolute inset-0 rounded-md bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)]"
+              transition={motionSpring.snappy}
             />
           )}
           <span className="relative z-10 flex items-center gap-1.5">{opt.label}</span>

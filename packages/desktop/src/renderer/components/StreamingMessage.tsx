@@ -4,7 +4,7 @@ import { Bot, Brain, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ToolCall } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motionDuration, motion as motionPresets } from '@/styles/design-tokens';
 import MarkdownContent from './MarkdownContent';
 import ToolCallCard from './ToolCallCard';
 
@@ -38,11 +38,14 @@ const StreamingMessage = memo(function StreamingMessage({
       className="flex gap-3.5 py-4"
     >
       <div
-        className={cn('flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center', 'bg-[var(--accent-dim)]')}
+        className={cn(
+          'flex-shrink-0 size-[var(--density-avatar-size)] rounded-full flex items-center justify-center',
+          'bg-[var(--accent-dim)]',
+        )}
       >
         <Bot size={16} className="text-[var(--accent)]" />
       </div>
-      <div className="min-w-0 max-w-[80%]">
+      <div className="min-w-0 max-w-[var(--content-max-width)]">
         {thinkingContent && (
           <div className="mb-2">
             <button
@@ -63,7 +66,7 @@ const StreamingMessage = memo(function StreamingMessage({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ duration: motionDuration.normal }}
                   className="overflow-hidden"
                 >
                   <div

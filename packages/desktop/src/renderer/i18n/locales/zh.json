@@ -12,6 +12,15 @@
     "cancel": "取消",
     "save": "保存",
     "close": "关闭",
+    "gateway": "网关",
+    "language": "语言",
+    "dark": "深色",
+    "light": "浅色",
+    "missing": "缺失",
+    "moreActions": "更多操作",
+    "switch": "切换",
+    "navigate": "导航",
+    "select": "选择",
     "task": "任务",
     "time": "时间"
   },
@@ -40,7 +49,13 @@
     "appearance": "外观",
     "theme": "主题",
     "themeUpdated": "主题已更新",
+    "density": "密度",
+    "densityCompact": "紧凑",
+    "densityComfortable": "舒适",
+    "densitySpacious": "宽松",
+    "densityUpdated": "显示密度已更新",
     "themeAuto": "跟随系统",
+    "language": "语言",
     "shortcuts": "快捷键",
     "sendShortcut": "发送消息",
     "sendEnter": "回车",
@@ -55,6 +70,7 @@
     "gatewayNamePlaceholder": "例如：生产服务器",
     "gatewayUrl": "Gateway 地址",
     "tokenPlaceholder": "Gateway Token",
+    "token": "Token",
     "password": "密码",
     "passwordPlaceholder": "Gateway 密码",
     "authMethod": "认证方式",
@@ -181,6 +197,8 @@
     "workspaceExplain": "ClawWork 将所有 AI 生成的文件保存到本地工作区，按任务分类且支持全文检索。",
     "workspaceHint": "可以选择任意空文件夹，文件将按任务目录保存在此处。",
     "gatewayExplain": "ClawWork 连接到 OpenClaw Gateway 服务器。Token 和密码是主要的远程连接方式；只有在没有共享凭证时，才使用配对码完成首次配对。",
+    "defaultGatewayName": "默认网关",
+    "defaultGatewayUrl": "ws://127.0.0.1:18789",
     "urlHint": "ws:// 用于本地，wss:// 用于带 TLS 的远程连接。格式：ws[s]://主机名:端口",
     "tokenHint": "使用共享 Gateway Token。首次远程连接时仍可能需要设备授权。",
     "passwordHint": "使用共享 Gateway 密码。首次远程连接时仍可能需要设备授权。",
@@ -241,7 +259,8 @@
     "cannotPreview": "无法预览此文件类型",
     "openInEditor": "在编辑器中打开",
     "revealInFolder": "在访达中显示",
-    "goToSourceShort": "跳转到源消息"
+    "goToSourceShort": "跳转到源消息",
+    "close": "关闭预览"
   },
   "archived": {
     "empty": "暂无归档对话"
@@ -256,6 +275,8 @@
     "serverAborted": "任务被服务端中止",
     "unknown": "未知错误",
     "failed": "失败",
+    "boundaryTitle": "应用出现异常",
+    "reload": "重新加载",
     "agentNotResponding": "Agent 未响应 — 可能不可用或服务端配置有误，请尝试其他 Agent",
     "stage": {
       "send": "发送",
@@ -269,6 +290,21 @@
   "agent": {
     "modelFallback": "已切换至模型: {{model}}"
   },
+  "toolCall": {
+    "args": "参数",
+    "result": "结果"
+  },
+  "mentionPicker": {
+    "local": "本地",
+    "tasks": "任务",
+    "files": "文件",
+    "noLocalFiles": "没有匹配的本地文件",
+    "noTasks": "没有匹配的任务",
+    "noFiles": "没有匹配的文件"
+  },
+  "slash": {
+    "argOptions": "/{{command}} 的可选项"
+  },
   "chatInput": {
     "describeTask": "描述你的任务…",
     "offlineReadOnly": "离线模式 — 只读",
@@ -278,6 +314,11 @@
     "toSend": "{{mod}}↵ 发送",
     "image": "图片",
     "model": "模型",
+    "noModelsAvailable": "暂无可用模型",
+    "addContextFolder": "为 @ 文件引用添加上下文文件夹",
+    "slashCommands": "斜杠命令",
+    "taskContextLimitExceeded": "任务上下文超过 500KB 限制",
+    "fileContextLimitExceeded": "文件上下文总量超过 500KB 限制",
     "thinking": "思考",
     "thinkingOff": "关闭",
     "thinkingMinimal": "最低",

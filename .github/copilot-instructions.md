@@ -8,7 +8,7 @@
 - The Electron main process owns WebSocket, filesystem, database, Git, workspace config, and OS integration.
 - The renderer owns UI state and presentation, and may cross the boundary only through `window.clawwork` from preload.
 - Do not import Node builtins, `electron`, or main-process modules into renderer code.
-- Follow `docs/design-system.md` for every renderer change. Use CSS variables from `theme.css` and tokens from `design-tokens.ts`.
+- Follow `theme.css`, `design-tokens.ts`, and `pnpm check:ui-contract` for every renderer change.
 - Do not hardcode hex, rgb, or rgba colors in renderer TypeScript or TSX.
 - If Gateway behavior is unclear, inspect `~/git/openclaw` before inventing local workarounds.
 - Run `pnpm check` before claiming completion.

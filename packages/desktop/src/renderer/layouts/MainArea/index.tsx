@@ -49,11 +49,23 @@ import logo from '@/assets/logo.png';
 import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import { useUsageStore } from '@/stores/usageStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayDispatcher';
+import DataTable, { type DataTableColumn } from '@/components/data-display/DataTable';
+import MetaRow from '@/components/data-display/MetaRow';
+import StatBlock from '@/components/data-display/StatBlock';
+import EmptyState from '@/components/semantic/EmptyState';
+import StatusTag from '@/components/semantic/StatusTag';
 
 const STICK_TO_BOTTOM_THRESHOLD_PX = 60;
 
 interface MainAreaProps {
   onTogglePanel: () => void;
+}
+
+interface ArchivedTaskRow {
+  id: string;
+  title: string;
+  gatewayName: string;
+  updatedAt: string;
 }
 
 function WelcomeScreen() {
@@ -148,7 +160,7 @@ function WelcomeScreen() {
               )}
             >
               <Server size={12} />
-              <span className="max-w-[100px] truncate">{gw.name}</span>
+              <span className="max-w-24 truncate">{gw.name}</span>
             </button>
           ))}
           {!gwExpanded && hiddenGwCount > 0 && (
@@ -185,7 +197,7 @@ function WelcomeScreen() {
               ) : (
                 <Bot size={12} />
               )}
-              <span className="max-w-[100px] truncate">{agent.name ?? agent.id}</span>
+              <span className="max-w-24 truncate">{agent.name ?? agent.id}</span>
             </button>
           ))}
           {!agentExpanded && hiddenAgentCount > 0 && (
@@ -302,7 +314,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                 onChange={(e) => setTitleDraft(e.target.value)}
                 onBlur={commitTitleEdit}
                 onKeyDown={handleTitleKeyDown}
-                className="font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-[240px]"
+                className="font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-60"
               />
             ) : (
               <Tooltip>
@@ -335,7 +347,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                     style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
                   >
                     <Server size={10} />
-                    <span className="max-w-[80px] truncate">{gwInfo.name}</span>
+                    <span className="max-w-24 truncate">{gwInfo.name}</span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{gwInfo.name}</TooltipContent>
@@ -350,7 +362,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                     ) : (
                       <Bot size={10} />
                     )}
-                    <span className="max-w-[80px] truncate">{agentInfo.name ?? agentInfo.id}</span>
+                    <span className="max-w-24 truncate">{agentInfo.name ?? agentInfo.id}</span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>{agentInfo.name ?? agentInfo.id}</TooltipContent>
@@ -359,7 +371,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
             {activeTask?.model && (
               <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)]">
                 <Cpu size={10} />
-                <span className="max-w-[100px] truncate">{activeTask.model}</span>
+                <span className="max-w-24 truncate">{activeTask.model}</span>
               </span>
             )}
             {hasUsageData && (
@@ -391,57 +403,55 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                     )}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 max-h-[70vh] overflow-y-auto">
+                <PopoverContent align="end" className="w-80 max-h-screen overflow-y-auto">
                   <div className="space-y-3">
                     {sessionUsage && (
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-[var(--text-secondary)]">
-                            {t('usage.sessionCost')}
-                          </span>
-                          <span className="text-lg font-semibold text-[var(--accent)]">
-                            {formatCost(sessionUsage.totalCost)}
-                          </span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <StatBlock label={t('usage.sessionCost')} value={formatCost(sessionUsage.totalCost)} accent />
+                          <StatBlock
+                            label={t('usage.totalTokens')}
+                            value={formatTokenCount(sessionUsage.totalTokens)}
+                          />
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-[var(--text-muted)]">
-                          <div className="flex items-center gap-1">
-                            <ArrowUp size={10} />
-                            <span>
-                              {t('usage.inputTokens')}: {formatTokenCount(sessionUsage.input)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ArrowDown size={10} />
-                            <span>
-                              {t('usage.outputTokens')}: {formatTokenCount(sessionUsage.output)}
-                            </span>
-                          </div>
-                          {sessionUsage.cacheRead > 0 && (
-                            <div>
-                              {t('usage.cacheRead')}: {formatTokenCount(sessionUsage.cacheRead)}
-                            </div>
-                          )}
-                          {sessionUsage.cacheWrite > 0 && (
-                            <div>
-                              {t('usage.cacheWrite')}: {formatTokenCount(sessionUsage.cacheWrite)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)]">
-                          {t('usage.totalTokens')}: {formatTokenCount(sessionUsage.totalTokens)}
+                        <div className="space-y-1 rounded-lg bg-[var(--bg-tertiary)] px-3 py-2">
+                          <MetaRow
+                            label={
+                              <span className="inline-flex items-center gap-1">
+                                <ArrowUp size={10} />
+                                {t('usage.inputTokens')}
+                              </span>
+                            }
+                            value={formatTokenCount(sessionUsage.input)}
+                          />
+                          <MetaRow
+                            label={
+                              <span className="inline-flex items-center gap-1">
+                                <ArrowDown size={10} />
+                                {t('usage.outputTokens')}
+                              </span>
+                            }
+                            value={formatTokenCount(sessionUsage.output)}
+                          />
+                          {sessionUsage.cacheRead > 0 ? (
+                            <MetaRow label={t('usage.cacheRead')} value={formatTokenCount(sessionUsage.cacheRead)} />
+                          ) : null}
+                          {sessionUsage.cacheWrite > 0 ? (
+                            <MetaRow label={t('usage.cacheWrite')} value={formatTokenCount(sessionUsage.cacheWrite)} />
+                          ) : null}
                         </div>
                         {contextTokens != null && contextTokens > 0 && (
                           <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
-                              <span>{t('rightPanel.contextUsage')}</span>
-                              <span>{Math.round((contextTokens / 200_000) * 100)}%</span>
-                            </div>
+                            <MetaRow
+                              label={t('rightPanel.contextUsage')}
+                              value={`${Math.round((contextTokens / 200_000) * 100)}%`}
+                            />
                             <div className="h-1.5 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
                               <div
                                 className={cn(
                                   'h-full rounded-full transition-all duration-300',
                                   contextTokens / 200_000 >= 0.9
-                                    ? 'bg-[var(--error)]'
+                                    ? 'bg-[var(--danger)]'
                                     : contextTokens / 200_000 >= 0.7
                                       ? 'bg-[var(--warning)]'
                                       : 'bg-[var(--accent)]',
@@ -456,27 +466,12 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
 
                     {cost && (
                       <div className={cn('space-y-2', sessionUsage && 'border-t border-[var(--border)] pt-3')}>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-[var(--text-secondary)]">
-                            {t('usage.instanceCost')}
-                          </span>
-                          <span className="text-sm font-semibold text-[var(--text-primary)]">
-                            {formatCost(cost.totals.totalCost)}
-                          </span>
+                        <StatBlock label={t('usage.instanceCost')} value={formatCost(cost.totals.totalCost)} />
+                        <div className="space-y-1 rounded-lg bg-[var(--bg-tertiary)] px-3 py-2">
+                          <MetaRow label={t('usage.inputTokens')} value={formatTokenCount(cost.totals.input)} />
+                          <MetaRow label={t('usage.outputTokens')} value={formatTokenCount(cost.totals.output)} />
+                          {cost.days > 0 ? <MetaRow label={t('usage.period', { days: cost.days })} value="" /> : null}
                         </div>
-                        <div className="grid grid-cols-2 gap-1.5 text-[10px] text-[var(--text-muted)]">
-                          <div>
-                            {t('usage.inputTokens')}: {formatTokenCount(cost.totals.input)}
-                          </div>
-                          <div>
-                            {t('usage.outputTokens')}: {formatTokenCount(cost.totals.output)}
-                          </div>
-                        </div>
-                        {cost.days > 0 && (
-                          <div className="text-[10px] text-[var(--text-muted)]">
-                            {t('usage.period', { days: cost.days })}
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -489,23 +484,19 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                           <div key={provider.provider} className="space-y-1.5">
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-[var(--text-primary)]">{provider.displayName}</span>
-                              {provider.plan && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-dim)] text-[var(--accent)]">
-                                  {provider.plan}
-                                </span>
-                              )}
+                              {provider.plan ? <StatusTag tone="accent">{provider.plan}</StatusTag> : null}
                             </div>
                             {provider.error && (
-                              <div className="text-[10px] text-[var(--error)] flex items-center gap-1">
+                              <div className="text-2xs text-[var(--danger)] flex items-center gap-1">
                                 <AlertTriangle size={10} />
                                 {provider.error}
                               </div>
                             )}
                             {provider.windows.map((w, i) => (
                               <div key={i} className="space-y-0.5">
-                                <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
+                                <div className="flex items-center justify-between text-2xs text-[var(--text-muted)]">
                                   <span>{w.label}</span>
-                                  <span className={cn(w.usedPercent >= 90 && 'text-[var(--error)]')}>
+                                  <span className={cn(w.usedPercent >= 90 && 'text-[var(--danger)]')}>
                                     {Math.round(w.usedPercent)}%
                                   </span>
                                 </div>
@@ -514,7 +505,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                                     className={cn(
                                       'h-full rounded-full transition-all duration-300',
                                       w.usedPercent >= 90
-                                        ? 'bg-[var(--error)]'
+                                        ? 'bg-[var(--danger)]'
                                         : w.usedPercent >= 70
                                           ? 'bg-[var(--warning)]'
                                           : 'bg-[var(--accent)]',
@@ -523,7 +514,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                                   />
                                 </div>
                                 {w.resetAt && (
-                                  <div className="text-[10px] text-[var(--text-muted)]">
+                                  <div className="text-2xs text-[var(--text-muted)]">
                                     {t('usage.resetsAt', { time: new Date(w.resetAt).toLocaleTimeString() })}
                                   </div>
                                 )}
@@ -623,7 +614,7 @@ function ChatContent() {
   return (
     <>
       <ScrollArea viewportRef={viewportRef} className="flex-1 px-6 py-4" onScrollCapture={handleScroll}>
-        <div className="max-w-3xl mx-auto space-y-1">
+        <div className="max-w-[var(--content-max-width)] mx-auto space-y-1">
           {!activeTask && <WelcomeScreen />}
           {activeTask && messages.length === 0 && !activeTurn && <WelcomeScreen />}
           {messages.map((msg) => (
@@ -702,6 +693,63 @@ function ArchivedTasks() {
     setActiveTask(taskId);
     setMainView('chat');
   };
+  const rows: ArchivedTaskRow[] = archivedTasks.map((task) => ({
+    id: task.id,
+    title: task.title || t('common.noTitle'),
+    gatewayName: gwInfoMap[task.gatewayId]?.name ?? '-',
+    updatedAt: task.updatedAt,
+  }));
+  const columns: DataTableColumn<ArchivedTaskRow>[] = [
+    {
+      key: 'task',
+      header: t('common.task'),
+      kind: 'text',
+      width: '50%',
+      render: (row) => (
+        <div className="flex min-w-0 items-center gap-2">
+          <MessageSquare size={14} className="shrink-0 text-[var(--text-muted)] opacity-50" />
+          <span className="truncate text-[var(--text-primary)]">{row.title}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'gateway',
+      header: t('common.gateway'),
+      kind: 'text',
+      width: '24%',
+      render: (row) => <span className="block truncate">{row.gatewayName}</span>,
+    },
+    {
+      key: 'time',
+      header: t('common.time'),
+      kind: 'time',
+      width: '18%',
+      render: (row) => <span className="whitespace-nowrap">{formatRelativeTime(new Date(row.updatedAt))}</span>,
+    },
+    {
+      key: 'action',
+      header: '',
+      kind: 'action',
+      width: '8%',
+      render: (row) => (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleReactivate(row.id);
+              }}
+            >
+              <ArchiveRestore size={14} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('contextMenu.reactivate')}</TooltipContent>
+        </Tooltip>
+      ),
+    },
+  ];
 
   return (
     <div className="flex flex-col h-full pt-14">
@@ -719,72 +767,25 @@ function ArchivedTasks() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('leftNav.searchTasks')}
-              className="w-full h-9 pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+              className="w-full h-[var(--density-control-height)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
             />
           </div>
         </div>
       )}
       <ScrollArea className="flex-1 px-5">
-        <div className="max-w-3xl">
-          {archivedTasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Archive size={40} className="text-[var(--text-muted)] opacity-40 mb-4" />
-              <p className="text-sm text-[var(--text-muted)]">
-                {searchQuery.trim() ? t('search.noResults') : t('archived.empty')}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-[1fr_minmax(80px,120px)_80px_32px] gap-x-3 items-center px-3 py-1.5 text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
-                <span>{t('common.task')}</span>
-                <span>Gateway</span>
-                <span>{t('common.time')}</span>
-                <span />
-              </div>
-              <AnimatePresence>
-                {archivedTasks.map((task) => {
-                  const gwName = gwInfoMap[task.gatewayId]?.name;
-                  return (
-                    <motion.div
-                      key={task.id}
-                      {...motionPresets.listItem}
-                      exit={{ opacity: 0, x: -8 }}
-                      layout
-                      className="grid grid-cols-[1fr_minmax(80px,120px)_80px_32px] gap-x-3 items-center px-3 py-2 rounded-md hover:bg-[var(--bg-hover)] transition-colors cursor-pointer group"
-                      onClick={() => handleOpenTask(task.id)}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <MessageSquare size={14} className="flex-shrink-0 text-[var(--text-muted)] opacity-50" />
-                        <span className="text-sm text-[var(--text-primary)] truncate">
-                          {task.title || t('common.noTitle')}
-                        </span>
-                      </div>
-                      <span className="text-xs text-[var(--text-muted)] truncate">{gwName || '-'}</span>
-                      <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">
-                        {formatRelativeTime(new Date(task.updatedAt))}
-                      </span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity w-7 h-7"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleReactivate(task.id);
-                            }}
-                          >
-                            <ArchiveRestore size={14} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{t('contextMenu.reactivate')}</TooltipContent>
-                      </Tooltip>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </>
-          )}
+        <div className="max-w-[var(--content-max-width)]">
+          <DataTable
+            columns={columns}
+            rows={rows}
+            getRowKey={(row) => row.id}
+            onRowClick={(row) => handleOpenTask(row.id)}
+            empty={
+              <EmptyState
+                icon={<Archive size={24} className="text-[var(--text-muted)]" />}
+                title={searchQuery.trim() ? t('search.noResults') : t('archived.empty')}
+              />
+            }
+          />
         </div>
       </ScrollArea>
     </div>

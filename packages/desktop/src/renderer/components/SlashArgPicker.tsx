@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { motionDuration, motionEase } from '@/styles/design-tokens';
 
 export interface ArgOption {
   value: string;
@@ -25,6 +27,7 @@ export default function SlashArgPicker({
   onHoverIndex,
   onClose,
 }: SlashArgPickerProps) {
+  const { t } = useTranslation();
   const selectedItemRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function SlashArgPicker({
           <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden />
           <motion.div
             role="listbox"
-            aria-label={`Options for /${commandName}`}
+            aria-label={t('slash.argOptions', { command: commandName })}
             className={cn(
               'absolute bottom-full left-0 right-0 mb-1 z-50',
               'surface-elevated rounded-xl overflow-hidden',
@@ -48,9 +51,9 @@ export default function SlashArgPicker({
             initial={{ opacity: 0, y: 4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.12, ease: 'easeOut' }}
+            transition={{ duration: motionDuration.fast, ease: motionEase.exit }}
           >
-            <div className="px-4 py-1.5 border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
+            <div className="px-4 py-1.5 border-b border-[var(--border-subtle)] text-xs text-[var(--text-muted)]">
               <span className="font-mono text-[var(--accent)]">/{commandName}</span>
             </div>
             <ul className="max-h-52 overflow-y-auto py-1">
@@ -62,11 +65,12 @@ export default function SlashArgPicker({
                   aria-selected={index === selectedIndex}
                   className={cn(
                     'flex items-center gap-3 px-4 py-2 cursor-pointer select-none',
-                    'transition-colors duration-75',
+                    'transition-colors',
                     index === selectedIndex
-                      ? 'bg-[var(--accent-soft)] text-[var(--fg-primary)]'
-                      : 'text-[var(--fg-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg-primary)]',
+                      ? 'bg-[var(--accent-soft)] text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]',
                   )}
+                  style={{ transitionDuration: `${motionDuration.fast}s` }}
                   onMouseEnter={() => onHoverIndex(index)}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -74,19 +78,21 @@ export default function SlashArgPicker({
                   }}
                 >
                   <span className="font-mono text-sm font-medium shrink-0">{opt.label}</span>
-                  {opt.detail && <span className="ml-auto text-xs text-[var(--fg-muted)] truncate">{opt.detail}</span>}
+                  {opt.detail && (
+                    <span className="ml-auto text-xs text-[var(--text-muted)] truncate">{opt.detail}</span>
+                  )}
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-[11px] text-[var(--fg-muted)]">
+            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-2xs text-[var(--text-muted)]">
               <span>
-                <kbd className="font-mono">↑↓</kbd> navigate
+                <kbd className="font-mono">↑↓</kbd> {t('common.navigate')}
               </span>
               <span>
-                <kbd className="font-mono">↵</kbd> select
+                <kbd className="font-mono">↵</kbd> {t('common.select')}
               </span>
               <span>
-                <kbd className="font-mono">Esc</kbd> close
+                <kbd className="font-mono">Esc</kbd> {t('common.close')}
               </span>
             </div>
           </motion.div>

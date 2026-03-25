@@ -5,6 +5,7 @@ import i18n from '../i18n';
 type MainView = 'chat' | 'files' | 'archived' | 'cron';
 
 export type Theme = 'dark' | 'light' | 'auto';
+export type DensityMode = 'compact' | 'comfortable' | 'spacious';
 
 export type Language = 'en' | 'zh';
 
@@ -57,6 +58,9 @@ interface UiState {
 
   theme: Theme;
   setTheme: (theme: Theme) => void;
+
+  density: DensityMode;
+  setDensity: (density: DensityMode) => void;
 
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -134,6 +138,9 @@ export const useUiStore = create<UiState>((set, get) => ({
 
   theme: 'auto',
   setTheme: (theme) => set({ theme }),
+
+  density: 'comfortable',
+  setDensity: (density) => set({ density }),
 
   language: 'en',
   setLanguage: (lang) => {

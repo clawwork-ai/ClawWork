@@ -36,6 +36,7 @@ export interface NotificationConfig {
 export interface AppConfig {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
+  density?: 'compact' | 'comfortable' | 'spacious';
   language?: 'en' | 'zh';
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;

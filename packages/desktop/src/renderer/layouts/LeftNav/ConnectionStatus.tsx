@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore } from '@/stores/uiStore';
+import { motionDuration } from '@/styles/design-tokens';
 
 type Status = 'connected' | 'connecting' | 'disconnected';
 
@@ -62,7 +63,7 @@ export default function ConnectionStatus({ gatewayStatus, className, collapsed }
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.15 }}
+        transition={{ duration: motionDuration.normal }}
         className={cn(
           'flex items-center gap-2 px-3 py-1.5 text-xs',
           isClickable && 'cursor-pointer hover:text-[var(--text-secondary)] transition-colors',

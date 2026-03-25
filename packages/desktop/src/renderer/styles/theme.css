@@ -2,12 +2,11 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
 
-/* ============================================================
-   ClawWork Design System - Theme Variables
-   See docs/design-system.md for full specification.
-   ============================================================ */
-
 @theme {
+  --font-family-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace;
+  --font-size-2xs: 11px;
+  --font-size-2xs--line-height: 16px;
   --font-size-xs: 13px;
   --font-size-xs--line-height: 18px;
   --font-size-sm: 14px;
@@ -24,6 +23,7 @@
   --font-size-3xl--line-height: 36px;
   --font-size-4xl: 36px;
   --font-size-4xl--line-height: 40px;
+  --content-max-width: 48rem;
 }
 
 @layer base {
@@ -47,9 +47,6 @@
     --danger-bg: rgba(248, 113, 113, 0.1);
     --warning: #f59e0b;
     --info: #3b82f6;
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    --radius: 6px;
-
     /* Premium depth tokens */
     --accent-hover: #0de00b;
     --accent-soft: rgba(15, 253, 13, 0.1);
@@ -59,7 +56,29 @@
     --glow-accent: rgba(15, 253, 13, 0.06);
     --shadow-elevated: 0 2px 12px rgba(0, 0, 0, 0.4);
     --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --shadow-floating: 0 10px 28px rgba(0, 0, 0, 0.45);
+    --shadow-dialog: 0 18px 48px rgba(0, 0, 0, 0.5);
+    --overlay-scrim: rgba(0, 0, 0, 0.5);
     --border-subtle: rgba(255, 255, 255, 0.06);
+    --surface-page: var(--bg-primary);
+    --surface-panel: var(--bg-secondary);
+    --surface-card: var(--bg-secondary);
+    --surface-elevated-bg: var(--bg-elevated);
+    --surface-floating-bg: var(--bg-elevated);
+    --surface-dialog-bg: var(--bg-elevated);
+    --state-hover: var(--bg-hover);
+    --state-selected: var(--accent-dim);
+    --tracking-tight: -0.02em;
+    --tracking-normal: -0.011em;
+    --tracking-wide: 0.08em;
+    --motion-duration-fast: 100ms;
+    --motion-duration-normal: 150ms;
+    --motion-duration-moderate: 200ms;
+    --motion-duration-slow: 300ms;
+    --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+    --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   :root[data-theme='light'] {
@@ -81,9 +100,6 @@
     --danger-bg: rgba(220, 38, 38, 0.08);
     --warning: #f59e0b;
     --info: #3b82f6;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --radius: 6px;
-
     /* Premium depth tokens */
     --accent-hover: #0a7a09;
     --accent-soft: rgba(11, 138, 10, 0.08);
@@ -93,7 +109,29 @@
     --glow-accent: rgba(11, 138, 10, 0.04);
     --shadow-elevated: 0 2px 12px rgba(0, 0, 0, 0.08);
     --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --shadow-floating: 0 10px 28px rgba(0, 0, 0, 0.14);
+    --shadow-dialog: 0 18px 48px rgba(0, 0, 0, 0.18);
+    --overlay-scrim: rgba(0, 0, 0, 0.5);
     --border-subtle: rgba(0, 0, 0, 0.06);
+    --surface-page: var(--bg-primary);
+    --surface-panel: var(--bg-secondary);
+    --surface-card: var(--bg-secondary);
+    --surface-elevated-bg: var(--bg-elevated);
+    --surface-floating-bg: var(--bg-elevated);
+    --surface-dialog-bg: var(--bg-elevated);
+    --state-hover: var(--bg-hover);
+    --state-selected: var(--accent-dim);
+    --tracking-tight: -0.02em;
+    --tracking-normal: -0.011em;
+    --tracking-wide: 0.08em;
+    --motion-duration-fast: 100ms;
+    --motion-duration-normal: 150ms;
+    --motion-duration-moderate: 200ms;
+    --motion-duration-slow: 300ms;
+    --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+    --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   html,
@@ -101,12 +139,7 @@
   #root {
     height: 100%;
     overflow: hidden;
-    font-family:
-      'Inter Variable',
-      -apple-system,
-      BlinkMacSystemFont,
-      system-ui,
-      sans-serif;
+    font-family: var(--font-family-sans);
     font-size: 16px;
     font-weight: 420;
     line-height: 1.5;
@@ -163,7 +196,7 @@
   }
 
   .prose-chat code {
-    font-family: 'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace;
+    font-family: var(--font-family-mono);
     font-size: 0.85em;
     background: var(--bg-tertiary);
     padding: 0.15em 0.35em;
@@ -286,9 +319,40 @@
 
 @layer base {
   .surface-elevated {
-    background-color: var(--bg-elevated);
-    box-shadow: var(--shadow-card);
+    background-color: var(--surface-elevated-bg);
+    box-shadow: var(--shadow-elevated);
     border: 1px solid var(--border-subtle);
+  }
+
+  .surface-page {
+    background-color: var(--surface-page);
+  }
+
+  .surface-panel {
+    background-color: var(--surface-panel);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .surface-card {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card);
+  }
+
+  .surface-floating {
+    background-color: var(--surface-floating-bg);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-floating);
+  }
+
+  .surface-dialog {
+    background-color: var(--surface-dialog-bg);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-dialog);
+  }
+
+  .surface-overlay {
+    background-color: var(--overlay-scrim);
   }
 
   .glow-accent {
@@ -298,6 +362,113 @@
   .ring-accent-focus:focus-within {
     outline: none;
     box-shadow: 0 0 0 2px var(--ring-accent);
+  }
+}
+
+@layer utilities {
+  .type-title-lg {
+    font-size: var(--font-size-2xl);
+    line-height: var(--font-size-2xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-title-md {
+    font-size: var(--font-size-xl);
+    line-height: var(--font-size-xl--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-title-sm {
+    font-size: var(--font-size-base);
+    line-height: var(--font-size-base--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .type-body-md {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-body-sm {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-label-md {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 500;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-label-sm {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    font-weight: 500;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .type-meta {
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-size-2xs--line-height);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .type-badge {
+    font-size: var(--font-size-2xs);
+    line-height: var(--font-size-2xs--line-height);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .type-code-inline,
+  .type-code-block {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+  }
+}
+
+@layer base {
+  :root,
+  :root[data-density='comfortable'] {
+    --density-toolbar-height: 36px;
+    --density-list-item-height: 40px;
+    --density-panel-gap: 16px;
+    --density-table-row-padding-y: 8px;
+    --density-control-height: 36px;
+    --density-control-height-sm: 32px;
+    --density-control-height-lg: 40px;
+    --density-avatar-size: 32px;
+  }
+
+  :root[data-density='compact'] {
+    --density-toolbar-height: 32px;
+    --density-list-item-height: 36px;
+    --density-panel-gap: 12px;
+    --density-table-row-padding-y: 6px;
+    --density-control-height: 32px;
+    --density-control-height-sm: 28px;
+    --density-control-height-lg: 36px;
+    --density-avatar-size: 28px;
+  }
+
+  :root[data-density='spacious'] {
+    --density-toolbar-height: 40px;
+    --density-list-item-height: 44px;
+    --density-panel-gap: 20px;
+    --density-table-row-padding-y: 10px;
+    --density-control-height: 40px;
+    --density-control-height-sm: 36px;
+    --density-control-height-lg: 44px;
+    --density-avatar-size: 36px;
   }
 }
 

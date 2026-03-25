@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Settings2, MonitorDot, Server, Bot, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { motionSpring } from '@/styles/design-tokens';
 
 export type SettingsSection = 'general' | 'system' | 'gateways' | 'agents' | 'about';
 
@@ -23,7 +24,7 @@ export default function SettingsNav({
   const { t } = useTranslation();
 
   return (
-    <nav className="w-[180px] flex-shrink-0 bg-[var(--bg-secondary)] border-r border-[var(--border-subtle)] py-4 px-3 space-y-1">
+    <nav className="w-44 flex-shrink-0 bg-[var(--bg-secondary)] border-r border-[var(--border-subtle)] py-4 px-3 space-y-1">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = active === item.key;
@@ -42,8 +43,8 @@ export default function SettingsNav({
             {isActive && (
               <motion.div
                 layoutId="settings-nav-active"
-                className="absolute inset-0 rounded-lg bg-[var(--bg-elevated)] shadow-sm border border-[var(--border-subtle)]"
-                transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                className="absolute inset-0 rounded-lg bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)]"
+                transition={motionSpring.snappy}
               />
             )}
             <Icon size={16} className="relative z-10 flex-shrink-0" />

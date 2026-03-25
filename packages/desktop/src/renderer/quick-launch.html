@@ -13,6 +13,7 @@
         height: 100%;
         background: transparent;
         overflow: hidden;
+        color-scheme: dark;
         font-family:
           'Inter',
           -apple-system,
@@ -21,20 +22,57 @@
           sans-serif;
       }
 
+      :root,
+      :root[data-theme='dark'] {
+        --ql-surface: rgba(28, 28, 28, 0.82);
+        --ql-border: rgba(255, 255, 255, 0.08);
+        --ql-border-inset: rgba(255, 255, 255, 0.04);
+        --ql-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        --ql-text: #ffffff;
+        --ql-text-muted: rgba(255, 255, 255, 0.3);
+        --ql-meta: rgba(255, 255, 255, 0.18);
+        --ql-kbd-bg: rgba(255, 255, 255, 0.06);
+        --ql-kbd-border: rgba(255, 255, 255, 0.07);
+        --ql-kbd-text: rgba(255, 255, 255, 0.28);
+        --ql-divider: rgba(255, 255, 255, 0.06);
+        --ql-accent: rgba(15, 253, 13, 0.8);
+        --ql-accent-border: rgba(15, 253, 13, 0.3);
+        --ql-accent-inset: rgba(15, 253, 13, 0.1);
+        --ql-accent-glow: rgba(15, 253, 13, 0.06);
+      }
+
+      :root[data-theme='light'] {
+        --ql-surface: rgba(250, 250, 250, 0.88);
+        --ql-border: rgba(0, 0, 0, 0.08);
+        --ql-border-inset: rgba(255, 255, 255, 0.5);
+        --ql-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+        --ql-text: #111827;
+        --ql-text-muted: rgba(17, 24, 39, 0.4);
+        --ql-meta: rgba(17, 24, 39, 0.3);
+        --ql-kbd-bg: rgba(0, 0, 0, 0.04);
+        --ql-kbd-border: rgba(0, 0, 0, 0.08);
+        --ql-kbd-text: rgba(17, 24, 39, 0.55);
+        --ql-divider: rgba(0, 0, 0, 0.08);
+        --ql-accent: rgba(11, 138, 10, 0.9);
+        --ql-accent-border: rgba(11, 138, 10, 0.28);
+        --ql-accent-inset: rgba(11, 138, 10, 0.12);
+        --ql-accent-glow: rgba(11, 138, 10, 0.08);
+      }
+
       .container {
         display: flex;
         align-items: center;
         height: 56px;
         padding: 0 16px;
-        background: rgba(28, 28, 28, 0.82);
+        background: var(--ql-surface);
         border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--ql-border);
         margin: 8px;
         -webkit-backdrop-filter: blur(40px) saturate(180%);
         backdrop-filter: blur(40px) saturate(180%);
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.5),
-          0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+          var(--ql-shadow),
+          0 0 0 1px var(--ql-border-inset) inset;
         opacity: 0;
         transform: scale(0.97) translateY(-4px);
         animation: slideIn 180ms ease-out forwards;
@@ -44,11 +82,11 @@
       }
 
       .container.sending {
-        border-color: rgba(15, 253, 13, 0.3);
+        border-color: var(--ql-accent-border);
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.5),
-          0 0 0 1px rgba(15, 253, 13, 0.1) inset,
-          0 0 24px rgba(15, 253, 13, 0.06);
+          var(--ql-shadow),
+          0 0 0 1px var(--ql-accent-inset) inset,
+          0 0 24px var(--ql-accent-glow);
       }
 
       @keyframes slideIn {
@@ -85,14 +123,14 @@
         background: transparent;
         border: none;
         outline: none;
-        color: #fff;
+        color: var(--ql-text);
         font-size: 15px;
         font-family: inherit;
         letter-spacing: -0.01em;
       }
 
       input::placeholder {
-        color: rgba(255, 255, 255, 0.3);
+        color: var(--ql-text-muted);
       }
 
       .hints {
@@ -111,7 +149,7 @@
 
       .hint-label {
         font-size: 10px;
-        color: rgba(255, 255, 255, 0.18);
+        color: var(--ql-meta);
         margin-right: 2px;
       }
 
@@ -120,17 +158,17 @@
         padding: 2px 5px;
         font-size: 10px;
         font-family: inherit;
-        color: rgba(255, 255, 255, 0.28);
-        background: rgba(255, 255, 255, 0.06);
+        color: var(--ql-kbd-text);
+        background: var(--ql-kbd-bg);
         border-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--ql-kbd-border);
         line-height: 1.3;
       }
 
       .divider {
         width: 1px;
         height: 14px;
-        background: rgba(255, 255, 255, 0.06);
+        background: var(--ql-divider);
       }
     </style>
   </head>
@@ -140,7 +178,7 @@
         class="icon"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="rgba(15,253,13,0.8)"
+        stroke="var(--ql-accent)"
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"
@@ -161,11 +199,33 @@
       var container = document.getElementById('container');
       var sendHint = document.getElementById('send-hint');
       var sendShortcut = 'enter';
+      var locale = (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+      var messages = {
+        en: {
+          placeholder: 'Ask anything...',
+        },
+        zh: {
+          placeholder: '输入你的任务...',
+        },
+      };
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme;
+      }
+
+      function resolveSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
 
       function makeKbd(text) {
         var el = document.createElement('kbd');
         el.textContent = text;
         return el;
+      }
+
+      function applyLocale() {
+        input.placeholder = messages[locale].placeholder;
       }
 
       function updateHint() {
@@ -180,13 +240,32 @@
       }
 
       if (window.clawwork) {
-        window.clawwork.getQuickLaunchConfig().then(function (config) {
+        Promise.all([window.clawwork.getQuickLaunchConfig(), window.clawwork.getSettings()]).then(function (results) {
+          var config = results[0];
+          var settings = results[1];
           sendShortcut = config.sendShortcut || 'enter';
+          var theme = settings && settings.theme ? settings.theme : 'auto';
+          applyTheme(theme === 'auto' ? resolveSystemTheme() : theme);
           updateHint();
         });
       } else {
+        applyTheme(resolveSystemTheme());
         updateHint();
       }
+
+      applyLocale();
+
+      var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', function () {
+        if (!window.clawwork) {
+          applyTheme(resolveSystemTheme());
+          return;
+        }
+        window.clawwork.getSettings().then(function (settings) {
+          var theme = settings && settings.theme ? settings.theme : 'auto';
+          applyTheme(theme === 'auto' ? resolveSystemTheme() : theme);
+        });
+      });
 
       function flashSend() {
         container.classList.add('sending');

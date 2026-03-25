@@ -4,7 +4,7 @@ import type { Message } from '@clawwork/shared';
 import { Bot, User, Brain, ChevronDown, ChevronRight, FileCode, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motionDuration, motion as motionPresets } from '@/styles/design-tokens';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import ToolCallCard from './ToolCallCard';
 import MarkdownContent from './MarkdownContent';
@@ -50,7 +50,7 @@ function FileBlockChip({
       )}
     >
       <FileCode size={13} className="text-[var(--accent)] flex-shrink-0" />
-      <span className="text-[var(--text-secondary)] font-medium truncate max-w-[200px]">{fileName}</span>
+      <span className="text-[var(--text-secondary)] font-medium truncate max-w-48">{fileName}</span>
       <span className="text-[var(--text-muted)] flex-shrink-0">{file.lineCount}L</span>
     </button>
   );
@@ -87,7 +87,7 @@ function ToolCallSummary({ toolCalls }: { toolCalls: Message['toolCalls'] }) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: motionDuration.normal }}
               className="overflow-hidden"
             >
               <div className="mt-1 space-y-1">
@@ -150,7 +150,7 @@ const ChatMessage = memo(function ChatMessage({
     >
       <div
         className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+          'flex-shrink-0 size-[var(--density-avatar-size)] rounded-full flex items-center justify-center',
           isUser ? 'bg-[var(--bg-tertiary)]' : 'bg-[var(--accent-dim)]',
         )}
       >
@@ -161,7 +161,7 @@ const ChatMessage = memo(function ChatMessage({
         )}
       </div>
 
-      <div className={cn('min-w-0 max-w-[80%]', isUser && 'text-right')}>
+      <div className={cn('min-w-0 max-w-[var(--content-max-width)]', isUser && 'text-right')}>
         {/* Thinking content (collapsible) */}
         {!isUser && message.thinkingContent && (
           <div className="mb-2">
@@ -183,7 +183,7 @@ const ChatMessage = memo(function ChatMessage({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ duration: motionDuration.normal }}
                   className="overflow-hidden"
                 >
                   <div
@@ -242,7 +242,7 @@ const ChatMessage = memo(function ChatMessage({
                 className={cn(
                   'rounded-xl object-cover cursor-pointer border border-[var(--border-subtle)]',
                   'hover:opacity-90 transition-opacity',
-                  images.length === 1 ? 'max-w-[280px] max-h-[200px]' : 'w-20 h-20',
+                  images.length === 1 ? 'max-w-72 max-h-48' : 'w-20 h-20',
                 )}
                 onClick={() => onImageClick?.(img.dataUrl)}
               />

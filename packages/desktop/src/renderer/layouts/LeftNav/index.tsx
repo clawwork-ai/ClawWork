@@ -28,6 +28,7 @@ import { useUiStore } from '@/stores/uiStore';
 import { useTaskContextMenu, TaskContextMenuPopover, type SessionActions } from '@/components/ContextMenu';
 import SearchResults, { type SearchResult } from '@/components/SearchResults';
 import { cn } from '@/lib/utils';
+import { motionDuration } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -49,6 +50,8 @@ import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import TaskItem from './TaskItem';
 import ConnectionStatus from './ConnectionStatus';
 import type { TaskStatus } from '@clawwork/shared';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
+import EmptyState from '@/components/semantic/EmptyState';
 
 type ConfirmAction = 'reset' | 'delete' | null;
 
@@ -445,7 +448,7 @@ export default function LeftNav() {
                   <ChevronDown size={14} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[160px]">
+              <DropdownMenuContent align="end" className="min-w-40">
                 {connectedGateways.map((gw) => (
                   <DropdownMenuItem key={gw.id} onClick={() => startNewTask(gw.id)}>
                     {gw.color ? (
@@ -460,9 +463,14 @@ export default function LeftNav() {
             </DropdownMenu>
           </div>
         ) : (
-          <Button variant="soft" onClick={() => startNewTask()} className="titlebar-no-drag w-full gap-2">
-            <Plus size={16} /> {t('common.newTask')}
-          </Button>
+          <ToolbarButton
+            variant="soft"
+            onClick={() => startNewTask()}
+            className="w-full justify-start"
+            icon={<Plus size={16} />}
+          >
+            {t('common.newTask')}
+          </ToolbarButton>
         )}
         <div className="titlebar-no-drag relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
@@ -472,7 +480,7 @@ export default function LeftNav() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('leftNav.searchTasks')}
-            className="w-full h-9 pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+            className="w-full h-[var(--density-control-height)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
           />
         </div>
       </div>
@@ -484,7 +492,7 @@ export default function LeftNav() {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: motionDuration.normal }}
               className="absolute inset-0 z-10 bg-[var(--bg-elevated)] border-t border-[var(--border)]"
             >
               <SearchResults results={searchResults} onSelect={handleSelectResult} />
@@ -504,9 +512,7 @@ export default function LeftNav() {
 
           <ScrollArea className="flex-1 px-4">
             <div className="space-y-0.5">
-              {visibleTasks.length === 0 && (
-                <p className="text-xs text-[var(--text-muted)] text-center py-8">{t('leftNav.emptyHint')}</p>
-              )}
+              {visibleTasks.length === 0 && <EmptyState title={t('leftNav.emptyHint')} className="py-8" />}
               {activeTasks.length > 0 && (
                 <>
                   <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] px-3 py-2">
@@ -555,7 +561,7 @@ export default function LeftNav() {
           active={mainView === 'cron'}
           onClick={() => setMainView('cron')}
           badge={
-            <span className="ml-auto text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[var(--accent-dim)] text-[var(--accent)]">
+            <span className="ml-auto text-2xs font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-[var(--accent-dim)] text-[var(--accent)]">
               beta
             </span>
           }

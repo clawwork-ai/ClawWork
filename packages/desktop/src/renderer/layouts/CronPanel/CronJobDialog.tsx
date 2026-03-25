@@ -666,7 +666,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl flex flex-col max-h-[85vh]">
+      <DialogContent className="max-w-2xl flex max-h-screen flex-col">
         <DialogHeader>
           <DialogTitle>{isEdit ? t('cron.editJob') : t('cron.createJob')}</DialogTitle>
           <DialogDescription>{t('cron.subtitle')}</DialogDescription>
@@ -757,7 +757,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                   min={1}
                 />
                 <select
-                  className={[selectClass, 'w-auto min-w-[100px]'].join(' ')}
+                  className={[selectClass, 'w-auto min-w-24'].join(' ')}
                   value={everyUnit}
                   onChange={(e) => setEveryUnit(e.target.value as EveryUnit)}
                 >
@@ -806,7 +806,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
           <div>
             <label className={labelClass}>{t('cron.fieldMessage')}</label>
             <textarea
-              className={[inputClass, 'min-h-[80px] resize-y'].join(' ')}
+              className={[inputClass, 'min-h-20 resize-y'].join(' ')}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={t('cron.messagePlaceholder')}
@@ -855,7 +855,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                 <div>
                   <label className={labelClass}>{t('cron.fieldDescription')}</label>
                   <textarea
-                    className={[inputClass, 'min-h-[60px] resize-y'].join(' ')}
+                    className={[inputClass, 'min-h-16 resize-y'].join(' ')}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}

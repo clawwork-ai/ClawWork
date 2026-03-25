@@ -3,7 +3,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useTheme } from '../src/renderer/hooks/useTheme';
+import { ThemeProvider } from '../src/renderer/context/ThemeProvider';
 import { useUiStore } from '../src/renderer/stores/uiStore';
 import GatewaysSection from '../src/renderer/layouts/Settings/sections/GatewaysSection';
 
@@ -62,11 +62,6 @@ async function flushAsync(): Promise<void> {
   });
 }
 
-function ThemeHarness() {
-  useTheme();
-  return null;
-}
-
 describe('settings UI regressions', () => {
   const originalMatchMedia = window.matchMedia;
 
@@ -76,6 +71,7 @@ describe('settings UI regressions', () => {
     (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     useUiStore.setState({
       theme: 'auto',
+      density: 'comfortable',
       gatewayInfoMap: {},
       gatewayStatusMap: {},
       defaultGatewayId: null,
@@ -122,15 +118,21 @@ describe('settings UI regressions', () => {
     window.clawwork.getSettings = getSettings;
     window.clawwork.updateSettings = updateSettings;
 
-    const { unmount } = render(<ThemeHarness />);
+    const { unmount } = render(
+      <ThemeProvider>
+        <div />
+      </ThemeProvider>,
+    );
 
     expect(updateSettings).not.toHaveBeenCalled();
 
     await flushAsync();
 
     expect(useUiStore.getState().theme).toBe('light');
-    expect(updateSettings).toHaveBeenCalledTimes(1);
-    expect(updateSettings).toHaveBeenLastCalledWith({ theme: 'light' });
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(updateSettings).toHaveBeenCalledTimes(2);
+    expect(updateSettings).toHaveBeenCalledWith({ theme: 'light' });
+    expect(updateSettings).toHaveBeenCalledWith({ density: 'comfortable' });
 
     unmount();
   });

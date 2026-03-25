@@ -15,7 +15,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          'bg-[var(--accent)] text-black font-semibold',
+          'bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold',
           'hover:bg-[var(--accent-hover)] hover:shadow-[var(--glow-accent)]',
           'active:brightness-90 active:scale-[0.98]',
         ].join(' '),
@@ -47,11 +47,11 @@ const buttonVariants = cva(
         link: 'text-[var(--accent)] underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-9 px-3.5 py-2',
-        sm: 'h-8 rounded-lg px-3 text-sm',
-        lg: 'h-10 rounded-lg px-5',
-        icon: 'h-9 w-9',
-        'icon-sm': 'h-8 w-8',
+        default: 'h-[var(--density-control-height)] px-3.5 py-2',
+        sm: 'h-[var(--density-control-height-sm)] rounded-lg px-3 text-sm',
+        lg: 'h-[var(--density-control-height-lg)] rounded-lg px-5',
+        icon: 'h-[var(--density-control-height)] w-[var(--density-control-height)]',
+        'icon-sm': 'h-[var(--density-control-height-sm)] w-[var(--density-control-height-sm)]',
       },
     },
     defaultVariants: {

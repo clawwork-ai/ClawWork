@@ -1,5 +1,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import { File, FileCode, FolderOpen, Image as ImageIcon, ListTodo } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
@@ -10,13 +11,6 @@ export type MentionItem =
   | { kind: 'task'; task: Task }
   | { kind: 'file'; artifact: Artifact }
   | { kind: 'local'; file: FileIndexEntry };
-
-const ALL_TABS: { id: MentionTab; label: string; icon: typeof ListTodo }[] = [
-  { id: 'local', label: 'Local', icon: FolderOpen },
-  { id: 'tasks', label: 'Tasks', icon: ListTodo },
-  { id: 'files', label: 'Files', icon: File },
-];
-
 interface MentionPickerProps {
   visible: boolean;
   query: string;
@@ -35,7 +29,7 @@ interface MentionPickerProps {
 
 function artifactIcon(type: string, size: number) {
   if (type === 'code') return <FileCode size={size} className="text-[var(--accent)]" />;
-  if (type === 'image') return <ImageIcon size={size} className="text-amber-400" />;
+  if (type === 'image') return <ImageIcon size={size} className="text-[var(--info)]" />;
   return <File size={size} className="text-[var(--text-muted)]" />;
 }
 
@@ -54,6 +48,7 @@ export default function MentionPicker({
   onHoverIndex,
   onItemsChange,
 }: MentionPickerProps) {
+  const { t } = useTranslation();
   const artifacts = useFileStore((s) => s.artifacts);
   const setArtifacts = useFileStore((s) => s.setArtifacts);
   const listRef = useRef<HTMLDivElement>(null);
@@ -74,9 +69,14 @@ export default function MentionPicker({
   }, [visible, artifacts.length, setArtifacts]);
 
   const tabs = useMemo(() => {
-    if (hasContextFolders) return ALL_TABS;
-    return ALL_TABS.filter((t) => t.id !== 'local');
-  }, [hasContextFolders]);
+    const allTabs: { id: MentionTab; label: string; icon: typeof ListTodo }[] = [
+      { id: 'local', label: t('mentionPicker.local'), icon: FolderOpen },
+      { id: 'tasks', label: t('mentionPicker.tasks'), icon: ListTodo },
+      { id: 'files', label: t('mentionPicker.files'), icon: File },
+    ];
+    if (hasContextFolders) return allTabs;
+    return allTabs.filter((tab) => tab.id !== 'local');
+  }, [hasContextFolders, t]);
 
   const items = useMemo<MentionItem[]>(() => {
     const q = query.toLowerCase();
@@ -140,10 +140,10 @@ export default function MentionPicker({
         {items.length === 0 && (
           <div className="px-3 py-4 text-center text-xs text-[var(--text-muted)]">
             {activeTab === 'local'
-              ? 'No matching local files'
+              ? t('mentionPicker.noLocalFiles')
               : activeTab === 'tasks'
-                ? 'No matching tasks'
-                : 'No matching files'}
+                ? t('mentionPicker.noTasks')
+                : t('mentionPicker.noFiles')}
           </div>
         )}
 
@@ -189,9 +189,9 @@ export default function MentionPicker({
               >
                 <ListTodo size={14} className="text-[var(--accent)] flex-shrink-0" />
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">
-                  {item.task.title || 'Untitled'}
+                  {item.task.title || t('common.noTitle')}
                 </span>
-                <span className="flex-shrink-0 text-[11px] text-[var(--text-muted)]">{item.task.status}</span>
+                <span className="flex-shrink-0 text-2xs text-[var(--text-muted)]">{item.task.status}</span>
               </button>
             );
           })}
@@ -221,15 +221,15 @@ export default function MentionPicker({
           })}
       </div>
 
-      <div className="flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-[11px] text-[var(--text-muted)]">
+      <div className="flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-2xs text-[var(--text-muted)]">
         <span>
-          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">←→</kbd> switch
+          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">Tab</kbd> {t('common.switch')}
         </span>
         <span>
-          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">↑↓</kbd> navigate
+          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">↑↓</kbd> {t('common.navigate')}
         </span>
         <span>
-          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">↵</kbd> select
+          <kbd className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)] font-mono">↵</kbd> {t('common.select')}
         </span>
       </div>
     </div>

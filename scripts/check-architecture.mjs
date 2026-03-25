@@ -42,18 +42,6 @@ function scanFile(filePath, regex, message) {
   }
 }
 
-const rendererCodeFiles = walk('packages/desktop/src/renderer').filter(
-  (filePath) => /\.(ts|tsx)$/.test(filePath) && filePath !== 'packages/desktop/src/renderer/styles/design-tokens.ts',
-);
-
-for (const filePath of rendererCodeFiles) {
-  scanFile(
-    filePath,
-    /(#[0-9a-fA-F]{3,8}\b|rgba?\s*\()/g,
-    'Use design tokens or CSS variables instead of hardcoded colors in renderer code.',
-  );
-}
-
 const sessionKeySourceFiles = [
   ...walk('packages/shared/src').filter((filePath) => filePath.endsWith('.ts')),
   ...walk('packages/desktop/src').filter((filePath) => /\.(ts|tsx)$/.test(filePath)),

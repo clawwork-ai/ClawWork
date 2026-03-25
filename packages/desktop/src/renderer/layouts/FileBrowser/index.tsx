@@ -15,6 +15,10 @@ import { TaskContextMenuPopover, type MenuItem } from '@/components/ContextMenu'
 import { useResizePanel } from '@/hooks/useResizePanel';
 import type { Artifact } from '@clawwork/shared';
 import type { ArtifactSearchResult } from '@/stores/fileStore';
+import EmptyState from '@/components/semantic/EmptyState';
+import ListItem from '@/components/semantic/ListItem';
+import SectionCard from '@/components/semantic/SectionCard';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 
 function sortArtifacts(list: Artifact[], sortBy: 'date' | 'name' | 'type'): Artifact[] {
   const sorted = [...list];
@@ -240,7 +244,7 @@ export default function FileBrowser() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('fileBrowser.searchFiles')}
               className={cn(
-                'w-full h-9 pl-10 pr-9 rounded-lg',
+                'w-full h-[var(--density-control-height)] pl-10 pr-9 rounded-lg',
                 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
                 'text-sm text-[var(--text-secondary)] outline-none',
                 'focus:border-[var(--border-accent)] focus:bg-[var(--bg-secondary)]',
@@ -250,6 +254,7 @@ export default function FileBrowser() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
+                aria-label={t('common.close')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X size={14} />
@@ -266,7 +271,7 @@ export default function FileBrowser() {
                   <Loader2 className="w-5 h-5 animate-spin text-[var(--text-muted)]" />
                 </div>
               ) : searchResults.length === 0 ? (
-                <p className="text-sm text-[var(--text-muted)] text-center py-8">{t('common.noFiles')}</p>
+                <EmptyState title={t('common.noFiles')} className="py-8" />
               ) : (
                 <div className="space-y-1.5">
                   {searchResults.map((r) => (
@@ -274,40 +279,45 @@ export default function FileBrowser() {
                       key={r.id}
                       onClick={() => setSelectedArtifact(r.id === selectedId ? null : r.id)}
                       className={cn(
-                        'w-full flex flex-col gap-0.5 px-3 py-2.5 rounded-xl text-left transition-colors',
+                        'w-full rounded-xl text-left transition-colors',
                         'bg-[var(--bg-secondary)] border hover:bg-[var(--bg-hover)]',
                         r.id === selectedId
                           ? 'border-[var(--border-accent)] bg-[var(--accent-dim)]'
                           : 'border-[var(--border)]',
                       )}
                     >
-                      <span className="text-sm text-[var(--text-primary)] font-medium truncate">{r.name}</span>
-                      {r.contentSnippet && <SnippetHighlight snippet={r.contentSnippet} />}
-                      <span className="text-xs text-[var(--text-muted)]">{taskMap.get(r.taskId) ?? r.taskId}</span>
+                      <ListItem
+                        title={r.name}
+                        subtitle={r.contentSnippet ? <SnippetHighlight snippet={r.contentSnippet} /> : undefined}
+                        meta={taskMap.get(r.taskId) ?? r.taskId}
+                        active={r.id === selectedId}
+                        className="rounded-xl px-3 py-2.5"
+                      />
                     </button>
                   ))}
                 </div>
               )
             ) : sorted.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--bg-tertiary)] flex items-center justify-center">
-                  <Search size={20} className="text-[var(--text-muted)]" />
-                </div>
-                <p className="text-sm text-[var(--text-muted)]">{t('common.noFiles')}</p>
-              </div>
+              <EmptyState
+                icon={<Search size={20} className="text-[var(--text-muted)]" />}
+                title={t('common.noFiles')}
+                className="py-20"
+              />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {sorted.map((a) => (
-                  <FileCard
-                    key={a.id}
-                    artifact={a}
-                    taskTitle={taskMap.get(a.taskId) ?? a.taskId}
-                    selected={a.id === selectedId}
-                    onClick={() => setSelectedArtifact(a.id === selectedId ? null : a.id)}
-                    onContextMenu={(e) => openFileMenu(e, a)}
-                  />
-                ))}
-              </div>
+              <SectionCard bodyClassName="p-0" className="border-none bg-transparent shadow-none">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  {sorted.map((a) => (
+                    <FileCard
+                      key={a.id}
+                      artifact={a}
+                      taskTitle={taskMap.get(a.taskId) ?? a.taskId}
+                      selected={a.id === selectedId}
+                      onClick={() => setSelectedArtifact(a.id === selectedId ? null : a.id)}
+                      onContextMenu={(e) => openFileMenu(e, a)}
+                    />
+                  ))}
+                </div>
+              </SectionCard>
             )}
           </div>
         </ScrollArea>
@@ -331,25 +341,24 @@ export default function FileBrowser() {
             >
               <div
                 className={cn(
-                  'w-[3px] h-8 rounded-full transition-colors duration-150',
+                  'w-1 h-8 rounded-full transition-colors duration-150',
                   isDragging ? 'bg-[var(--accent)]' : 'bg-transparent group-hover:bg-[var(--text-muted)]',
                 )}
               />
             </div>
-            <button
+            <ToolbarButton
               onClick={() => setSelectedArtifact(null)}
-              title="Close preview"
+              title={t('filePreview.close')}
+              icon={<ChevronRight size={13} />}
               className={cn(
                 'absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 z-10',
-                'flex items-center justify-center w-5 h-12',
+                'w-5 h-12 justify-center p-0',
                 'bg-[var(--bg-secondary)] border border-r-0 border-[var(--border)]',
                 'rounded-l-lg cursor-pointer',
                 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]',
                 'transition-colors duration-150',
               )}
-            >
-              <ChevronRight size={13} />
-            </button>
+            />
             <FilePreview artifact={selectedArtifact} onNavigateToTask={handleNavigateToTask} />
           </motion.div>
         )}

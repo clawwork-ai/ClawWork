@@ -38,6 +38,12 @@ jobs:
       - name: Architecture guardrails
         run: pnpm check:architecture
 
+      - name: UI contract
+        run: pnpm check:ui-contract
+
+      - name: Renderer copy contract
+        run: pnpm check:renderer-copy
+
   test:
     needs: [quality]
     runs-on: ubuntu-latest

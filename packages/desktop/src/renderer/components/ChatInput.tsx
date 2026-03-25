@@ -32,7 +32,7 @@ import { toast } from 'sonner';
 import { markAbortedByUser } from '@/hooks/useGatewayDispatcher';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from '@/lib/error-format';
 import { cn, modKey } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -648,7 +648,7 @@ export default function ChatInput() {
               const line = `[${m.role}]\n${m.content}`;
               taskContextSize += new TextEncoder().encode(line).length;
               if (taskContextSize > MAX_TEXT_TOTAL) {
-                toast.error('Task context exceeds 500KB limit');
+                toast.error(t('chatInput.taskContextLimitExceeded'));
                 break;
               }
               lines.push(line);
@@ -681,7 +681,7 @@ export default function ChatInput() {
             const blockSize = new TextEncoder().encode(read.content).length;
             totalTextSize += blockSize;
             if (totalTextSize > MAX_TEXT_TOTAL) {
-              toast.error('Total file context exceeds 500KB limit');
+              toast.error(t('chatInput.fileContextLimitExceeded'));
               break;
             }
             textBlocks.push(`<file path="${a.name}">\n${read.content}\n</file>`);
@@ -1141,7 +1141,7 @@ export default function ChatInput() {
 
   return (
     <div className="flex-shrink-0 px-6 pb-5">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-[var(--content-max-width)] mx-auto">
         {/* Image preview strip */}
         <AnimatePresence>
           {pendingImages.length > 0 && (
@@ -1176,7 +1176,7 @@ export default function ChatInput() {
                   >
                     <X size={12} />
                   </button>
-                  <span className="absolute bottom-0 left-0 right-0 text-[11px] text-center text-[var(--text-muted)] bg-black/50 rounded-b-lg truncate px-1">
+                  <span className="absolute bottom-0 left-0 right-0 text-2xs text-center text-[var(--text-muted)] bg-[var(--overlay-scrim)] rounded-b-lg truncate px-1">
                     {img.file.name}
                   </span>
                 </motion.div>
@@ -1199,14 +1199,14 @@ export default function ChatInput() {
                   )}
                 >
                   <Cpu size={16} className="flex-shrink-0" />
-                  <span className="max-w-[100px] truncate">{modelLabel}</span>
+                  <span className="max-w-24 truncate">{modelLabel}</span>
                   {currentModelEntry?.reasoning && (
-                    <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
+                    <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
                       R
                     </span>
                   )}
                   {currentModelEntry?.contextWindow && (
-                    <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                    <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--info)]/15 text-[var(--info)]">
                       {formatContextWindow(currentModelEntry.contextWindow)}
                     </span>
                   )}
@@ -1228,12 +1228,12 @@ export default function ChatInput() {
                         >
                           <span className="truncate">{m.name ?? m.id}</span>
                           {m.reasoning && (
-                            <span className="px-1 py-px rounded text-[11px] font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
+                            <span className="px-1 py-px rounded text-2xs font-medium bg-[var(--accent)]/15 text-[var(--accent)]">
                               R
                             </span>
                           )}
                           {m.contextWindow && (
-                            <span className="ml-auto pl-2 px-1 py-px rounded text-[11px] font-medium bg-[var(--info)]/15 text-[var(--info)]">
+                            <span className="ml-auto pl-2 px-1 py-px rounded text-2xs font-medium bg-[var(--info)]/15 text-[var(--info)]">
                               {formatContextWindow(m.contextWindow)}
                             </span>
                           )}
@@ -1244,7 +1244,7 @@ export default function ChatInput() {
                 ))}
                 {modelCatalog.length === 0 && (
                   <DropdownMenuItem disabled>
-                    <span className="text-[var(--text-muted)] italic">No models available</span>
+                    <span className="text-[var(--text-muted)] italic">{t('chatInput.noModelsAvailable')}</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -1423,7 +1423,7 @@ export default function ChatInput() {
               </Button>
             </motion.div>
 
-            <div className="flex-1 relative min-h-[24px]">
+            <div className="flex-1 relative min-h-6">
               {(selectedTasks.length > 0 || selectedArtifacts.length > 0 || selectedLocalFiles.length > 0) && (
                 <div className="flex flex-wrap gap-1.5 pb-2">
                   {selectedLocalFiles.map((f) => (
@@ -1505,7 +1505,7 @@ export default function ChatInput() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
+                    transition={{ duration: motionDuration.normal }}
                     className="absolute inset-0 flex items-center gap-2.5"
                   >
                     {isVoiceListening && (
@@ -1554,7 +1554,7 @@ export default function ChatInput() {
                 </TooltipTrigger>
                 <TooltipContent>{voiceTooltip}</TooltipContent>
               </Tooltip>
-              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
+              <span className="rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
                 {t('voiceInput.beta')}
               </span>
             </div>
@@ -1565,7 +1565,7 @@ export default function ChatInput() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ duration: motionDuration.normal }}
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1588,7 +1588,7 @@ export default function ChatInput() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ duration: motionDuration.normal }}
                   whileHover={reduced ? undefined : motionPresets.scale.whileHover}
                   whileTap={reduced ? undefined : motionPresets.scale.whileTap}
                 >
@@ -1601,7 +1601,7 @@ export default function ChatInput() {
           </div>
         </div>
 
-        <div className="flex items-center mt-2 gap-1.5 min-h-[24px]">
+        <div className="flex items-center mt-2 gap-1.5 min-h-6">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -1616,13 +1616,13 @@ export default function ChatInput() {
                 <FolderPlus size={16} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="top">Add context folder for @ file references</TooltipContent>
+            <TooltipContent side="top">{t('chatInput.addContextFolder')}</TooltipContent>
           </Tooltip>
           {contextFolders.map((folder) => (
             <span
               key={folder}
               className={cn(
-                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-[200px]',
+                'inline-flex items-center gap-1 text-sm px-2 py-1 rounded-md flex-shrink-0 max-w-48',
                 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
               )}
             >

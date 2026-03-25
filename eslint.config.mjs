@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/out/**', '**/coverage/**', 'scripts/**', '**/scripts/**'] },
+  { ignores: ['**/dist/**', '**/out/**', '**/coverage/**', '.claude/**', 'scripts/**', '**/scripts/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

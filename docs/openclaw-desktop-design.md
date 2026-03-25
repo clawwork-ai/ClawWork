@@ -556,8 +556,8 @@ Only visible in the conversation flow view (hidden in the file browser view). Ke
 
 - [x] **T3.5-0** Install dependencies: framer-motion, cva, Radix UI suite (@radix-ui/react-collapsible, @radix-ui/react-dropdown-menu, @radix-ui/react-scroll-area, @radix-ui/react-tabs, @radix-ui/react-tooltip), @fontsource-variable/inter, @fontsource-variable/jetbrains-mono, clsx, tailwind-merge
   - ✅ Check: All dependencies installed without version conflicts
-- [x] **T3.5-1** Design system definition: `docs/design-system.md` spec doc + `design-tokens.ts` TS constants (colors, spacing, radius, typography, shadows, transitions, motion presets) + shadcn/ui base components (Button, ScrollArea, Collapsible, Tabs, DropdownMenu, Tooltip)
-  - ✅ Check: All token values are consistent between TS and CSS
+- [x] **T3.5-1** UI foundation definition: `theme.css` runtime tokens + `design-tokens.ts` motion/type helpers + shadcn/ui base components (Button, ScrollArea, Collapsible, Tabs, DropdownMenu, Tooltip)
+  - ✅ Check: UI primitives consume the shared token layer and contract gate
 
 #### 3.5.2 Foundation Refactor
 

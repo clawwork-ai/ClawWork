@@ -247,14 +247,14 @@ Naming and layout:
 
 ## UI and Design System
 
-Read `docs/design-system.md` before touching UI.
+Before touching UI, inspect `theme.css`, `design-tokens.ts`, and `scripts/check-ui-contract.mjs`.
 
 Non-negotiables:
 
 - dark-first product language with light theme parity
 - accent is green: `#0FFD0D` dark, `#0B8A0A` light
 - backgrounds, borders, focus rings, and depth come from CSS variables in `theme.css`
-- tokens also exist in `src/renderer/styles/design-tokens.ts`
+- `design-tokens.ts` only holds motion presets and token keys for TS consumers
 - typography is Inter Variable + JetBrains Mono
 - motion should be meaningful and respect `prefers-reduced-motion`
 - every interactive control needs default, hover, active, focused, disabled, and loading states
@@ -277,6 +277,7 @@ pnpm format
 pnpm format:check
 pnpm test
 pnpm check
+pnpm check:ui-contract
 pnpm test:e2e
 pnpm test:e2e:smoke
 pnpm test:e2e:gateway
@@ -379,7 +380,7 @@ Before coding, ask these questions:
 - does this keep session routing explicit?
 - does this respect local-first artifact persistence?
 - does this belong in main, preload, shared, or renderer?
-- does this follow `docs/design-system.md` if UI is involved?
+- does this follow `theme.css`, `design-tokens.ts`, and `pnpm check:ui-contract` if UI is involved?
 - will `pnpm check` and relevant E2E still pass?
 
 If not, stop and fix the design first.
@@ -390,13 +391,15 @@ For a new engineer or AI agent, read in this order:
 
 1. `DEVELOPMENT.md`
 2. `docs/architecture-invariants.md`
-3. `docs/design-system.md`
-4. `docs/openclaw-desktop-design.md`
-5. `packages/shared/src/constants.ts`
-6. `packages/shared/src/gateway-protocol.ts`
-7. `packages/desktop/src/main/index.ts`
-8. `packages/desktop/src/main/ws/gateway-client.ts`
-9. `packages/desktop/src/renderer/App.tsx`
-10. `packages/desktop/src/renderer/hooks/useGatewayDispatcher.ts`
+3. `packages/desktop/src/renderer/styles/theme.css`
+4. `packages/desktop/src/renderer/styles/design-tokens.ts`
+5. `scripts/check-ui-contract.mjs`
+6. `docs/openclaw-desktop-design.md`
+7. `packages/shared/src/constants.ts`
+8. `packages/shared/src/gateway-protocol.ts`
+9. `packages/desktop/src/main/index.ts`
+10. `packages/desktop/src/main/ws/gateway-client.ts`
+11. `packages/desktop/src/renderer/App.tsx`
+12. `packages/desktop/src/renderer/hooks/useGatewayDispatcher.ts`
 
 That is enough context to stop being dangerous.

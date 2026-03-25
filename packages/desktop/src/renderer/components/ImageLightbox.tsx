@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { motionDuration } from '@/styles/design-tokens';
 
 interface ImageLightboxProps {
   src: string | null;
@@ -24,26 +25,28 @@ export default function ImageLightbox({ src, onClose }: ImageLightboxProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 cursor-pointer"
+          transition={{ duration: motionDuration.normal }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay-scrim)] cursor-pointer"
           onClick={onClose}
         >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-          >
-            <X size={20} className="text-white" />
-          </button>
-          <motion.img
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            src={src}
-            alt=""
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="absolute inset-4 flex items-center justify-center">
+            <button
+              onClick={onClose}
+              className="absolute right-0 top-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-secondary)]/85 text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-elevated)]"
+            >
+              <X size={20} />
+            </button>
+            <motion.img
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: motionDuration.normal }}
+              src={src}
+              alt=""
+              className="max-w-full max-h-full rounded-lg object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

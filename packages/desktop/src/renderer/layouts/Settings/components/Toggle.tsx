@@ -17,17 +17,17 @@ export default function Toggle({
       aria-label={ariaLabel}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative inline-flex w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 cursor-pointer',
+        'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
         checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
       )}
     >
       <span
-        className="pointer-events-none absolute top-[3px] left-[3px] h-[18px] w-[18px] rounded-full bg-[var(--bg-elevated)] shadow-[var(--shadow-card)]"
-        style={{
-          transform: `translateX(${checked ? 20 : 0}px)`,
-          transition: 'transform 200ms cubic-bezier(0.34,1.56,0.64,1)',
-        }}
+        className={cn(
+          'pointer-events-none block h-5 w-5 rounded-full bg-[var(--bg-elevated)] shadow-[var(--shadow-card)]',
+          'transition-transform duration-200',
+          checked ? 'translate-x-5' : 'translate-x-0',
+        )}
       />
     </button>
   );

@@ -1,7 +1,13 @@
 dist/
 out/
 coverage/
+.claude/
+.codex/
+.serena/
 pnpm-lock.yaml
 *.db
 playwright-report/
 test-results/
+findings.md
+progress.md
+task_plan.md

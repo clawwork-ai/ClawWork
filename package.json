@@ -10,6 +10,8 @@
     "dev:slides": "pnpm --filter @clawwork/keynote dev",
     "build": "pnpm -r build",
     "check:architecture": "node scripts/check-architecture.mjs",
+    "check:renderer-copy": "node scripts/check-renderer-copy.mjs",
+    "check:ui-contract": "node scripts/check-ui-contract.mjs",
     "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -19,7 +21,7 @@
     "test:e2e": "playwright test --config=e2e/playwright.config.ts",
     "test:e2e:smoke": "playwright test --config=e2e/playwright.config.ts --project=smoke",
     "test:e2e:gateway": "playwright test --config=e2e/playwright.config.ts --project=gateway",
-    "check": "pnpm lint && pnpm check:architecture && pnpm format:check && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm check:architecture && pnpm check:ui-contract && pnpm check:renderer-copy && pnpm format:check && pnpm typecheck && pnpm test"
   },
   "lint-staged": {
     "*.{ts,tsx,mts,cts,js,mjs,cjs}": [

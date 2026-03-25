@@ -12,11 +12,12 @@ import { useTaskStore } from './stores/taskStore';
 import { useMessageStore } from './stores/messageStore';
 import { useFileStore } from './stores/fileStore';
 import { useGatewayEventDispatcher } from './hooks/useGatewayDispatcher';
-import { useTheme } from './hooks/useTheme';
+import { useResolvedTheme } from './hooks/useTheme';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
 import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { motionDuration, motionEase } from '@/styles/design-tokens';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -27,7 +28,6 @@ export default function App() {
   const mainView = useUiStore((s) => s.mainView);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
-  const theme = useUiStore((s) => s.theme);
   const setMainView = useUiStore((s) => s.setMainView);
   const focusSearch = useUiStore((s) => s.focusSearch);
   const startNewTask = useTaskStore((s) => s.startNewTask);
@@ -45,9 +45,9 @@ export default function App() {
   const setRightPanelWidth = useUiStore((s) => s.setRightPanelWidth);
   const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
+  const resolvedTheme = useResolvedTheme();
 
   useGatewayEventDispatcher();
-  useTheme();
   useUpdateCheck();
   useTraySync();
 
@@ -220,7 +220,7 @@ export default function App() {
           }}
         />
         <Toaster
-          theme={theme === 'auto' ? 'system' : theme}
+          theme={resolvedTheme}
           position="bottom-right"
           toastOptions={{
             style: {
@@ -241,7 +241,7 @@ export default function App() {
       <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
         <motion.aside
           animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
-          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+          transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
           className={cn('flex-shrink-0 border-r border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
           style={{ minWidth: leftNavCollapsed ? 52 : 180 }}
         >
@@ -274,7 +274,7 @@ export default function App() {
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: rightPanelWidth, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
+                transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
                 className={cn('flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
               >
                 <RightPanel />
@@ -283,7 +283,7 @@ export default function App() {
           )}
         </AnimatePresence>
         <Toaster
-          theme={theme === 'auto' ? 'system' : theme}
+          theme={resolvedTheme}
           position="bottom-right"
           toastOptions={{
             style: {

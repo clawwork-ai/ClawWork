@@ -1,7 +1,8 @@
 import { AlertTriangle, XCircle, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUiStore } from '../stores/uiStore';
-import { Button } from '@/components/ui/button';
+import InlineNotice from '@/components/semantic/InlineNotice';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 
 export default function ConnectionBanner() {
   const { t } = useTranslation();
@@ -18,19 +19,20 @@ export default function ConnectionBanner() {
 
   if (!hasGateways) {
     return (
-      <div
-        className="titlebar-no-drag bg-amber-500/15 border-b border-amber-500/30 px-4 py-2.5 flex items-center gap-3 cursor-pointer hover:bg-amber-500/20 transition-colors"
-        onClick={() => setSettingsOpen(true)}
-      >
-        <Server size={15} className="flex-shrink-0 text-amber-400" />
-        <span className="flex-1 text-xs text-amber-200 font-medium">{t('connection.noGateway')}</span>
-        <Button
-          size="sm"
-          variant="outline"
-          className="titlebar-no-drag h-7 text-xs px-3 border-amber-500/50 text-amber-300 hover:bg-amber-500/20 hover:text-amber-100 flex-shrink-0"
+      <div className="px-4 pt-2">
+        <InlineNotice
+          tone="warning"
+          action={
+            <ToolbarButton size="sm" variant="outline" onClick={() => setSettingsOpen(true)}>
+              {t('connection.addGateway')}
+            </ToolbarButton>
+          }
         >
-          {t('connection.addGateway')}
-        </Button>
+          <span className="inline-flex items-center gap-3">
+            <Server size={15} className="flex-shrink-0" />
+            {t('connection.noGateway')}
+          </span>
+        </InlineNotice>
       </div>
     );
   }
@@ -46,54 +48,63 @@ export default function ConnectionBanner() {
 
   if (reconnectInfo?.gaveUp) {
     return (
-      <div className="titlebar-no-drag bg-[var(--danger)]/10 border-b border-[var(--danger)]/20 px-4 py-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-        <XCircle size={13} className="text-[var(--danger)] flex-shrink-0" />
-        <span className="flex-1">{t('connection.unreachableBanner', { name: gwName })}</span>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => window.clawwork.reconnectGateway(defaultGatewayId)}
-          className="titlebar-no-drag h-6 text-xs px-2"
+      <div className="px-4 pt-2">
+        <InlineNotice
+          tone="error"
+          action={
+            <div className="flex items-center gap-2">
+              <ToolbarButton
+                size="sm"
+                variant="outline"
+                onClick={() => window.clawwork.reconnectGateway(defaultGatewayId)}
+              >
+                {t('connection.retryNow')}
+              </ToolbarButton>
+              <ToolbarButton size="sm" variant="ghost" onClick={() => setSettingsOpen(true)}>
+                {t('connection.openSettings')}
+              </ToolbarButton>
+            </div>
+          }
         >
-          {t('connection.retryNow')}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setSettingsOpen(true)}
-          className="titlebar-no-drag h-6 text-xs px-2"
-        >
-          {t('connection.openSettings')}
-        </Button>
+          <span className="inline-flex items-center gap-2">
+            <XCircle size={13} className="flex-shrink-0" />
+            {t('connection.unreachableBanner', { name: gwName })}
+          </span>
+        </InlineNotice>
       </div>
     );
   }
 
   if (status === 'connecting' || (status === 'disconnected' && reconnectInfo && !reconnectInfo.gaveUp)) {
     return (
-      <div className="titlebar-no-drag bg-[var(--warning)]/10 border-b border-[var(--warning)]/20 px-4 py-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-        <AlertTriangle size={13} className="text-[var(--warning)] flex-shrink-0" />
-        <span>
-          {t('connection.reconnectingBanner', { name: gwName })}
-          {reconnectInfo && ` (${reconnectInfo.attempt}/${reconnectInfo.max})`}
-        </span>
+      <div className="px-4 pt-2">
+        <InlineNotice tone="warning">
+          <span className="inline-flex items-center gap-2">
+            <AlertTriangle size={13} className="flex-shrink-0" />
+            {t('connection.reconnectingBanner', { name: gwName })}
+            {reconnectInfo && ` (${reconnectInfo.attempt}/${reconnectInfo.max})`}
+          </span>
+        </InlineNotice>
       </div>
     );
   }
 
   if (status === 'disconnected') {
     return (
-      <div className="titlebar-no-drag bg-[var(--danger)]/10 border-b border-[var(--danger)]/20 px-4 py-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-        <XCircle size={13} className="text-[var(--danger)] flex-shrink-0" />
-        <span className="flex-1">{t('connection.disconnectedBanner', { name: gwName })}</span>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setSettingsOpen(true)}
-          className="titlebar-no-drag h-6 text-xs px-2"
+      <div className="px-4 pt-2">
+        <InlineNotice
+          tone="error"
+          action={
+            <ToolbarButton size="sm" variant="ghost" onClick={() => setSettingsOpen(true)}>
+              {t('connection.openSettings')}
+            </ToolbarButton>
+          }
         >
-          {t('connection.openSettings')}
-        </Button>
+          <span className="inline-flex items-center gap-2">
+            <XCircle size={13} className="flex-shrink-0" />
+            {t('connection.disconnectedBanner', { name: gwName })}
+          </span>
+        </InlineNotice>
       </div>
     );
   }

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import SettingRow from '../components/SettingRow';
+import SettingRow from '@/components/semantic/SettingRow';
+import SettingGroup from '@/components/semantic/SettingGroup';
+import InlineNotice from '@/components/semantic/InlineNotice';
 
 const linkClass = cn(
   'flex items-center justify-center gap-2 h-9 px-4 rounded-lg text-sm font-medium transition-colors',
@@ -135,8 +137,8 @@ export default function AboutSection() {
     <div>
       <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.about')}</h3>
       <p className="text-sm text-[var(--text-muted)] mt-1 mb-4">{t('settings.aboutDesc')}</p>
-      <div className="rounded-xl bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)] divide-y divide-[var(--border-subtle)]">
-        <div className="px-5 py-4 space-y-3">
+      <SettingGroup>
+        <div className="space-y-3 px-5 py-4">
           <SettingRow label={t('settings.version')}>
             <span className="text-sm text-[var(--text-primary)] font-mono">
               {currentVersion ? `v${currentVersion}` : '—'}
@@ -154,27 +156,29 @@ export default function AboutSection() {
 
         {updateState === 'available' && versionInfo && (
           <div className="px-5 py-4">
-            <div className={cn('rounded-lg px-4 py-3', 'bg-[var(--accent-soft)] border border-[var(--accent)]/30')}>
-              <p className="text-sm text-[var(--accent)] font-medium mb-2">
-                {t('settings.newVersionAvailable', { version: versionInfo.latestVersion })}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" onClick={handleDownload} className="gap-1.5">
-                  <Download size={14} />
-                  {t('settings.downloadUpdate')}
-                </Button>
-                {versionInfo.releaseUrl && (
-                  <a
-                    href={versionInfo.releaseUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] underline"
-                  >
-                    {t('settings.downloadManually')}
-                  </a>
-                )}
+            <InlineNotice tone="info">
+              <div>
+                <p className="mb-2 text-sm font-medium">
+                  {t('settings.newVersionAvailable', { version: versionInfo.latestVersion })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button variant="default" size="sm" onClick={handleDownload} className="gap-1.5">
+                    <Download size={14} />
+                    {t('settings.downloadUpdate')}
+                  </Button>
+                  {versionInfo.releaseUrl && (
+                    <a
+                      href={versionInfo.releaseUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] underline"
+                    >
+                      {t('settings.downloadManually')}
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            </InlineNotice>
           </div>
         )}
 
@@ -196,29 +200,33 @@ export default function AboutSection() {
 
         {updateState === 'downloaded' && (
           <div className="px-5 py-4">
-            <div className={cn('rounded-lg px-4 py-3', 'bg-[var(--accent-soft)] border border-[var(--accent)]/30')}>
-              <p className="text-sm text-[var(--accent)] font-medium mb-2">
-                {t('settings.newVersionAvailable', { version: versionInfo?.latestVersion })}
-              </p>
-              <Button variant="default" size="sm" onClick={handleInstall} className="gap-1.5">
-                <RotateCcw size={14} />
-                {t('settings.readyToInstall')}
-              </Button>
-            </div>
+            <InlineNotice tone="info">
+              <div>
+                <p className="mb-2 text-sm font-medium">
+                  {t('settings.newVersionAvailable', { version: versionInfo?.latestVersion })}
+                </p>
+                <Button variant="default" size="sm" onClick={handleInstall} className="gap-1.5">
+                  <RotateCcw size={14} />
+                  {t('settings.readyToInstall')}
+                </Button>
+              </div>
+            </InlineNotice>
           </div>
         )}
 
         {updateState === 'error' && (
           <div className="px-5 py-4">
-            <div className="rounded-lg px-4 py-3 bg-[var(--danger-bg)] border border-[var(--danger)]/30">
-              <p className="text-sm text-[var(--danger)] mb-2">
-                {t('settings.updateError', { message: errorMessage })}
-              </p>
-              <Button variant="outline" size="sm" onClick={handleCheckForUpdates} className="gap-1.5">
-                <RefreshCw size={14} />
-                {t('settings.checkForUpdates')}
-              </Button>
-            </div>
+            <InlineNotice
+              tone="error"
+              action={
+                <Button variant="outline" size="sm" onClick={handleCheckForUpdates} className="gap-1.5">
+                  <RefreshCw size={14} />
+                  {t('settings.checkForUpdates')}
+                </Button>
+              }
+            >
+              {t('settings.updateError', { message: errorMessage })}
+            </InlineNotice>
           </div>
         )}
 
@@ -249,7 +257,7 @@ export default function AboutSection() {
             {t('settings.submitIssue')}
           </a>
         </div>
-      </div>
+      </SettingGroup>
     </div>
   );
 }

@@ -115,14 +115,14 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
       <header className="flex items-center justify-between gap-2 px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {ext && (
-            <span className="flex-shrink-0 text-[11px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
+            <span className="flex-shrink-0 text-2xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] leading-none">
               {ext}
             </span>
           )}
           <h3 className="text-sm font-medium text-[var(--text-primary)] truncate min-w-0">{artifact.name}</h3>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[11px] text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
+          <span className="text-2xs text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
           {isCode && content !== null && <CopyButton text={content} />}
         </div>
       </header>
@@ -194,7 +194,7 @@ function PreviewContent({
         <img
           src={`data:${mimeType};base64,${content}`}
           alt={name}
-          className="max-w-full max-h-[60vh] rounded-lg object-contain"
+          className="max-w-full max-h-96 rounded-lg object-contain"
         />
       </div>
     );

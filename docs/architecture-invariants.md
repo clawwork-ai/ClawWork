@@ -37,7 +37,7 @@ This document is the short list of rules that should survive refactors, contribu
 
 ## UI Invariants
 
-- All renderer changes must follow `docs/design-system.md`.
+- All renderer changes must follow `theme.css`, `design-tokens.ts`, and `pnpm check:ui-contract`.
 - Do not hardcode hex, rgb, or rgba colors in renderer TypeScript or TSX.
 - Use CSS variables from `theme.css` and tokens from `design-tokens.ts`.
 - Preserve the dark-first visual language, light-theme parity, and explicit interaction states.
@@ -60,5 +60,5 @@ Before merging a non-trivial change, confirm:
 - Session routing is still explicit.
 - The owning layer is clear.
 - Local-first artifact persistence is preserved.
-- UI changes still match `docs/design-system.md`.
+- UI changes still satisfy `theme.css`, `design-tokens.ts`, and `pnpm check:ui-contract`.
 - `pnpm check` and any relevant E2E coverage pass.

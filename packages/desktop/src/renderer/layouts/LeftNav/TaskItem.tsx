@@ -6,7 +6,7 @@ import { cn, formatRelativeTime } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import type { Task } from '@clawwork/shared';
 
@@ -94,7 +94,7 @@ export default function TaskItem({
             onContextMenu={onContextMenu}
             className="titlebar-no-drag w-full flex justify-center py-1.5 relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]"
           >
-            {active && <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-[var(--accent)]" />}
+            {active && <span className="absolute left-0 top-1 bottom-1 w-1 rounded-full bg-[var(--accent)]" />}
             <span
               className={cn(
                 'w-8 h-8 rounded-md flex items-center justify-center text-xs font-medium transition-colors',
@@ -121,7 +121,7 @@ export default function TaskItem({
       {...motionPresets.listItem}
       whileHover={reduced ? undefined : { x: 2 }}
       whileTap={reduced ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.15, ease: 'easeOut' }}
+      transition={{ duration: motionDuration.normal, ease: motionEase.exit }}
       onClick={handleClick}
       onContextMenu={onContextMenu}
       className={cn(
@@ -133,7 +133,7 @@ export default function TaskItem({
       )}
       style={active ? { boxShadow: 'var(--shadow-card)' } : undefined}
     >
-      {active && <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[var(--accent)]" />}
+      {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[var(--accent)]" />}
       <MessageSquare size={16} className="mt-0.5 flex-shrink-0 opacity-50" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -176,7 +176,7 @@ export default function TaskItem({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span
-                  className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate"
+                  className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate"
                   style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
                 >
                   <Server size={10} className="flex-shrink-0 opacity-60" />
@@ -189,7 +189,7 @@ export default function TaskItem({
           {agentInfo && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate">
                   {agentInfo.identity?.emoji ? (
                     <span className="text-xs leading-none">{agentInfo.identity.emoji}</span>
                   ) : (
@@ -204,7 +204,7 @@ export default function TaskItem({
           {modelLabel && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-[80px] truncate">
+                <span className="inline-flex items-center gap-1 text-xs leading-tight px-1.5 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] max-w-20 truncate">
                   <Cpu size={10} className="flex-shrink-0 opacity-60" />
                   {modelLabel}
                 </span>

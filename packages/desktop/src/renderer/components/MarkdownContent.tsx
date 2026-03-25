@@ -117,7 +117,7 @@ function SaveActionButton({ className, onSave }: SaveActionButtonProps) {
         'h-7 w-7 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 backdrop-blur-sm',
         'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
         state === 'saved' && 'text-[var(--accent)]',
-        state === 'error' && 'text-red-400',
+        state === 'error' && 'text-[var(--danger)]',
         className,
       )}
       onClick={(event) => {
@@ -161,7 +161,7 @@ export default function MarkdownContent({
             rehypePlugins={[...REHYPE_PLUGINS]}
             components={{
               table: ({ children }: ComponentPropsWithoutRef<'table'>) => (
-                <div className="overflow-x-auto my-2">
+                <div className="my-2 overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]">
                   <table>{children}</table>
                 </div>
               ),

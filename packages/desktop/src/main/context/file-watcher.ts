@@ -32,10 +32,6 @@ export function watchFolder(folderPath: string): void {
       notifyRenderer(folderPath);
     });
 
-    watcher.on('error', () => {
-      unwatchFolder(folderPath);
-    });
-
     watchers.set(folderPath, watcher);
   } catch {
     //

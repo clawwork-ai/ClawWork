@@ -10,6 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore } from '@/stores/uiStore';
 import type { AgentInfo, AgentListResponse, AgentFileEntry, ModelCatalogEntry } from '@clawwork/shared';
+import EmptyState from '@/components/semantic/EmptyState';
+import LoadingBlock from '@/components/semantic/LoadingBlock';
+import SettingGroup from '@/components/semantic/SettingGroup';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
 
@@ -23,16 +27,10 @@ interface AgentFormData {
 const EMPTY_FORM: AgentFormData = { name: '', workspace: '', emoji: '', model: '' };
 
 const inputClass = cn(
-  'flex-1 h-10 px-3 py-2 rounded-md',
+  'flex-1 h-[var(--density-control-height-lg)] px-3 py-2 rounded-md',
   'bg-[var(--bg-tertiary)] border border-[var(--border)]',
   'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
   'outline-none ring-accent-focus transition-colors',
-);
-
-const cardClass = cn(
-  'rounded-xl p-5',
-  'bg-[var(--bg-elevated)] shadow-[var(--shadow-card)]',
-  'border border-[var(--border-subtle)]',
 );
 
 function AgentCard({
@@ -73,7 +71,7 @@ function AgentCard({
     <motion.div
       {...motionPresets.listItem}
       className={cn(
-        'rounded-xl px-4 py-3.5 bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border transition-colors',
+        'surface-card rounded-xl px-4 py-3.5 border transition-colors',
         isEditing ? 'border-[var(--accent)]/40' : 'border-[var(--border-subtle)]',
       )}
     >
@@ -95,7 +93,7 @@ function AgentCard({
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm text-[var(--text-primary)] truncate">{agent.name ?? agent.id}</span>
             {isDefault && (
-              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-medium">
+              <span className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] font-medium">
                 <Crown size={10} />
                 {t('settings.agentDefault')}
               </span>
@@ -155,15 +153,12 @@ function AgentCard({
           >
             <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
               {loadingFiles ? (
-                <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] py-2">
-                  <Loader2 size={14} className="animate-spin" />
-                  {t('settings.agentLoadingFiles')}
-                </div>
+                <LoadingBlock mode="inline" label={t('settings.agentLoadingFiles')} className="py-2" />
               ) : files.length === 0 ? (
                 <p className="text-sm text-[var(--text-muted)] py-2">{t('settings.agentNoFiles')}</p>
               ) : (
-                <div className="flex gap-3 h-[280px]">
-                  <div className="w-[160px] flex-shrink-0 space-y-0.5 overflow-y-auto">
+                <div className="flex gap-3 h-70">
+                  <div className="w-40 flex-shrink-0 space-y-0.5 overflow-y-auto">
                     {files.map((f) => (
                       <button
                         key={f.name}
@@ -180,8 +175,8 @@ function AgentCard({
                         <FileText size={12} className="flex-shrink-0" />
                         <span className="font-mono truncate">{f.name}</span>
                         {f.missing && (
-                          <span className="text-[9px] px-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex-shrink-0">
-                            missing
+                          <span className="text-2xs px-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex-shrink-0">
+                            {t('common.missing')}
                           </span>
                         )}
                       </button>
@@ -238,7 +233,7 @@ function AgentForm({
       exit={{ opacity: 0, height: 0, marginTop: 0 }}
       className="overflow-hidden"
     >
-      <div className={cn(cardClass, 'space-y-4')}>
+      <div className="surface-card space-y-4 rounded-xl p-5">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-[var(--text-primary)]">
             {editingId ? t('settings.editAgent') : t('settings.addAgent')}
@@ -465,7 +460,7 @@ export default function AgentsSection() {
         closeForm();
         await refreshAgents();
       } else {
-        toast.error(res.error ?? 'Failed');
+        toast.error(res.error ?? t('errors.failed'));
       }
     } else {
       const res = await window.clawwork.createAgent(selectedGatewayId, {
@@ -486,7 +481,7 @@ export default function AgentsSection() {
         closeForm();
         await refreshAgents();
       } else {
-        toast.error(res.error ?? 'Failed');
+        toast.error(res.error ?? t('errors.failed'));
       }
     }
     setSaving(false);
@@ -517,7 +512,7 @@ export default function AgentsSection() {
       });
       await refreshAgents();
     } else {
-      toast.error(res.error ?? 'Failed');
+      toast.error(res.error ?? t('errors.failed'));
     }
     setDeletingAgentId(null);
     setDeleteFiles(false);
@@ -567,10 +562,12 @@ export default function AgentsSection() {
           <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.agents')}</h3>
         </div>
         <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.agentsDesc')}</p>
-        <div className={cn(cardClass, 'flex flex-col items-center py-8')}>
-          <Server size={32} className="text-[var(--text-muted)] opacity-40 mb-3" />
-          <p className="text-sm text-[var(--text-muted)]">{t('settings.noConnectedGateways')}</p>
-        </div>
+        <SettingGroup>
+          <EmptyState
+            icon={<Server size={24} className="text-[var(--text-muted)]" />}
+            title={t('settings.noConnectedGateways')}
+          />
+        </SettingGroup>
       </div>
     );
   }
@@ -606,10 +603,9 @@ export default function AgentsSection() {
                 ))}
               </select>
             )}
-            <Button variant="soft" size="sm" onClick={openAddForm} className="titlebar-no-drag gap-1.5">
-              <Plus size={14} />
+            <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
               {t('settings.addAgent')}
-            </Button>
+            </ToolbarButton>
           </div>
         </div>
         <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.agentsDesc')}</p>
@@ -658,14 +654,17 @@ export default function AgentsSection() {
           </AnimatePresence>
 
           {agents.length === 0 && !showForm && (
-            <div className={cn(cardClass, 'flex flex-col items-center py-8')}>
-              <Bot size={32} className="text-[var(--text-muted)] opacity-40 mb-3" />
-              <p className="text-sm text-[var(--text-muted)] mb-3">{t('settings.noAgents')}</p>
-              <Button variant="soft" size="sm" onClick={openAddForm} className="titlebar-no-drag gap-1.5">
-                <Plus size={14} />
-                {t('settings.addAgent')}
-              </Button>
-            </div>
+            <SettingGroup>
+              <EmptyState
+                icon={<Bot size={24} className="text-[var(--text-muted)]" />}
+                title={t('settings.noAgents')}
+                action={
+                  <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
+                    {t('settings.addAgent')}
+                  </ToolbarButton>
+                }
+              />
+            </SettingGroup>
           )}
 
           <AnimatePresence>

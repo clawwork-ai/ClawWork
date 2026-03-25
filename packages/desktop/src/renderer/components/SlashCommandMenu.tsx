@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { motionDuration, motionEase } from '@/styles/design-tokens';
 import type { SlashCommand } from '@/lib/slash-commands';
 
 interface SlashCommandMenuProps {
@@ -20,6 +22,7 @@ export default function SlashCommandMenu({
   onClose,
   className,
 }: SlashCommandMenuProps) {
+  const { t } = useTranslation();
   const listRef = useRef<HTMLUListElement>(null);
   const selectedItemRef = useRef<HTMLLIElement>(null);
 
@@ -36,7 +39,7 @@ export default function SlashCommandMenu({
           <div className="fixed inset-0 z-40" onClick={onClose} aria-hidden />
           <motion.div
             role="listbox"
-            aria-label="Slash commands"
+            aria-label={t('chatInput.slashCommands')}
             className={cn(
               'absolute bottom-full left-0 right-0 mb-1 z-50',
               'surface-elevated rounded-xl overflow-hidden',
@@ -47,7 +50,7 @@ export default function SlashCommandMenu({
             initial={{ opacity: 0, y: 4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.12, ease: 'easeOut' }}
+            transition={{ duration: motionDuration.fast, ease: motionEase.exit }}
           >
             <ul ref={listRef} className="max-h-52 overflow-y-auto py-1">
               {commands.map((cmd, index) => (
@@ -58,11 +61,12 @@ export default function SlashCommandMenu({
                   aria-selected={index === selectedIndex}
                   className={cn(
                     'flex items-baseline gap-3 px-4 py-2 cursor-pointer select-none',
-                    'transition-colors duration-75',
+                    'transition-colors',
                     index === selectedIndex
-                      ? 'bg-[var(--accent-soft)] text-[var(--fg-primary)]'
-                      : 'text-[var(--fg-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg-primary)]',
+                      ? 'bg-[var(--accent-soft)] text-[var(--text-primary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]',
                   )}
+                  style={{ transitionDuration: `${motionDuration.fast}s` }}
                   onMouseEnter={() => onHoverIndex(index)}
                   onMouseDown={(e) => {
                     // Prevent textarea blur before selection
@@ -76,20 +80,20 @@ export default function SlashCommandMenu({
                   <span className="text-xs truncate">{cmd.description}</span>
                   {/* Arg hint */}
                   {cmd.argHint && (
-                    <span className="ml-auto text-xs font-mono text-[var(--fg-muted)] shrink-0">{cmd.argHint}</span>
+                    <span className="ml-auto text-xs font-mono text-[var(--text-muted)] shrink-0">{cmd.argHint}</span>
                   )}
                 </li>
               ))}
             </ul>
-            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-[11px] text-[var(--fg-muted)]">
+            <div className="px-4 py-1.5 border-t border-[var(--border-subtle)] flex gap-3 text-2xs text-[var(--text-muted)]">
               <span>
-                <kbd className="font-mono">↑↓</kbd> navigate
+                <kbd className="font-mono">↑↓</kbd> {t('common.navigate')}
               </span>
               <span>
-                <kbd className="font-mono">↵</kbd> select
+                <kbd className="font-mono">↵</kbd> {t('common.select')}
               </span>
               <span>
-                <kbd className="font-mono">Esc</kbd> close
+                <kbd className="font-mono">Esc</kbd> {t('common.close')}
               </span>
             </div>
           </motion.div>

@@ -2,7 +2,7 @@ import { useState, type ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import SettingsNav, { type SettingsSection } from './SettingsNav';
 import GeneralSection from './sections/GeneralSection';
@@ -50,7 +50,7 @@ export default function Settings({ onClose }: { onClose: () => void }) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: motionDuration.normal }}
             >
               <SectionComponent />
             </motion.div>

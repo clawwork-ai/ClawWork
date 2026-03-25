@@ -15,7 +15,7 @@ export default function SlashCommandDashboard({ open, onOpenChange, onSelectComm
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[70vh] overflow-y-auto">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{t('slashDashboard.title')}</DialogTitle>
           <DialogDescription>{t('slashDashboard.description')}</DialogDescription>

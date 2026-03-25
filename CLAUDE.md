@@ -176,4 +176,4 @@ See `docs/debugging.md` for SQLite queries, renderer debug events, main process 
 ## Design Documents
 
 - Full design doc: `docs/openclaw-desktop-design.md` (v0.2)
-- Design system spec: `docs/design-system.md`
+- UI contract source: `packages/desktop/src/renderer/styles/theme.css`, `packages/desktop/src/renderer/styles/design-tokens.ts`, and `scripts/check-ui-contract.mjs`

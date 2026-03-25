@@ -36,6 +36,7 @@ Closes #
 - [ ] `pnpm lint`
 - [ ] `pnpm test`
 - [ ] `pnpm build`
+- [ ] `pnpm check:ui-contract`
 - [ ] Manual smoke test
 - [ ] Not run
 
@@ -49,7 +50,7 @@ Commands, screenshots, or notes:
 
 If the change affects the UI, add screenshots or a short recording.
 
-If the change touches `docs/design-system.md`, renderer styles, layout, spacing, component states, or interaction polish, explain which tokens, variables, or states were intentionally preserved or changed.
+If the change touches renderer styles, layout, spacing, component states, or interaction polish, explain which tokens, variables, states, or `pnpm check:ui-contract` rules were intentionally preserved or changed.
 
 ## Release note
 

@@ -12,6 +12,15 @@
     "cancel": "Cancel",
     "save": "Save",
     "close": "Close",
+    "gateway": "Gateway",
+    "language": "Language",
+    "dark": "Dark",
+    "light": "Light",
+    "missing": "Missing",
+    "moreActions": "More actions",
+    "switch": "switch",
+    "navigate": "navigate",
+    "select": "select",
     "task": "Task",
     "time": "Time"
   },
@@ -40,7 +49,13 @@
     "appearance": "Appearance",
     "theme": "Theme",
     "themeUpdated": "Theme updated",
+    "density": "Density",
+    "densityCompact": "Compact",
+    "densityComfortable": "Comfortable",
+    "densitySpacious": "Spacious",
+    "densityUpdated": "Display density updated",
     "themeAuto": "Auto",
+    "language": "Language",
     "shortcuts": "Shortcuts",
     "sendShortcut": "Send message",
     "sendEnter": "Enter",
@@ -55,6 +70,7 @@
     "gatewayNamePlaceholder": "e.g. Production Server",
     "gatewayUrl": "Gateway URL",
     "tokenPlaceholder": "Gateway token",
+    "token": "Token",
     "password": "Password",
     "passwordPlaceholder": "Gateway password",
     "authMethod": "Authentication",
@@ -181,6 +197,8 @@
     "workspaceExplain": "ClawWork saves all AI-generated files to a local workspace folder, organized by task and fully searchable.",
     "workspaceHint": "You can pick any empty folder. Files will be stored here, organized by task.",
     "gatewayExplain": "ClawWork connects to an OpenClaw Gateway server. Token and password are the primary remote connection methods. Pairing Code is for first-time pairing flows when you do not have shared credentials.",
+    "defaultGatewayName": "Default Gateway",
+    "defaultGatewayUrl": "ws://127.0.0.1:18789",
     "urlHint": "ws:// for local, wss:// for remote with TLS. Format: ws[s]://hostname:port",
     "tokenHint": "Use the shared gateway token. First-time remote connections may still require device approval.",
     "passwordHint": "Use the shared gateway password. First-time remote connections may still require device approval.",
@@ -241,7 +259,8 @@
     "cannotPreview": "Cannot preview this file type",
     "openInEditor": "Open in Editor",
     "revealInFolder": "Reveal in Finder",
-    "goToSourceShort": "Go to Source"
+    "goToSourceShort": "Go to Source",
+    "close": "Close preview"
   },
   "archived": {
     "empty": "No archived chats"
@@ -256,6 +275,8 @@
     "serverAborted": "Task interrupted by server",
     "unknown": "Unknown error",
     "failed": "failed",
+    "boundaryTitle": "Something went wrong",
+    "reload": "Reload",
     "agentNotResponding": "Agent is not responding — it may be unavailable or misconfigured on the server. Try a different agent.",
     "stage": {
       "send": "Send",
@@ -269,6 +290,21 @@
   "agent": {
     "modelFallback": "Switched to model: {{model}}"
   },
+  "toolCall": {
+    "args": "Arguments",
+    "result": "Result"
+  },
+  "mentionPicker": {
+    "local": "Local",
+    "tasks": "Tasks",
+    "files": "Files",
+    "noLocalFiles": "No matching local files",
+    "noTasks": "No matching tasks",
+    "noFiles": "No matching files"
+  },
+  "slash": {
+    "argOptions": "Options for /{{command}}"
+  },
   "chatInput": {
     "describeTask": "Describe your task…",
     "offlineReadOnly": "Offline — read-only",
@@ -278,6 +314,11 @@
     "toSend": "{{mod}}↵ to send",
     "image": "Image",
     "model": "Model",
+    "noModelsAvailable": "No models available",
+    "addContextFolder": "Add context folder for @ file references",
+    "slashCommands": "Slash commands",
+    "taskContextLimitExceeded": "Task context exceeds 500KB limit",
+    "fileContextLimitExceeded": "Total file context exceeds 500KB limit",
     "thinking": "Thinking",
     "thinkingOff": "Off",
     "thinkingMinimal": "Minimal",

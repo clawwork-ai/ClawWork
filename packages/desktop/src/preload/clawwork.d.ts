@@ -86,6 +86,7 @@ interface NotificationSettings {
 interface AppSettings {
   workspacePath: string;
   theme?: 'dark' | 'light' | 'auto';
+  density?: 'compact' | 'comfortable' | 'spacious';
   language?: 'en' | 'zh';
   gateways: GatewayServerConfig[];
   defaultGatewayId?: string;

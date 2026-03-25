@@ -21,6 +21,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore, type GatewayConnectionStatus } from '@/stores/uiStore';
+import EmptyState from '@/components/semantic/EmptyState';
+import InlineNotice from '@/components/semantic/InlineNotice';
+import SettingGroup from '@/components/semantic/SettingGroup';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 import {
   inferGatewayAuthMode,
   parseGatewaySetupCode,
@@ -72,16 +76,10 @@ const GATEWAY_TYPE_LABEL: Record<GatewayType, string> = {
 };
 
 const inputClass = cn(
-  'flex-1 h-10 px-3 py-2 rounded-md',
+  'flex-1 h-[var(--density-control-height-lg)] px-3 py-2 rounded-md',
   'bg-[var(--bg-tertiary)] border border-[var(--border)]',
   'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
   'outline-none ring-accent-focus transition-colors',
-);
-
-const cardClass = cn(
-  'rounded-xl p-5',
-  'bg-[var(--bg-elevated)] shadow-[var(--shadow-card)]',
-  'border border-[var(--border-subtle)]',
 );
 
 function GatewayCard({
@@ -112,7 +110,7 @@ function GatewayCard({
       layout
       {...motionPresets.listItem}
       className={cn(
-        'rounded-xl px-4 py-3.5 bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border transition-colors',
+        'surface-card rounded-xl px-4 py-3.5 transition-colors',
         isEditing ? 'border-[var(--accent)]/40' : 'border-[var(--border-subtle)]',
       )}
     >
@@ -246,7 +244,7 @@ function GatewayForm({
   };
 
   const AUTH_TABS: { mode: GatewayAuthMode; label: string }[] = [
-    { mode: 'token', label: 'Token' },
+    { mode: 'token', label: t('settings.token') },
     { mode: 'password', label: t('settings.password') },
     { mode: 'pairingCode', label: t('settings.pairingCode') },
   ];
@@ -273,7 +271,7 @@ function GatewayForm({
       exit={{ opacity: 0, height: 0, marginTop: 0 }}
       className="overflow-hidden"
     >
-      <div className={cn(cardClass, 'space-y-4')}>
+      <div className="surface-card space-y-4 rounded-xl p-5">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-[var(--text-primary)]">
             {editingId ? t('settings.editGateway') : t('settings.addGateway')}
@@ -306,7 +304,7 @@ function GatewayForm({
                 className={cn(
                   'flex-1 h-7 text-xs font-medium rounded-md transition-colors',
                   authMode === mode
-                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm'
+                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                 )}
               >
@@ -533,7 +531,7 @@ export default function GatewaysSection() {
         closeForm();
         await loadGateways();
       } else {
-        toast.error(res.error ?? 'Failed');
+        toast.error(res.error ?? t('errors.failed'));
       }
     } else {
       const newGw: GatewayServerConfig = {
@@ -552,7 +550,7 @@ export default function GatewaysSection() {
         closeForm();
         await loadGateways();
       } else {
-        toast.error(res.error ?? 'Failed');
+        toast.error(res.error ?? t('errors.failed'));
       }
     }
     setSaving(false);
@@ -565,7 +563,7 @@ export default function GatewaysSection() {
         toast.success(t('settings.gatewayRemoved'));
         await loadGateways();
       } else {
-        toast.error(res.error ?? 'Failed');
+        toast.error(res.error ?? t('errors.failed'));
       }
     },
     [loadGateways, t],
@@ -590,10 +588,9 @@ export default function GatewaysSection() {
       <div>
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-base font-semibold text-[var(--text-primary)]">{t('settings.gateways')}</h3>
-          <Button variant="soft" size="sm" onClick={openAddForm} className="titlebar-no-drag gap-1.5">
-            <Plus size={14} />
+          <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
             {t('settings.addGateway')}
-          </Button>
+          </ToolbarButton>
         </div>
         <p className="text-sm text-[var(--text-muted)] mb-4">{t('settings.gatewaysDesc')}</p>
 
@@ -628,14 +625,17 @@ export default function GatewaysSection() {
           </AnimatePresence>
 
           {gateways.length === 0 && !showForm && (
-            <div className={cn(cardClass, 'flex flex-col items-center py-8')}>
-              <Server size={32} className="text-[var(--text-muted)] opacity-40 mb-3" />
-              <p className="text-sm text-[var(--text-muted)] mb-3">{t('settings.noGateways')}</p>
-              <Button variant="soft" size="sm" onClick={openAddForm} className="titlebar-no-drag gap-1.5">
-                <Plus size={14} />
-                {t('settings.addFirstGateway')}
-              </Button>
-            </div>
+            <SettingGroup>
+              <EmptyState
+                icon={<Server size={24} className="text-[var(--text-muted)]" />}
+                title={t('settings.noGateways')}
+                action={
+                  <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
+                    {t('settings.addFirstGateway')}
+                  </ToolbarButton>
+                }
+              />
+            </SettingGroup>
           )}
 
           <AnimatePresence>
@@ -693,15 +693,7 @@ export default function GatewaysSection() {
             <DialogDescription className="pt-2">{t('pairing.description')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <div
-              className={cn(
-                'rounded-lg p-3 text-sm',
-                'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'text-[var(--text-secondary)]',
-              )}
-            >
-              {t('pairing.instructions')}
-            </div>
+            <InlineNotice tone="info">{t('pairing.instructions')}</InlineNotice>
             <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
               <Loader2 size={14} className="animate-spin" />
               {t('pairing.waiting')}

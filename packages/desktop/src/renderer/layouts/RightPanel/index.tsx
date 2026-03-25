@@ -6,6 +6,9 @@ import { useMessageStore } from '@/stores/messageStore';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Artifact } from '@clawwork/shared';
+import EmptyState from '@/components/semantic/EmptyState';
+import ListItem from '@/components/semantic/ListItem';
+import PanelHeader from '@/components/semantic/PanelHeader';
 
 export default function RightPanel() {
   const { t } = useTranslation();
@@ -40,43 +43,41 @@ export default function RightPanel() {
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pt-10 pb-3 border-b border-[var(--border)]">
-        <div className="text-sm font-medium text-[var(--text-primary)]">{t('rightPanel.artifacts')}</div>
+        <PanelHeader title={t('rightPanel.artifacts')} />
       </div>
 
       <ScrollArea className="flex-1">
         <div className="p-3">
           <div className="space-y-2">
             {taskArtifacts.length === 0 ? (
-              <div className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)] px-4 py-5 text-center">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                  <FileText size={16} className="text-[var(--text-muted)]" />
-                </div>
-                <span className="text-sm text-[var(--text-secondary)]">{t('common.noFiles')}</span>
-              </div>
+              <EmptyState
+                icon={<FileText size={16} className="text-[var(--text-muted)]" />}
+                title={t('common.noFiles')}
+                className="min-h-24 rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)] px-4 py-5"
+              />
             ) : (
               taskArtifacts.map((a) => (
                 <button
                   key={a.id}
                   onClick={() => setHighlightedMessage(a.messageId)}
                   className={cn(
-                    'group block w-full min-w-0 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-2.5 text-left',
+                    'group block w-full min-w-0 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-left',
                     'transition-all duration-150 hover:border-[var(--border)] hover:bg-[var(--bg-hover)] hover:translate-y-[-1px]',
                   )}
                   title={a.localPath}
                 >
-                  <div className="flex w-full min-w-0 items-center gap-2.5 overflow-hidden">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)]">
-                      <FileText
-                        size={15}
-                        className="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1 overflow-hidden">
-                      <div className="block w-full truncate text-sm font-medium text-[var(--text-primary)]">
-                        {a.name}
+                  <ListItem
+                    leading={
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+                        <FileText
+                          size={15}
+                          className="text-[var(--text-muted)] transition-colors group-hover:text-[var(--text-secondary)]"
+                        />
                       </div>
-                    </div>
-                  </div>
+                    }
+                    title={a.name}
+                    className="rounded-xl px-3 py-2.5"
+                  />
                 </button>
               ))
             )}

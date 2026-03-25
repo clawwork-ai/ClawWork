@@ -3,6 +3,7 @@ import { MessageSquare, FileText, FolderOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { motionDuration, motionEase } from '@/styles/design-tokens';
 
 export interface SearchResult {
   type: 'task' | 'message' | 'artifact';
@@ -32,8 +33,10 @@ const LABEL_KEYS = {
 const listItem = {
   initial: { opacity: 0, y: 4 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.15 },
+  transition: { duration: motionDuration.normal, ease: motionEase.standard },
 };
+
+const listItemStagger = motionDuration.fast / 3;
 
 function highlightSnippet(text: string): React.ReactNode[] {
   const parts = text.split(/(<<.*?>>)/g);
@@ -65,7 +68,7 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
   }
 
   return (
-    <ScrollArea className="max-h-[360px]">
+    <ScrollArea className="max-h-96">
       <div className="p-2 space-y-3">
         {sections.map((type) => (
           <div key={type}>
@@ -78,7 +81,7 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
                 <motion.button
                   key={result.id}
                   {...listItem}
-                  transition={{ ...listItem.transition, delay: idx * 0.03 }}
+                  transition={{ ...listItem.transition, delay: idx * listItemStagger }}
                   onClick={() => onSelect(result)}
                   className={cn(
                     'w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left',
