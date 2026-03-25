@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Star, Bug, RefreshCw, Loader2, Download, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import SettingRow from '@/components/semantic/SettingRow';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import InlineNotice from '@/components/semantic/InlineNotice';
+import { useUiStore } from '@/stores/uiStore';
 
 const linkClass = cn(
   'type-label flex h-9 items-center justify-center gap-2 rounded-lg px-4 transition-colors',
@@ -23,6 +24,9 @@ interface VersionInfo {
   releaseNotes?: string | null;
 }
 
+const DEV_MODE_TAP_COUNT = 5;
+const DEV_MODE_TAP_WINDOW_MS = 3000;
+
 export default function AboutSection() {
   const { t } = useTranslation();
   const [updateState, setUpdateState] = useState<UpdateState>('idle');
@@ -31,6 +35,37 @@ export default function AboutSection() {
   const [downloadPercent, setDownloadPercent] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [deviceId, setDeviceId] = useState<string | null>(null);
+
+  const devMode = useUiStore((s) => s.devMode);
+  const setDevMode = useUiStore((s) => s.setDevMode);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const handleVersionClick = useCallback(() => {
+    if (devMode) return;
+    tapCountRef.current += 1;
+    clearTimeout(tapTimerRef.current);
+    const remaining = DEV_MODE_TAP_COUNT - tapCountRef.current;
+    if (remaining > 0 && remaining <= 3) {
+      toast.dismiss('dev-mode-hint');
+      toast(t('settings.devModeSteps', { count: remaining }), { id: 'dev-mode-hint', duration: 2000 });
+    }
+    if (tapCountRef.current >= DEV_MODE_TAP_COUNT) {
+      tapCountRef.current = 0;
+      toast.dismiss('dev-mode-hint');
+      setDevMode(true);
+      toast.success(t('settings.devModeEnabled'));
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, DEV_MODE_TAP_WINDOW_MS);
+  }, [devMode, setDevMode, t]);
+
+  const handleDisableDevMode = useCallback(() => {
+    setDevMode(false);
+    toast.success(t('settings.devModeDisabled'));
+  }, [setDevMode, t]);
 
   useEffect(() => {
     window.clawwork
@@ -140,10 +175,20 @@ export default function AboutSection() {
       <SettingGroup>
         <div className="space-y-3 px-5 py-4">
           <SettingRow label={t('settings.version')}>
-            <span className="type-mono-data text-[var(--text-primary)]">
+            <span
+              className="type-mono-data text-[var(--text-primary)] cursor-default select-none"
+              onClick={handleVersionClick}
+            >
               {currentVersion ? `v${currentVersion}` : '—'}
             </span>
           </SettingRow>
+          {devMode && (
+            <SettingRow label={t('settings.devMode')}>
+              <Button variant="outline" size="sm" onClick={handleDisableDevMode}>
+                {t('settings.devModeDisable')}
+              </Button>
+            </SettingRow>
+          )}
           {deviceId && (
             <div>
               <SettingRow label={t('settings.deviceId')}>

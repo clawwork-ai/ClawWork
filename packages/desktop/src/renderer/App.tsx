@@ -98,6 +98,9 @@ export default function App() {
       if (settings?.rightPanelShortcut) {
         useUiStore.setState({ rightPanelShortcut: settings.rightPanelShortcut });
       }
+      if (settings?.devMode) {
+        useUiStore.setState({ devMode: true });
+      }
     });
   }, [ready]);
 

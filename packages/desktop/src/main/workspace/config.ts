@@ -53,6 +53,7 @@ export interface AppConfig {
   rightPanelShortcut?: 'Period' | 'BracketRight';
   deviceId?: string;
   zoomLevel?: number;
+  devMode?: boolean;
 }
 
 function configFilePath(): string {

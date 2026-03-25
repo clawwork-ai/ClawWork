@@ -122,6 +122,9 @@ interface UiState {
 
   rightPanelShortcut: PanelShortcutRight;
   setRightPanelShortcut: (s: PanelShortcutRight) => void;
+
+  devMode: boolean;
+  setDevMode: (enabled: boolean) => void;
 }
 
 const EMPTY_AGENT_CATALOG = { agents: [] as AgentInfo[], defaultId: '' };
@@ -280,5 +283,12 @@ export const useUiStore = create<UiState>((set, get) => ({
   setRightPanelShortcut: (s) => {
     set({ rightPanelShortcut: s });
     window.clawwork.updateSettings({ rightPanelShortcut: s });
+  },
+
+  devMode: false,
+  setDevMode: (enabled) => {
+    set({ devMode: enabled });
+    window.clawwork.updateSettings({ devMode: enabled });
+    window.clawwork.rebuildMenu();
   },
 }));

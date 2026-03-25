@@ -1,6 +1,5 @@
 import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } from 'electron';
 import { join } from 'path';
-import { writeFileSync } from 'fs';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { nativeTheme } from 'electron';
 import { initAllGateways, destroyAllGateways, rebindAllWindows } from './ws/index.js';
@@ -31,38 +30,18 @@ let isQuitting = false;
 process.stdout?.on?.('error', () => {});
 process.stderr?.on?.('error', () => {});
 
-const SCREENSHOT_PATH = '/tmp/clawwork-screenshot.png';
-
-async function captureScreenshot(win: BrowserWindow): Promise<string> {
-  const image = await win.webContents.capturePage();
-  writeFileSync(SCREENSHOT_PATH, image.toPNG());
-  getDebugLogger().info({
-    domain: 'app',
-    event: 'app.screenshot.saved',
-    data: { path: SCREENSHOT_PATH },
-  });
-  return SCREENSHOT_PATH;
-}
-
-function setupDevScreenshot(win: BrowserWindow): void {
-  if (!is.dev) return;
-
-  // Capture initial screenshot after page loads
-  win.webContents.on('did-finish-load', () => {
-    setTimeout(() => captureScreenshot(win), 1500);
-  });
-
-  // Global shortcut: Cmd+Shift+S to capture
-  globalShortcut.register('CommandOrControl+Shift+S', () => {
-    captureScreenshot(win);
-  });
-
-  // IPC handler so renderer or scripts can trigger it
-  ipcMain.handle('dev:screenshot', () => captureScreenshot(win));
-}
-
-function buildAppMenu(): Menu {
+function buildAppMenu(devMode = false): Menu {
   const isMac = process.platform === 'darwin';
+  const viewSubmenu: Electron.MenuItemConstructorOptions[] = [
+    { role: 'resetZoom' as const },
+    { role: 'zoomIn' as const },
+    { role: 'zoomOut' as const },
+    { type: 'separator' as const },
+    { role: 'togglefullscreen' as const },
+  ];
+  if (devMode || is.dev) {
+    viewSubmenu.push({ type: 'separator' as const }, { role: 'reload' as const }, { role: 'toggleDevTools' as const });
+  }
   const template: Electron.MenuItemConstructorOptions[] = [
     ...(isMac
       ? [
@@ -89,16 +68,7 @@ function buildAppMenu(): Menu {
     { role: 'editMenu' as const },
     {
       label: 'View',
-      submenu: [
-        { role: 'resetZoom' as const },
-        { role: 'zoomIn' as const },
-        { role: 'zoomOut' as const },
-        { type: 'separator' as const },
-        { role: 'reload' as const },
-        { role: 'toggleDevTools' as const },
-        { type: 'separator' as const },
-        { role: 'togglefullscreen' as const },
-      ],
+      submenu: viewSubmenu,
     },
     ...(isMac
       ? [
@@ -119,7 +89,13 @@ function buildAppMenu(): Menu {
 
 function createWindow(): BrowserWindow {
   getDebugLogger().info({ domain: 'app', event: 'app.window.create' });
-  Menu.setApplicationMenu(buildAppMenu());
+  const devMode = readConfig()?.devMode === true;
+  Menu.setApplicationMenu(buildAppMenu(devMode));
+
+  ipcMain.handle('app:rebuild-menu', () => {
+    const dm = readConfig()?.devMode === true;
+    Menu.setApplicationMenu(buildAppMenu(dm));
+  });
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -234,7 +210,6 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow();
   initAllGateways(mainWindow);
-  setupDevScreenshot(mainWindow);
   initTray(mainWindow);
   initQuickLaunch(mainWindow);
 

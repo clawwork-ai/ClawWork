@@ -103,6 +103,7 @@ interface AppSettings {
   notifications?: NotificationSettings;
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
+  devMode?: boolean;
 }
 
 export type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';
@@ -303,6 +304,7 @@ export interface ClawWorkAPI {
   // Settings
   getSettings: () => Promise<AppSettings | null>;
   updateSettings: (partial: Partial<AppSettings>) => Promise<{ ok: boolean; config: AppSettings }>;
+  rebuildMenu: () => Promise<void>;
   getMicrophonePermission: () => Promise<{ status: VoicePermissionStatus }>;
   requestMicrophonePermission: () => Promise<{ status: VoicePermissionStatus }>;
   checkWhisper: () => Promise<{
