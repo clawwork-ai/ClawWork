@@ -20,13 +20,13 @@ favicon: ''
 
 ---
 
-# <span class="en">About Me</span><span class="zh">关于我</span>
+# 👋 <span class="en">About Me</span><span class="zh">关于我</span>
 
 <DeckAboutMeSlide />
 
 ---
 
-# <span class="en">Pain Points of Using OpenClaw</span><span class="zh">养虾的痛点</span>
+# 😤 <span class="en">Pain Points of Using OpenClaw</span><span class="zh">养虾的痛点</span>
 
 <div class="en cw-kicker">"One window, one task, one context."</div>
 <div class="zh cw-kicker">"一个窗口，一个任务，一个上下文。"</div>
@@ -72,7 +72,7 @@ favicon: ''
 
 ---
 
-# <span class="en">What is ClawWork</span><span class="zh">ClawWork 是什么</span>
+# 🦐 <span class="en">What is ClawWork</span><span class="zh">ClawWork 是什么</span>
 
 <div class="en cw-kicker">A desktop client for OpenClaw, <strong>built for parallel work</strong>.</div>
 <div class="zh cw-kicker">一个 OpenClaw 桌面客户端，<strong>为并行工作而生</strong>。</div>
@@ -97,8 +97,8 @@ favicon: ''
   <DeckFeatureCard
     tone="purple"
     icon="📦"
-    en-title="Artifact Aggregation"
-    zh-title="产物聚合"
+    en-title="File Management"
+    zh-title="文件管理"
     en-body="Every Agent output is automatically collected, browsable, and searchable."
     zh-body="所有 Agent 产出自动收集，可浏览，可搜索。"
   />
@@ -112,7 +112,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Launch Sprint</span><span class="zh">启动冲刺</span>
+# 🚀 <span class="en">Launch Sprint</span><span class="zh">启动冲刺</span>
 
 <div class="en cw-kicker">10 Releases in 12 Days</div>
 <div class="zh cw-kicker">12 天发布 10 个版本</div>
@@ -172,7 +172,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Architecture at a Glance</span><span class="zh">架构概览</span>
+# 🏗 <span class="en">Architecture at a Glance</span><span class="zh">架构概览</span>
 
 <div class="en cw-kicker">Single WebSocket, <strong>Multiple Gateways, Parallel Sessions</strong></div>
 <div class="zh cw-kicker">单 WebSocket，<strong>多 Gateway，并行会话</strong></div>
@@ -188,7 +188,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Three-Panel Layout</span><span class="zh">三栏布局</span>
+# 🖥 <span class="en">Three-Panel Layout</span><span class="zh">三栏布局</span>
 
 <div class="en cw-kicker">Left, Center, Right. Everything visible at once.</div>
 <div class="zh cw-kicker">左、中、右。一目了然。</div>
@@ -204,7 +204,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Multi-Session in Action</span><span class="zh">多会话实战</span>
+# ⚡ <span class="en">Multi-Session in Action</span><span class="zh">多会话实战</span>
 
 <div class="en cw-kicker">Three tasks running in parallel. Each with isolated context.</div>
 <div class="zh cw-kicker">三个任务并行运行。各自独立上下文。</div>
@@ -220,7 +220,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Artifact Aggregation</span><span class="zh">产物聚合</span>
+# 📂 <span class="en">File Management</span><span class="zh">文件管理</span>
 
 <div class="en cw-kicker">Every file the Agent produces, automatically collected.</div>
 <div class="zh cw-kicker">Agent 产出的每一个文件，自动收集。</div>
@@ -258,13 +258,13 @@ favicon: ''
 
 ---
 
-# <span class="en">Task Progress Tracking</span><span class="zh">任务进度追踪</span>
+# 📊 <span class="en">Task Progress Tracking</span><span class="zh">任务进度追踪</span>
 
 <DeckTaskProgressSlide />
 
 ---
 
-# <span class="en">Token & Context Awareness</span><span class="zh">Token 与上下文感知</span>
+# 🧠 <span class="en">Token & Context Awareness</span><span class="zh">Token 与上下文感知</span>
 
 <div class="en cw-kicker">You always know how much runway you have.</div>
 <div class="zh cw-kicker">你始终知道还剩多少空间。</div>
@@ -273,7 +273,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Feature Matrix</span><span class="zh">功能大全</span>
+# 🧩 <span class="en">Feature Matrix</span><span class="zh">功能大全</span>
 
 <div class="en cw-kicker">20 capabilities beyond chat. All shipped.</div>
 <div class="zh cw-kicker">20 项超越聊天的能力，全部已发布。</div>
@@ -282,13 +282,13 @@ favicon: ''
 
 ---
 
-# <span class="en">Tech Stack</span><span class="zh">技术栈</span>
+# 🔧 <span class="en">Tech Stack</span><span class="zh">技术栈</span>
 
 <DeckTechStackSlide />
 
 ---
 
-# <span class="en">Lessons from Gateway Integration</span><span class="zh">Gateway 集成踩坑记</span>
+# ⚠️ <span class="en">Lessons from Gateway Integration</span><span class="zh">Gateway 集成踩坑记</span>
 
 <div class="en cw-kicker">Things we learned the hard way, so you do not have to.</div>
 <div class="zh cw-kicker">我们踩过的坑，帮你提前避开。</div>
@@ -331,7 +331,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Dev Workflow</span><span class="zh">开发工作流</span>
+# 🔄 <span class="en">Dev Workflow</span><span class="zh">开发工作流</span>
 
 <div class="en cw-kicker">Vibe Coding: requirement → parallel worktrees → auto review → ship.</div>
 <div class="zh cw-kicker">Vibe Coding：需求 → 并行 worktree → 自动 review → 发版。</div>
@@ -340,7 +340,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Engineering Quality</span><span class="zh">工程质量体系</span>
+# 🛡 <span class="en">Engineering Quality</span><span class="zh">工程质量体系</span>
 
 <div class="en cw-kicker">Solo developer, <strong>production-grade guardrails</strong>.</div>
 <div class="zh cw-kicker">一个人开发，<strong>生产级护栏</strong>。</div>
@@ -349,7 +349,7 @@ favicon: ''
 
 ---
 
-# <span class="en">Open Source Collaboration</span><span class="zh">开源协作</span>
+# 🤝 <span class="en">Open Source Collaboration</span><span class="zh">开源协作</span>
 
 <div class="en cw-kicker">From first clone to merged PR.</div>
 <div class="zh cw-kicker">从 clone 到 PR 合并。</div>
@@ -358,16 +358,16 @@ favicon: ''
 
 ---
 
-# <span class="en">Sprint Breakdown</span><span class="zh">冲刺全景</span>
+# 📈 <span class="en">Sprint Breakdown</span><span class="zh">冲刺全景</span>
 
-<div class="en cw-kicker">7 Days · 82 PRs · 1.2B Tokens</div>
-<div class="zh cw-kicker">7 天 · 82 个 PR · 1.2B Token</div>
+<div class="en cw-kicker">14 Days · 139 PRs · 1.2B Tokens</div>
+<div class="zh cw-kicker">14 天 · 139 个 PR · 1.2B Token</div>
 
 <DeckVibeCodingSlide />
 
 ---
 
-# <span class="en">Community Signal</span><span class="zh">社区信号</span>
+# ⭐ <span class="en">Community Signal</span><span class="zh">社区信号</span>
 
 <div class="cw-grid-2">
   <DeckSignalCard

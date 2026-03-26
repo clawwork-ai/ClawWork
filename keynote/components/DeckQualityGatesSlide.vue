@@ -1,6 +1,18 @@
 <script setup lang="ts">
 const guards = [
   {
+    cmd: 'knip',
+    zh: '死代码/无引用导出扫描接入 check 与 CI',
+    en: 'Dead-code + unused-export scan wired into check and CI',
+    tone: 'red' as const,
+  },
+  {
+    cmd: 'test:coverage',
+    zh: 'Vitest 覆盖率纳入 CI 测试环节',
+    en: 'Vitest coverage included in CI test stage',
+    tone: 'purple' as const,
+  },
+  {
     cmd: 'check:architecture',
     zh: '会话 Key 必须走 buildSessionKey()',
     en: 'Session key via buildSessionKey() only',
@@ -45,7 +57,12 @@ const pipeline = [
     en: 'Husky: lint-staged + arch check',
     tone: 'green' as const,
   },
-  { stage: 'PR Check', zh: '8 项质量门 + 3 平台构建', en: '8 quality gates + 3-platform build', tone: 'cyan' as const },
+  {
+    stage: 'PR Check',
+    zh: '8 项质量门 + coverage 测试 + 3 平台构建',
+    en: '8 quality gates + coverage tests + 3-platform build',
+    tone: 'cyan' as const,
+  },
   {
     stage: 'E2E',
     zh: 'Playwright: Smoke + Gateway (Docker)',
@@ -63,7 +80,7 @@ const pipeline = [
 
 <template>
   <div class="cw-split cw-split--media cw-mt-16" style="align-items: stretch">
-    <div class="cw-stack-md">
+    <div class="cw-stack-sm">
       <div v-for="g in guards" :key="g.cmd" class="cw-guard-row" :data-tone="g.tone">
         <span class="cw-guard-cmd">{{ g.cmd }}</span>
         <span class="en cw-guard-desc">{{ g.en }}</span>

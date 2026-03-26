@@ -32,10 +32,8 @@
       <div class="cw-meta-row">
         <span>samzong</span>
         <span>·</span>
-        <span class="en">OpenClaw Community</span>
-        <span class="zh">OpenClaw 社区</span>
-        <span>·</span>
-        <span>2026</span>
+        <span class="en">Updated 2026-03-26</span>
+        <span class="zh">更新于 2026-03-26</span>
       </div>
     </div>
 

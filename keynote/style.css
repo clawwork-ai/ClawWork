@@ -1294,6 +1294,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  height: 100%;
 }
 
 .cw-thanks-copy {
@@ -1399,7 +1400,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 6px 12px;
   border-radius: var(--cw-radius-sm);
   background: var(--cw-tone-soft);
   border: 1px solid var(--cw-tone-border);
@@ -1422,9 +1423,9 @@
 .cw-pipeline {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   height: 100%;
-  gap: 12px;
+  gap: 0;
 }
 
 .cw-pipeline-step {
@@ -1592,9 +1593,9 @@
 
 .cw-feature-cell {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
   border-radius: var(--cw-radius-sm);
   background: var(--cw-tone-soft);
   border: 1px solid var(--cw-tone-border);
@@ -1603,12 +1604,21 @@
     box-shadow 0.25s ease;
 }
 
+.cw-feature-cell-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .cw-feature-cell:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .cw-feature-cell--next {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
   border-style: dashed;
   opacity: 0.75;
 }
@@ -1626,11 +1636,19 @@
 }
 
 .cw-feature-cell-stars {
-  margin-left: auto;
   font-size: 0.6rem;
   color: var(--cw-yellow);
   flex-shrink: 0;
   letter-spacing: 1px;
+}
+
+.cw-feature-cell-ver {
+  margin-left: calc(1.05rem + 8px);
+  font-family: var(--cw-font-mono);
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--cw-text-muted);
+  opacity: 0.5;
 }
 
 .cw-feature-next-row {
@@ -1667,22 +1685,22 @@
 .cw-sprint-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   font-size: 0.8rem;
 }
 
 .cw-sprint-day {
-  width: 80px;
+  width: 68px;
   flex-shrink: 0;
   font-family: var(--cw-font-mono);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--cw-text-muted);
 }
 
 .cw-sprint-bar-track {
   flex: 1;
-  height: 24px;
-  border-radius: 6px;
+  height: 18px;
+  border-radius: 5px;
   background: var(--cw-bg-panel);
   overflow: hidden;
 }
@@ -1705,11 +1723,13 @@
 }
 
 .cw-sprint-phase {
-  width: 40px;
-  font-size: 0.88rem;
+  width: 72px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--cw-tone);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  text-align: right;
 }
 
 .cw-sprint-breakdown {
