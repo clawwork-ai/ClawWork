@@ -1,0 +1,93 @@
+{
+  "app": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "reload": "Reload",
+    "paired": "Mobile device paired"
+  },
+  "pairing": {
+    "title": "Pair with your PC",
+    "subtitle": "Scan the QR code shown on your desktop app to get started",
+    "instruction": "After scanning, approve this device on your desktop before the mobile app can connect.",
+    "scanning": "Scanning...",
+    "loadingCamera": "Loading camera...",
+    "scanButton": "Scan QR Code",
+    "cancelButton": "Cancel",
+    "error": "Pairing failed",
+    "invalidQr": "Invalid QR code",
+    "retryButton": "Try Again",
+    "cameraError": "Camera access denied",
+    "videoError": "Failed to start camera",
+    "scannerUnsupported": "QR scanner not supported on this browser"
+  },
+  "chat": {
+    "emptyState": "Select a task or create a new one",
+    "thinking": "Thinking...",
+    "inputPlaceholder": "Type a message...",
+    "sendButton": "Send",
+    "abortButton": "Stop",
+    "authorizationPending": "Waiting for authorization...",
+    "systemMessage": "System message",
+    "userMessage": "Your message",
+    "assistantMessage": "Assistant message",
+    "you": "You",
+    "assistant": "Assistant",
+    "mainArea": "Chat",
+    "virtualizedList": "Chat transcript"
+  },
+  "tasks": {
+    "newTask": "New Task",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This Week",
+    "older": "Older",
+    "empty": "No tasks yet",
+    "navigationLabel": "Task list"
+  },
+  "gateway": {
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "notFound": "Gateway not found",
+    "statusLabel": "Gateway connection status"
+  },
+  "agents": {
+    "selectTitle": "Select Agent",
+    "empty": "No agents available"
+  },
+  "drawer": {
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "menuButton": "Open menu",
+    "closeButton": "Close menu",
+    "newTaskButton": "New task"
+  },
+  "tools": {
+    "expandButton": "Show details",
+    "collapseButton": "Hide details"
+  },
+  "shell": {
+    "connected": "Gateway connected",
+    "bootstrapping": "Connecting to gateway..."
+  },
+  "errors": {
+    "requestFailed": "Request failed",
+    "sendFailed": "Send failed",
+    "serverAborted": "Task interrupted by server",
+    "unknown": "Unknown error",
+    "failed": "failed",
+    "agentNotResponding": "Agent is not responding - it may be unavailable or misconfigured on the server. Try a different agent.",
+    "stage": {
+      "send": "Send",
+      "stream": "Stream",
+      "final": "Finalize",
+      "lifecycle": "Agent",
+      "sync": "Sync",
+      "persist": "Persist"
+    }
+  },
+  "qrScanner": {
+    "videoLabel": "Camera viewfinder for QR code scanning",
+    "scanFrameLabel": "QR code scan area"
+  }
+}

@@ -15,5 +15,9 @@ export default defineConfig({
       name: 'gateway',
       testMatch: 'gateway/**/*.spec.ts',
     },
+    {
+      name: 'pwa',
+      testMatch: 'pwa/**/*.spec.ts',
+    },
   ],
 });

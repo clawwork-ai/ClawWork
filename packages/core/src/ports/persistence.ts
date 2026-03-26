@@ -11,6 +11,12 @@ export interface PersistedTask {
   tags: string[];
   artifactDir: string;
   gatewayId: string;
+  model?: string;
+  modelProvider?: string;
+  thinkingLevel?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  contextTokens?: number;
 }
 
 export interface PersistedMessage {

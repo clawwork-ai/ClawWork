@@ -18,6 +18,11 @@
         "postcss"
       ]
     },
+    "packages/pwa": {
+      "entry": ["src/main.tsx", "vite.config.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignoreDependencies": ["@fontsource-variable/inter", "@fontsource-variable/jetbrains-mono", "tailwindcss"]
+    },
     "website": {}
   },
   "ignore": ["keynote/**"],

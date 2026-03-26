@@ -1,6 +1,7 @@
 packages:
   - 'packages/shared'
   - 'packages/core'
+  - 'packages/pwa'
   - 'packages/desktop'
   - 'keynote'
   - 'website'

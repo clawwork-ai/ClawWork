@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Moon, Sun, Monitor, Bell } from 'lucide-react';
+import { Moon, Sun, Monitor, Bell, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { modKey } from '@/lib/utils';
@@ -17,9 +17,11 @@ import SettingRow from '@/components/semantic/SettingRow';
 import SegmentedControl from '../components/SegmentedControl';
 import Toggle from '../components/Toggle';
 import SettingGroup from '@/components/semantic/SettingGroup';
+import { PairMobileDialog } from '../components/PairMobileDialog';
 
 export default function GeneralSection() {
   const { t } = useTranslation();
+  const [showPairDialog, setShowPairDialog] = useState(false);
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
   const density = useUiStore((s) => s.density);
@@ -236,6 +238,28 @@ export default function GeneralSection() {
           </SettingRow>
         ))}
       </SettingGroup>
+
+      <h3 className="type-section-title mt-8 text-[var(--text-primary)]">{t('settings.mobile')}</h3>
+      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.mobileDesc')}</p>
+      <SettingGroup>
+        <SettingRow
+          label={
+            <div className="flex items-center gap-3">
+              <Smartphone size={14} className="flex-shrink-0 text-[var(--text-muted)]" />
+              <span className="type-label text-[var(--text-primary)]">{t('settings.pairMobile')}</span>
+            </div>
+          }
+        >
+          <button
+            onClick={() => setShowPairDialog(true)}
+            className="type-label rounded-lg border border-[var(--border)] px-3 py-1.5 text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+          >
+            {t('settings.pairMobileButton')}
+          </button>
+        </SettingRow>
+      </SettingGroup>
+
+      <PairMobileDialog open={showPairDialog} onOpenChange={setShowPairDialog} />
     </div>
   );
 }

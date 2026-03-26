@@ -1,0 +1,45 @@
+{
+  "name": "@clawwork/pwa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:e2e": "../../node_modules/.bin/playwright test --config ../../e2e/playwright.config.ts --project pwa"
+  },
+  "dependencies": {
+    "@clawwork/core": "workspace:*",
+    "@clawwork/shared": "workspace:*",
+    "framer-motion": "^11.0.0",
+    "i18next": "^25.8.0",
+    "idb": "^8.0.0",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.460.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^16.5.0",
+    "react-markdown": "^9.0.0",
+    "react-virtuoso": "^4.18.3",
+    "remark-gfm": "^4.0.0",
+    "sonner": "^2.0.7",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.0.0",
+    "@fontsource-variable/jetbrains-mono": "^5.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.0",
+    "vitest": "^3.2.4",
+    "workbox-window": "^7.4.0"
+  }
+}

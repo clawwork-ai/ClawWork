@@ -6,6 +6,10 @@
 }
 
 @layer base {
+  :root {
+    --surface-qr-bg: #ffffff;
+  }
+
   :root,
   :root[data-theme='dark'] {
     --bg-primary: #1c1c1c;

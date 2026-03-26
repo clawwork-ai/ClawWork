@@ -9,6 +9,7 @@ const EXCLUDED_FILES = new Set([
   'packages/desktop/src/renderer/styles/theme.css',
   'packages/desktop/src/renderer/styles/design-tokens.ts',
   'packages/desktop/src/renderer/styles/typography.css',
+  'packages/pwa/src/styles/index.css',
 ]);
 
 const RULES = [
@@ -123,7 +124,9 @@ function addViolation(filePath, content, index, category, message, match) {
   violations.push({ filePath, line, column, category, message, match: match.trim() || match });
 }
 
-const rendererFiles = walk('packages/desktop/src/renderer').filter((filePath) => /\.(ts|tsx|css|html)$/.test(filePath));
+const rendererFiles = [...walk('packages/desktop/src/renderer'), ...walk('packages/pwa/src')].filter((filePath) =>
+  /\.(ts|tsx|css|html)$/.test(filePath),
+);
 
 const COMPONENT_USAGE_RULES = [
   {
