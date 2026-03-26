@@ -1,1 +1,1 @@
-export { buildAppError, formatErrorForUser, formatErrorForToast } from '@clawwork/core';
+export { buildAppError, formatErrorForToast } from '@clawwork/core';

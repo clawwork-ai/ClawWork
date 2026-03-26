@@ -4,7 +4,7 @@ import type { ExecApprovalRequest, ModelCatalogEntry, AgentInfo } from '@clawwor
 import { parseTaskIdFromSessionKey } from '@clawwork/shared';
 import { toast } from 'sonner';
 import i18n from '../i18n';
-import { ports, useMessageStore, useTaskStore, useUiStore } from '../platform';
+import { ports, composerBridge, useMessageStore, useTaskStore, useUiStore } from '../platform';
 import { useApprovalStore } from '../stores/approvalStore';
 import { hydrateFromLocal, syncFromGateway, syncSessionMessages, retrySyncPending } from '../lib/session-sync';
 
@@ -74,6 +74,7 @@ function getDispatcher() {
       syncSessionMessages,
       retrySyncPending,
     });
+    composerBridge.markAbortedByUser = (taskId) => dispatcher!.markAbortedByUser(taskId);
   }
   return dispatcher;
 }
@@ -96,10 +97,6 @@ export function useGatewayBootstrap(): void {
       d.reset();
     };
   }, []);
-}
-
-export function markAbortedByUser(taskId: string): void {
-  getDispatcher().markAbortedByUser(taskId);
 }
 
 export async function fetchAgentsForGateway(gatewayId: string): Promise<void> {

@@ -9,8 +9,8 @@ import Settings from './layouts/Settings';
 import ApprovalDialog from './components/ApprovalDialog';
 import { useUiStore } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
-import { useMessageStore } from './stores/messageStore';
 import { useFileStore } from './stores/fileStore';
+import { composer } from './platform';
 import { useGatewayEventDispatcher } from './hooks/useGatewayDispatcher';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
@@ -32,9 +32,6 @@ export default function App() {
   const startNewTask = useTaskStore((s) => s.startNewTask);
   const createTask = useTaskStore((s) => s.createTask);
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
-  const updateTaskTitle = useTaskStore((s) => s.updateTaskTitle);
-  const addMessage = useMessageStore((s) => s.addMessage);
-  const setProcessing = useMessageStore((s) => s.setProcessing);
 
   const leftNavCollapsed = useUiStore((s) => s.leftNavCollapsed);
   const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
@@ -166,33 +163,9 @@ export default function App() {
   useEffect(() => {
     return window.clawwork.onQuickLaunchSubmit((message) => {
       const task = createTask();
-      const title = message.slice(0, 30).replace(/\n/g, ' ').trim();
-      updateTaskTitle(task.id, title + (message.length > 30 ? '\u2026' : ''));
-      const pendingUserMessage = addMessage(task.id, 'user', message, undefined, { persist: false });
-      setProcessing(task.id, true);
-      window.clawwork
-        .sendMessage(task.gatewayId, task.sessionKey, message)
-        .then((result) => {
-          if (result && !result.ok) {
-            setProcessing(task.id, false);
-            return;
-          }
-          window.clawwork
-            .persistMessage({
-              id: pendingUserMessage.id,
-              taskId: pendingUserMessage.taskId,
-              role: pendingUserMessage.role,
-              content: pendingUserMessage.content,
-              timestamp: pendingUserMessage.timestamp,
-              toolCalls: pendingUserMessage.toolCalls,
-            })
-            .catch(() => {});
-        })
-        .catch(() => {
-          setProcessing(task.id, false);
-        });
+      composer.send(task.id, { content: message, titleHint: message });
     });
-  }, [createTask, updateTaskTitle, addMessage, setProcessing]);
+  }, [createTask]);
 
   useEffect(() => {
     const navigateToTask = (taskId: string): void => {

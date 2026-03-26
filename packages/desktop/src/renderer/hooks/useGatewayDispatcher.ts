@@ -1,5 +1,1 @@
-export {
-  useGatewayBootstrap as useGatewayEventDispatcher,
-  markAbortedByUser,
-  fetchAgentsForGateway,
-} from './useGatewayBootstrap';
+export { useGatewayBootstrap as useGatewayEventDispatcher, fetchAgentsForGateway } from './useGatewayBootstrap';

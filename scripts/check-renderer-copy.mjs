@@ -9,7 +9,7 @@ const SCAN_PATHS = [
   'packages/desktop/src/renderer/components/data-display',
   'packages/desktop/src/renderer/context',
   'packages/desktop/src/renderer/components/ErrorBoundary.tsx',
-  'packages/desktop/src/renderer/components/ChatInput.tsx',
+  'packages/desktop/src/renderer/components/ChatInput',
   'packages/desktop/src/renderer/components/FileCard.tsx',
   'packages/desktop/src/renderer/components/ConnectionBanner.tsx',
   'packages/desktop/src/renderer/components/ContextMenu.tsx',
@@ -32,10 +32,9 @@ const SCAN_PATHS = [
   'packages/desktop/src/renderer/quick-launch.html',
 ];
 
-const LINE_PATTERNS = [
-  />\s*([A-Za-z][^<{]{1,})\s*</g,
-  /aria-label="([A-Za-z][^"]+)"/g,
-  /title="([A-Za-z][^"]+)"/g,
+const JSX_TEXT_PATTERN = />\s*([A-Za-z][^<{]{1,})\s*</g;
+const ATTRIBUTE_PATTERNS = [/aria-label="([A-Za-z][^"]+)"/g, /title="([A-Za-z][^"]+)"/g];
+const TOAST_PATTERNS = [
   /toast\.(?:success|error)\(\s*'([^']*[A-Za-z][^']*)'/g,
   /toast\.(?:success|error)\(\s*"([^"]*[A-Za-z][^"]*)"/g,
 ];
@@ -96,9 +95,16 @@ function getLineAndColumn(content, index) {
 for (const filePath of expandPaths()) {
   const content = readFileSync(path.join(root, filePath), 'utf8');
   const lines = content.split('\n');
+  const patterns = [];
+
+  if (/\.(tsx|html)$/.test(filePath)) {
+    patterns.push(JSX_TEXT_PATTERN, ...ATTRIBUTE_PATTERNS, ...TOAST_PATTERNS);
+  } else if (/\.ts$/.test(filePath)) {
+    patterns.push(...ATTRIBUTE_PATTERNS, ...TOAST_PATTERNS);
+  }
 
   lines.forEach((lineContent, lineIndex) => {
-    for (const pattern of LINE_PATTERNS) {
+    for (const pattern of patterns) {
       for (const match of lineContent.matchAll(pattern)) {
         const text = (match[1] ?? '').trim();
         if (!text || IGNORE_MATCHES.some((token) => text.includes(token))) {

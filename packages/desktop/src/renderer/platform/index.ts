@@ -1,6 +1,7 @@
 import { useStore } from 'zustand';
-import { createMessageStore, createTaskStore, createUiStore } from '@clawwork/core';
-import type { MessageState, TaskState, UiState, PlatformPorts } from '@clawwork/core';
+import { createMessageStore, createTaskStore, createUiStore, createChatComposer } from '@clawwork/core';
+import type { MessageState, TaskState, UiState, PlatformPorts, ChatComposer } from '@clawwork/core';
+import { toast } from 'sonner';
 import { createElectronPorts } from './electron-adapter';
 import i18n from '../i18n';
 
@@ -58,6 +59,39 @@ const taskStoreApi = createTaskStore({
     return entry ? { agents: entry.agents, defaultId: entry.defaultId } : { agents: [], defaultId: null };
   },
   onTaskCreated: () => uiStoreApi.getState().setMainView('chat'),
+});
+
+export const composerBridge = {
+  markAbortedByUser: (_taskId: string): void => {},
+};
+
+let _composer: ChatComposer | null = null;
+
+function getComposer(): ChatComposer {
+  if (!_composer) {
+    _composer = createChatComposer({
+      gateway: getPorts().gateway,
+      getTaskStore: () => taskStoreApi.getState(),
+      getMessageStore: () => messageStoreApi.getState(),
+      persistMessage: (...args) => getPorts().persistence.persistMessage(...args),
+      markAbortedByUser: (taskId) => composerBridge.markAbortedByUser(taskId),
+      compactSession: (gwId, sk) => window.clawwork.compactSession(gwId, sk),
+      resetSession: (gwId, sk, mode) => window.clawwork.resetSession(gwId, sk, mode as 'new' | 'reset'),
+      getModelProvider: (gwId, modelId) => {
+        const catalog = uiStoreApi.getState().modelCatalogByGateway[gwId];
+        return catalog?.find((m) => m.id === modelId)?.provider;
+      },
+      translate: (key, opts) => i18n.t(key, opts),
+      onError: (toastMsg) => toast.error(toastMsg.title, { description: toastMsg.description }),
+    });
+  }
+  return _composer;
+}
+
+export const composer = new Proxy({} as ChatComposer, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getComposer(), prop, receiver);
+  },
 });
 
 export function useMessageStore(): MessageState;
