@@ -1,27 +1,22 @@
 <script setup lang="ts">
+import { t, type I18nText, type Tone } from '../composables/i18n';
+
 withDefaults(
   defineProps<{
-    tone?: 'green' | 'cyan' | 'purple' | 'yellow' | 'red';
-    enTitle: string;
-    zhTitle?: string;
-    enNote?: string;
-    zhNote?: string;
+    tone?: Tone;
+    title: I18nText;
+    note?: I18nText;
   }>(),
   {
     tone: 'green',
-    zhTitle: '',
-    enNote: '',
-    zhNote: '',
   },
 );
 </script>
 
 <template>
   <div class="cw-card cw-card--signal" :data-tone="tone">
-    <div class="en cw-card-label">{{ enTitle }}</div>
-    <div v-if="zhTitle" class="zh cw-card-label">{{ zhTitle }}</div>
+    <div class="cw-card-label">{{ t(title) }}</div>
     <slot />
-    <p v-if="enNote" class="en cw-card-note">{{ enNote }}</p>
-    <p v-if="zhNote" class="zh cw-card-note">{{ zhNote }}</p>
+    <p v-if="note" class="cw-card-note">{{ t(note) }}</p>
   </div>
 </template>

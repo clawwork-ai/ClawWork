@@ -1,7 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-const props = defineProps({ repo: { type: String, required: true } });
+
+const props = defineProps<{ repo: string }>();
 const stars = ref('…');
+
 onMounted(async () => {
   try {
     const r = await fetch(`https://api.github.com/repos/${props.repo}`);

@@ -1,78 +1,180 @@
 <script setup lang="ts">
-const flow = [
+import { t, type I18nText, type Tone } from '../composables/i18n';
+
+const flow: { num: string; name: I18nText; detail: I18nText; tone: Tone }[] = [
   {
     num: '1',
-    zh: '整理需求',
-    en: 'Requirements',
-    detail_zh: '人 + 多 LLM 联合 Review',
-    detail_en: 'Human + multi-LLM joint review',
-    tone: 'red' as const,
+    name: {
+      en: 'Requirements',
+      zh: '整理需求',
+      ja: '要件整理',
+      ko: '요구사항 정리',
+      fr: 'Exigences',
+      de: 'Anforderungen',
+      es: 'Requisitos',
+      pt: 'Requisitos',
+    },
+    detail: {
+      en: 'Human + multi-LLM joint review',
+      zh: '人 + 多 LLM 联合 Review',
+      ja: '人間 + マルチ LLM 共同レビュー',
+      ko: '사람 + 멀티 LLM 공동 리뷰',
+      fr: 'Revue humain + multi-LLM',
+      de: 'Mensch + Multi-LLM gemeinsames Review',
+      es: 'Revisión humano + multi-LLM',
+      pt: 'Revisão humano + multi-LLM',
+    },
+    tone: 'red',
   },
   {
     num: '2',
-    zh: '任务拆分',
-    en: 'Task Split',
-    detail_zh: 'Issue / Bug / 需求文档 → PR 粒度拆分',
-    detail_en: 'Issue / Bug / Spec → PR-sized chunks',
-    tone: 'yellow' as const,
+    name: {
+      en: 'Task Split',
+      zh: '任务拆分',
+      ja: 'タスク分割',
+      ko: '태스크 분할',
+      fr: 'Découpage',
+      de: 'Aufgabenteilung',
+      es: 'División de tareas',
+      pt: 'Divisão de tarefas',
+    },
+    detail: {
+      en: 'Issue / Bug / Spec → PR-sized chunks',
+      zh: 'Issue / Bug / 需求文档 → PR 粒度拆分',
+      ja: 'Issue / Bug / 仕様 → PR サイズに分割',
+      ko: 'Issue / Bug / 스펙 → PR 크기로 분할',
+      fr: 'Issue / Bug / Spec → morceaux taille PR',
+      de: 'Issue / Bug / Spec → PR-große Blöcke',
+      es: 'Issue / Bug / Spec → trozos tamaño PR',
+      pt: 'Issue / Bug / Spec → pedaços tamanho PR',
+    },
+    tone: 'yellow',
   },
   {
     num: '3',
-    zh: '多 Worktree 并行',
-    en: 'Parallel Worktrees',
-    detail_zh: 'gmc 工具初始化，每个 worktree 自带 todo.md',
-    detail_en: 'gmc init, each worktree gets todo.md',
-    tone: 'green' as const,
+    name: {
+      en: 'Parallel Worktrees',
+      zh: '多 Worktree 并行',
+      ja: '並列 Worktree',
+      ko: '병렬 Worktree',
+      fr: 'Worktrees parallèles',
+      de: 'Parallele Worktrees',
+      es: 'Worktrees paralelos',
+      pt: 'Worktrees paralelos',
+    },
+    detail: {
+      en: 'gmc init, each worktree gets todo.md',
+      zh: 'gmc 工具初始化，每个 worktree 自带 todo.md',
+      ja: 'gmc 初期化、各 worktree に todo.md',
+      ko: 'gmc 초기화, 각 worktree에 todo.md',
+      fr: 'gmc init, chaque worktree reçoit todo.md',
+      de: 'gmc init, jeder Worktree bekommt todo.md',
+      es: 'gmc init, cada worktree recibe todo.md',
+      pt: 'gmc init, cada worktree recebe todo.md',
+    },
+    tone: 'green',
   },
   {
     num: '4',
-    zh: '编码 + 测试',
-    en: 'Code + Test',
-    detail_zh: '严格代码规范，配合 skill 自动化',
-    detail_en: 'Strict conventions, skill-driven automation',
-    tone: 'cyan' as const,
+    name: {
+      en: 'Code + Test',
+      zh: '编码 + 测试',
+      ja: 'コード + テスト',
+      ko: '코드 + 테스트',
+      fr: 'Code + Test',
+      de: 'Code + Test',
+      es: 'Código + Test',
+      pt: 'Código + Teste',
+    },
+    detail: {
+      en: 'Strict conventions, skill-driven automation',
+      zh: '严格代码规范，配合 skill 自动化',
+      ja: '厳格な規約、skill ベースの自動化',
+      ko: '엄격한 컨벤션, skill 기반 자동화',
+      fr: 'Conventions strictes, automatisation par skill',
+      de: 'Strikte Konventionen, skill-getriebene Automatisierung',
+      es: 'Convenciones estrictas, automatización por skill',
+      pt: 'Convenções estritas, automação por skill',
+    },
+    tone: 'cyan',
   },
   {
     num: '5',
-    zh: 'Code Review → PR',
-    en: 'Review → PR',
-    detail_zh: '自动 Review + 读取 PR Template → 提交',
-    detail_en: 'Auto review + PR template → submit',
-    tone: 'purple' as const,
+    name: {
+      en: 'Review → PR',
+      zh: 'Code Review → PR',
+      ja: 'レビュー → PR',
+      ko: '리뷰 → PR',
+      fr: 'Review → PR',
+      de: 'Review → PR',
+      es: 'Review → PR',
+      pt: 'Review → PR',
+    },
+    detail: {
+      en: 'Auto review + PR template → submit',
+      zh: '自动 Review + 读取 PR Template → 提交',
+      ja: '自動レビュー + PR テンプレート → 提出',
+      ko: '자동 리뷰 + PR 템플릿 → 제출',
+      fr: 'Review auto + template PR → soumettre',
+      de: 'Auto-Review + PR-Template → einreichen',
+      es: 'Review auto + plantilla PR → enviar',
+      pt: 'Review auto + template PR → submeter',
+    },
+    tone: 'purple',
   },
   {
     num: '6',
-    zh: '监控 CI → 合并',
-    en: 'Monitor CI → Merge',
-    detail_zh: '失败则 amend 修复，通过则合并',
-    detail_en: 'Fix on failure, merge on pass',
-    tone: 'green' as const,
+    name: {
+      en: 'Monitor CI → Merge',
+      zh: '监控 CI → 合并',
+      ja: 'CI 監視 → マージ',
+      ko: 'CI 모니터 → 머지',
+      fr: 'Surveiller CI → Merge',
+      de: 'CI überwachen → Merge',
+      es: 'Monitorear CI → Merge',
+      pt: 'Monitorar CI → Merge',
+    },
+    detail: {
+      en: 'Fix on failure, merge on pass',
+      zh: '失败则 amend 修复，通过则合并',
+      ja: '失敗なら修正、成功ならマージ',
+      ko: '실패 시 수정, 통과 시 머지',
+      fr: 'Corriger si échec, merger si OK',
+      de: 'Bei Fehler fixen, bei Erfolg mergen',
+      es: 'Corregir si falla, mergear si pasa',
+      pt: 'Corrigir se falhar, mergear se passar',
+    },
+    tone: 'green',
   },
 ];
 </script>
 
 <template>
-  <div class="cw-mt-16">
+  <div class="mt-4">
     <div class="cw-workflow-grid">
       <div v-for="s in flow" :key="s.num" class="cw-workflow-card" :data-tone="s.tone">
         <div class="cw-workflow-header">
           <span class="cw-pipeline-num">{{ s.num }}</span>
-          <strong class="en cw-pipeline-stage">{{ s.en }}</strong>
-          <strong class="zh cw-pipeline-stage">{{ s.zh }}</strong>
+          <strong class="cw-pipeline-stage">{{ t(s.name) }}</strong>
         </div>
-        <span class="en cw-pipeline-desc">{{ s.detail_en }}</span>
-        <span class="zh cw-pipeline-desc">{{ s.detail_zh }}</span>
+        <span class="cw-pipeline-desc">{{ t(s.detail) }}</span>
       </div>
     </div>
     <div class="cw-workflow-footer">
       <a href="https://github.com/samzong/samzong/tree/main/skills" target="_blank" class="cw-sprint-ref">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path
-            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-          />
-        </svg>
-        <span class="en">samzong/skills — All skills &amp; workflows open-sourced</span>
-        <span class="zh">samzong/skills — 所有 skill 和工作流已开源</span>
+        <GhIcon />
+        <span>{{
+          t({
+            en: 'samzong/skills — All skills & workflows open-sourced',
+            zh: 'samzong/skills — 所有 skill 和工作流已开源',
+            ja: 'samzong/skills — 全 skill とワークフローをオープンソース化',
+            ko: 'samzong/skills — 모든 skill과 워크플로 오픈소스',
+            fr: 'samzong/skills — Tous les skills et workflows open-sourcés',
+            de: 'samzong/skills — Alle Skills & Workflows open-sourced',
+            es: 'samzong/skills — Todos los skills y workflows en código abierto',
+            pt: 'samzong/skills — Todos os skills e workflows em código aberto',
+          })
+        }}</span>
       </a>
     </div>
   </div>

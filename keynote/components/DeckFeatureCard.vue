@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { t, type I18nText, type Tone } from '../composables/i18n';
+
 withDefaults(
   defineProps<{
-    tone?: 'green' | 'cyan' | 'purple' | 'yellow' | 'red';
+    tone?: Tone;
     icon: string;
-    enTitle: string;
-    zhTitle: string;
-    enBody: string;
-    zhBody: string;
+    title: I18nText;
+    body: I18nText;
     compact?: boolean;
   }>(),
   {
@@ -19,9 +19,7 @@ withDefaults(
 <template>
   <div class="cw-card" :class="compact ? 'cw-card--compact' : 'cw-card--feature'" :data-tone="tone">
     <div class="cw-card-icon">{{ icon }}</div>
-    <h3 class="en" :class="compact ? 'cw-card-title cw-card-title--compact' : 'cw-card-title'">{{ enTitle }}</h3>
-    <h3 class="zh" :class="compact ? 'cw-card-title cw-card-title--compact' : 'cw-card-title'">{{ zhTitle }}</h3>
-    <p class="en" :class="compact ? 'cw-card-copy cw-card-copy--compact' : 'cw-card-copy'">{{ enBody }}</p>
-    <p class="zh" :class="compact ? 'cw-card-copy cw-card-copy--compact' : 'cw-card-copy'">{{ zhBody }}</p>
+    <h3 class="cw-card-title" :class="{ 'cw-card-title--compact': compact }">{{ t(title) }}</h3>
+    <p class="cw-card-copy" :class="{ 'cw-card-copy--compact': compact }">{{ t(body) }}</p>
   </div>
 </template>
