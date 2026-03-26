@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 6am on monday"],
+  "rangeStrategy": "bump",
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Automerge patch updates for dependencies",
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge minor+patch for devDependencies",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "Group Radix UI updates",
+      "matchPackagePatterns": ["^@radix-ui/"],
+      "groupName": "radix-ui"
+    },
+    {
+      "description": "Group type definition updates",
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "type-definitions"
+    },
+    {
+      "description": "Pin Electron major — requires manual testing",
+      "matchPackageNames": ["electron"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Separate PRs for Electron tooling",
+      "matchPackageNames": [
+        "electron-builder",
+        "electron-vite",
+        "@electron-toolkit/preload",
+        "@electron-toolkit/utils"
+      ],
+      "groupName": "electron-tooling"
+    }
+  ]
+}

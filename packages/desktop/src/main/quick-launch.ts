@@ -64,7 +64,7 @@ function ensureWindow(): BrowserWindow {
   return quickLaunchWindow;
 }
 
-export function showQuickLaunch(): void {
+function showQuickLaunch(): void {
   const win = ensureWindow();
 
   const cursor = screen.getCursorScreenPoint();

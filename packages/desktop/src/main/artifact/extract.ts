@@ -24,13 +24,13 @@ const LANG_EXT: Record<string, string> = {
   md: 'md',
 };
 
-export interface ExtractedImage {
+interface ExtractedImage {
   src: string;
   alt: string;
   isRemote: boolean;
 }
 
-export interface ExtractedCodeBlock {
+interface ExtractedCodeBlock {
   language: string;
   content: string;
   fileName: string;

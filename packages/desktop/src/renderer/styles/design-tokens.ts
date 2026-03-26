@@ -17,10 +17,6 @@ export const motionSpring = {
   snappy: { type: 'spring', bounce: 0.15, duration: 0.4 },
 } as const;
 
-export type MotionDurationToken = keyof typeof motionDuration;
-export type MotionEaseToken = keyof typeof motionEase;
-export type MotionSpringToken = keyof typeof motionSpring;
-
 export const motion = {
   fadeIn: {
     initial: { opacity: 0 },

@@ -4,7 +4,7 @@ import { sanitizeForLog } from '@clawwork/shared';
 import type { DebugEvent } from '@clawwork/shared';
 import type { DebugLogger } from './logger.js';
 
-export interface ExportDebugBundleOptions {
+interface ExportDebugBundleOptions {
   outputDir: string;
   logger: DebugLogger;
   meta?: {

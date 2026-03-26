@@ -1,6 +1,6 @@
 import type { FileTier } from '@clawwork/shared';
 
-export const TEXT_EXTS = new Set([
+const TEXT_EXTS = new Set([
   '.ts',
   '.tsx',
   '.js',
@@ -50,8 +50,8 @@ export const TEXT_EXTS = new Set([
   '.editorconfig',
 ]);
 
-export const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']);
-export const DOC_EXTS = new Set(['.pdf', '.docx', '.xlsx', '.pptx']);
+const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg']);
+const DOC_EXTS = new Set(['.pdf', '.docx', '.xlsx', '.pptx']);
 
 export function classifyTier(ext: string): FileTier {
   if (TEXT_EXTS.has(ext)) return 'text';
@@ -60,7 +60,7 @@ export function classifyTier(ext: string): FileTier {
   return 'unsupported';
 }
 
-export const MIME_MAP: Record<string, string> = {
+const MIME_MAP: Record<string, string> = {
   '.ts': 'text/typescript',
   '.tsx': 'text/typescript',
   '.js': 'text/javascript',

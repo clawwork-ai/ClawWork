@@ -1,6 +1,6 @@
 import type Database from 'better-sqlite3';
 
-export interface SearchResult {
+interface SearchResult {
   type: 'task' | 'message' | 'artifact';
   id: string;
   title: string;
@@ -68,7 +68,7 @@ ORDER BY artifacts_fts.rank
 LIMIT 50;
 `;
 
-export interface ArtifactSearchResult {
+interface ArtifactSearchResult {
   id: string;
   taskId: string;
   name: string;

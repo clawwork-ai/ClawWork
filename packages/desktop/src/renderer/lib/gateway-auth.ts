@@ -1,18 +1,18 @@
 export type GatewayAuthMode = 'token' | 'password' | 'pairingCode';
 
-export interface GatewayCredentialState {
+interface GatewayCredentialState {
   token?: string;
   password?: string;
   pairingCode?: string;
 }
 
-export interface GatewayFormValidationInput extends GatewayCredentialState {
+interface GatewayFormValidationInput extends GatewayCredentialState {
   mode: GatewayAuthMode;
   name: string;
   url: string;
 }
 
-export type GatewayFormErrorKey =
+type GatewayFormErrorKey =
   | 'nameRequired'
   | 'invalidUrl'
   | 'tokenRequired'

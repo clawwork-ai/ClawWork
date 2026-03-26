@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { useUiStore, type Theme, type DensityMode } from '@/stores/uiStore';
 
 interface ThemeContextValue {
@@ -11,7 +11,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function resolveThemeMode(theme: Theme): 'dark' | 'light' {
+function resolveThemeMode(theme: Theme): 'dark' | 'light' {
   if (theme !== 'auto') return theme;
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
@@ -82,16 +82,4 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
-}
-
-export function useResolvedTheme() {
-  return useTheme().resolvedTheme;
 }

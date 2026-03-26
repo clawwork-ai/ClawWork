@@ -47,6 +47,9 @@ jobs:
       - name: i18n key parity
         run: pnpm check:i18n
 
+      - name: Dead code detection
+        run: pnpm check:dead-code
+
   test:
     needs: [quality]
     runs-on: ubuntu-latest
@@ -71,8 +74,8 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm test:coverage
 
   build:
     needs: [quality]

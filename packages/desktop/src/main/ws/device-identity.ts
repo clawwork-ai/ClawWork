@@ -91,11 +91,11 @@ export function loadOrCreateDeviceIdentity(filePath?: string): DeviceIdentity {
   return identity;
 }
 
-export function publicKeyRawBase64Url(publicKeyPem: string): string {
+function publicKeyRawBase64Url(publicKeyPem: string): string {
   return base64UrlEncode(derivePublicKeyRaw(publicKeyPem));
 }
 
-export function signDevicePayload(privateKeyPem: string, payload: string): string {
+function signDevicePayload(privateKeyPem: string, payload: string): string {
   const key = crypto.createPrivateKey(privateKeyPem);
   return base64UrlEncode(Buffer.from(crypto.sign(null, Buffer.from(payload, 'utf8'), key)));
 }
@@ -120,7 +120,7 @@ function normalizeMetadataForAuth(value: string | null | undefined): string {
   return trimmed.replace(/[A-Z]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 32));
 }
 
-export function buildDeviceAuthPayloadV3(params: DeviceAuthPayloadV3Params): string {
+function buildDeviceAuthPayloadV3(params: DeviceAuthPayloadV3Params): string {
   const scopes = params.scopes.join(',');
   const token = params.token ?? '';
   const platform = normalizeMetadataForAuth(params.platform);
@@ -140,7 +140,7 @@ export function buildDeviceAuthPayloadV3(params: DeviceAuthPayloadV3Params): str
   ].join('|');
 }
 
-export interface DeviceConnectPayload {
+interface DeviceConnectPayload {
   id: string;
   publicKey: string;
   signature: string;
@@ -225,12 +225,4 @@ export function saveDeviceToken(gatewayId: string, token: string, role: string, 
 export function loadDeviceToken(gatewayId: string): string | null {
   const store = readTokenStore();
   return store.tokens[gatewayId]?.token ?? null;
-}
-
-export function removeDeviceToken(gatewayId: string): void {
-  const store = readTokenStore();
-  if (gatewayId in store.tokens) {
-    delete store.tokens[gatewayId];
-    writeTokenStore(store);
-  }
 }

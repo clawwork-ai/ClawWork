@@ -14,7 +14,7 @@ export interface TrayTaskInfo {
   duration: string;
 }
 
-export interface TrayState {
+interface TrayState {
   status: TrayStatus;
   tasks: TrayTaskInfo[];
 }

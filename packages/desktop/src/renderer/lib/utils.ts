@@ -48,6 +48,6 @@ export function formatCost(usd: number): string {
   return `$${usd.toFixed(2)}`;
 }
 
-export const isMac = navigator.platform.toUpperCase().includes('MAC');
+const isMac = navigator.platform.toUpperCase().includes('MAC');
 
 export const modKey = isMac ? '⌘' : 'Ctrl';

@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 import type { Artifact } from '@clawwork/shared';
 
-const EMPTY_ARTIFACTS: Artifact[] = [];
-export { EMPTY_ARTIFACTS };
-
 type SortBy = 'date' | 'name' | 'type';
 
 export interface ArtifactSearchResult {

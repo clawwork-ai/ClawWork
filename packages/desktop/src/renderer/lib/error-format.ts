@@ -2,7 +2,7 @@ import type { AppError, ErrorSource, ErrorStage, Retryable } from '@clawwork/sha
 import { RETRYABLE_ERROR_CODES, NON_RETRYABLE_ERROR_CODES } from '@clawwork/shared';
 import type { TFunction } from 'i18next';
 
-export function classifyRetryable(code?: string): Retryable {
+function classifyRetryable(code?: string): Retryable {
   if (!code) return 'unknown';
   if (RETRYABLE_ERROR_CODES.has(code)) return 'yes';
   if (NON_RETRYABLE_ERROR_CODES.has(code)) return 'no';

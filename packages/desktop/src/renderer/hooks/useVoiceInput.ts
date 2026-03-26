@@ -11,12 +11,7 @@ import type {
   VoiceSession,
 } from '@/lib/voice/types';
 
-export type {
-  CreateVoiceSessionHandlers,
-  VoiceErrorCode,
-  VoicePermissionStatus,
-  VoiceSession,
-} from '@/lib/voice/types';
+export type { VoicePermissionStatus } from '@/lib/voice/types';
 
 interface UseVoiceInputOptions {
   textareaRef: RefObject<HTMLTextAreaElement | null>;

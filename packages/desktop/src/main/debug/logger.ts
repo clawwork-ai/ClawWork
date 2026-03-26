@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import type { DebugDomain, DebugEvent, DebugLevel } from '@clawwork/shared';
 import { sanitizeForLog } from '@clawwork/shared';
 
-export interface CreateDebugLoggerOptions {
+interface CreateDebugLoggerOptions {
   debugDir: string;
   maxEvents?: number;
   console?: boolean;

@@ -17,7 +17,7 @@ export type PanelShortcutRight = 'Period' | 'BracketRight';
 
 export type GatewayConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
-export interface GatewayInfo {
+interface GatewayInfo {
   id: string;
   name: string;
   color?: string;

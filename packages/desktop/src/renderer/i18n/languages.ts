@@ -2,7 +2,7 @@ import { SUPPORTED_LANGUAGE_CODES, type LanguageCode } from '@clawwork/shared';
 
 export type Language = LanguageCode;
 
-export interface LanguageConfig {
+interface LanguageConfig {
   code: Language;
   label: string;
   intlLocale: string;

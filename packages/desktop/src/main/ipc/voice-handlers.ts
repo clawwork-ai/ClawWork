@@ -5,7 +5,7 @@ import { join } from 'path';
 import { tmpdir, homedir } from 'os';
 import { randomUUID } from 'crypto';
 
-export type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';
+type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';
 
 interface MediaPermissionDetails {
   mediaType?: string;

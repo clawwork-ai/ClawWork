@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 
 export const GATEWAY_TOKEN = 'e2e-test-token-123';
 export const GATEWAY_ID = 'e2e-gateway';
-export const GATEWAY_PORT = 28789;
+const GATEWAY_PORT = 28789;
 export const GATEWAY_WS_URL = `ws://127.0.0.1:${GATEWAY_PORT}`;
 export const GATEWAY_HTTP_URL = `http://127.0.0.1:${GATEWAY_PORT}`;
 export const HEALTH_TIMEOUT_MS = 30_000;

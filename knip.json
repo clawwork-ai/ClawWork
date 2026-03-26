@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {},
+    "packages/shared": {},
+    "packages/desktop": {
+      "entry": ["src/main/index.ts", "src/preload/index.ts", "src/renderer/main.tsx", "electron.vite.config.ts"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "paths": {
+        "@/*": ["src/renderer/*"]
+      },
+      "ignoreDependencies": [
+        "@fontsource-variable/inter",
+        "@fontsource-variable/jetbrains-mono",
+        "tailwindcss",
+        "autoprefixer",
+        "postcss"
+      ]
+    },
+    "website": {}
+  },
+  "ignore": ["keynote/**"],
+  "exclude": ["unlisted"]
+}

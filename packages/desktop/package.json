@@ -63,6 +63,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/ws": "^8.5.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "autoprefixer": "^10.4.0",
     "electron": "^34.0.0",
     "electron-builder": "^25.0.0",

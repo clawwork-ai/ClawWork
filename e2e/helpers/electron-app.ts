@@ -16,7 +16,7 @@ function resolveElectronBinary(): string {
   return electronBin;
 }
 
-export interface LaunchResult {
+interface LaunchResult {
   app: ElectronApplication;
   page: Page;
   cleanup: () => void;

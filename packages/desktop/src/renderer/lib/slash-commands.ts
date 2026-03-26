@@ -29,7 +29,7 @@ export interface SlashCommand {
  *
  * PLACEHOLDER: replace/extend with dynamic gateway commands when available.
  */
-export const STATIC_SLASH_COMMANDS: SlashCommand[] = [
+const STATIC_SLASH_COMMANDS: SlashCommand[] = [
   { name: 'new', description: 'Reset the session', argHint: undefined, category: 'session' },
   { name: 'reset', description: 'Reset the session', argHint: undefined, category: 'session' },
   { name: 'abort', description: 'Abort the active run', argHint: undefined, category: 'session' },
@@ -66,7 +66,7 @@ export const STATIC_SLASH_COMMANDS: SlashCommand[] = [
   { name: 'settings', description: 'Open settings', argHint: undefined, category: 'info' },
 ];
 
-export const CATEGORY_ORDER: SlashCommandCategory[] = ['session', 'model', 'access', 'info'];
+const CATEGORY_ORDER: SlashCommandCategory[] = ['session', 'model', 'access', 'info'];
 
 export const CATEGORY_I18N_KEYS: Record<SlashCommandCategory, string> = {
   session: 'slashDashboard.categorySession',
