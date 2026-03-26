@@ -1,5 +1,6 @@
 packages:
   - 'packages/shared'
+  - 'packages/core'
   - 'packages/desktop'
   - 'keynote'
   - 'website'

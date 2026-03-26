@@ -12,7 +12,7 @@
     "check:architecture": "node scripts/check-architecture.mjs",
     "check:renderer-copy": "node scripts/check-renderer-copy.mjs",
     "check:ui-contract": "node scripts/check-ui-contract.mjs",
-    "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
+    "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/core exec tsc -b && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

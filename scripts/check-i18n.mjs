@@ -78,7 +78,8 @@ for (const file of localeFiles) {
 // ── 10b: Unused key check ───────────────────────────────────────────
 console.log('\n── i18n unused key check ──');
 
-const sourceFiles = collectFiles(RENDERER_DIR, ['.ts', '.tsx']);
+const CORE_DIR = join(ROOT, 'packages/core/src');
+const sourceFiles = [...collectFiles(RENDERER_DIR, ['.ts', '.tsx']), ...collectFiles(CORE_DIR, ['.ts', '.tsx'])];
 const sourceText = sourceFiles.map((f) => readFileSync(f, 'utf-8')).join('\n');
 
 const dynamicPrefixRe = /t\(\s*`([^$`]+)\$\{/g;

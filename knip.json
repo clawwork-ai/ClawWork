@@ -3,6 +3,7 @@
   "workspaces": {
     ".": {},
     "packages/shared": {},
+    "packages/core": {},
     "packages/desktop": {
       "entry": ["src/main/index.ts", "src/preload/index.ts", "src/renderer/main.tsx", "electron.vite.config.ts"],
       "project": ["src/**/*.{ts,tsx}"],

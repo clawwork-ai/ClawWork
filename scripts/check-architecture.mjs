@@ -44,6 +44,7 @@ function scanFile(filePath, regex, message) {
 
 const sessionKeySourceFiles = [
   ...walk('packages/shared/src').filter((filePath) => filePath.endsWith('.ts')),
+  ...walk('packages/core/src').filter((filePath) => filePath.endsWith('.ts')),
   ...walk('packages/desktop/src').filter((filePath) => /\.(ts|tsx)$/.test(filePath)),
 ].filter((filePath) => filePath !== 'packages/shared/src/constants.ts');
 

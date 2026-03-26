@@ -1,11 +1,18 @@
-interface IpcResult {
-  ok: boolean;
-  result?: Record<string, unknown>;
-  error?: string;
-  errorCode?: string;
-  errorDetails?: Record<string, unknown>;
-  pairingRequired?: boolean;
-}
+import type {
+  IpcResult as SharedIpcResult,
+  ChatAttachment as SharedChatAttachment,
+  ApprovalDecision,
+  CronJob,
+  CronJobCreate,
+  CronJobPatch,
+  CronListParams,
+  CronListResult,
+  CronRunResult,
+  CronRunsParams,
+  CronStatusResult,
+} from '@clawwork/shared';
+
+type IpcResult<T = Record<string, unknown>> = SharedIpcResult<T>;
 
 interface ConnectionStatus {
   connected: boolean;
@@ -197,11 +204,7 @@ interface ListResult<T> {
   error?: string;
 }
 
-interface ChatAttachment {
-  mimeType: string;
-  fileName: string;
-  content: string; // base64
-}
+type ChatAttachment = SharedChatAttachment;
 
 export interface ClawWorkAPI {
   // Chat — all require gatewayId
@@ -437,14 +440,3 @@ declare global {
     clawwork: ClawWorkAPI;
   }
 }
-import type {
-  ApprovalDecision,
-  CronJob,
-  CronJobCreate,
-  CronJobPatch,
-  CronListParams,
-  CronListResult,
-  CronRunResult,
-  CronRunsParams,
-  CronStatusResult,
-} from '@clawwork/shared';

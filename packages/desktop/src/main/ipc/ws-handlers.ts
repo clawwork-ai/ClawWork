@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
 import { readConfig, ensureDeviceId } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
+import { parseToolArgs } from '@clawwork/core';
 import type { ApprovalDecision, ChatAttachment, ExecApprovalResolveParams } from '@clawwork/shared';
 import { getDebugLogger } from '../debug/index.js';
 import type { GatewayClient } from '../ws/gateway-client.js';
@@ -277,7 +278,7 @@ export function registerWsHandlers(): void {
                       typeof b.arguments === 'object' && b.arguments !== null
                         ? (b.arguments as Record<string, unknown>)
                         : typeof b.arguments === 'string'
-                          ? safeJsonParse(b.arguments)
+                          ? parseToolArgs(b.arguments)
                           : undefined,
                     result: resultText,
                     startedAt: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
@@ -619,12 +620,4 @@ export function registerWsHandlers(): void {
     const { gatewayId, ...params } = payload;
     return gatewayRpc(gatewayId, (gw) => gw.listCronRuns(params));
   });
-}
-
-function safeJsonParse(raw: string): Record<string, unknown> | undefined {
-  try {
-    return JSON.parse(raw) as Record<string, unknown>;
-  } catch {
-    return { raw };
-  }
 }

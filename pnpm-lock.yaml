@@ -55,8 +55,24 @@ importers:
         specifier: ^52.0.0
         version: 52.14.1(@nuxt/kit@3.21.2(magicast@0.5.2))(@vue/compiler-sfc@3.5.30)(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.8.2))
 
+  packages/core:
+    dependencies:
+      '@clawwork/shared':
+        specifier: workspace:*
+        version: link:../shared
+      zustand:
+        specifier: ^5.0.11
+        version: 5.0.11(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    devDependencies:
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+
   packages/desktop:
     dependencies:
+      '@clawwork/core':
+        specifier: workspace:*
+        version: link:../core
       '@clawwork/shared':
         specifier: workspace:*
         version: link:../shared
