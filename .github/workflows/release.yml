@@ -32,6 +32,10 @@ jobs:
             platform: win
             arch: x64
             build_args: '--win --x64'
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            build_args: '--linux --x64'
 
     runs-on: ${{ matrix.os }}
     env:
@@ -130,6 +134,9 @@ jobs:
           echo "$ASSETS" | grep -q "latest-mac-arm64.yml" || { echo "::error::latest-mac-arm64.yml missing from release"; exit 1; }
           echo "$ASSETS" | grep -q "latest-mac.yml" || { echo "::error::latest-mac.yml (x64) missing from release"; exit 1; }
           echo "$ASSETS" | grep -q "latest.yml" || { echo "::error::latest.yml missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "latest-linux.yml" || { echo "::error::latest-linux.yml missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "\.AppImage$" || { echo "::error::AppImage missing from release"; exit 1; }
+          echo "$ASSETS" | grep -q "\.deb$" || { echo "::error::deb package missing from release"; exit 1; }
           echo "All update metadata files present"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

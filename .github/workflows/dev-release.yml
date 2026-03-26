@@ -31,6 +31,10 @@ jobs:
             platform: win
             arch: x64
             build_args: '--win --x64'
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            build_args: '--linux --x64'
 
     runs-on: ${{ matrix.os }}
     defaults:
@@ -99,7 +103,10 @@ jobs:
             packages/desktop/dist/*.dmg
             packages/desktop/dist/*.zip
             packages/desktop/dist/*.exe
+            packages/desktop/dist/*.AppImage
+            packages/desktop/dist/*.deb
             packages/desktop/dist/*.blockmap
+            packages/desktop/dist/latest-linux.yml
           if-no-files-found: error
           retention-days: 5
 

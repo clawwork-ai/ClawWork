@@ -85,6 +85,9 @@ jobs:
           - os: windows-latest
             platform: win
             build_args: '--win --x64'
+          - os: ubuntu-latest
+            platform: linux
+            build_args: '--linux --x64'
 
     runs-on: ${{ matrix.os }}
 

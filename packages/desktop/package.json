@@ -16,6 +16,7 @@
     "build:mac": "electron-vite build && electron-builder --mac --arm64",
     "build:mac:x64": "electron-vite build && electron-builder --mac --x64",
     "build:win": "electron-vite build && electron-builder --win --x64",
+    "build:linux": "electron-vite build && electron-builder --linux --x64",
     "preview": "electron-vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
