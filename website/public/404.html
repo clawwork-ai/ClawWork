@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting&hellip;</title>
+    <script>
+      var seg = location.pathname.startsWith('/ClawWork/keynote/') ? '/ClawWork/keynote/' : '/ClawWork/';
+      var rest = location.pathname.slice(seg.length);
+      location.replace(seg + '?' + rest + (location.search ? '&' + location.search.slice(1) : '') + location.hash);
+    </script>
+  </head>
+  <body></body>
+</html>

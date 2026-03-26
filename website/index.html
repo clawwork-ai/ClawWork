@@ -9,6 +9,14 @@
       content="ClawWork — Open source AI desktop client. Parallel tasks, visible tool activity, and files you can actually find later."
     />
     <title>ClawWork</title>
+    <script>
+      (function () {
+        var q = location.search.slice(1);
+        if (q && !q.includes('=')) {
+          history.replaceState(null, '', location.pathname + q + location.hash);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
