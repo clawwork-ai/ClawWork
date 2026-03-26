@@ -57,6 +57,6 @@ linux:
         - x64
   category: Development
   icon: build/icon.png
-  maintainer: clawwork-ai <build@clawwork.ai>
+  maintainer: samzong <samzong.lu@gmail.com>
   desktop:
     StartupWMClass: ClawWork
