@@ -1,6 +1,24 @@
 <script setup lang="ts">
 const guards = [
   {
+    cmd: 'knip',
+    zh: '死代码/无引用导出扫描接入 check 与 CI',
+    en: 'Dead-code + unused-export scan wired into check and CI',
+    tone: 'red' as const,
+  },
+  {
+    cmd: 'test:coverage',
+    zh: 'Vitest 覆盖率纳入 CI 测试环节',
+    en: 'Vitest coverage included in CI test stage',
+    tone: 'purple' as const,
+  },
+  {
+    cmd: 'VSCode workspace',
+    zh: '保存即格式化 + ESLint 修复 + 工作区 TS SDK',
+    en: 'Format-on-save + ESLint fixes + workspace TS SDK',
+    tone: 'cyan' as const,
+  },
+  {
     cmd: 'check:architecture',
     zh: '会话 Key 必须走 buildSessionKey()',
     en: 'Session key via buildSessionKey() only',
@@ -45,7 +63,12 @@ const pipeline = [
     en: 'Husky: lint-staged + arch check',
     tone: 'green' as const,
   },
-  { stage: 'PR Check', zh: '8 项质量门 + 3 平台构建', en: '8 quality gates + 3-platform build', tone: 'cyan' as const },
+  {
+    stage: 'PR Check',
+    zh: '9 项质量门 + coverage 测试 + 3 平台构建',
+    en: '9 quality gates + coverage tests + 3-platform build',
+    tone: 'cyan' as const,
+  },
   {
     stage: 'E2E',
     zh: 'Playwright: Smoke + Gateway (Docker)',
