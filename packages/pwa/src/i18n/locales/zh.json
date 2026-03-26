@@ -1,0 +1,99 @@
+{
+  "app": {
+    "loading": "加载中...",
+    "error": "出现错误",
+    "reload": "重新加载",
+    "paired": "移动设备已配对"
+  },
+  "pairing": {
+    "title": "与电脑配对",
+    "subtitle": "扫描桌面应用上显示的二维码以开始",
+    "instruction": "扫码后，请在桌面端批准此设备，然后手机端即可连接。",
+    "scanning": "扫描中...",
+    "loadingCamera": "正在启动相机...",
+    "scanButton": "扫描二维码",
+    "cancelButton": "取消",
+    "error": "配对失败",
+    "invalidQr": "无效的二维码",
+    "retryButton": "重试",
+    "cameraError": "相机权限被拒绝",
+    "videoError": "无法启动相机",
+    "scannerUnsupported": "此浏览器不支持二维码扫描"
+  },
+  "chat": {
+    "emptyState": "选择一个任务或创建新任务",
+    "thinking": "思考中...",
+    "inputPlaceholder": "输入消息...",
+    "sendButton": "发送",
+    "abortButton": "停止",
+    "authorizationPending": "等待授权中...",
+    "systemMessage": "系统消息",
+    "userMessage": "你的消息",
+    "assistantMessage": "助手消息",
+    "you": "你",
+    "assistant": "助手",
+    "mainArea": "聊天",
+    "virtualizedList": "聊天记录"
+  },
+  "tasks": {
+    "newTask": "新任务",
+    "today": "今天",
+    "yesterday": "昨天",
+    "thisWeek": "本周",
+    "older": "更早",
+    "empty": "暂无任务",
+    "navigationLabel": "任务列表"
+  },
+  "gateway": {
+    "connected": "已连接",
+    "connecting": "连接中...",
+    "disconnected": "未连接",
+    "notFound": "未找到网关",
+    "statusLabel": "网关连接状态"
+  },
+  "agents": {
+    "selectTitle": "选择智能体",
+    "empty": "暂无可用智能体"
+  },
+  "drawer": {
+    "settings": "设置",
+    "signOut": "退出登录",
+    "menuButton": "打开菜单",
+    "closeButton": "关闭菜单",
+    "newTaskButton": "新建任务"
+  },
+  "tools": {
+    "expandButton": "显示详情",
+    "collapseButton": "隐藏详情"
+  },
+  "shell": {
+    "connected": "网关已连接",
+    "bootstrapping": "正在连接网关...",
+    "reconnect": "重新连接"
+  },
+  "errors": {
+    "requestFailed": "请求出错",
+    "sendFailed": "发送失败",
+    "serverAborted": "任务被服务端中止",
+    "unknown": "未知错误",
+    "failed": "失败",
+    "agentNotResponding": "Agent 未响应 — 可能不可用或服务端配置有误，请尝试其他 Agent",
+    "stage": {
+      "send": "发送",
+      "stream": "推流",
+      "final": "完成",
+      "lifecycle": "Agent",
+      "sync": "同步",
+      "persist": "持久化"
+    }
+  },
+  "qrScanner": {
+    "videoLabel": "二维码扫描取景框",
+    "scanFrameLabel": "二维码扫描区域"
+  },
+  "settings": {
+    "darkMode": "深色模式",
+    "lightMode": "浅色模式",
+    "language": "语言"
+  }
+}

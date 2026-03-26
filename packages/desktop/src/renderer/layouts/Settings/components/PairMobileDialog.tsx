@@ -1,163 +1,171 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useUiStore } from '@/stores/uiStore';
 
-const QR_EXPIRY_MS = 60_000;
-const ED25519_SPKI_PREFIX_LENGTH = 12;
-
-function base64Encode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]!);
-  }
-  return btoa(binary);
+interface QrPayload {
+  v: 1;
+  s?: string;
+  g: {
+    u: string;
+    n: string;
+    t?: string;
+    p?: string;
+    c?: string;
+    m?: 'token' | 'password' | 'pairingCode';
+  }[];
 }
 
-async function generateMobileIdentity(): Promise<{ id: string; pub: string; priv: string }> {
-  const keyPair = await crypto.subtle.generateKey('Ed25519', true, ['sign', 'verify']);
-  const spki = await crypto.subtle.exportKey('spki', keyPair.publicKey);
-  const pkcs8 = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
-  const raw = new Uint8Array(spki).slice(ED25519_SPKI_PREFIX_LENGTH);
-  const hash = await crypto.subtle.digest('SHA-256', raw);
-  const hexChars: string[] = [];
-  const view = new Uint8Array(hash);
-  for (let i = 0; i < view.byteLength; i++) {
-    hexChars.push(view[i]!.toString(16).padStart(2, '0'));
-  }
-  return {
-    id: hexChars.join(''),
-    pub: base64Encode(spki),
-    priv: base64Encode(pkcs8),
-  };
-}
+const QR_TTL_SECONDS = 60;
 
-interface PairMobileDialogProps {
+export default function PairMobileDialog({
+  open,
+  onOpenChange,
+}: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-export function PairMobileDialog({ open, onOpenChange }: PairMobileDialogProps) {
+}) {
   const { t } = useTranslation();
+  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
+  const gatewayStatusMap = useUiStore((s) => s.gatewayStatusMap);
+
+  const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
   const [qrData, setQrData] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [countdown, setCountdown] = useState(0);
+  const [generating, setGenerating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const generateQr = useCallback(async () => {
-    try {
-      setError(null);
-      setQrData(null);
-
-      const [identity, gateways] = await Promise.all([generateMobileIdentity(), window.clawwork.listGateways()]);
-
-      const connectedGateways = gateways.filter((gw) => gw.connected);
-      if (connectedGateways.length === 0) {
-        setError(t('settings.pairNoGateways'));
-        return;
-      }
-
-      const payload = {
-        v: 1,
-        d: identity,
-        g: connectedGateways.map((gw) => {
-          const wsUrl = gw.url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
-          return {
-            u: wsUrl,
-            t: gw.authMode === 'token' || !gw.authMode ? gw.token : undefined,
-            p: gw.authMode === 'password' ? gw.password : undefined,
-            c: gw.authMode === 'pairingCode' ? gw.pairingCode : undefined,
-            m: gw.authMode ?? 'token',
-            n: gw.name,
-          };
-        }),
-      };
-
-      setQrData(JSON.stringify(payload));
-
-      if (expiryTimerRef.current) clearTimeout(expiryTimerRef.current);
-      expiryTimerRef.current = setTimeout(() => {
-        setQrData(null);
-        setError(t('settings.pairExpired'));
-      }, QR_EXPIRY_MS);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('settings.pairFailed'));
-    }
-  }, [t]);
+  const gatewayEntries = useMemo(() => Object.entries(gatewayInfoMap), [gatewayInfoMap]);
 
   useEffect(() => {
-    if (open) {
-      generateQr();
-    } else {
-      setQrData(null);
-      setError(null);
-      if (expiryTimerRef.current) {
-        clearTimeout(expiryTimerRef.current);
-        expiryTimerRef.current = null;
-      }
+    if (!open) return;
+    const firstConnectedId = Object.entries(gatewayStatusMap).find(([, s]) => s === 'connected')?.[0] ?? null;
+    const firstGatewayId = gatewayEntries[0]?.[0] ?? null;
+    setSelectedGatewayId(firstConnectedId ?? firstGatewayId);
+    setQrData(null);
+    setCountdown(0);
+    setGenerating(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
+  }, [open, gatewayStatusMap, gatewayEntries]);
+
+  useEffect(() => {
     return () => {
-      if (expiryTimerRef.current) {
-        clearTimeout(expiryTimerRef.current);
-        expiryTimerRef.current = null;
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [open, generateQr]);
+  }, []);
+
+  const handleGenerate = useCallback(async () => {
+    if (!selectedGatewayId) return;
+    setGenerating(true);
+
+    try {
+      const settings = await window.clawwork.getSettings();
+      if (!settings) return;
+
+      const deviceId = await window.clawwork.getDeviceId();
+      const payload: QrPayload = { v: 1, s: deviceId, g: [] };
+
+      const cfg = settings.gateways.find((g: { id: string }) => g.id === selectedGatewayId);
+      if (!cfg) return;
+
+      const mode: 'token' | 'password' | 'pairingCode' =
+        cfg.authMode ?? (cfg.pairingCode ? 'pairingCode' : cfg.password ? 'password' : 'token');
+      payload.g.push({
+        u: cfg.url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:'),
+        t: mode === 'token' ? (cfg.token ?? '') : undefined,
+        p: mode === 'password' ? cfg.password : undefined,
+        c: mode === 'pairingCode' ? cfg.pairingCode : undefined,
+        m: mode,
+        n: cfg.name,
+      });
+
+      setQrData(JSON.stringify(payload));
+      setCountdown(QR_TTL_SECONDS);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            timerRef.current = null;
+            setQrData(null);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } finally {
+      setGenerating(false);
+    }
+  }, [selectedGatewayId]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Smartphone size={20} />
+            <Smartphone size={18} />
             {t('settings.pairMobile')}
           </DialogTitle>
           <DialogDescription>{t('settings.pairMobileDesc')}</DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 flex flex-col items-center gap-4">
-          {qrData && (
-            <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--surface-qr-bg)' }}>
-              <QRCodeSVG value={qrData} size={220} level="M" />
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className="mb-2 type-label text-[var(--text-primary)]">{t('settings.pairSelectGateways')}</p>
+            <div className="space-y-2">
+              {gatewayEntries.length === 0 && (
+                <p className="type-body text-[var(--text-muted)]">{t('settings.noGateways')}</p>
+              )}
+              {gatewayEntries.map(([id, info]) => {
+                const status = gatewayStatusMap[id] ?? 'disconnected';
+                return (
+                  <label
+                    key={id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg bg-[var(--bg-tertiary)] px-3 py-2 transition-colors hover:bg-[var(--bg-hover)]"
+                  >
+                    <input
+                      type="radio"
+                      name="pair-mobile-gateway"
+                      checked={selectedGatewayId === id}
+                      onChange={() => setSelectedGatewayId(id)}
+                      className="h-4 w-4 accent-[var(--accent)]"
+                    />
+                    <span className="flex-1 truncate type-body text-[var(--text-primary)]">{info.name}</span>
+                    <span
+                      className={`h-2 w-2 flex-shrink-0 rounded-full ${
+                        status === 'connected'
+                          ? 'bg-[var(--accent)]'
+                          : status === 'connecting'
+                            ? 'bg-[var(--warning)]'
+                            : 'bg-[var(--text-muted)]'
+                      }`}
+                    />
+                  </label>
+                );
+              })}
             </div>
-          )}
+          </div>
 
-          {error && (
-            <div
-              role="alert"
-              className="type-body w-full rounded-lg px-4 py-3"
-              style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)' }}
-            >
-              {error}
+          {qrData ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="rounded-xl p-3" style={{ backgroundColor: 'var(--surface-qr-bg)' }}>
+                <QRCodeSVG value={qrData} size={280} level="L" />
+              </div>
+              <p className="type-body text-[var(--text-muted)]">
+                {t('settings.pairExpiresIn', { seconds: countdown })}
+              </p>
             </div>
-          )}
-
-          {qrData && (
-            <p className="type-support text-center text-[var(--text-muted)]">{t('settings.pairInstruction')}</p>
-          )}
-
-          {!qrData && !error && (
-            <div className="flex items-center justify-center" style={{ height: 220 }}>
-              <div
-                className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
-                style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
-              />
-            </div>
-          )}
-
-          {error && (
-            <button
-              onClick={generateQr}
-              className="type-label rounded-lg px-4"
-              style={{
-                backgroundColor: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-                minHeight: 36,
-              }}
-            >
-              {t('settings.pairRetry')}
-            </button>
+          ) : (
+            <Button onClick={handleGenerate} disabled={!selectedGatewayId || generating} className="w-full">
+              {generating ? <Loader2 size={16} className="animate-spin" /> : t('settings.pairGenerate')}
+            </Button>
           )}
         </div>
       </DialogContent>

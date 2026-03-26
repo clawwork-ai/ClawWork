@@ -13,22 +13,37 @@ export async function buildDeviceConnectPayload(
   identity: DeviceIdentity,
   nonce: string,
   token?: string,
+  params?: {
+    clientId?: string;
+    clientMode?: string;
+    role?: string;
+    scopes?: string[];
+    platform?: string;
+    deviceFamily?: string;
+  },
 ): Promise<DeviceConnectPayload> {
   const signedAtMs = Date.now();
-  const scopes = 'user,chat';
+  const clientId = params?.clientId ?? 'clawwork-pwa';
+  const clientMode = params?.clientMode ?? 'backend';
+  const role = params?.role ?? 'operator';
+  const scopes = (
+    params?.scopes ?? ['operator.admin', 'operator.write', 'operator.read', 'operator.approvals', 'operator.pairing']
+  ).join(',');
+  const platform = params?.platform ?? 'pwa';
+  const deviceFamily = params?.deviceFamily ?? 'mobile';
 
   const payloadString = [
     'v3',
     identity.id,
-    'clawwork-pwa',
-    'pwa',
-    'user',
+    clientId,
+    clientMode,
+    role,
     scopes,
     String(signedAtMs),
     token ?? '',
     nonce,
-    'pwa',
-    'mobile',
+    platform,
+    deviceFamily,
   ].join('|');
 
   const [pubKey, signature] = await Promise.all([

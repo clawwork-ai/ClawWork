@@ -1,0 +1,99 @@
+{
+  "app": {
+    "loading": "載入中...",
+    "error": "發生錯誤",
+    "reload": "重新載入",
+    "paired": "行動裝置已配對"
+  },
+  "pairing": {
+    "title": "與電腦配對",
+    "subtitle": "掃描桌面應用程式上顯示的 QR Code 以開始",
+    "instruction": "掃碼後，請在桌面端批准此裝置，然後手機端即可連線。",
+    "scanning": "掃描中...",
+    "loadingCamera": "正在啟動相機...",
+    "scanButton": "掃描 QR Code",
+    "cancelButton": "取消",
+    "error": "配對失敗",
+    "invalidQr": "無效的 QR Code",
+    "retryButton": "重試",
+    "cameraError": "相機權限被拒絕",
+    "videoError": "無法啟動相機",
+    "scannerUnsupported": "此瀏覽器不支援 QR Code 掃描"
+  },
+  "chat": {
+    "emptyState": "選擇一個任務或建立新任務",
+    "thinking": "思考中...",
+    "inputPlaceholder": "輸入訊息...",
+    "sendButton": "傳送",
+    "abortButton": "停止",
+    "authorizationPending": "等待授權中...",
+    "systemMessage": "系統訊息",
+    "userMessage": "你的訊息",
+    "assistantMessage": "助手訊息",
+    "you": "你",
+    "assistant": "助手",
+    "mainArea": "聊天",
+    "virtualizedList": "聊天記錄"
+  },
+  "tasks": {
+    "newTask": "新任務",
+    "today": "今天",
+    "yesterday": "昨天",
+    "thisWeek": "本週",
+    "older": "更早",
+    "empty": "尚無任務",
+    "navigationLabel": "任務列表"
+  },
+  "gateway": {
+    "connected": "已連線",
+    "connecting": "連線中...",
+    "disconnected": "未連線",
+    "notFound": "未找到閘道",
+    "statusLabel": "閘道連線狀態"
+  },
+  "agents": {
+    "selectTitle": "選擇智能體",
+    "empty": "暫無可用智能體"
+  },
+  "drawer": {
+    "settings": "設定",
+    "signOut": "登出",
+    "menuButton": "開啟選單",
+    "closeButton": "關閉選單",
+    "newTaskButton": "新建任務"
+  },
+  "tools": {
+    "expandButton": "顯示詳情",
+    "collapseButton": "隱藏詳情"
+  },
+  "shell": {
+    "connected": "閘道已連線",
+    "bootstrapping": "正在連接閘道...",
+    "reconnect": "重新連線"
+  },
+  "errors": {
+    "requestFailed": "請求出錯",
+    "sendFailed": "傳送失敗",
+    "serverAborted": "任務被伺服器中止",
+    "unknown": "未知錯誤",
+    "failed": "失敗",
+    "agentNotResponding": "Agent 未回應 — 可能不可用或伺服器配置有誤，請嘗試其他 Agent",
+    "stage": {
+      "send": "傳送",
+      "stream": "串流",
+      "final": "完成",
+      "lifecycle": "Agent",
+      "sync": "同步",
+      "persist": "持久化"
+    }
+  },
+  "qrScanner": {
+    "videoLabel": "QR Code 掃描取景框",
+    "scanFrameLabel": "QR Code 掃描區域"
+  },
+  "settings": {
+    "darkMode": "深色模式",
+    "lightMode": "淺色模式",
+    "language": "語言"
+  }
+}

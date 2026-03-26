@@ -23,17 +23,17 @@
 @layer base {
   :root,
   :root[data-theme='dark'] {
-    --bg-primary: #1c1c1c;
-    --bg-secondary: #242424;
-    --bg-tertiary: #2a2a2a;
-    --bg-hover: #333333;
+    --bg-primary: #000000;
+    --bg-secondary: #171717;
+    --bg-tertiary: #1c1c1c;
+    --bg-hover: #2a2a2a;
     --accent: #0ffd0d;
     --accent-foreground: #041204;
     --accent-dim: rgba(15, 253, 13, 0.15);
     --text-primary: #f3f4f4;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
-    --border: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.04);
     --border-accent: rgba(15, 253, 93, 0.15);
     --scrollbar-thumb: #444444;
     --scrollbar-track: transparent;
@@ -47,12 +47,14 @@
     --bg-elevated: #2f2f2f;
     --ring-accent: rgba(15, 253, 13, 0.4);
     --glow-accent: rgba(15, 253, 13, 0.06);
-    --shadow-elevated: 0 2px 12px rgba(0, 0, 0, 0.4);
-    --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: none;
+    --shadow-card: none;
     --shadow-floating: 0 10px 28px rgba(0, 0, 0, 0.45);
     --shadow-dialog: 0 18px 48px rgba(0, 0, 0, 0.5);
     --overlay-scrim: rgba(0, 0, 0, 0.5);
-    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-subtle: rgba(255, 255, 255, 0.03);
+    --input-bar-bg: #2f2f2f;
+    --user-bubble-bg: #2f2f2f;
     --surface-page: var(--bg-primary);
     --surface-panel: var(--bg-secondary);
     --surface-card: var(--bg-secondary);
@@ -115,6 +117,8 @@
     --surface-elevated-bg: var(--bg-elevated);
     --surface-floating-bg: var(--bg-elevated);
     --surface-dialog-bg: var(--bg-elevated);
+    --input-bar-bg: #f3f4f6;
+    --user-bubble-bg: #f3f4f6;
     --state-hover: var(--bg-hover);
     --state-selected: var(--accent-dim);
   }

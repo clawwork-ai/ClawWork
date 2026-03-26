@@ -1,14 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Square } from 'lucide-react';
-import { composer } from '../stores';
+import { ArrowUp, Square, Plus } from 'lucide-react';
+import { composer, ensureHydrationReady } from '../stores';
 import { useMessageStore, useTaskStore, useUiStore } from '../stores/hooks';
 
 interface ChatInputProps {
   taskId: string;
 }
 
-const MIN_HEIGHT = 44;
 const MAX_HEIGHT = 120;
 
 export function ChatInput({ taskId }: ChatInputProps) {
@@ -38,7 +37,7 @@ export function ChatInput({ taskId }: ChatInputProps) {
     const prev = text;
     setText('');
     if (textareaRef.current) {
-      textareaRef.current.style.height = MIN_HEIGHT + 'px';
+      textareaRef.current.style.height = '32px';
     }
 
     try {
@@ -59,6 +58,11 @@ export function ChatInput({ taskId }: ChatInputProps) {
       /* abort is best-effort */
     }
   }, [taskId]);
+
+  const handleNewTask = useCallback(async () => {
+    await ensureHydrationReady();
+    useTaskStore.getState().startNewTask();
+  }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -81,11 +85,19 @@ export function ChatInput({ taskId }: ChatInputProps) {
   };
 
   return (
-    <div
-      className="safe-area-bottom border-t"
-      style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-secondary)' }}
-    >
-      <div className="flex items-end gap-2 px-3 py-2">
+    <div className="safe-area-bottom px-3 py-2" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <div
+        className="flex items-end gap-2 rounded-[22px] px-2 py-1.5"
+        style={{ backgroundColor: 'var(--input-bar-bg)' }}
+      >
+        <button
+          onClick={handleNewTask}
+          aria-label={t('drawer.newTaskButton')}
+          className="flex shrink-0 items-center justify-center rounded-full transition-colors"
+          style={{ color: 'var(--text-secondary)', width: 32, height: 32 }}
+        >
+          <Plus size={18} />
+        </button>
         <textarea
           ref={textareaRef}
           value={text}
@@ -96,41 +108,27 @@ export function ChatInput({ taskId }: ChatInputProps) {
           disabled={!connected}
           rows={1}
           aria-label={t('chat.inputPlaceholder')}
-          className="type-body flex-1 resize-none rounded-lg border bg-transparent px-3 py-2 outline-none"
-          style={{
-            borderColor: 'var(--border)',
-            color: 'var(--text-primary)',
-            minHeight: MIN_HEIGHT,
-          }}
+          className="type-body flex-1 resize-none bg-transparent py-1 outline-none"
+          style={{ color: 'var(--text-primary)', minHeight: 32 }}
         />
         {isStreaming ? (
           <button
             onClick={handleAbort}
             aria-label={t('chat.abortButton')}
-            className="shrink-0 rounded-lg p-2 transition-colors"
-            style={{
-              backgroundColor: 'var(--danger-bg)',
-              color: 'var(--danger)',
-              minHeight: MIN_HEIGHT,
-              minWidth: MIN_HEIGHT,
-            }}
+            className="flex shrink-0 items-center justify-center rounded-full transition-colors"
+            style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', width: 32, height: 32 }}
           >
-            <Square size={18} />
+            <Square size={14} />
           </button>
         ) : (
           <button
             onClick={handleSend}
             disabled={!text.trim() || !connected}
             aria-label={t('chat.sendButton')}
-            className="shrink-0 rounded-lg p-2 transition-colors disabled:opacity-30"
-            style={{
-              backgroundColor: 'var(--accent)',
-              color: 'var(--accent-foreground)',
-              minHeight: MIN_HEIGHT,
-              minWidth: MIN_HEIGHT,
-            }}
+            className="flex shrink-0 items-center justify-center rounded-full transition-colors disabled:opacity-30"
+            style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', width: 32, height: 32 }}
           >
-            <Send size={18} />
+            <ArrowUp size={16} />
           </button>
         )}
       </div>

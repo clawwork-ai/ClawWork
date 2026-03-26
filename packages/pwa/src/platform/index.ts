@@ -5,12 +5,14 @@ import type { BrowserGatewayTransportResult } from './gateway-adapter.js';
 import { createBrowserSettings } from './settings-adapter.js';
 import { createBrowserNotifications } from './notifications-adapter.js';
 import { getAllClients, getClient } from '../gateway/client.js';
-import { getIdentity } from '../persistence/db.js';
+import { getIdentity, getScopeId } from '../persistence/db.js';
 
 let _ports: PlatformPorts | null = null;
 let _gwResult: BrowserGatewayTransportResult | null = null;
 
 async function resolveDeviceId(): Promise<string> {
+  const scopeId = await getScopeId();
+  if (scopeId) return scopeId;
   const identity = await getIdentity();
   if (!identity) throw new Error('Device identity not found');
   return identity.id;

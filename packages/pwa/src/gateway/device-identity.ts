@@ -39,6 +39,19 @@ function base64Encode(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+export async function generateDeviceIdentity(): Promise<DeviceIdentity> {
+  const keyPair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const spki = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+  const raw = new Uint8Array(spki).slice(ED25519_SPKI_PREFIX_LENGTH);
+  const hash = await crypto.subtle.digest('SHA-256', raw);
+  const view = new Uint8Array(hash);
+  let id = '';
+  for (let i = 0; i < view.byteLength; i++) {
+    id += view[i]!.toString(16).padStart(2, '0');
+  }
+  return { id, publicKey: keyPair.publicKey, privateKey: keyPair.privateKey };
+}
+
 export async function importDeviceIdentity(record: StoredDeviceIdentityRecord): Promise<DeviceIdentity> {
   const publicKeyBytes = base64Decode(record.publicKeyBase64);
   const privateKeyBytes = base64Decode(record.privateKeyBase64);

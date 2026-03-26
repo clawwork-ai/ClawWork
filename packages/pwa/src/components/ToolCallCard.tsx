@@ -39,7 +39,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
   const statusColor = getStatusColor(toolCall.status);
 
   return (
-    <div className="rounded-lg border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-secondary)' }}>
+    <div className="rounded-xl" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <button
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
@@ -64,7 +64,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
         )}
       </button>
       {expanded && (
-        <div className="border-t px-3 py-2" style={{ borderColor: 'var(--border)' }}>
+        <div className="px-3 py-2">
           {toolCall.args && (
             <pre className="type-code-inline overflow-x-auto" style={{ color: 'var(--text-muted)' }}>
               {JSON.stringify(toolCall.args, null, 2)}

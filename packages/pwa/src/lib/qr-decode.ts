@@ -7,15 +7,9 @@ interface QrGatewayEntry {
   m?: 'token' | 'password' | 'pairingCode';
 }
 
-interface QrDeviceIdentity {
-  id: string;
-  pub: string;
-  priv: string;
-}
-
 interface QrPayload {
   v: number;
-  d: QrDeviceIdentity;
+  s?: string;
   g: QrGatewayEntry[];
 }
 
@@ -36,15 +30,7 @@ export function parseQrPayload(raw: string): QrPayload {
     throw new Error(`Unsupported QR version: ${obj.v}`);
   }
 
-  const rawDevice = obj.d;
-  if (!rawDevice || typeof rawDevice !== 'object') {
-    throw new Error('Invalid QR code: missing device identity');
-  }
-
-  const d = rawDevice as Record<string, unknown>;
-  if (typeof d.id !== 'string' || typeof d.pub !== 'string' || typeof d.priv !== 'string') {
-    throw new Error('Invalid QR code: malformed device identity');
-  }
+  const scopeId = typeof obj.s === 'string' ? obj.s : undefined;
 
   const gateways = obj.g;
   if (!Array.isArray(gateways) || gateways.length === 0) {
@@ -84,7 +70,7 @@ export function parseQrPayload(raw: string): QrPayload {
 
   return {
     v: 1,
-    d: { id: d.id, pub: d.pub, priv: d.priv },
+    s: scopeId,
     g: gateways as QrGatewayEntry[],
   };
 }

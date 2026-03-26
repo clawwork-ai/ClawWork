@@ -1,0 +1,86 @@
+{
+  "app": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "reload": "Neu laden",
+    "paired": "Mobilgerät gekoppelt"
+  },
+  "pairing": {
+    "title": "Mit PC koppeln",
+    "subtitle": "Scannen Sie den QR-Code auf Ihrer Desktop-App",
+    "instruction": "Nach dem Scannen genehmigen Sie dieses Gerät auf dem Desktop.",
+    "scanning": "Scannen...",
+    "loadingCamera": "Kamera wird gestartet...",
+    "scanButton": "QR-Code scannen",
+    "cancelButton": "Abbrechen",
+    "error": "Kopplung fehlgeschlagen",
+    "invalidQr": "Ungültiger QR-Code",
+    "retryButton": "Erneut versuchen",
+    "cameraError": "Kamerazugriff verweigert",
+    "videoError": "Kamera konnte nicht gestartet werden",
+    "scannerUnsupported": "QR-Scanner wird in diesem Browser nicht unterstützt"
+  },
+  "chat": {
+    "emptyState": "Aufgabe auswählen oder neue erstellen",
+    "thinking": "Denke nach...",
+    "inputPlaceholder": "Nachricht eingeben...",
+    "sendButton": "Senden",
+    "abortButton": "Stopp",
+    "authorizationPending": "Warte auf Autorisierung...",
+    "systemMessage": "Systemnachricht",
+    "userMessage": "Ihre Nachricht",
+    "assistantMessage": "Assistenznachricht",
+    "you": "Sie",
+    "assistant": "Assistent",
+    "mainArea": "Chat",
+    "virtualizedList": "Chatverlauf"
+  },
+  "tasks": {
+    "newTask": "Neue Aufgabe",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "thisWeek": "Diese Woche",
+    "older": "Älter",
+    "empty": "Noch keine Aufgaben",
+    "navigationLabel": "Aufgabenliste"
+  },
+  "gateway": {
+    "connected": "Verbunden",
+    "connecting": "Verbinde...",
+    "disconnected": "Getrennt",
+    "notFound": "Gateway nicht gefunden",
+    "statusLabel": "Gateway-Verbindungsstatus"
+  },
+  "agents": { "selectTitle": "Agent auswählen", "empty": "Keine Agenten verfügbar" },
+  "drawer": {
+    "settings": "Einstellungen",
+    "signOut": "Abmelden",
+    "menuButton": "Menü öffnen",
+    "closeButton": "Menü schließen",
+    "newTaskButton": "Neue Aufgabe"
+  },
+  "tools": { "expandButton": "Details anzeigen", "collapseButton": "Details ausblenden" },
+  "shell": {
+    "connected": "Gateway verbunden",
+    "bootstrapping": "Verbinde mit Gateway...",
+    "reconnect": "Neu verbinden"
+  },
+  "errors": {
+    "requestFailed": "Anfrage fehlgeschlagen",
+    "sendFailed": "Senden fehlgeschlagen",
+    "serverAborted": "Aufgabe vom Server abgebrochen",
+    "unknown": "Unbekannter Fehler",
+    "failed": "Fehlgeschlagen",
+    "agentNotResponding": "Agent antwortet nicht",
+    "stage": {
+      "send": "Senden",
+      "stream": "Stream",
+      "final": "Abschluss",
+      "lifecycle": "Agent",
+      "sync": "Sync",
+      "persist": "Speichern"
+    }
+  },
+  "qrScanner": { "videoLabel": "Kamerasucher für QR-Code-Scan", "scanFrameLabel": "QR-Code-Scanbereich" },
+  "settings": { "darkMode": "Dunkelmodus", "lightMode": "Hellmodus", "language": "Sprache" }
+}

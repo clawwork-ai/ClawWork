@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence, m } from 'framer-motion';
+import { AnimatePresence, m, useDragControls } from 'framer-motion';
 import type { AgentInfo } from '@clawwork/shared';
 import { useUiStore } from '../stores/hooks';
 import { X } from 'lucide-react';
@@ -19,6 +19,7 @@ export function AgentSelector({ open, onClose, onSelect }: AgentSelectorProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const prevFocusRef = useRef<HTMLElement | null>(null);
   const titleId = 'agent-selector-title';
+  const dragControls = useDragControls();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -86,13 +87,25 @@ export function AgentSelector({ open, onClose, onSelect }: AgentSelectorProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            drag="y"
+            dragControls={dragControls}
+            dragListener={false}
+            dragConstraints={{ top: 0 }}
+            dragElastic={{ top: 0, bottom: 0.3 }}
+            onDragEnd={(_e, info) => {
+              if (info.offset.y > 100 || info.velocity.y > 500) onClose();
+            }}
             className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl"
             style={{ backgroundColor: 'var(--bg-secondary)', maxHeight: '60vh' }}
           >
             <div
-              className="flex items-center justify-between border-b px-4 py-3"
-              style={{ borderColor: 'var(--border)' }}
+              className="flex justify-center pt-2 pb-1"
+              onPointerDown={(e) => dragControls.start(e)}
+              style={{ touchAction: 'none' }}
             >
+              <div className="h-1 w-9 rounded-full" style={{ backgroundColor: 'var(--text-muted)', opacity: 0.4 }} />
+            </div>
+            <div className="flex items-center justify-between px-4 py-2" style={{ touchAction: 'manipulation' }}>
               <span id={titleId} className="type-label" style={{ color: 'var(--text-primary)' }}>
                 {t('agents.selectTitle')}
               </span>
@@ -105,7 +118,7 @@ export function AgentSelector({ open, onClose, onSelect }: AgentSelectorProps) {
                 <X size={18} />
               </button>
             </div>
-            <div className="overflow-y-auto p-2" style={{ maxHeight: 'calc(60vh - 52px)' }}>
+            <div className="overflow-y-auto p-2" style={{ maxHeight: 'calc(60vh - 72px)', touchAction: 'pan-y' }}>
               {agents.map((agent) => (
                 <button
                   key={agent.id}
@@ -114,8 +127,8 @@ export function AgentSelector({ open, onClose, onSelect }: AgentSelectorProps) {
                     onClose();
                   }}
                   aria-label={agent.name || agent.id}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 text-left transition-colors"
-                  style={{ color: 'var(--text-primary)', minHeight: 44 }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
                 >
                   <span className="type-body">{agent.identity?.emoji || '\uD83E\uDD16'}</span>
                   <div className="flex-1">

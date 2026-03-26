@@ -58,18 +58,7 @@ export function ChatView() {
   if (!activeTaskId && pendingNewTask) {
     return (
       <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea', { defaultValue: 'Chat' })}>
-        <div className="flex-1 px-8 py-8">
-          <div
-            className="rounded-lg border px-4 py-4 type-body"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            {t('chat.emptyState')}
-          </div>
-        </div>
+        <div className="flex-1" />
         <ChatInput taskId="__pending__" />
       </div>
     );
@@ -107,16 +96,9 @@ export function ChatView() {
           </div>
         )}
         {gatewayStatus === 'connecting' && (
-          <div
-            className="rounded-lg border px-3 py-3 type-body"
-            style={{
-              borderColor: 'var(--border)',
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-secondary)',
-            }}
-          >
+          <p className="px-3 py-3 type-support" style={{ color: 'var(--text-muted)' }}>
             {t('chat.authorizationPending')}
-          </div>
+          </p>
         )}
       </div>
       <ChatInput taskId={activeTaskId ?? '__pending__'} />

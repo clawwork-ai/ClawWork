@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { ScanLine } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +14,7 @@ export function PairingView({ onPaired }: PairingViewProps) {
   const { t } = useTranslation();
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pairingRef = useRef(false);
 
   useEffect(() => {
     if (!error) return;
@@ -23,19 +24,22 @@ export function PairingView({ onPaired }: PairingViewProps) {
 
   const handleScanResult = useCallback(
     async (data: string) => {
+      if (pairingRef.current) return;
+      pairingRef.current = true;
       try {
         const { parseQrPayload } = await import('../lib/qr-decode');
         const payload = parseQrPayload(data);
 
-        const { saveIdentity, saveGateway } = await import('../persistence/db');
-        const { importDeviceIdentity, exportDeviceIdentity } = await import('../gateway/device-identity');
-        const identity = await importDeviceIdentity({
-          id: payload.d.id,
-          publicKeyBase64: payload.d.pub,
-          privateKeyBase64: payload.d.priv,
-        });
+        const { saveIdentity, saveGateway, saveScopeId, clearAll } = await import('../persistence/db');
+        await clearAll();
+        const { exportDeviceIdentity, generateDeviceIdentity } = await import('../gateway/device-identity');
+        const identity = await generateDeviceIdentity();
         const record = await exportDeviceIdentity(identity);
         await saveIdentity(record);
+
+        if (payload.s) {
+          await saveScopeId(payload.s);
+        }
 
         for (const gw of payload.g) {
           await saveGateway({
@@ -52,6 +56,7 @@ export function PairingView({ onPaired }: PairingViewProps) {
         setScanning(false);
         onPaired();
       } catch (e) {
+        pairingRef.current = false;
         setError(e instanceof Error ? e.message : t('pairing.invalidQr'));
         setScanning(false);
       }

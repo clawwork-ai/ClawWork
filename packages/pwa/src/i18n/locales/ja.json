@@ -1,0 +1,99 @@
+{
+  "app": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "reload": "再読み込み",
+    "paired": "モバイルデバイスがペアリングされました"
+  },
+  "pairing": {
+    "title": "PCとペアリング",
+    "subtitle": "デスクトップアプリに表示されたQRコードをスキャンしてください",
+    "instruction": "スキャン後、デスクトップでこのデバイスを承認してください。",
+    "scanning": "スキャン中...",
+    "loadingCamera": "カメラを起動中...",
+    "scanButton": "QRコードをスキャン",
+    "cancelButton": "キャンセル",
+    "error": "ペアリング失敗",
+    "invalidQr": "無効なQRコード",
+    "retryButton": "再試行",
+    "cameraError": "カメラの権限が拒否されました",
+    "videoError": "カメラを起動できません",
+    "scannerUnsupported": "このブラウザではQRスキャンがサポートされていません"
+  },
+  "chat": {
+    "emptyState": "タスクを選択するか、新しいタスクを作成してください",
+    "thinking": "考え中...",
+    "inputPlaceholder": "メッセージを入力...",
+    "sendButton": "送信",
+    "abortButton": "停止",
+    "authorizationPending": "認証待ち...",
+    "systemMessage": "システムメッセージ",
+    "userMessage": "あなたのメッセージ",
+    "assistantMessage": "アシスタントメッセージ",
+    "you": "あなた",
+    "assistant": "アシスタント",
+    "mainArea": "チャット",
+    "virtualizedList": "チャット履歴"
+  },
+  "tasks": {
+    "newTask": "新しいタスク",
+    "today": "今日",
+    "yesterday": "昨日",
+    "thisWeek": "今週",
+    "older": "それ以前",
+    "empty": "タスクはまだありません",
+    "navigationLabel": "タスクリスト"
+  },
+  "gateway": {
+    "connected": "接続済み",
+    "connecting": "接続中...",
+    "disconnected": "切断",
+    "notFound": "ゲートウェイが見つかりません",
+    "statusLabel": "ゲートウェイ接続状態"
+  },
+  "agents": {
+    "selectTitle": "エージェントを選択",
+    "empty": "利用可能なエージェントがありません"
+  },
+  "drawer": {
+    "settings": "設定",
+    "signOut": "サインアウト",
+    "menuButton": "メニューを開く",
+    "closeButton": "メニューを閉じる",
+    "newTaskButton": "新しいタスク"
+  },
+  "tools": {
+    "expandButton": "詳細を表示",
+    "collapseButton": "詳細を非表示"
+  },
+  "shell": {
+    "connected": "ゲートウェイ接続済み",
+    "bootstrapping": "ゲートウェイに接続中...",
+    "reconnect": "再接続"
+  },
+  "errors": {
+    "requestFailed": "リクエスト失敗",
+    "sendFailed": "送信失敗",
+    "serverAborted": "タスクがサーバーにより中断されました",
+    "unknown": "不明なエラー",
+    "failed": "失敗",
+    "agentNotResponding": "Agentが応答しません — 利用不可またはサーバー設定に問題がある可能性があります",
+    "stage": {
+      "send": "送信",
+      "stream": "ストリーム",
+      "final": "完了",
+      "lifecycle": "Agent",
+      "sync": "同期",
+      "persist": "永続化"
+    }
+  },
+  "qrScanner": {
+    "videoLabel": "QRコードスキャン用カメラビューファインダー",
+    "scanFrameLabel": "QRコードスキャンエリア"
+  },
+  "settings": {
+    "darkMode": "ダークモード",
+    "lightMode": "ライトモード",
+    "language": "言語"
+  }
+}

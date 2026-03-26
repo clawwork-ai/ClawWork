@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ActiveTurn } from '@clawwork/core';
 import { ToolCallCard } from './ToolCallCard';
-import { Bot } from 'lucide-react';
 
 const MarkdownContent = lazy(() => import('./MarkdownContent').then((m) => ({ default: m.MarkdownContent })));
 
@@ -16,32 +15,39 @@ export function StreamingMessage({ turn }: StreamingMessageProps) {
 
   return (
     <div className="mb-4" role="article" aria-label={t('chat.assistantMessage', { defaultValue: 'Assistant message' })}>
-      <div className="mb-1 flex items-center gap-2">
-        <Bot size={14} style={{ color: 'var(--accent)' }} aria-hidden="true" />
-        <span className="type-support font-medium" style={{ color: 'var(--text-muted)' }}>
-          {t('chat.assistant', { defaultValue: 'Assistant' })}
-        </span>
-        {!turn.finalized && (
+      {!text && !turn.finalized && (
+        <div className="flex items-center gap-1.5 py-3" aria-label={t('chat.thinking')}>
+          <div className="h-2 w-2 animate-pulse rounded-full" style={{ backgroundColor: 'var(--text-muted)' }} />
           <div
-            className="h-1.5 w-1.5 animate-pulse rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
-            aria-hidden="true"
+            className="h-2 w-2 animate-pulse rounded-full"
+            style={{ backgroundColor: 'var(--text-muted)', animationDelay: '150ms' }}
           />
-        )}
-      </div>
+          <div
+            className="h-2 w-2 animate-pulse rounded-full"
+            style={{ backgroundColor: 'var(--text-muted)', animationDelay: '300ms' }}
+          />
+        </div>
+      )}
 
       <div aria-live="polite" aria-atomic="false">
         {text && (
-          <div className="prose-chat pl-5 type-body">
+          <div className="prose-chat type-body">
             <Suspense fallback={<p className="whitespace-pre-wrap">{text}</p>}>
               <MarkdownContent content={text} />
             </Suspense>
+            {!turn.finalized && (
+              <span
+                className="ml-0.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full align-middle"
+                style={{ backgroundColor: 'var(--accent)' }}
+                aria-hidden="true"
+              />
+            )}
           </div>
         )}
       </div>
 
       {turn.toolCalls.length > 0 && (
-        <div className="mt-2 space-y-1 pl-5">
+        <div className="mt-2 space-y-1">
           {turn.toolCalls.map((tc) => (
             <ToolCallCard key={tc.id} toolCall={tc} />
           ))}

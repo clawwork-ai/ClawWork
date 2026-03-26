@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion';
-import { Menu, Plus, Settings, LogOut, Bot } from 'lucide-react';
+import { AnimatePresence, LazyMotion, domMax, m } from 'framer-motion';
+import { Menu, Settings, LogOut, ChevronDown, Search, SquarePen } from 'lucide-react';
 import { useUiStore, useTaskStore } from '../stores/hooks';
 import { AgentSelector } from '../components/AgentSelector';
+import { GatewayDebugLog } from '../components/GatewayDebugLog';
 import { destroyAllClients } from '../gateway/client';
 import { clearAll } from '../persistence/db';
 import { TaskList } from '../components/TaskList';
 import { GatewayStatus } from '../components/GatewayStatus';
 import { ChatView } from './ChatView';
+import { SettingsSheet } from '../components/SettingsSheet';
 import { ensureHydrationReady } from '../stores';
 
 interface DrawerLayoutProps {
@@ -19,12 +21,16 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [agentSelectorOpen, setAgentSelectorOpen] = useState(false);
+  const [debugLogOpen, setDebugLogOpen] = useState(false);
+  const settingsOpen = useUiStore((s) => s.settingsOpen);
+  const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const tasks = useTaskStore((s) => s.tasks);
   const activeTask = tasks.find((tk) => tk.id === activeTaskId);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const edgeTouchRef = useRef<number | null>(null);
 
   const closeDrawer = useCallback(() => {
     setDrawerOpen(false);
@@ -102,14 +108,11 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   }, []);
 
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={domMax}>
       <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <div className="safe-area-top" />
 
-        <header
-          className="flex shrink-0 items-center gap-3 border-b px-4 py-3"
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <header className="flex shrink-0 items-center gap-2 px-3 py-2">
           <button
             ref={menuButtonRef}
             onClick={() => setDrawerOpen(true)}
@@ -119,23 +122,41 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
           >
             <Menu size={22} />
           </button>
-          <span className="type-label flex-1 truncate" style={{ color: 'var(--text-primary)' }}>
-            {activeTask?.title || (pendingNewTask ? t('tasks.newTask') : t('app.name', { defaultValue: 'ClawWork' }))}
-          </span>
           <button
             onClick={() => setAgentSelectorOpen(true)}
+            className="flex flex-1 items-center gap-1 truncate"
             aria-label={t('agents.selectTitle')}
-            className="rounded-lg p-1.5 transition-colors"
-            style={{ color: 'var(--text-secondary)', minHeight: 44, minWidth: 44 }}
           >
-            <Bot size={18} />
+            <span className="type-label truncate" style={{ color: 'var(--text-primary)' }}>
+              {activeTask?.title || (pendingNewTask ? t('tasks.newTask') : t('app.name', { defaultValue: 'ClawWork' }))}
+            </span>
+            <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
           </button>
-          <GatewayStatusCompact />
+          <GatewayStatusCompact onTap={() => setDebugLogOpen(true)} />
         </header>
 
         <main className="flex-1 overflow-hidden">
           <ChatView />
         </main>
+
+        {!drawerOpen && (
+          <div
+            className="fixed inset-y-0 left-0 z-30"
+            style={{ width: 20 }}
+            onTouchStart={(e) => {
+              edgeTouchRef.current = e.touches[0]!.clientX;
+            }}
+            onTouchMove={(e) => {
+              if (edgeTouchRef.current !== null && e.touches[0]!.clientX - edgeTouchRef.current > 50) {
+                edgeTouchRef.current = null;
+                setDrawerOpen(true);
+              }
+            }}
+            onTouchEnd={() => {
+              edgeTouchRef.current = null;
+            }}
+          />
+        )}
 
         <AnimatePresence>
           {drawerOpen && (
@@ -158,23 +179,34 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col"
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                drag="x"
+                dragConstraints={{ right: 0 }}
+                dragElastic={0.1}
+                onDragEnd={(_e, info) => {
+                  if (info.offset.x < -80 || info.velocity.x < -300) closeDrawer();
+                }}
+                className="fixed inset-y-0 left-0 z-50 flex w-80 flex-col"
                 style={{ backgroundColor: 'var(--bg-secondary)', maxWidth: '80vw' }}
               >
                 <div className="safe-area-top" />
-                <div
-                  className="flex items-center justify-between border-b px-4 py-3"
-                  style={{ borderColor: 'var(--border)' }}
-                >
-                  <GatewayStatus />
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <div
+                    className="flex flex-1 items-center gap-2 rounded-lg px-3 py-2"
+                    style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                  >
+                    <Search size={16} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
+                    <span className="type-body" style={{ color: 'var(--text-muted)' }}>
+                      {t('drawer.search', { defaultValue: 'Search' })}
+                    </span>
+                  </div>
                   <button
                     onClick={handleNewTask}
                     aria-label={t('drawer.newTaskButton')}
-                    className="rounded-lg p-1.5 transition-colors"
+                    className="flex shrink-0 items-center justify-center rounded-lg transition-colors"
                     style={{ color: 'var(--accent)', minHeight: 44, minWidth: 44 }}
                   >
-                    <Plus size={20} />
+                    <SquarePen size={20} />
                   </button>
                 </div>
 
@@ -182,14 +214,15 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                   <TaskList onSelect={closeDrawer} />
                 </div>
 
-                <div className="border-t px-4 py-3" style={{ borderColor: 'var(--border)' }}>
+                <div className="px-4 py-3">
+                  <GatewayStatus />
                   <button
                     onClick={() => {
                       useUiStore.getState().setSettingsOpen(true);
                       closeDrawer();
                     }}
                     aria-label={t('drawer.settings')}
-                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 type-body transition-colors"
+                    className="mt-2 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 type-body transition-colors"
                     style={{ color: 'var(--text-secondary)', minHeight: 44 }}
                   >
                     <Settings size={16} aria-hidden="true" />
@@ -217,11 +250,15 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
         onClose={() => setAgentSelectorOpen(false)}
         onSelect={handleAgentSelect}
       />
+
+      <GatewayDebugLog open={debugLogOpen} onClose={() => setDebugLogOpen(false)} />
+
+      <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} onSignOut={handleSignOut} />
     </LazyMotion>
   );
 }
 
-function GatewayStatusCompact() {
+function GatewayStatusCompact({ onTap }: { onTap?: () => void }) {
   const { t } = useTranslation();
   const statusMap = useUiStore((s) => s.gatewayStatusMap);
   const entries = Object.entries(statusMap);
@@ -237,5 +274,15 @@ function GatewayStatusCompact() {
       ? t('gateway.connecting')
       : t('gateway.disconnected');
 
-  return <div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-label={label} role="status" />;
+  return (
+    <button
+      onClick={onTap}
+      className="flex items-center justify-center rounded-lg p-2 transition-colors"
+      style={{ minHeight: 44, minWidth: 44 }}
+      aria-label={`${label} — tap for log`}
+      role="status"
+    >
+      <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
+    </button>
+  );
 }

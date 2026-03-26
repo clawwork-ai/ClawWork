@@ -145,6 +145,12 @@ export class BrowserGatewayClient {
     };
   }
 
+  reconnect(): void {
+    this.destroyed = false;
+    this.reconnectAttempts = 0;
+    this.connect();
+  }
+
   destroy(): void {
     this.destroyed = true;
     this.cleanup();
@@ -346,15 +352,22 @@ export class BrowserGatewayClient {
 
   private handleChallenge(nonce: string): void {
     this.state = 'authorization_pending';
-    const scopes = ['user', 'chat'];
+    const scopes = ['operator.admin', 'operator.write', 'operator.read', 'operator.approvals', 'operator.pairing'];
     const signatureToken =
       this.auth && 'token' in this.auth
         ? this.auth.token
         : this.auth && 'bootstrapToken' in this.auth
           ? this.auth.bootstrapToken
-          : this.deviceToken;
+          : null;
 
-    buildDeviceConnectPayload(this.identity, nonce, signatureToken)
+    buildDeviceConnectPayload(this.identity, nonce, signatureToken ?? undefined, {
+      clientId: 'gateway-client',
+      clientMode: 'backend',
+      role: 'operator',
+      scopes,
+      platform: 'pwa',
+      deviceFamily: 'mobile',
+    })
       .then((device) => {
         const auth: Record<string, unknown> = this.auth ? { ...this.auth } : {};
         if (this.deviceToken) {
@@ -365,7 +378,7 @@ export class BrowserGatewayClient {
           minProtocol: 3,
           maxProtocol: 3,
           client: {
-            id: 'clawwork-pwa',
+            id: 'gateway-client',
             displayName: 'ClawWork PWA',
             version: '0.1.0',
             platform: 'pwa',
@@ -657,6 +670,14 @@ export function getClient(id: string): BrowserGatewayClient | undefined {
 
 export function getAllClients(): BrowserGatewayClient[] {
   return Array.from(clients.values());
+}
+
+export function reconnectAllClients(): void {
+  for (const client of clients.values()) {
+    if (!client.isConnected) {
+      client.reconnect();
+    }
+  }
 }
 
 export function destroyAllClients(): void {

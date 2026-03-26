@@ -173,6 +173,19 @@ export async function saveMessage(msg: StoredMessage): Promise<void> {
   await db.put('messages', msg);
 }
 
+const SCOPE_ID_KEY = 'scopeDeviceId';
+
+export async function getScopeId(): Promise<string | undefined> {
+  const db = await getDb();
+  const record = await db.get('preferences', SCOPE_ID_KEY);
+  return typeof record?.value === 'string' ? record.value : undefined;
+}
+
+export async function saveScopeId(id: string): Promise<void> {
+  const db = await getDb();
+  await db.put('preferences', { key: SCOPE_ID_KEY, value: id });
+}
+
 export async function isPaired(): Promise<boolean> {
   const db = await getDb();
   const [gatewayCount, identityCount] = await Promise.all([db.count('gateways'), db.count('identity')]);

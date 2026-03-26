@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { isPaired } from './persistence/db';
 import { reportDebugEvent } from './lib/debug';
 import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
+import { useUiStore } from './stores/hooks';
+import { reconnectAllClients } from './gateway/client';
 import { DrawerLayout } from './views/DrawerLayout';
 import { Toaster } from 'sonner';
 
@@ -91,6 +93,44 @@ export default function App() {
 
 function AppShell({ onSignedOut }: { onSignedOut: () => void }) {
   useGatewayBootstrap();
+  const { t } = useTranslation();
+  const gatewaysLoaded = useUiStore((s) => s.gatewaysLoaded);
+  const statusMap = useUiStore((s) => s.gatewayStatusMap);
+
+  const entries = Object.entries(statusMap);
+  const anyConnected = entries.some(([, s]) => s === 'connected');
+  const gaveUp = entries.length > 0 && entries.every(([, s]) => s === 'disconnected');
+
+  if (gatewaysLoaded && !anyConnected) {
+    return (
+      <div
+        className="safe-area-top safe-area-bottom flex h-full flex-col items-center justify-center gap-4 px-8"
+        style={{ backgroundColor: 'var(--bg-primary)' }}
+      >
+        <img src="/icons/logo.png" alt="ClawWork" className="mb-2 h-16 w-16" />
+        {!gaveUp && (
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+        )}
+        <p className="text-center type-body" style={{ color: 'var(--text-secondary)' }}>
+          {gaveUp ? t('gateway.disconnected') : t('chat.authorizationPending')}
+        </p>
+        <p className="max-w-sm text-center type-support" style={{ color: 'var(--text-muted)' }}>
+          {t('pairing.instruction')}
+        </p>
+        <button
+          onClick={reconnectAllClients}
+          className="rounded-xl px-6 type-body"
+          style={{
+            backgroundColor: 'var(--accent)',
+            color: 'var(--accent-foreground)',
+            minHeight: 44,
+          }}
+        >
+          {t('shell.reconnect', { defaultValue: 'Reconnect' })}
+        </button>
+      </div>
+    );
+  }
 
   return <DrawerLayout onSignedOut={onSignedOut} />;
 }

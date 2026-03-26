@@ -17,7 +17,7 @@ import SettingRow from '@/components/semantic/SettingRow';
 import SegmentedControl from '../components/SegmentedControl';
 import Toggle from '../components/Toggle';
 import SettingGroup from '@/components/semantic/SettingGroup';
-import { PairMobileDialog } from '../components/PairMobileDialog';
+import PairMobileDialog from '../components/PairMobileDialog';
 
 export default function GeneralSection() {
   const { t } = useTranslation();

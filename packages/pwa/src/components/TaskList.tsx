@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { useTaskStore, useUiStore } from '../stores/hooks';
-import { MessageSquare } from 'lucide-react';
 
 interface TaskListProps {
   onSelect: () => void;
@@ -77,17 +76,11 @@ export function TaskList({ onSelect }: TaskListProps) {
                 }}
                 aria-label={task.title || t('tasks.newTask')}
                 aria-current={isActive ? 'true' : undefined}
-                className="flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left transition-colors"
                 style={{
                   backgroundColor: isActive ? 'var(--bg-hover)' : 'transparent',
-                  minHeight: 44,
                 }}
               >
-                <MessageSquare
-                  size={14}
-                  style={{ color: isActive ? 'var(--accent)' : 'var(--text-muted)' }}
-                  aria-hidden="true"
-                />
                 <span
                   className="type-body flex-1 truncate"
                   style={{

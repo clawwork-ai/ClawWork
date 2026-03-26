@@ -285,6 +285,12 @@ function buildApi(): ClawWorkAPI {
     setWindowButtonVisibility: (visible: boolean) => ipcRenderer.send('ui:set-window-button-visibility', visible),
 
     getDeviceId: () => ipcRenderer.invoke('workspace:get-device-id') as Promise<string>,
+    getDeviceIdentity: () =>
+      ipcRenderer.invoke('pairing:get-device-identity') as Promise<{
+        deviceId: string;
+        publicKeyPem: string;
+        privateKeyPem: string;
+      }>,
 
     selectContextFolder: () => ipcRenderer.invoke('context:select-folder'),
     listContextFiles: (folders: string[], query?: string) =>
