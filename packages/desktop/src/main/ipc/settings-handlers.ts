@@ -3,7 +3,6 @@ import { readConfig, updateConfig, writeConfig, buildGatewayAuth } from '../work
 import type { AppConfig, GatewayServerConfig } from '../workspace/config.js';
 import { getGatewayClient, addGateway, removeGateway } from '../ws/index.js';
 import { GatewayClient } from '../ws/gateway-client.js';
-import { loadOrCreateDeviceIdentity } from '../ws/device-identity.js';
 import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 import type { GatewayAuth } from '@clawwork/shared';
 
@@ -13,7 +12,6 @@ function getMainWindow(): BrowserWindow | null {
 }
 
 export function registerSettingsHandlers(): void {
-  ipcMain.handle('pairing:get-device-identity', () => loadOrCreateDeviceIdentity());
   ipcMain.handle('settings:get', (): AppConfig | null => {
     return readConfig();
   });

@@ -4,7 +4,7 @@ import { isPaired } from './persistence/db';
 import { reportDebugEvent } from './lib/debug';
 import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
 import { useUiStore } from './stores/hooks';
-import { reconnectAllClients } from './gateway/client';
+import { reconnectAllClients } from './gateway/client-registry';
 import { DrawerLayout } from './views/DrawerLayout';
 import { Toaster } from 'sonner';
 
