@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog, net, shell } from 'electron';
+import { ipcMain, BrowserWindow, dialog, shell } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve, sep } from 'path';
 import { eq } from 'drizzle-orm';
@@ -7,6 +7,7 @@ import { artifacts, tasks, messages } from '../db/schema.js';
 import { saveArtifact, saveArtifactFromBuffer } from '../artifact/save.js';
 import { getWorkspacePath } from '../workspace/config.js';
 import { searchArtifacts } from '../db/search.js';
+import { safeFetch } from '../net/safe-fetch.js';
 
 interface SaveParams {
   taskId: string;
@@ -149,9 +150,7 @@ export function registerArtifactHandlers(): void {
         let buffer: Buffer;
         const url = params.url;
         if (/^https?:\/\//.test(url)) {
-          const res = await net.fetch(url);
-          if (!res.ok) return { ok: false, error: `fetch failed: ${res.status}` };
-          buffer = Buffer.from(await res.arrayBuffer());
+          buffer = await safeFetch(url);
         } else if (url.startsWith('file://')) {
           const filePath = resolve(url.replace('file://', ''));
           if (!filePath.startsWith(resolve(workspacePath) + sep)) {

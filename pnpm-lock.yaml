@@ -164,9 +164,6 @@ importers:
         specifier: ^5.0.11
         version: 5.0.11(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
-      '@electron-toolkit/preload':
-        specifier: ^3.0.0
-        version: 3.0.2(electron@34.5.8)
       '@electron-toolkit/utils':
         specifier: ^4.0.0
         version: 4.0.0(electron@34.5.8)
@@ -1007,11 +1004,6 @@ packages:
 
   '@drauu/core@1.0.0':
     resolution: {integrity: sha512-r1fPyuKaGuNHc8vxRFUT8LxqWjJ3nx+U+zsHcEOurmJoB7uN+zpFw5kTLInfdfvQZ+qF/ebQjw1AwbGcc1XKsQ==}
-
-  '@electron-toolkit/preload@3.0.2':
-    resolution: {integrity: sha512-TWWPToXd8qPRfSXwzf5KVhpXMfONaUuRAZJHsKthKgZR/+LqX1dZVSSClQ8OTAEduvLGdecljCsoT2jSshfoUg==}
-    peerDependencies:
-      electron: '>=13.0.0'
 
   '@electron-toolkit/utils@4.0.0':
     resolution: {integrity: sha512-qXSntwEzluSzKl4z5yFNBknmPGjPa3zFhE4mp9+h0cgokY5ornAeP+CJQDBhKsL1S58aOQfcwkD3NwLZCl+64g==}
@@ -8662,10 +8654,6 @@ snapshots:
       ajv-keywords: 3.5.2(ajv@6.14.0)
 
   '@drauu/core@1.0.0': {}
-
-  '@electron-toolkit/preload@3.0.2(electron@34.5.8)':
-    dependencies:
-      electron: 34.5.8
 
   '@electron-toolkit/utils@4.0.0(electron@34.5.8)':
     dependencies:
