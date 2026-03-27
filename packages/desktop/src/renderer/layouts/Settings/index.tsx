@@ -1,9 +1,8 @@
 import { useState, type ComponentType } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
-import { Button } from '@/components/ui/button';
+import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import SettingsNav, { type SettingsSection } from './SettingsNav';
 import GeneralSection from './sections/GeneralSection';
 import SystemSection from './sections/SystemSection';
@@ -19,7 +18,7 @@ const SECTION_COMPONENTS: Record<SettingsSection, ComponentType> = {
   about: AboutSection,
 };
 
-export default function Settings({ onClose }: { onClose: () => void }) {
+export default function Settings() {
   const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
 
@@ -27,18 +26,9 @@ export default function Settings({ onClose }: { onClose: () => void }) {
 
   return (
     <motion.div {...motionPresets.fadeIn} className="flex flex-col h-full">
-      <header className="titlebar-drag flex items-center justify-between h-12 px-4 border-b border-[var(--border)] flex-shrink-0">
-        <h2 className="type-label text-[var(--text-primary)]">{t('common.settings')}</h2>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onClose}
-          className="titlebar-no-drag"
-          aria-label={t('common.close')}
-        >
-          <X size={16} />
-        </Button>
-      </header>
+      <WindowTitlebar
+        left={<h2 className="type-section-title text-[var(--text-primary)]">{t('common.settings')}</h2>}
+      />
 
       <div className="flex flex-1 min-h-0">
         <SettingsNav active={activeSection} onChange={setActiveSection} />

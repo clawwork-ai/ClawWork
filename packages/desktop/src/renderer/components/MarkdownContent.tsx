@@ -66,7 +66,7 @@ function CopyActionButton({ label, copiedLabel, text, className }: CopyActionBut
       aria-label={copied ? copiedLabel : label}
       title={copied ? copiedLabel : label}
       className={cn(
-        'h-7 w-7 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 backdrop-blur-sm',
+        'h-7 w-7 rounded-md border-none bg-transparent shadow-none',
         'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
         className,
       )}
@@ -114,7 +114,7 @@ function SaveActionButton({ className, onSave }: SaveActionButtonProps) {
       size="icon-sm"
       disabled={state === 'saving'}
       className={cn(
-        'h-7 w-7 rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 backdrop-blur-sm',
+        'h-7 w-7 rounded-md border-none bg-transparent shadow-none',
         'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
         state === 'saved' && 'text-[var(--accent)]',
         state === 'error' && 'text-[var(--danger)]',

@@ -10,16 +10,13 @@ import {
   MessageSquare,
   Server,
   Bot,
-  Cpu,
   ArrowUp,
   ArrowDown,
   ChevronRight,
   DollarSign,
   RefreshCw,
   AlertTriangle,
-  MoreHorizontal,
-  FileDown,
-  FolderDown,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
@@ -27,16 +24,11 @@ import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/m
 import { useUiStore } from '@/stores/uiStore';
 import { cn, formatRelativeTime, formatTokenCount, formatCost } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
+import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import ChatMessage from '@/components/ChatMessage';
 import StreamingMessage from '@/components/StreamingMessage';
 import ThinkingIndicator from '@/components/ThinkingIndicator';
@@ -46,16 +38,14 @@ import FilePreviewModal from '@/components/FilePreviewModal';
 import FileBrowser from '../FileBrowser';
 import CronPanel from '@/layouts/CronPanel';
 import logo from '@/assets/logo.png';
-import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import { useUsageStore } from '@/stores/usageStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayDispatcher';
 import DataTable, { type DataTableColumn } from '@/components/data-display/DataTable';
-import MetaRow from '@/components/data-display/MetaRow';
-import StatBlock from '@/components/data-display/StatBlock';
 import EmptyState from '@/components/semantic/EmptyState';
 import StatusTag from '@/components/semantic/StatusTag';
 
 const STICK_TO_BOTTOM_THRESHOLD_PX = 60;
+const MAX_HEADER_TITLE_LENGTH = 120;
 
 interface MainAreaProps {
   onTogglePanel: () => void;
@@ -220,7 +210,15 @@ function WelcomeScreen() {
   );
 }
 
-function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
+function ChatHeader({
+  onTogglePanel,
+  messageLayout,
+  onToggleMessageLayout,
+}: {
+  onTogglePanel: () => void;
+  messageLayout: 'centered' | 'wide';
+  onToggleMessageLayout: () => void;
+}) {
   const { t } = useTranslation();
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
   const updateTaskTitle = useTaskStore((s) => s.updateTaskTitle);
@@ -239,7 +237,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
   }, [activeTask]);
 
   const commitTitleEdit = useCallback(() => {
-    const trimmed = titleDraft.trim();
+    const trimmed = titleDraft.trim().slice(0, MAX_HEADER_TITLE_LENGTH);
     if (activeTask && trimmed && trimmed !== activeTask.title) {
       updateTaskTitle(activeTask.id, trimmed);
     }
@@ -264,15 +262,6 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
     [commitTitleEdit, cancelTitleEdit],
   );
   const rightPanelOpen = useUiStore((s) => s.rightPanelOpen);
-  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
-  const hasMultipleGateways = Object.keys(gatewayInfoMap).length > 1;
-  const gwInfo = activeTask ? gatewayInfoMap[activeTask.gatewayId] : undefined;
-  const agentInfo = useUiStore((s) => {
-    if (!activeTask?.agentId) return undefined;
-    const catalog = s.agentCatalogByGateway[activeTask.gatewayId];
-    if (!catalog || activeTask.agentId === catalog.defaultId) return undefined;
-    return catalog.agents.find((a) => a.id === activeTask.agentId);
-  });
   const sessionUsage = useUsageStore((s) => s.sessionUsage);
   const cost = useUsageStore((s) => s.cost);
   const usageStatus = useUsageStore((s) => s.status);
@@ -292,14 +281,16 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
   const outputTokens = sessionUsage?.output ?? activeTask?.outputTokens ?? null;
   const contextTokens = activeTask?.contextTokens ?? null;
   const sessionCost = sessionUsage?.totalCost ?? null;
-  const hasUsageData =
-    inputTokens != null ||
-    outputTokens != null ||
-    (contextTokens != null && contextTokens > 0) ||
-    (sessionCost != null && sessionCost > 0);
+  const contextUsagePercent =
+    contextTokens != null && contextTokens > 0 ? Math.round((contextTokens / 200_000) * 100) : null;
+  const hasInputSummary = inputTokens != null;
+  const hasOutputSummary = outputTokens != null;
+  const hasContextSummary = contextUsagePercent != null;
+  const hasCostSummary = sessionCost != null && sessionCost > 0;
+  const hasUsageData = hasInputSummary || hasOutputSummary || hasContextSummary || hasCostSummary;
 
   return (
-    <header className="titlebar-drag flex items-center justify-between h-12 px-5 border-b border-[var(--border)] flex-shrink-0">
+    <header className="titlebar-drag flex items-center justify-between px-5 h-[var(--density-toolbar-height)] border-b border-[var(--border)] flex-shrink-0">
       <div className="titlebar-no-drag flex items-center gap-2.5">
         {activeTask ? (
           <>
@@ -307,16 +298,17 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
               <input
                 ref={titleInputRef}
                 value={titleDraft}
-                onChange={(e) => setTitleDraft(e.target.value)}
+                onChange={(e) => setTitleDraft(e.target.value.slice(0, MAX_HEADER_TITLE_LENGTH))}
                 onBlur={commitTitleEdit}
                 onKeyDown={handleTitleKeyDown}
-                className="type-label text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--ring-accent)] rounded px-1.5 py-0.5 outline-none max-w-60"
+                maxLength={MAX_HEADER_TITLE_LENGTH}
+                className="type-label max-w-80 rounded border border-[var(--ring-accent)] bg-[var(--bg-primary)] px-1.5 py-0.5 text-[var(--text-primary)] outline-none"
               />
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h2
-                    className="type-label text-[var(--text-primary)] truncate cursor-pointer"
+                    className="type-section-title max-w-xl cursor-pointer truncate text-[var(--text-primary)]"
                     onDoubleClick={startTitleEdit}
                   >
                     {activeTask.title || t('common.newTask')}
@@ -325,243 +317,162 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
                 <TooltipContent>{t('contextMenu.rename')}</TooltipContent>
               </Tooltip>
             )}
-            <span
-              className={cn(
-                'type-badge rounded-md px-2 py-0.5',
-                activeTask.status === 'active'
-                  ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
-                  : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
-              )}
-            >
-              {activeTask.status === 'active' ? t('common.inProgress') : t('common.completed')}
-            </span>
-            {hasMultipleGateways && gwInfo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]"
-                    style={gwInfo.color ? { borderLeft: `2px solid ${gwInfo.color}` } : undefined}
-                  >
-                    <Server size={10} />
-                    <span className="max-w-24 truncate">{gwInfo.name}</span>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{gwInfo.name}</TooltipContent>
-              </Tooltip>
-            )}
-            {agentInfo && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
-                    {agentInfo.identity?.emoji ? (
-                      <span className="emoji-sm">{agentInfo.identity.emoji}</span>
-                    ) : (
-                      <Bot size={10} />
-                    )}
-                    <span className="max-w-24 truncate">{agentInfo.name ?? agentInfo.id}</span>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>{agentInfo.name ?? agentInfo.id}</TooltipContent>
-              </Tooltip>
-            )}
-            {activeTask?.model && (
-              <span className="type-support inline-flex items-center gap-1 rounded bg-[var(--bg-tertiary)] px-1.5 py-0.5 text-[var(--text-muted)]">
-                <Cpu size={10} />
-                <span className="max-w-24 truncate">{activeTask.model}</span>
-              </span>
-            )}
-            {hasUsageData && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="type-support inline-flex items-center gap-1 rounded px-1 py-0.5 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer">
-                    {inputTokens != null && (
-                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[var(--bg-tertiary)]">
-                        <ArrowUp size={9} />
-                        {formatTokenCount(inputTokens)}
-                      </span>
-                    )}
-                    {outputTokens != null && (
-                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[var(--bg-tertiary)]">
-                        <ArrowDown size={9} />
-                        {formatTokenCount(outputTokens)}
-                      </span>
-                    )}
-                    {contextTokens != null && contextTokens > 0 && (
-                      <span className="px-1 py-0.5 rounded bg-[var(--bg-tertiary)]">
-                        ctx {Math.round((contextTokens / 200_000) * 100)}%
-                      </span>
-                    )}
-                    {sessionCost != null && sessionCost > 0 && (
-                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--accent)]">
-                        <DollarSign size={9} />
-                        {formatCost(sessionCost)}
-                      </span>
-                    )}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-80 max-h-screen overflow-y-auto">
-                  <div className="space-y-3">
-                    {sessionUsage && (
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <StatBlock label={t('usage.sessionCost')} value={formatCost(sessionUsage.totalCost)} accent />
-                          <StatBlock
-                            label={t('usage.totalTokens')}
-                            value={formatTokenCount(sessionUsage.totalTokens)}
-                          />
-                        </div>
-                        <div className="space-y-1 rounded-lg bg-[var(--bg-tertiary)] px-3 py-2">
-                          <MetaRow
-                            label={
-                              <span className="inline-flex items-center gap-1">
-                                <ArrowUp size={10} />
-                                {t('usage.inputTokens')}
-                              </span>
-                            }
-                            value={formatTokenCount(sessionUsage.input)}
-                          />
-                          <MetaRow
-                            label={
-                              <span className="inline-flex items-center gap-1">
-                                <ArrowDown size={10} />
-                                {t('usage.outputTokens')}
-                              </span>
-                            }
-                            value={formatTokenCount(sessionUsage.output)}
-                          />
-                          {sessionUsage.cacheRead > 0 ? (
-                            <MetaRow label={t('usage.cacheRead')} value={formatTokenCount(sessionUsage.cacheRead)} />
-                          ) : null}
-                          {sessionUsage.cacheWrite > 0 ? (
-                            <MetaRow label={t('usage.cacheWrite')} value={formatTokenCount(sessionUsage.cacheWrite)} />
-                          ) : null}
-                        </div>
-                        {contextTokens != null && contextTokens > 0 && (
-                          <div className="space-y-1">
-                            <MetaRow
-                              label={t('rightPanel.contextUsage')}
-                              value={`${Math.round((contextTokens / 200_000) * 100)}%`}
-                            />
-                            <div className="h-1.5 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
-                              <div
-                                className={cn(
-                                  'h-full rounded-full transition-all duration-300',
-                                  contextTokens / 200_000 >= 0.9
-                                    ? 'bg-[var(--danger)]'
-                                    : contextTokens / 200_000 >= 0.7
-                                      ? 'bg-[var(--warning)]'
-                                      : 'bg-[var(--accent)]',
-                                )}
-                                style={{ width: `${Math.min(100, (contextTokens / 200_000) * 100)}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {cost && (
-                      <div className={cn('space-y-2', sessionUsage && 'border-t border-[var(--border)] pt-3')}>
-                        <StatBlock label={t('usage.instanceCost')} value={formatCost(cost.totals.totalCost)} />
-                        <div className="space-y-1 rounded-lg bg-[var(--bg-tertiary)] px-3 py-2">
-                          <MetaRow label={t('usage.inputTokens')} value={formatTokenCount(cost.totals.input)} />
-                          <MetaRow label={t('usage.outputTokens')} value={formatTokenCount(cost.totals.output)} />
-                          {cost.days > 0 ? <MetaRow label={t('usage.period', { days: cost.days })} value="" /> : null}
-                        </div>
-                      </div>
-                    )}
-
-                    {usageStatus && usageStatus.providers.length > 0 && (
-                      <div className="space-y-2 border-t border-[var(--border)] pt-3">
-                        <span className="type-label text-[var(--text-secondary)]">{t('usage.rateLimits')}</span>
-                        {usageStatus.providers.map((provider) => (
-                          <div key={provider.provider} className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                              <span className="type-support text-[var(--text-primary)]">{provider.displayName}</span>
-                              {provider.plan ? <StatusTag tone="accent">{provider.plan}</StatusTag> : null}
-                            </div>
-                            {provider.error && (
-                              <div className="type-meta flex items-center gap-1 text-[var(--danger)]">
-                                <AlertTriangle size={10} />
-                                {provider.error}
-                              </div>
-                            )}
-                            {provider.windows.map((w, i) => (
-                              <div key={i} className="space-y-0.5">
-                                <div className="type-meta flex items-center justify-between text-[var(--text-muted)]">
-                                  <span>{w.label}</span>
-                                  <span className={cn(w.usedPercent >= 90 && 'text-[var(--danger)]')}>
-                                    {Math.round(w.usedPercent)}%
-                                  </span>
-                                </div>
-                                <div className="h-1 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
-                                  <div
-                                    className={cn(
-                                      'h-full rounded-full transition-all duration-300',
-                                      w.usedPercent >= 90
-                                        ? 'bg-[var(--danger)]'
-                                        : w.usedPercent >= 70
-                                          ? 'bg-[var(--warning)]'
-                                          : 'bg-[var(--accent)]',
-                                    )}
-                                    style={{ width: `${Math.min(100, w.usedPercent)}%` }}
-                                  />
-                                </div>
-                                {w.resetAt && (
-                                  <div className="type-meta text-[var(--text-muted)]">
-                                    {t('usage.resetsAt', { time: new Date(w.resetAt).toLocaleTimeString() })}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="flex justify-end border-t border-[var(--border)] pt-2">
-                      <button
-                        onClick={() => fetchUsage(costGatewayId, sessionKey || undefined)}
-                        disabled={usageLoading}
-                        className="p-1 rounded hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer disabled:opacity-50"
-                      >
-                        <RefreshCw size={12} className={cn(usageLoading && 'animate-spin')} />
-                      </button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
           </>
         ) : (
           <h2 className="type-label text-[var(--text-muted)]">ClawWork</h2>
         )}
       </div>
       <div className="titlebar-no-drag flex items-center gap-1">
-        {activeTask && (
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal size={18} />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>{t('mainArea.moreActions')}</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => exportToLocal(activeTask.id)}>
-                <FileDown size={14} />
-                {t('contextMenu.saveToMarkdown')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportToFiles(activeTask.id)}>
-                <FolderDown size={14} />
-                {t('contextMenu.exportToFiles')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {hasUsageData && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="type-meta inline-flex h-8 items-center gap-0 rounded-lg border border-[var(--border-subtle)] px-1 text-[var(--text-secondary)] hover:border-[var(--border)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer">
+                {inputTokens != null && (
+                  <span className="inline-flex items-center gap-0.5 px-1.5">
+                    <ArrowUp size={14} className="text-[var(--text-secondary)]" />
+                    {formatTokenCount(inputTokens)}
+                  </span>
+                )}
+                {hasOutputSummary && (
+                  <>
+                    {hasInputSummary && <span className="h-3.5 w-px bg-[var(--border-subtle)]" />}
+                    <span className="inline-flex items-center gap-0.5 px-1.5">
+                      <ArrowDown size={14} className="text-[var(--text-secondary)]" />
+                      {formatTokenCount(outputTokens)}
+                    </span>
+                  </>
+                )}
+                {hasContextSummary && (
+                  <>
+                    {(hasInputSummary || hasOutputSummary) && <span className="h-3.5 w-px bg-[var(--border-subtle)]" />}
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-0.5 px-1.5',
+                        contextUsagePercent >= 90
+                          ? 'text-[var(--danger)]'
+                          : contextUsagePercent >= 70
+                            ? 'text-[var(--warning)]'
+                            : 'text-[var(--accent)]',
+                      )}
+                    >
+                      <span className="text-[var(--text-secondary)]">{t('rightPanel.contextUsage')}</span>
+                      {contextUsagePercent}%
+                    </span>
+                  </>
+                )}
+                {hasCostSummary && (
+                  <>
+                    {(hasInputSummary || hasOutputSummary || hasContextSummary) && (
+                      <span className="h-3.5 w-px bg-[var(--border-subtle)]" />
+                    )}
+                    <span className="inline-flex items-center gap-0.5 px-1.5 text-[var(--accent)]">
+                      <DollarSign size={14} className="text-[var(--text-secondary)]" />
+                      {formatCost(sessionCost)}
+                    </span>
+                  </>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 max-h-screen overflow-y-auto">
+              <div className="space-y-3">
+                {cost && (
+                  <div className="space-y-2">
+                    <div className="type-label text-[var(--text-secondary)]">
+                      {t('usage.period', { days: cost.days || 30 })}
+                    </div>
+                    <div className="type-meta flex h-8 w-full items-center gap-0 rounded-lg border border-[var(--border-subtle)] px-1 text-[var(--text-secondary)]">
+                      <span className="inline-flex min-w-0 flex-1 items-center gap-0.5 px-1.5 text-[var(--accent)]">
+                        <DollarSign size={14} className="text-[var(--text-secondary)]" />
+                        {formatCost(cost.totals.totalCost)}
+                      </span>
+                      <span className="h-3.5 w-px bg-[var(--border-subtle)]" />
+                      <span className="inline-flex min-w-0 flex-1 items-center gap-0.5 px-1.5">
+                        <ArrowUp size={14} className="text-[var(--text-secondary)]" />
+                        {formatTokenCount(cost.totals.input)}
+                      </span>
+                      <span className="h-3.5 w-px bg-[var(--border-subtle)]" />
+                      <span className="inline-flex min-w-0 flex-1 items-center gap-0.5 px-1.5">
+                        <ArrowDown size={14} className="text-[var(--text-secondary)]" />
+                        {formatTokenCount(cost.totals.output)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {usageStatus && usageStatus.providers.length > 0 && (
+                  <div className="space-y-2 border-t border-[var(--border)] pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="type-label text-[var(--text-secondary)]">{t('usage.rateLimits')}</span>
+                      <button
+                        onClick={() => fetchUsage(costGatewayId, sessionKey || undefined)}
+                        disabled={usageLoading}
+                        className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                      >
+                        <RefreshCw size={12} className={cn(usageLoading && 'animate-spin')} />
+                      </button>
+                    </div>
+                    {usageStatus.providers.map((provider) => (
+                      <div key={provider.provider} className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="type-support text-[var(--text-primary)]">{provider.displayName}</span>
+                          {provider.plan ? <StatusTag tone="accent">{provider.plan}</StatusTag> : null}
+                        </div>
+                        {provider.error && (
+                          <div className="type-meta flex items-center gap-1 text-[var(--danger)]">
+                            <AlertTriangle size={10} />
+                            {provider.error}
+                          </div>
+                        )}
+                        {provider.windows.map((w, i) => (
+                          <div key={i} className="space-y-0.5">
+                            <div className="type-meta flex items-center justify-between text-[var(--text-muted)]">
+                              <span>{w.label}</span>
+                              <span className={cn(w.usedPercent >= 90 && 'text-[var(--danger)]')}>
+                                {Math.round(w.usedPercent)}%
+                              </span>
+                            </div>
+                            <div className="h-1 rounded-full bg-[var(--bg-secondary)] overflow-hidden">
+                              <div
+                                className={cn(
+                                  'h-full rounded-full transition-all duration-300',
+                                  w.usedPercent >= 90
+                                    ? 'bg-[var(--danger)]'
+                                    : w.usedPercent >= 70
+                                      ? 'bg-[var(--warning)]'
+                                      : 'bg-[var(--accent)]',
+                                )}
+                                style={{ width: `${Math.min(100, w.usedPercent)}%` }}
+                              />
+                            </div>
+                            {w.resetAt && (
+                              <div className="type-meta text-[var(--text-muted)]">
+                                {t('usage.resetsAt', { time: new Date(w.resetAt).toLocaleTimeString() })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={messageLayout === 'wide' ? 'secondary' : 'ghost'}
+              size="icon"
+              onClick={onToggleMessageLayout}
+            >
+              <ArrowLeftRight size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {messageLayout === 'wide' ? t('mainArea.messageLayoutCentered') : t('mainArea.messageLayoutWide')}
+          </TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={onTogglePanel}>
@@ -578,6 +489,7 @@ function ChatHeader({ onTogglePanel }: { onTogglePanel: () => void }) {
 function ChatContent() {
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
+  const messageLayout = useUiStore((s) => s.messageLayout);
   const messages = useMessageStore((s) =>
     activeTaskId ? (s.messagesByTask[activeTaskId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
@@ -592,6 +504,7 @@ function ChatContent() {
   const [previewFile, setPreviewFile] = useState<{ path: string; content: string } | null>(null);
   const closeFilePreview = useCallback(() => setPreviewFile(null), []);
   const handleHighlightDone = useCallback(() => setHighlightedMessage(null), [setHighlightedMessage]);
+  const showWelcome = !activeTask || (messages.length === 0 && !activeTurn);
 
   const handleScroll = useCallback(() => {
     const el = viewportRef.current;
@@ -605,26 +518,51 @@ function ChatContent() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, activeTurn, isProcessing]);
 
+  if (showWelcome) {
+    return (
+      <>
+        <div className="flex-1 px-5 pt-4 pb-0 overflow-y-auto">
+          <div
+            className={cn(
+              messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
+            )}
+          >
+            <WelcomeScreen />
+          </div>
+        </div>
+        <ChatInput />
+        <ImageLightbox src={lightboxSrc} onClose={closeLightbox} />
+        <FilePreviewModal file={previewFile} onClose={closeFilePreview} />
+      </>
+    );
+  }
+
   return (
     <>
-      <ScrollArea viewportRef={viewportRef} className="flex-1 px-6 py-4" onScrollCapture={handleScroll}>
-        <div className="max-w-[var(--content-max-width)] mx-auto space-y-1">
-          {!activeTask && <WelcomeScreen />}
-          {activeTask && messages.length === 0 && !activeTurn && <WelcomeScreen />}
-          {messages.map((msg) => (
-            <ChatMessage
-              key={msg.id}
-              message={msg}
-              highlighted={msg.id === highlightedId}
-              onHighlightDone={handleHighlightDone}
-              onImageClick={setLightboxSrc}
-              onFileClick={setPreviewFile}
-            />
+      <ScrollArea viewportRef={viewportRef} className="flex-1 px-5 pt-4 pb-0" onScrollCapture={handleScroll}>
+        <div
+          className={cn(
+            'space-y-3',
+            messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
+          )}
+        >
+          {messages.map((msg, i) => (
+            <div key={msg.id} className={cn(i > 0 && msg.role === 'user' && messages[i - 1].role !== 'user' && 'pt-3')}>
+              <ChatMessage
+                message={msg}
+                messageLayout={messageLayout}
+                highlighted={msg.id === highlightedId}
+                onHighlightDone={handleHighlightDone}
+                onImageClick={setLightboxSrc}
+                onFileClick={setPreviewFile}
+              />
+            </div>
           ))}
           {activeTurn?.finalized && activeTurn.content && (
             <ChatMessage
               key={`turn-${activeTurn.id}`}
               message={activeTurnToMessage(activeTurn, activeTaskId!)}
+              messageLayout={messageLayout}
               highlighted={false}
               onHighlightDone={handleHighlightDone}
               onImageClick={setLightboxSrc}
@@ -638,6 +576,7 @@ function ChatContent() {
                 content={activeTurn.streamingText}
                 thinkingContent={activeTurn.streamingThinking || undefined}
                 toolCalls={activeTurn.toolCalls}
+                messageLayout={messageLayout}
               />
             )}
           <AnimatePresence>
@@ -746,12 +685,16 @@ function ArchivedTasks() {
   ];
 
   return (
-    <div className="flex flex-col h-full pt-14">
-      <header className="flex items-center gap-2.5 h-12 px-5 border-b border-[var(--border)] flex-shrink-0">
-        <Archive size={18} className="text-[var(--text-muted)]" />
-        <h2 className="type-label text-[var(--text-primary)]">{t('leftNav.archivedChats')}</h2>
-        <span className="type-support text-[var(--text-muted)]">({totalArchived})</span>
-      </header>
+    <div className="flex flex-col h-full">
+      <WindowTitlebar
+        left={
+          <div className="flex items-center gap-2.5">
+            <Archive size={18} className="text-[var(--text-muted)]" />
+            <h2 className="type-section-title text-[var(--text-primary)]">{t('leftNav.archivedChats')}</h2>
+            <span className="type-support text-[var(--text-muted)]">({totalArchived})</span>
+          </div>
+        }
+      />
       {totalArchived > 0 && (
         <div className="px-5 py-3 flex-shrink-0">
           <div className="relative max-w-md">
@@ -761,7 +704,7 @@ function ArchivedTasks() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('leftNav.searchTasks')}
-              className="w-full h-[var(--density-control-height)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+              className="w-full h-[var(--density-control-height)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] glow-focus focus:border-transparent transition-all"
             />
           </div>
         </div>
@@ -788,30 +731,35 @@ function ArchivedTasks() {
 
 export default function MainArea({ onTogglePanel }: MainAreaProps) {
   const mainView = useUiStore((s) => s.mainView);
+  const messageLayout = useUiStore((s) => s.messageLayout);
+  const toggleMessageLayout = useUiStore((s) => s.toggleMessageLayout);
+  const activeTaskId = useTaskStore((s) => s.activeTaskId);
 
   return (
     <div className="flex flex-col h-full">
       <ConnectionBanner />
-      <AnimatePresence mode="wait">
-        {mainView === 'files' ? (
-          <motion.div key="files" {...motionPresets.fadeIn} className="flex-1 min-h-0">
-            <FileBrowser />
-          </motion.div>
-        ) : mainView === 'archived' ? (
-          <motion.div key="archived" {...motionPresets.fadeIn} className="flex-1 min-h-0">
-            <ArchivedTasks />
-          </motion.div>
-        ) : mainView === 'cron' ? (
-          <motion.div key="cron" {...motionPresets.fadeIn} className="flex-1 min-h-0">
-            <CronPanel />
-          </motion.div>
-        ) : (
-          <motion.div key="chat" {...motionPresets.fadeIn} className="flex flex-col flex-1 min-h-0">
-            <ChatHeader onTogglePanel={onTogglePanel} />
-            <ChatContent />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mainView === 'files' ? (
+        <div className="flex-1 min-h-0">
+          <FileBrowser />
+        </div>
+      ) : mainView === 'archived' ? (
+        <div className="flex-1 min-h-0">
+          <ArchivedTasks />
+        </div>
+      ) : mainView === 'cron' ? (
+        <div className="flex-1 min-h-0">
+          <CronPanel />
+        </div>
+      ) : (
+        <div key={`chat-${activeTaskId ?? 'welcome'}`} className="flex flex-col flex-1 min-h-0">
+          <ChatHeader
+            onTogglePanel={onTogglePanel}
+            messageLayout={messageLayout}
+            onToggleMessageLayout={toggleMessageLayout}
+          />
+          <ChatContent />
+        </div>
+      )}
     </div>
   );
 }

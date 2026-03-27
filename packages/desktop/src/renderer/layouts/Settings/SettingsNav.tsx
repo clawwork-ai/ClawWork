@@ -24,7 +24,7 @@ export default function SettingsNav({
   const { t } = useTranslation();
 
   return (
-    <nav className="w-44 flex-shrink-0 bg-[var(--bg-secondary)] border-r border-[var(--border-subtle)] py-4 px-3 space-y-1">
+    <nav className="w-44 flex-shrink-0 border-r border-[var(--border-subtle)] py-4 px-3 space-y-1">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = active === item.key;
@@ -35,15 +35,14 @@ export default function SettingsNav({
             onClick={() => onChange(item.key)}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'type-label relative flex items-center gap-2.5 w-full h-9 px-3 rounded-lg transition-colors cursor-pointer',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+              'glow-focus type-label relative flex items-center gap-2.5 w-full h-9 px-3 rounded-lg transition-colors cursor-pointer',
               isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
             )}
           >
             {isActive && (
               <motion.div
                 layoutId="settings-nav-active"
-                className="absolute inset-0 rounded-lg bg-[var(--bg-elevated)] shadow-[var(--shadow-card)] border border-[var(--border-subtle)]"
+                className="absolute inset-0 rounded-lg bg-[var(--bg-hover)] border border-[var(--border-subtle)]"
                 transition={motionSpring.snappy}
               />
             )}

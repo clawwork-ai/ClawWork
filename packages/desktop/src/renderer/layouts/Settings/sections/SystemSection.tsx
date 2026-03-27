@@ -112,8 +112,7 @@ export default function SystemSection() {
 
   return (
     <div>
-      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.system')}</h3>
-      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.systemDesc')}</p>
+      <h3 className="type-section-title mb-4 text-[var(--text-primary)]">{t('settings.system')}</h3>
       <SettingGroup>
         <SettingRow
           label={
@@ -152,7 +151,7 @@ export default function SystemSection() {
                     'type-mono-data w-36 text-center px-2.5 py-1 rounded-md',
                     'bg-[var(--accent-soft)] border border-[var(--accent)]/40',
                     'text-[var(--accent)] outline-none animate-pulse',
-                    'focus:ring-2 focus:ring-[var(--ring-accent)]',
+                    'glow-focus',
                   )}
                 />
               ) : (
@@ -161,7 +160,7 @@ export default function SystemSection() {
                   aria-label={t('settings.quickLaunchShortcut')}
                   onClick={() => setRecordingShortcut(true)}
                   className={cn(
-                    'type-mono-data px-2.5 py-1 rounded-md',
+                    'glow-focus type-mono-data px-2.5 py-1 rounded-md',
                     'bg-[var(--bg-tertiary)] border border-[var(--border)]',
                     'text-[var(--text-primary)] hover:border-[var(--accent)]/40 transition-colors',
                     'cursor-pointer',

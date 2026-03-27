@@ -2,7 +2,6 @@
   "common": {
     "newTask": "새 작업",
     "completed": "완료됨",
-    "inProgress": "진행 중",
     "settings": "설정",
     "fileManager": "파일 관리자",
     "noFiles": "파일이 없습니다",
@@ -16,7 +15,6 @@
     "dark": "다크",
     "light": "라이트",
     "missing": "누락",
-    "moreActions": "추가 작업",
     "switch": "전환",
     "navigate": "이동",
     "select": "선택",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "생성된 파일은 자동으로 보관됩니다.",
     "starOnGithub": "ClawWork가 마음에 드셨나요? GitHub에서 별을 눌러주세요",
     "toggleContextPanel": "컨텍스트 패널 전환",
-    "moreActions": "추가 작업"
+    "messageLayoutWide": "메시지 영역 펼치기",
+    "messageLayoutCentered": "메시지 가운데 정렬로 복귀"
   },
   "settings": {
     "appearance": "외관",
@@ -136,7 +135,6 @@
     "agentsDesc": "연결된 게이트웨이의 AI 에이전트 관리",
     "aboutDesc": "버전, 업데이트, 링크",
     "deviceId": "디바이스 ID",
-    "deviceIdDesc": "이 설치에 고유한 ID입니다. 세션은 디바이스 ID별로 구분됩니다. 다른 기기와 세션을 동기화하려면 이 ID를 해당 기기의 설정 파일에 복사하세요.",
     "devMode": "개발자 모드",
     "devModeSteps": "{{count}}번 더 탭하면 개발자 모드가 활성화됩니다",
     "devModeEnabled": "개발자 모드가 활성화되었습니다",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "작업을 설명하세요…",
     "offlineReadOnly": "오프라인 — 읽기 전용",
-    "poweredBy": "AI는 실수할 수 있습니다. 중요한 정보는 확인하세요.",
-    "offlineHint": "오프라인 — 이전 작업과 파일 열람 가능",
-    "toSend": "{{mod}}↵ 전송",
     "image": "이미지",
     "noModelsAvailable": "사용 가능한 모델이 없습니다",
     "addContextFolder": "@ 파일 참조를 위한 컨텍스트 폴더 추가",
+    "linkLocalFolders": "로컬 디렉터리 연결",
     "slashCommands": "슬래시 명령어",
     "taskContextLimitExceeded": "작업 컨텍스트가 500KB 제한을 초과했습니다",
     "fileContextLimitExceeded": "전체 파일 컨텍스트가 500KB 제한을 초과했습니다",
@@ -394,13 +390,6 @@
     "newRequest": "에이전트가 실행 승인을 요청하고 있습니다"
   },
   "usage": {
-    "sessionCost": "이번 세션",
-    "instanceCost": "인스턴스 합계 (30일)",
-    "inputTokens": "입력",
-    "outputTokens": "출력",
-    "cacheRead": "캐시 읽기",
-    "cacheWrite": "캐시 쓰기",
-    "totalTokens": "총 토큰",
     "period": "최근 {{days}}일",
     "rateLimits": "요청 제한",
     "resetsAt": "{{time}}에 초기화"
@@ -553,5 +542,18 @@
     "toggleFailed": "작업 업데이트에 실패했습니다",
     "deleteFailed": "작업 삭제에 실패했습니다",
     "loadingCatalogs": "카탈로그 로딩 중..."
+  },
+  "commandPalette": {
+    "placeholder": "명령어 입력 또는 검색…",
+    "recentTasks": "최근 작업",
+    "actions": "작업",
+    "activeTasks": "진행 중인 작업",
+    "newTask": "새 작업",
+    "openFiles": "파일 열기",
+    "toggleTheme": "테마 전환",
+    "togglePanels": "패널 전환",
+    "openSettings": "설정 열기",
+    "noResults": "결과 없음",
+    "running": "실행 중"
   }
 }

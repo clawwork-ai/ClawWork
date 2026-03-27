@@ -23,6 +23,9 @@ export default defineConfig({
         '@': resolve('src/renderer'),
       },
     },
+    css: {
+      transformer: 'lightningcss',
+    },
     plugins: [react(), tailwindcss()],
     build: {
       rollupOptions: {

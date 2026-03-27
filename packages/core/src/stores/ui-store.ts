@@ -5,6 +5,7 @@ export type MainView = 'chat' | 'files' | 'archived' | 'cron';
 export type Theme = 'dark' | 'light' | 'auto';
 export type DensityMode = 'compact' | 'comfortable' | 'spacious';
 export type SendShortcut = 'enter' | 'cmdEnter';
+export type MessageLayout = 'centered' | 'wide';
 export type PanelShortcutLeft = 'Comma' | 'BracketLeft';
 export type PanelShortcutRight = 'Period' | 'BracketRight';
 export type GatewayConnectionStatus = 'connected' | 'connecting' | 'disconnected';
@@ -72,6 +73,10 @@ export interface UiState {
   sendShortcut: SendShortcut;
   setSendShortcut: (shortcut: SendShortcut) => void;
 
+  messageLayout: MessageLayout;
+  setMessageLayout: (layout: MessageLayout) => void;
+  toggleMessageLayout: () => void;
+
   searchFocusTrigger: number;
   focusSearch: () => void;
 
@@ -94,6 +99,11 @@ export interface UiState {
 
   devMode: boolean;
   setDevMode: (enabled: boolean) => void;
+
+  commandPaletteOpen: boolean;
+  openCommandPalette: () => void;
+  closeCommandPalette: () => void;
+  toggleCommandPalette: () => void;
 }
 
 export interface UiStoreDeps {
@@ -244,6 +254,18 @@ export function createUiStore(deps: UiStoreDeps) {
       deps.updateSettings({ sendShortcut: shortcut });
     },
 
+    messageLayout: deps.storage.get('cw:messageLayout') === 'wide' ? 'wide' : 'centered',
+    setMessageLayout: (layout) => {
+      deps.storage.set('cw:messageLayout', layout);
+      set({ messageLayout: layout });
+    },
+    toggleMessageLayout: () =>
+      set((s) => {
+        const next = s.messageLayout === 'centered' ? 'wide' : 'centered';
+        deps.storage.set('cw:messageLayout', next);
+        return { messageLayout: next };
+      }),
+
     searchFocusTrigger: 0,
     focusSearch: () => set((s) => ({ searchFocusTrigger: s.searchFocusTrigger + 1 })),
 
@@ -292,5 +314,10 @@ export function createUiStore(deps: UiStoreDeps) {
       deps.updateSettings({ devMode: enabled });
       deps.onRebuildMenu?.();
     },
+
+    commandPaletteOpen: false,
+    openCommandPalette: () => set({ commandPaletteOpen: true }),
+    closeCommandPalette: () => set({ commandPaletteOpen: false }),
+    toggleCommandPalette: () => set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
   }));
 }

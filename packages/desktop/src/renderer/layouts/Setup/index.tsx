@@ -178,7 +178,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
               <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
               <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
             </div>
-            <h1 className="type-page-title text-[var(--text-primary)]">{t('setup.welcome')}</h1>
+            <h1 className="type-section-title text-[var(--text-primary)]">{t('setup.welcome')}</h1>
             <p className="type-body leading-relaxed text-[var(--text-muted)]">
               {step === 'workspace' ? (
                 <>
@@ -332,7 +332,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                           type="button"
                           onClick={() => handleGwAuthModeChange(mode)}
                           className={cn(
-                            'titlebar-no-drag flex-1 h-7 type-label rounded-md transition-colors',
+                            'titlebar-no-drag glow-focus flex-1 h-7 type-label rounded-md transition-colors',
                             gwAuthMode === mode
                               ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
                               : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
@@ -451,7 +451,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                 </div>
                 <button
                   onClick={handleSkipGateway}
-                  className="type-support w-full text-center text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                  className="glow-focus type-support w-full text-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   {t('setup.skipGateway')}
                 </button>

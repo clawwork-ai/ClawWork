@@ -165,7 +165,7 @@ function AgentCard({
                         type="button"
                         onClick={() => onSelectFile(f.name)}
                         className={cn(
-                          'type-support flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
+                          'glow-focus type-support flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
                           'hover:bg-[var(--bg-tertiary)]',
                           selectedFile === f.name
                             ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
@@ -558,10 +558,9 @@ export default function AgentsSection() {
   if (connectedGatewayIds.length === 0) {
     return (
       <div>
-        <div className="mb-1">
+        <div className="mb-4">
           <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.agents')}</h3>
         </div>
-        <p className="type-support mb-4 text-[var(--text-muted)]">{t('settings.agentsDesc')}</p>
         <SettingGroup>
           <EmptyState
             icon={<Server size={24} className="text-[var(--text-muted)]" />}
@@ -575,7 +574,7 @@ export default function AgentsSection() {
   return (
     <>
       <div>
-        <div className="flex items-center justify-between mb-1">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.agents')}</h3>
           <div className="flex items-center gap-2">
             {connectedGatewayIds.length > 1 && (
@@ -591,9 +590,9 @@ export default function AgentsSection() {
                   closeForm();
                 }}
                 className={cn(
-                  'type-label h-8 rounded-md px-2',
+                  'glow-focus type-label h-8 rounded-md px-2',
                   'bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                  'text-[var(--text-primary)] outline-none',
+                  'text-[var(--text-primary)]',
                 )}
               >
                 {connectedGatewayIds.map((gwId) => (
@@ -603,12 +602,13 @@ export default function AgentsSection() {
                 ))}
               </select>
             )}
-            <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
-              {t('settings.addAgent')}
-            </ToolbarButton>
+            {!showForm && (
+              <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
+                {t('settings.addAgent')}
+              </ToolbarButton>
+            )}
           </div>
         </div>
-        <p className="type-support mb-4 text-[var(--text-muted)]">{t('settings.agentsDesc')}</p>
 
         <div className="space-y-2">
           <AnimatePresence>

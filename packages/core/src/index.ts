@@ -66,6 +66,7 @@ export type {
   Theme,
   DensityMode,
   SendShortcut,
+  MessageLayout,
   PanelShortcutLeft,
   PanelShortcutRight,
   GatewayConnectionStatus,

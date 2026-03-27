@@ -170,10 +170,9 @@ export default function AboutSection() {
 
   return (
     <div>
-      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.about')}</h3>
-      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.aboutDesc')}</p>
+      <h3 className="type-section-title mb-4 text-[var(--text-primary)]">{t('settings.about')}</h3>
       <SettingGroup>
-        <div className="space-y-3 px-5 py-4">
+        <div>
           <SettingRow label={t('settings.version')}>
             <span
               className="type-mono-data text-[var(--text-primary)] cursor-default select-none"
@@ -190,12 +189,9 @@ export default function AboutSection() {
             </SettingRow>
           )}
           {deviceId && (
-            <div>
-              <SettingRow label={t('settings.deviceId')}>
-                <span className="type-mono-data select-all text-[var(--text-secondary)]">{deviceId}</span>
-              </SettingRow>
-              <p className="type-support mt-1 text-[var(--text-muted)]">{t('settings.deviceIdDesc')}</p>
-            </div>
+            <SettingRow label={t('settings.deviceId')}>
+              <span className="type-mono-data select-all text-[var(--text-secondary)]">{deviceId}</span>
+            </SettingRow>
           )}
         </div>
 

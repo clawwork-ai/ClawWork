@@ -253,7 +253,7 @@ export default function CronPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="titlebar-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
+      <header className="titlebar-drag flex items-center justify-between px-5 h-[var(--density-toolbar-height)] border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-3">
           <h2 className="type-section-title text-[var(--text-primary)]">{t('cron.title')}</h2>
           {schedulerStatus && (
@@ -312,7 +312,7 @@ export default function CronPanel() {
         </div>
       </header>
 
-      <div className="flex items-center justify-between px-6 py-2 border-b border-[var(--border)] flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-2 border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-1">
           {filterTabs.map((tab) => (
             <button

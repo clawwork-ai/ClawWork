@@ -1,12 +1,9 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/jetbrains-mono';
-@import '@fontsource/instrument-serif';
-@import '@fontsource/instrument-serif/400-italic.css';
 
 @theme {
   --font-family-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace;
-  --font-family-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --font-size-2xs: 11px;
   --font-size-2xs--line-height: 16px;
   --font-size-xs: 13px;
@@ -95,21 +92,6 @@
 
   .type-mono-data {
     font-variant-numeric: tabular-nums;
-  }
-
-  .type-display-serif {
-    font-family: var(--font-family-display);
-    font-size: var(--font-size-2xl);
-    line-height: var(--font-size-2xl--line-height);
-    font-weight: 400;
-    letter-spacing: -0.01em;
-  }
-
-  .type-display-serif-sm {
-    font-family: var(--font-family-display);
-    font-size: var(--font-size-xl);
-    line-height: var(--font-size-xl--line-height);
-    font-weight: 400;
   }
 
   .emoji-sm {

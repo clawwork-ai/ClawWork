@@ -41,6 +41,7 @@ interface UseChatSendOpts {
   setSelectedLocalFiles: Dispatch<SetStateAction<FileIndexEntry[]>>;
   contextFolders: string[];
   stopVoiceInput: () => void;
+  onComposerCleared?: () => void;
 }
 
 export function useChatSend(opts: UseChatSendOpts) {
@@ -56,6 +57,7 @@ export function useChatSend(opts: UseChatSendOpts) {
     setSelectedLocalFiles,
     contextFolders,
     stopVoiceInput,
+    onComposerCleared,
   } = opts;
 
   const { t } = useTranslation();
@@ -155,6 +157,7 @@ export function useChatSend(opts: UseChatSendOpts) {
 
     textarea.value = '';
     textarea.style.height = 'auto';
+    onComposerCleared?.();
     const images = [...pendingImages];
     const taskMentions = [...selectedTasks];
     const artifactMentions = [...selectedArtifacts];
@@ -315,6 +318,7 @@ export function useChatSend(opts: UseChatSendOpts) {
     setSelectedLocalFiles,
     textareaRef,
     t,
+    onComposerCleared,
   ]);
 
   const handleModelQuickSend = useCallback(
@@ -395,6 +399,7 @@ export function useChatSend(opts: UseChatSendOpts) {
       ta.style.height = 'auto';
       ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
       ta.focus();
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
     },
     [textareaRef],
   );

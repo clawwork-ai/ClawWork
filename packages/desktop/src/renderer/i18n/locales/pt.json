@@ -2,7 +2,6 @@
   "common": {
     "newTask": "Nova Tarefa",
     "completed": "Concluída",
-    "inProgress": "Em Andamento",
     "settings": "Configurações",
     "fileManager": "Gerenciador de Arquivos",
     "noFiles": "Nenhum arquivo ainda",
@@ -16,7 +15,6 @@
     "dark": "Escuro",
     "light": "Claro",
     "missing": "Ausente",
-    "moreActions": "Mais ações",
     "switch": "alternar",
     "navigate": "navegar",
     "select": "selecionar",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "Arquivos gerados são arquivados automaticamente.",
     "starOnGithub": "Curtindo o ClawWork? Deixe uma estrela no GitHub",
     "toggleContextPanel": "Alternar painel de contexto",
-    "moreActions": "Mais ações"
+    "messageLayoutWide": "Expandir largura das mensagens",
+    "messageLayoutCentered": "Voltar a centralizar mensagens"
   },
   "settings": {
     "appearance": "Aparência",
@@ -136,7 +135,6 @@
     "agentsDesc": "Gerenciar agentes de IA nos gateways conectados",
     "aboutDesc": "Versão, atualizações e links",
     "deviceId": "ID do Dispositivo",
-    "deviceIdDesc": "Único para esta instalação. As sessões são vinculadas ao ID do Dispositivo. Para sincronizar sessões entre dispositivos, copie este ID para o arquivo de configuração do outro dispositivo.",
     "devMode": "Modo Desenvolvedor",
     "devModeSteps": "Mais {{count}} toque(s) para ativar o Modo Desenvolvedor",
     "devModeEnabled": "Modo Desenvolvedor ativado",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "Descreva sua tarefa…",
     "offlineReadOnly": "Offline — somente leitura",
-    "poweredBy": "A IA pode cometer erros. Verifique informações importantes.",
-    "offlineHint": "Offline — navegue por tarefas e arquivos anteriores",
-    "toSend": "{{mod}}↵ para enviar",
     "image": "Imagem",
     "noModelsAvailable": "Nenhum modelo disponível",
     "addContextFolder": "Adicionar pasta de contexto para referências de arquivo com @",
+    "linkLocalFolders": "Vincular diretórios locais",
     "slashCommands": "Comandos slash",
     "taskContextLimitExceeded": "O contexto da tarefa excede o limite de 500KB",
     "fileContextLimitExceeded": "O contexto total de arquivos excede o limite de 500KB",
@@ -394,13 +390,6 @@
     "newRequest": "O agente está solicitando aprovação de execução"
   },
   "usage": {
-    "sessionCost": "Esta Sessão",
-    "instanceCost": "Total da Instância (30d)",
-    "inputTokens": "Entrada",
-    "outputTokens": "Saída",
-    "cacheRead": "Leitura de cache",
-    "cacheWrite": "Escrita de cache",
-    "totalTokens": "Total de tokens",
     "period": "Últimos {{days}} dias",
     "rateLimits": "Limites de Taxa",
     "resetsAt": "Reinicia às {{time}}"
@@ -553,5 +542,18 @@
     "toggleFailed": "Falha ao atualizar tarefa",
     "deleteFailed": "Falha ao excluir tarefa",
     "loadingCatalogs": "Carregando catálogos..."
+  },
+  "commandPalette": {
+    "placeholder": "Digite um comando ou pesquise…",
+    "recentTasks": "Tarefas recentes",
+    "actions": "Ações",
+    "activeTasks": "Tarefas ativas",
+    "newTask": "Nova tarefa",
+    "openFiles": "Abrir arquivos",
+    "toggleTheme": "Alternar tema",
+    "togglePanels": "Alternar painéis",
+    "openSettings": "Abrir configurações",
+    "noResults": "Sem resultados",
+    "running": "Em execução"
   }
 }

@@ -2,7 +2,6 @@
   "common": {
     "newTask": "New Task",
     "completed": "Completed",
-    "inProgress": "In Progress",
     "settings": "Settings",
     "fileManager": "File Manager",
     "noFiles": "No files yet",
@@ -16,7 +15,6 @@
     "dark": "Dark",
     "light": "Light",
     "missing": "Missing",
-    "moreActions": "More actions",
     "switch": "switch",
     "navigate": "navigate",
     "select": "select",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "Files produced along the way are auto-archived.",
     "starOnGithub": "Enjoying ClawWork? Give us a star on GitHub",
     "toggleContextPanel": "Toggle context panel",
-    "moreActions": "More actions"
+    "messageLayoutWide": "Expand message width",
+    "messageLayoutCentered": "Center message width"
   },
   "settings": {
     "appearance": "Appearance",
@@ -136,7 +135,6 @@
     "agentsDesc": "Manage AI agents on connected gateways",
     "aboutDesc": "Version, updates, and links",
     "deviceId": "Device ID",
-    "deviceIdDesc": "Unique to this installation. Sessions are scoped by Device ID. To sync sessions across devices, copy this ID to the config file on the other device.",
     "devMode": "Developer Mode",
     "devModeSteps": "{{count}} more tap(s) to enable Developer Mode",
     "devModeEnabled": "Developer Mode enabled",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "Describe your task…",
     "offlineReadOnly": "Offline — read-only",
-    "poweredBy": "AI can make mistakes. Check important info.",
-    "offlineHint": "Offline — browse past tasks and files",
-    "toSend": "{{mod}}↵ to send",
     "image": "Image",
     "noModelsAvailable": "No models available",
     "addContextFolder": "Add context folder for @ file references",
+    "linkLocalFolders": "Link local folders",
     "slashCommands": "Slash commands",
     "taskContextLimitExceeded": "Task context exceeds 500KB limit",
     "fileContextLimitExceeded": "Total file context exceeds 500KB limit",
@@ -394,13 +390,6 @@
     "newRequest": "Agent is requesting execution approval"
   },
   "usage": {
-    "sessionCost": "This Session",
-    "instanceCost": "Instance Total (30d)",
-    "inputTokens": "Input",
-    "outputTokens": "Output",
-    "cacheRead": "Cache read",
-    "cacheWrite": "Cache write",
-    "totalTokens": "Total tokens",
     "period": "Last {{days}} days",
     "rateLimits": "Rate Limits",
     "resetsAt": "Resets at {{time}}"
@@ -553,5 +542,18 @@
     "toggleFailed": "Failed to update job",
     "deleteFailed": "Failed to delete job",
     "loadingCatalogs": "Loading catalogs..."
+  },
+  "commandPalette": {
+    "placeholder": "Type a command or search…",
+    "recentTasks": "Recent Tasks",
+    "actions": "Actions",
+    "activeTasks": "Active Tasks",
+    "newTask": "New Task",
+    "openFiles": "Open Files",
+    "toggleTheme": "Toggle Theme",
+    "togglePanels": "Toggle Panels",
+    "openSettings": "Open Settings",
+    "noResults": "No results",
+    "running": "Running"
   }
 }

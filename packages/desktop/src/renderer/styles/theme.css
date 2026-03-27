@@ -6,6 +6,19 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   :root {
     --surface-qr-bg: #ffffff;
   }
@@ -61,19 +74,20 @@
     --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* Glass + depth */
-    --glass-bg: rgba(36, 36, 36, 0.65);
-    --glass-bg-heavy: rgba(28, 28, 28, 0.82);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(28, 28, 28, 0.9);
+    --glass-bg-heavy: rgba(28, 28, 28, 0.96);
+    --glass-border: rgba(255, 255, 255, 0.06);
     --glass-highlight: rgba(255, 255, 255, 0.04);
-    --glass-blur: 12px;
-    --glass-blur-heavy: 24px;
-    --glass-saturate: 1.3;
+    --glass-blur: 24px;
+    --glass-blur-heavy: 40px;
+    --glass-saturate: 180%;
     --glass-noise-opacity: 0.03;
     --shadow-inset-soft: inset 0 1px 0 rgba(255, 255, 255, 0.04);
     --shadow-inset-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-    --shadow-card-layered: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
-    --shadow-floating-layered: 0 4px 12px rgba(0, 0, 0, 0.3), 0 12px 36px rgba(0, 0, 0, 0.25);
-    --shadow-elevated-layered: 0 2px 6px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.2);
+    --shadow-card-layered: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
+    --shadow-floating-layered:
+      0 2px 4px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.15);
+    --shadow-elevated-layered: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.25);
 
     /* 3-layer glow */
     --glow-ring: 0 0 0 1px rgba(15, 253, 13, 0.35);
@@ -156,19 +170,20 @@
     --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* Glass + depth */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-bg-heavy: rgba(250, 250, 250, 0.85);
+    --glass-bg: rgba(250, 250, 250, 0.92);
+    --glass-bg-heavy: rgba(255, 255, 255, 0.97);
     --glass-border: rgba(0, 0, 0, 0.06);
     --glass-highlight: rgba(255, 255, 255, 0.5);
-    --glass-blur: 12px;
-    --glass-blur-heavy: 24px;
-    --glass-saturate: 1.2;
+    --glass-blur: 20px;
+    --glass-blur-heavy: 32px;
+    --glass-saturate: 150%;
     --glass-noise-opacity: 0.02;
     --shadow-inset-soft: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    --shadow-inset-card: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-    --shadow-card-layered: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
-    --shadow-floating-layered: 0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 36px rgba(0, 0, 0, 0.06);
-    --shadow-elevated-layered: 0 2px 6px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-inset-card: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+    --shadow-card-layered: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.03);
+    --shadow-floating-layered:
+      0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08), 0 16px 48px rgba(0, 0, 0, 0.06);
+    --shadow-elevated-layered: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
 
     /* 3-layer glow */
     --glow-ring: 0 0 0 1px rgba(11, 138, 10, 0.3);
@@ -401,9 +416,12 @@
   }
 
   .surface-card {
-    background-color: var(--surface-card);
+    background-color: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-card);
+  }
+
+  :root[data-theme='light'] .surface-card {
+    background-color: rgba(0, 0, 0, 0.02);
   }
 
   .surface-floating {
@@ -433,33 +451,25 @@
 
   /* Glass utilities */
   .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    background: var(--surface-floating-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-inset-soft);
   }
 
   .glass-heavy {
-    background: var(--glass-bg-heavy);
-    backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-saturate));
+    background: var(--surface-dialog-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-inset-soft);
   }
 
   .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    background: var(--surface-floating-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-inset-card), var(--shadow-card-layered);
   }
 
   .glass-command {
-    background: var(--glass-bg-heavy);
-    backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-saturate));
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(var(--glass-saturate));
+    background: var(--surface-dialog-bg);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-inset-soft), var(--shadow-floating-layered);
   }
@@ -507,7 +517,8 @@
     --_glow-inset: var(--glow-inset-danger);
   }
 
-  .glow-focus:focus-visible {
+  .glow-focus:focus-visible,
+  .glow-focus:focus {
     outline: none;
     box-shadow: var(--glow-ring), var(--glow-diffuse), var(--glow-inset);
   }
@@ -524,7 +535,7 @@
 @layer base {
   :root,
   :root[data-density='comfortable'] {
-    --density-toolbar-height: 36px;
+    --density-toolbar-height: 44px;
     --density-list-item-height: 40px;
     --density-panel-gap: 16px;
     --density-table-row-padding-y: 8px;
@@ -535,7 +546,7 @@
   }
 
   :root[data-density='compact'] {
-    --density-toolbar-height: 32px;
+    --density-toolbar-height: 38px;
     --density-list-item-height: 36px;
     --density-panel-gap: 12px;
     --density-table-row-padding-y: 6px;
@@ -546,7 +557,7 @@
   }
 
   :root[data-density='spacious'] {
-    --density-toolbar-height: 40px;
+    --density-toolbar-height: 48px;
     --density-list-item-height: 44px;
     --density-panel-gap: 20px;
     --density-table-row-padding-y: 10px;
@@ -572,6 +583,10 @@
 
 .animate-highlight {
   animation: msg-highlight 2s ease-out;
+}
+
+.animate-stream-cursor {
+  animation: stream-pulse 1.2s ease-in-out infinite;
 }
 
 @supports not (backdrop-filter: blur(1px)) {

@@ -11,6 +11,7 @@
   },
   "author": "clawwork-ai",
   "scripts": {
+    "clean": "node ./scripts/clean.mjs",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "build:mac": "electron-vite build && electron-builder --mac --arm64",
@@ -27,7 +28,6 @@
     "@clawwork/shared": "workspace:*",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@fontsource/instrument-serif": "^5.2.8",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",

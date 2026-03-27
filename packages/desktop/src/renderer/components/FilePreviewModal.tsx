@@ -2,7 +2,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FileCode, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motionDuration } from '@/styles/design-tokens';
+import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
 
 interface FilePreviewModalProps {
   file: { path: string; content: string } | null;
@@ -44,13 +44,10 @@ export default function FilePreviewModal({ file, onClose }: FilePreviewModalProp
         >
           <div className="absolute inset-4 flex items-center justify-center">
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: motionDuration.normal }}
+              {...motionPresets.dialogEnter}
               className={cn(
                 'relative flex w-full max-w-4xl max-h-full flex-col',
-                'bg-[var(--bg-elevated)] rounded-xl border border-[var(--border-subtle)]',
+                'glass-heavy rounded-xl border border-[var(--border-subtle)]',
                 'shadow-[var(--shadow-floating)] overflow-hidden',
               )}
               onClick={(e) => e.stopPropagation()}

@@ -9,34 +9,18 @@ interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAr
 const ScrollArea = React.forwardRef<React.ComponentRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
   ({ className, children, viewportRef, ...props }, ref) => (
     <ScrollAreaPrimitive.Root ref={ref} className={cn('relative overflow-hidden', className)} {...props}>
-      <ScrollAreaPrimitive.Viewport ref={viewportRef} className="h-full w-full rounded-[inherit]">
+      <ScrollAreaPrimitive.Viewport ref={viewportRef} className="h-full w-full rounded-[inherit] [&>div]:!block">
         {children}
       </ScrollAreaPrimitive.Viewport>
-      <ScrollBar />
-      <ScrollAreaPrimitive.Corner />
+      <ScrollAreaPrimitive.ScrollAreaScrollbar orientation="vertical" className="!w-0 !p-0 !m-0">
+        <ScrollAreaPrimitive.ScrollAreaThumb />
+      </ScrollAreaPrimitive.ScrollAreaScrollbar>
+      <ScrollAreaPrimitive.ScrollAreaScrollbar orientation="horizontal" className="!h-0 !p-0 !m-0">
+        <ScrollAreaPrimitive.ScrollAreaThumb />
+      </ScrollAreaPrimitive.ScrollAreaScrollbar>
     </ScrollAreaPrimitive.Root>
   ),
 );
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
-
-const ScrollBar = React.forwardRef<
-  React.ComponentRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
->(({ className, orientation = 'vertical', ...props }, ref) => (
-  <ScrollAreaPrimitive.ScrollAreaScrollbar
-    ref={ref}
-    orientation={orientation}
-    className={cn(
-      'flex touch-none select-none transition-opacity duration-150 opacity-0 data-[state=visible]:opacity-100',
-      orientation === 'vertical' && 'h-full w-1.5 border-l border-l-transparent p-px',
-      orientation === 'horizontal' && 'h-1.5 flex-col border-t border-t-transparent p-px',
-      className,
-    )}
-    {...props}
-  >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-[var(--scrollbar-thumb)]" />
-  </ScrollAreaPrimitive.ScrollAreaScrollbar>
-));
-ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 
 export { ScrollArea };

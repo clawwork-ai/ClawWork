@@ -29,6 +29,14 @@ export const useUsageStore = create<UsageState>((set, get) => ({
 
   fetchUsage: async (gatewayId: string, sessionKey?: string) => {
     if (!gatewayId) return;
+    if (
+      typeof window.clawwork.getUsageStatus !== 'function' ||
+      typeof window.clawwork.getUsageCost !== 'function' ||
+      (sessionKey && typeof window.clawwork.getSessionUsage !== 'function')
+    ) {
+      set({ loading: false, error: null, sessionUsage: null });
+      return;
+    }
     set({ loading: true, error: null });
     try {
       const skipInstance = Date.now() - instanceFetchedAt < INSTANCE_CACHE_MS && get().status != null;

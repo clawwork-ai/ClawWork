@@ -86,7 +86,7 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
                   className={cn(
                     'w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left',
                     'transition-colors hover:bg-[var(--bg-hover)]',
-                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ring-accent)]',
+                    'focus-visible:outline-none glow-focus',
                   )}
                 >
                   <Icon size={15} className="mt-0.5 flex-shrink-0 text-[var(--text-muted)]" />

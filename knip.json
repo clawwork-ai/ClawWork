@@ -19,19 +19,17 @@
       "ignoreDependencies": [
         "@fontsource-variable/inter",
         "@fontsource-variable/jetbrains-mono",
-        "@fontsource/instrument-serif",
         "tailwindcss",
         "autoprefixer",
         "postcss"
       ]
     },
     "packages/pwa": {
-      "entry": ["src/main.tsx", "vite.config.ts"],
       "project": ["src/**/*.{ts,tsx}"],
       "ignoreDependencies": ["@fontsource-variable/inter", "@fontsource-variable/jetbrains-mono", "tailwindcss"]
     },
     "website": {}
   },
-  "ignore": ["keynote/**", "packages/desktop/src/renderer/components/ActivityBars.tsx"],
+  "ignore": ["keynote/**"],
   "exclude": ["unlisted"]
 }

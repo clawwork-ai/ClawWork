@@ -18,7 +18,7 @@ export default function Toggle({
       onClick={() => onChange(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+        'focus-visible:outline-none glow-focus',
         checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-tertiary)] border border-[var(--border)]',
       )}
     >

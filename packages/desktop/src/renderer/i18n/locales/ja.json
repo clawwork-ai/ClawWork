@@ -2,7 +2,6 @@
   "common": {
     "newTask": "新規タスク",
     "completed": "完了",
-    "inProgress": "進行中",
     "settings": "設定",
     "fileManager": "ファイルマネージャー",
     "noFiles": "ファイルがありません",
@@ -16,7 +15,6 @@
     "dark": "ダーク",
     "light": "ライト",
     "missing": "不明",
-    "moreActions": "その他の操作",
     "switch": "切替",
     "navigate": "移動",
     "select": "選択",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "生成されたファイルは自動的にアーカイブされます。",
     "starOnGithub": "ClawWork を気に入っていただけましたか？GitHub でスターをお願いします",
     "toggleContextPanel": "コンテキストパネルの切替",
-    "moreActions": "その他の操作"
+    "messageLayoutWide": "メッセージ幅を広げる",
+    "messageLayoutCentered": "メッセージを中央寄せに戻す"
   },
   "settings": {
     "appearance": "外観",
@@ -136,7 +135,6 @@
     "agentsDesc": "接続中のゲートウェイの AI エージェントを管理",
     "aboutDesc": "バージョン、アップデート、リンク",
     "deviceId": "デバイス ID",
-    "deviceIdDesc": "このインストール固有の ID です。セッションはデバイス ID ごとに管理されます。デバイス間でセッションを共有するには、この ID を別のデバイスの設定ファイルにコピーしてください。",
     "devMode": "開発者モード",
     "devModeSteps": "あと {{count}} 回タップで開発者モードを有効化",
     "devModeEnabled": "開発者モードが有効になりました",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "タスクを入力…",
     "offlineReadOnly": "オフライン — 読み取り専用",
-    "poweredBy": "AI は間違えることがあります。重要な情報はご確認ください。",
-    "offlineHint": "オフライン — 過去のタスクとファイルを閲覧できます",
-    "toSend": "{{mod}}↵ で送信",
     "image": "画像",
     "noModelsAvailable": "利用可能なモデルがありません",
     "addContextFolder": "@ ファイル参照用のコンテキストフォルダを追加",
+    "linkLocalFolders": "ローカルフォルダを関連付け",
     "slashCommands": "スラッシュコマンド",
     "taskContextLimitExceeded": "タスクコンテキストが 500KB の上限を超えています",
     "fileContextLimitExceeded": "ファイルコンテキストの合計が 500KB の上限を超えています",
@@ -394,13 +390,6 @@
     "newRequest": "エージェントが実行の承認をリクエストしています"
   },
   "usage": {
-    "sessionCost": "このセッション",
-    "instanceCost": "インスタンス合計 (30日)",
-    "inputTokens": "入力",
-    "outputTokens": "出力",
-    "cacheRead": "キャッシュ読み取り",
-    "cacheWrite": "キャッシュ書き込み",
-    "totalTokens": "合計トークン",
     "period": "直近 {{days}} 日間",
     "rateLimits": "レート制限",
     "resetsAt": "{{time}} にリセット"
@@ -553,5 +542,18 @@
     "toggleFailed": "ジョブの更新に失敗しました",
     "deleteFailed": "ジョブの削除に失敗しました",
     "loadingCatalogs": "カタログを読み込み中..."
+  },
+  "commandPalette": {
+    "placeholder": "コマンドを入力または検索…",
+    "recentTasks": "最近のタスク",
+    "actions": "アクション",
+    "activeTasks": "実行中のタスク",
+    "newTask": "新しいタスク",
+    "openFiles": "ファイルを開く",
+    "toggleTheme": "テーマを切替",
+    "togglePanels": "パネルを切替",
+    "openSettings": "設定を開く",
+    "noResults": "結果なし",
+    "running": "実行中"
   }
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "node scripts/ensure-electron.mjs",
     "prepare": "husky",
+    "clean": "pnpm --filter @clawwork/desktop clean",
     "dev": "pnpm --filter @clawwork/desktop dev",
     "dev:website": "pnpm --filter @clawwork/website dev",
     "dev:pwa": "pnpm --filter @clawwork/pwa dev",

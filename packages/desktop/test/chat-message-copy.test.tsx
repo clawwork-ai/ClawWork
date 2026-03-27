@@ -101,7 +101,7 @@ describe('chat message copy actions', () => {
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith(message.content);
   });
 
-  it('does not show the assistant copy button for user messages', () => {
+  it('shows a copy button for user messages and copies the full message', async () => {
     const message = buildMessage({
       role: 'user',
       content: 'local draft',
@@ -110,7 +110,15 @@ describe('chat message copy actions', () => {
     const { container, unmount } = render(<ChatMessage message={message} />);
     cleanups.push(unmount);
 
-    expect(container.querySelector('button[aria-label="Copy message"]')).toBeNull();
+    const button = container.querySelector('button[aria-label="Copy message"]');
+
+    expect(button).not.toBeNull();
+
+    await act(async () => {
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith(message.content);
   });
 
   it('shows a copy button for fenced code blocks and copies only the code', async () => {

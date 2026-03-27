@@ -26,9 +26,13 @@ export default function ToolsCatalog({ groups, onToolSelect }: ToolsCatalogProps
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton variant="ghost" size="sm" icon={<Wrench size={14} className="flex-shrink-0" />}>
-          <span>{t('rightPanel.toolCount', { count: totalTools })}</span>
-        </ToolbarButton>
+        <ToolbarButton
+          variant="ghost"
+          size="sm"
+          icon={<Wrench size={14} className="flex-shrink-0" />}
+          className="rounded-lg text-[var(--text-secondary)]"
+          title={t('rightPanel.toolCount', { count: totalTools })}
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="max-h-96 w-72 overflow-y-auto">
         {groups.map((group, gi) => (

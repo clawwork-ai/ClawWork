@@ -89,6 +89,12 @@ export const motion = {
     exit: { opacity: 0, y: 16, scale: 0.98 },
     transition: { ...motionSpring.panelSettle },
   },
+  collapse: {
+    initial: { opacity: 0, height: 0 },
+    animate: { opacity: 1, height: 'auto' },
+    exit: { opacity: 0, height: 0 },
+    transition: { duration: motionDuration.normal },
+  },
 } as const;
 
 export const commandPaletteMotion = {

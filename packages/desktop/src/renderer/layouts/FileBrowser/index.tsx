@@ -19,6 +19,7 @@ import EmptyState from '@/components/semantic/EmptyState';
 import ListItem from '@/components/semantic/ListItem';
 import SectionCard from '@/components/semantic/SectionCard';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
+import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 
 function sortArtifacts(list: Artifact[], sortBy: 'date' | 'name' | 'type'): Artifact[] {
   const sorted = [...list];
@@ -196,38 +197,40 @@ export default function FileBrowser() {
   return (
     <div className="flex h-full">
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="titlebar-drag flex items-center justify-between px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
-          <h2 className="type-section-title text-[var(--text-primary)]">{t('common.fileManager')}</h2>
-          <div className="titlebar-no-drag flex items-center gap-2">
-            <select
-              value={filterTaskId ?? ''}
-              onChange={(e) => setFilterTaskId(e.target.value || null)}
-              className={cn(
-                'h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'type-label text-[var(--text-secondary)] outline-none cursor-pointer',
-              )}
-            >
-              <option value="">{t('fileBrowser.allTasks')}</option>
-              {taskIdsWithArtifacts.map((id) => (
-                <option key={id} value={id}>
-                  {taskMap.get(id) ?? id}
-                </option>
-              ))}
-            </select>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'name' | 'type')}
-              className={cn(
-                'h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                'type-label text-[var(--text-secondary)] outline-none cursor-pointer',
-              )}
-            >
-              <option value="date">{t('fileBrowser.sortByDate')}</option>
-              <option value="name">{t('fileBrowser.sortByName')}</option>
-              <option value="type">{t('fileBrowser.sortByType')}</option>
-            </select>
-          </div>
-        </header>
+        <WindowTitlebar
+          left={<h2 className="type-section-title text-[var(--text-primary)]">{t('common.fileManager')}</h2>}
+          right={
+            <>
+              <select
+                value={filterTaskId ?? ''}
+                onChange={(e) => setFilterTaskId(e.target.value || null)}
+                className={cn(
+                  'glow-focus h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                  'type-label text-[var(--text-secondary)] cursor-pointer',
+                )}
+              >
+                <option value="">{t('fileBrowser.allTasks')}</option>
+                {taskIdsWithArtifacts.map((id) => (
+                  <option key={id} value={id}>
+                    {taskMap.get(id) ?? id}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'name' | 'type')}
+                className={cn(
+                  'glow-focus h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                  'type-label text-[var(--text-secondary)] cursor-pointer',
+                )}
+              >
+                <option value="date">{t('fileBrowser.sortByDate')}</option>
+                <option value="name">{t('fileBrowser.sortByName')}</option>
+                <option value="type">{t('fileBrowser.sortByType')}</option>
+              </select>
+            </>
+          }
+        />
 
         <div className="titlebar-no-drag px-6 py-3 border-b border-[var(--border)] flex-shrink-0">
           <div className="relative">
@@ -255,7 +258,7 @@ export default function FileBrowser() {
               <button
                 onClick={() => setSearchQuery('')}
                 aria-label={t('common.close')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+                className="glow-focus absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X size={14} />
               </button>

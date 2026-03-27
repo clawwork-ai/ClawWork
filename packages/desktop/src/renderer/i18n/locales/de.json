@@ -2,7 +2,6 @@
   "common": {
     "newTask": "Neue Aufgabe",
     "completed": "Abgeschlossen",
-    "inProgress": "In Bearbeitung",
     "settings": "Einstellungen",
     "fileManager": "Dateiverwaltung",
     "noFiles": "Noch keine Dateien",
@@ -16,7 +15,6 @@
     "dark": "Dunkel",
     "light": "Hell",
     "missing": "Fehlt",
-    "moreActions": "Weitere Aktionen",
     "switch": "Wechseln",
     "navigate": "Navigieren",
     "select": "Auswaehlen",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "Dabei erzeugte Dateien werden automatisch archiviert.",
     "starOnGithub": "ClawWork gefaellt Ihnen? Geben Sie uns einen Stern auf GitHub",
     "toggleContextPanel": "Kontextbereich ein-/ausblenden",
-    "moreActions": "Weitere Aktionen"
+    "messageLayoutWide": "Nachrichtenbereich verbreitern",
+    "messageLayoutCentered": "Nachrichten wieder zentrieren"
   },
   "settings": {
     "appearance": "Darstellung",
@@ -136,7 +135,6 @@
     "agentsDesc": "KI-Agents auf verbundenen Gateways verwalten",
     "aboutDesc": "Version, Updates und Links",
     "deviceId": "Geraete-ID",
-    "deviceIdDesc": "Eindeutig fuer diese Installation. Sitzungen sind an die Geraete-ID gebunden. Um Sitzungen geraeteuebergreifend zu synchronisieren, kopieren Sie diese ID in die Konfigurationsdatei des anderen Geraets.",
     "devMode": "Entwicklermodus",
     "devModeSteps": "Noch {{count}} Mal tippen, um den Entwicklermodus zu aktivieren",
     "devModeEnabled": "Entwicklermodus aktiviert",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "Beschreiben Sie Ihre Aufgabe…",
     "offlineReadOnly": "Offline — Nur-Lese-Modus",
-    "poweredBy": "KI kann Fehler machen. Pruefen Sie wichtige Informationen.",
-    "offlineHint": "Offline — Vergangene Aufgaben und Dateien durchstoebern",
-    "toSend": "{{mod}}↵ zum Senden",
     "image": "Bild",
     "noModelsAvailable": "Keine Modelle verfuegbar",
     "addContextFolder": "Kontextordner fuer @-Dateiverweise hinzufuegen",
+    "linkLocalFolders": "Lokale Ordner verknuepfen",
     "slashCommands": "Slash-Befehle",
     "taskContextLimitExceeded": "Aufgabenkontext ueberschreitet 500-KB-Limit",
     "fileContextLimitExceeded": "Dateikontext ueberschreitet 500-KB-Limit",
@@ -394,13 +390,6 @@
     "newRequest": "Agent fordert Ausfuehrungsgenehmigung an"
   },
   "usage": {
-    "sessionCost": "Diese Sitzung",
-    "instanceCost": "Instanz gesamt (30 T.)",
-    "inputTokens": "Eingabe",
-    "outputTokens": "Ausgabe",
-    "cacheRead": "Cache-Lesen",
-    "cacheWrite": "Cache-Schreiben",
-    "totalTokens": "Tokens gesamt",
     "period": "Letzte {{days}} Tage",
     "rateLimits": "Ratenlimits",
     "resetsAt": "Zuruecksetzung um {{time}}"
@@ -553,5 +542,18 @@
     "toggleFailed": "Job konnte nicht aktualisiert werden",
     "deleteFailed": "Job konnte nicht geloescht werden",
     "loadingCatalogs": "Kataloge werden geladen…"
+  },
+  "commandPalette": {
+    "placeholder": "Befehl eingeben oder suchen…",
+    "recentTasks": "Letzte Aufgaben",
+    "actions": "Aktionen",
+    "activeTasks": "Aktive Aufgaben",
+    "newTask": "Neue Aufgabe",
+    "openFiles": "Dateien öffnen",
+    "toggleTheme": "Design wechseln",
+    "togglePanels": "Panels umschalten",
+    "openSettings": "Einstellungen öffnen",
+    "noResults": "Keine Ergebnisse",
+    "running": "Läuft"
   }
 }

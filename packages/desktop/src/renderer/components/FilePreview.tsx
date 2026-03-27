@@ -111,7 +111,7 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
   }, [artifact.localPath]);
 
   return (
-    <motion.div className="flex flex-col h-full" {...motionPresets.slideIn}>
+    <motion.div className="glass-card flex flex-col h-full" {...motionPresets.slideIn}>
       <header className="flex items-center justify-between gap-2 px-4 h-11 border-b border-[var(--border)] flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {ext && (

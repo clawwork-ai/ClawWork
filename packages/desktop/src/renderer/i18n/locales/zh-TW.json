@@ -2,7 +2,6 @@
   "common": {
     "newTask": "新任務",
     "completed": "已完成",
-    "inProgress": "進行中",
     "settings": "設定",
     "fileManager": "檔案管理",
     "noFiles": "尚無檔案",
@@ -16,7 +15,6 @@
     "dark": "深色",
     "light": "淺色",
     "missing": "缺少",
-    "moreActions": "更多操作",
     "switch": "切換",
     "navigate": "導覽",
     "select": "選取",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "過程中產生的檔案會自動歸檔。",
     "starOnGithub": "喜歡 ClawWork 嗎？在 GitHub 上給我們一顆星",
     "toggleContextPanel": "切換上下文面板",
-    "moreActions": "更多操作"
+    "messageLayoutWide": "鋪開訊息區域",
+    "messageLayoutCentered": "切回置中訊息區域"
   },
   "settings": {
     "appearance": "外觀",
@@ -136,7 +135,6 @@
     "agentsDesc": "管理已連線 Gateway 上的 AI 代理",
     "aboutDesc": "版本、更新與連結",
     "deviceId": "裝置 ID",
-    "deviceIdDesc": "此安裝的唯一識別碼。工作階段按裝置 ID 區分。如需跨裝置同步工作階段，請將此 ID 複製到另一台裝置的設定檔。",
     "devMode": "開發者模式",
     "devModeSteps": "再點擊 {{count}} 次開啟開發者模式",
     "devModeEnabled": "開發者模式已開啟",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "描述你的任務…",
     "offlineReadOnly": "離線 — 唯讀模式",
-    "poweredBy": "AI 可能出錯，請查核重要資訊。",
-    "offlineHint": "離線 — 瀏覽過往任務與檔案",
-    "toSend": "{{mod}}↵ 傳送",
     "image": "圖片",
     "noModelsAvailable": "沒有可用的模型",
     "addContextFolder": "新增上下文資料夾以使用 @ 檔案參照",
+    "linkLocalFolders": "關聯目錄",
     "slashCommands": "斜線指令",
     "taskContextLimitExceeded": "任務上下文超過 500KB 限制",
     "fileContextLimitExceeded": "檔案上下文總計超過 500KB 限制",
@@ -394,13 +390,6 @@
     "newRequest": "代理正在請求執行核准"
   },
   "usage": {
-    "sessionCost": "本次工作階段",
-    "instanceCost": "實例總計（30 天）",
-    "inputTokens": "輸入",
-    "outputTokens": "輸出",
-    "cacheRead": "快取讀取",
-    "cacheWrite": "快取寫入",
-    "totalTokens": "Token 總計",
     "period": "最近 {{days}} 天",
     "rateLimits": "速率限制",
     "resetsAt": "{{time}} 重設"
@@ -553,5 +542,18 @@
     "toggleFailed": "更新工作失敗",
     "deleteFailed": "刪除工作失敗",
     "loadingCatalogs": "載入目錄中…"
+  },
+  "commandPalette": {
+    "placeholder": "輸入命令或搜尋…",
+    "recentTasks": "最近任務",
+    "actions": "操作",
+    "activeTasks": "進行中的任務",
+    "newTask": "新建任務",
+    "openFiles": "開啟檔案",
+    "toggleTheme": "切換主題",
+    "togglePanels": "切換面板",
+    "openSettings": "開啟設定",
+    "noResults": "無結果",
+    "running": "執行中"
   }
 }

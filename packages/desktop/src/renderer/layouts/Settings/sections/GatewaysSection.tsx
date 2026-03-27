@@ -302,7 +302,7 @@ function GatewayForm({
                 type="button"
                 onClick={() => handleAuthModeChange(mode)}
                 className={cn(
-                  'type-label flex-1 h-7 rounded-md transition-colors',
+                  'glow-focus type-label flex-1 h-7 rounded-md transition-colors',
                   authMode === mode
                     ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
@@ -586,13 +586,14 @@ export default function GatewaysSection() {
   return (
     <>
       <div>
-        <div className="flex items-center justify-between mb-1">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.gateways')}</h3>
-          <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
-            {t('settings.addGateway')}
-          </ToolbarButton>
+          {!showForm && (
+            <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
+              {t('settings.addGateway')}
+            </ToolbarButton>
+          )}
         </div>
-        <p className="type-support mb-4 text-[var(--text-muted)]">{t('settings.gatewaysDesc')}</p>
 
         <div className="space-y-2">
           <AnimatePresence>

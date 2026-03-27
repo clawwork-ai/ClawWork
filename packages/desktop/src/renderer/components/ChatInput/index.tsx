@@ -4,24 +4,21 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Send,
   Square,
-  Paperclip,
   X,
   ChevronDown,
-  Cpu,
-  Brain,
   Mic,
   Loader2,
   TerminalSquare,
-  Minimize2,
-  RotateCcw,
   File,
   FileCode,
-  FolderPlus,
+  FolderOpen,
   ListTodo,
+  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { cn, modKey } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
+import ToolbarButton from '@/components/semantic/ToolbarButton';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -29,7 +26,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
@@ -57,6 +53,7 @@ export default function ChatInput() {
   const reduced = useReducedMotion();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [canSend, setCanSend] = useState(false);
 
   const sendShortcut = useUiStore((s) => s.sendShortcut);
   const mainView = useUiStore((s) => s.mainView);
@@ -64,14 +61,8 @@ export default function ChatInput() {
 
   const { pendingImages, setPendingImages, handleFileSelect, removeImage, handlePaste } = useImageAttachments();
 
-  const {
-    contextFolders,
-    contextFileCount,
-    localFilesForPicker,
-    handleAddContextFolder,
-    handleRemoveContextFolder,
-    loadLocalFiles,
-  } = useContextFolders();
+  const { contextFolders, localFilesForPicker, handleAddContextFolder, handleRemoveContextFolder, loadLocalFiles } =
+    useContextFolders();
 
   const {
     slashMenuVisible,
@@ -117,6 +108,10 @@ export default function ChatInput() {
 
   const [whisperAvailable, setWhisperAvailable] = useState(false);
   useEffect(() => {
+    if (typeof window.clawwork.checkWhisper !== 'function') {
+      setWhisperAvailable(false);
+      return;
+    }
     window.clawwork.checkWhisper().then((r) => setWhisperAvailable(r.available));
   }, []);
 
@@ -154,8 +149,6 @@ export default function ChatInput() {
     handleSend,
     handleModelQuickSend,
     handleThinkingQuickSend,
-    handleCompact,
-    handleReset,
     handleAbort,
     handleToolSelect,
   } = useChatSend({
@@ -170,6 +163,7 @@ export default function ChatInput() {
     setSelectedLocalFiles,
     contextFolders,
     stopVoiceInput: () => stopVoiceInput(),
+    onComposerCleared: () => setCanSend(false),
   });
 
   const {
@@ -344,15 +338,17 @@ export default function ChatInput() {
     if (!textarea) return;
     textarea.style.height = 'auto';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+    setCanSend(Boolean(textarea.value.trim()) || pendingImages.length > 0);
     if (argPickerVisible) closeArgPicker();
     updateSlashMenu();
     updateMentionPicker();
-  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateMentionPicker]);
+  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateMentionPicker, pendingImages.length]);
 
   const voiceActive = isVoiceListening || isVoiceTranscribing;
   const disabled = isOffline;
   const placeholder = isOffline ? t('chatInput.offlineReadOnly') : t('chatInput.describeTask');
   const voiceTooltip = !isVoiceSupported ? t('voiceInput.unsupportedTooltip') : t('voiceInput.tooltip');
+  const composerModelLabel = (currentModelEntry?.name ?? modelLabel).replace(/^[^/]+\//, '');
 
   const prevTranscribingRef = useRef(false);
   useEffect(() => {
@@ -375,6 +371,11 @@ export default function ChatInput() {
     toast.error(t('voiceInput.recognitionFailed'));
   }, [voiceErrorCode, t]);
 
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    setCanSend(Boolean(textarea?.value.trim()) || pendingImages.length > 0);
+  }, [pendingImages.length]);
+
   return (
     <div className="flex-shrink-0 px-6 pb-5">
       <div className="max-w-[var(--content-max-width)] mx-auto">
@@ -384,7 +385,7 @@ export default function ChatInput() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex gap-2 mb-2 overflow-x-auto pb-1"
+              className="mb-2 inline-flex max-w-full gap-2 overflow-x-auto overflow-y-visible px-1 pt-2 pb-1"
             >
               {pendingImages.map((img, i) => (
                 <motion.div
@@ -392,17 +393,18 @@ export default function ChatInput() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="relative flex-shrink-0 group"
+                  className="group relative flex-shrink-0 pt-1 pr-1"
                 >
-                  <img
-                    src={img.previewUrl}
-                    alt={img.file.name}
-                    className="h-16 w-16 rounded-lg object-cover border border-[var(--border-subtle)]"
-                  />
+                  <div className="relative overflow-hidden rounded-lg border border-[var(--border-subtle)] shadow-[var(--shadow-card)]">
+                    <img src={img.previewUrl} alt={img.file.name} className="h-16 w-16 object-cover" />
+                    <span className="type-support absolute bottom-0 left-0 right-0 bg-[var(--overlay-scrim)] px-1 text-center truncate text-[var(--text-muted)]">
+                      {img.file.name}
+                    </span>
+                  </div>
                   <button
                     onClick={() => removeImage(i)}
                     className={cn(
-                      'absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full',
+                      'absolute top-0 right-0 h-5 w-5 rounded-full',
                       'bg-[var(--bg-elevated)] border border-[var(--border-subtle)]',
                       'flex items-center justify-center',
                       'opacity-0 group-hover:opacity-100 transition-opacity',
@@ -411,167 +413,11 @@ export default function ChatInput() {
                   >
                     <X size={12} />
                   </button>
-                  <span className="type-support absolute bottom-0 left-0 right-0 rounded-b-lg bg-[var(--overlay-scrim)] px-1 text-center truncate text-[var(--text-muted)]">
-                    {img.file.name}
-                  </span>
                 </motion.div>
               ))}
             </motion.div>
           )}
         </AnimatePresence>
-
-        {!isOffline && (
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={cn(
-                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-                    'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                    'hover:bg-[var(--bg-hover)] transition-colors',
-                  )}
-                >
-                  <Cpu size={16} className="flex-shrink-0" />
-                  <span className="max-w-24 truncate">{modelLabel}</span>
-                  {currentModelEntry?.reasoning && (
-                    <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">R</span>
-                  )}
-                  {currentModelEntry?.contextWindow && (
-                    <span className="type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
-                      {formatContextWindow(currentModelEntry.contextWindow)}
-                    </span>
-                  )}
-                  <ChevronDown size={14} className="opacity-50" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {Object.entries(modelsByProvider).map(([provider, models]) => (
-                  <DropdownMenuSub key={provider}>
-                    <DropdownMenuSubTrigger>
-                      <span>{provider}</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      {models.map((m) => (
-                        <DropdownMenuItem
-                          key={m.id}
-                          onClick={() => handleModelQuickSend(m.id)}
-                          className={cn(m.id === currentModel && 'font-medium text-[var(--accent)]')}
-                        >
-                          <span className="truncate">{m.name ?? m.id}</span>
-                          {m.reasoning && (
-                            <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">
-                              R
-                            </span>
-                          )}
-                          {m.contextWindow && (
-                            <span className="ml-auto pl-2 type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
-                              {formatContextWindow(m.contextWindow)}
-                            </span>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuSub>
-                ))}
-                {modelCatalog.length === 0 && (
-                  <DropdownMenuItem disabled>
-                    <span className="text-[var(--text-muted)] italic">{t('chatInput.noModelsAvailable')}</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenuSeparator className="h-4 w-px mx-0.5" />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className={cn(
-                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-                    'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                    'hover:bg-[var(--bg-hover)] transition-colors',
-                    currentThinking !== 'off' && 'text-[var(--accent)]',
-                  )}
-                >
-                  <Brain size={16} className="flex-shrink-0" />
-                  <span>{t(THINKING_LABEL_KEYS[currentThinking])}</span>
-                  <ChevronDown size={14} className="opacity-50" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {THINKING_LEVELS.map((level) => (
-                  <DropdownMenuItem
-                    key={level}
-                    onClick={() => handleThinkingQuickSend(level)}
-                    className={cn(level === currentThinking && 'font-medium text-[var(--accent)]')}
-                  >
-                    {t(THINKING_LABEL_KEYS[level])}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenuSeparator className="h-4 w-px mx-0.5" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className={cn(
-                    'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-                    'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                    'hover:bg-[var(--bg-hover)] transition-colors',
-                  )}
-                  onClick={() => setDashboardOpen(true)}
-                >
-                  <TerminalSquare size={16} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top">{t('slashDashboard.tooltip')}</TooltipContent>
-            </Tooltip>
-
-            {toolsCatalog?.groups && toolsCatalog.groups.length > 0 && (
-              <>
-                <DropdownMenuSeparator className="h-4 w-px mx-0.5" />
-                <ToolsCatalog groups={toolsCatalog.groups} onToolSelect={handleToolSelect} />
-              </>
-            )}
-
-            {activeTask && (
-              <div className="ml-auto flex items-center gap-0.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className={cn(
-                        'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                        'hover:bg-[var(--bg-hover)] transition-colors',
-                      )}
-                      onClick={handleCompact}
-                    >
-                      <Minimize2 size={16} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">{t('contextMenu.compactSession')}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className={cn(
-                        'type-label inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                        'hover:bg-[var(--bg-hover)] transition-colors',
-                      )}
-                      onClick={handleReset}
-                    >
-                      <RotateCcw size={16} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">{t('contextMenu.resetSession')}</TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-          </div>
-        )}
 
         <div className="relative">
           {slashMenuVisible && (
@@ -616,11 +462,8 @@ export default function ChatInput() {
 
           <div
             className={cn(
-              'flex items-end gap-2',
-              'bg-[var(--bg-elevated)] rounded-2xl p-3.5',
-              'border border-[var(--border-subtle)]',
-              'shadow-[var(--shadow-elevated)]',
-              'ring-accent-focus transition-all duration-200',
+              'glass-heavy rounded-3xl border border-[var(--border)] shadow-[var(--shadow-floating-layered)]',
+              'ring-accent-focus transition-all duration-200 hover:border-[var(--border-accent)] focus-within:border-[var(--border-accent)]',
               isOffline && 'opacity-60',
             )}
           >
@@ -633,74 +476,350 @@ export default function ChatInput() {
               onChange={handleFileSelect}
             />
 
-            <motion.div
-              whileHover={reduced ? undefined : motionPresets.scale.whileHover}
-              whileTap={reduced ? undefined : motionPresets.scale.whileTap}
-              transition={motionPresets.scale.transition}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={disabled}
-                className="rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                <Paperclip size={18} />
-              </Button>
-            </motion.div>
+            <div className="px-4 pt-3 pb-3">
+              <div className="relative">
+                {(selectedTasks.length > 0 || selectedArtifacts.length > 0 || selectedLocalFiles.length > 0) && (
+                  <div className="flex flex-wrap gap-1.5 pb-2">
+                    {selectedLocalFiles.map((f) => (
+                      <span
+                        key={f.absolutePath}
+                        className={cn(
+                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
+                          'bg-[var(--accent)]/10 text-[var(--accent)]',
+                        )}
+                      >
+                        <FileCode size={14} className="flex-shrink-0" />
+                        {f.relativePath}
+                        <button
+                          onClick={() => removeSelectedLocalFile(f.absolutePath)}
+                          className="ml-0.5 opacity-50 hover:opacity-100"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedTasks.map((task) => (
+                      <span
+                        key={`task-${task.id}`}
+                        className={cn(
+                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
+                          'bg-[var(--accent)]/10 text-[var(--accent)]',
+                        )}
+                      >
+                        <ListTodo size={14} className="flex-shrink-0" />
+                        {task.title}
+                        <button
+                          onClick={() => removeSelectedTask(task.id)}
+                          className="ml-0.5 opacity-50 hover:opacity-100"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    {selectedArtifacts.map((a) => (
+                      <span
+                        key={a.id}
+                        className={cn(
+                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
+                          'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+                        )}
+                      >
+                        <File size={14} className="flex-shrink-0" />
+                        {a.name}
+                        <button
+                          onClick={() => removeSelectedArtifact(a.id)}
+                          className="ml-0.5 opacity-50 hover:opacity-100"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <textarea
+                  ref={textareaRef}
+                  rows={2}
+                  placeholder={placeholder}
+                  disabled={disabled || isVoiceTranscribing}
+                  onKeyDown={handleKeyDown}
+                  onKeyUp={handleVoiceKeyUp}
+                  onInput={handleInput}
+                  onPaste={handlePaste}
+                  onClick={updateSlashMenu}
+                  className={cn(
+                    'w-full resize-none bg-transparent',
+                    'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
+                    'min-h-11 outline-none max-h-48 leading-6 disabled:opacity-50',
+                    voiceActive && 'invisible',
+                  )}
+                />
+                <AnimatePresence>
+                  {voiceActive && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: motionDuration.normal }}
+                      className="absolute inset-0 flex items-center gap-2.5"
+                    >
+                      {isVoiceListening && (
+                        <>
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
+                          </span>
+                          <span className="type-body text-[var(--text-secondary)]">
+                            {t('voiceInput.listeningStatus')}
+                          </span>
+                        </>
+                      )}
+                      {isVoiceTranscribing && (
+                        <>
+                          <Loader2 size={14} className="animate-spin text-[var(--accent)]" />
+                          <span className="type-body text-[var(--text-secondary)]">{t('voiceInput.transcribing')}</span>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-            <div className="flex-1 relative min-h-6">
-              {(selectedTasks.length > 0 || selectedArtifacts.length > 0 || selectedLocalFiles.length > 0) && (
-                <div className="flex flex-wrap gap-1.5 pb-2">
-                  {selectedLocalFiles.map((f) => (
-                    <span
-                      key={f.absolutePath}
-                      className={cn(
-                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                        'bg-[var(--accent)]/10 text-[var(--accent)]',
-                      )}
+              {!isOffline && (
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <motion.div
+                      whileHover={reduced ? undefined : motionPresets.scale.whileHover}
+                      whileTap={reduced ? undefined : motionPresets.scale.whileTap}
+                      transition={motionPresets.scale.transition}
                     >
-                      <FileCode size={14} className="flex-shrink-0" />
-                      {f.relativePath}
-                      <button
-                        onClick={() => removeSelectedLocalFile(f.absolutePath)}
-                        className="ml-0.5 opacity-50 hover:opacity-100"
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={disabled}
+                        className="rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                       >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-                  {selectedTasks.map((task) => (
+                        <Plus size={18} />
+                      </Button>
+                    </motion.div>
+
+                    <div className="flex items-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <ToolbarButton
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-lg border-none px-2 text-[var(--text-secondary)] shadow-none"
+                            title={currentModelEntry?.name ?? modelLabel}
+                          >
+                            <span className="max-w-36 truncate">{composerModelLabel}</span>
+                            {currentModelEntry?.reasoning && (
+                              <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">
+                                R
+                              </span>
+                            )}
+                            {currentModelEntry?.contextWindow && (
+                              <span className="type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
+                                {formatContextWindow(currentModelEntry.contextWindow)}
+                              </span>
+                            )}
+                            <ChevronDown size={14} className="opacity-50" />
+                          </ToolbarButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          {Object.entries(modelsByProvider).map(([provider, models]) => (
+                            <DropdownMenuSub key={provider}>
+                              <DropdownMenuSubTrigger>
+                                <span>{provider}</span>
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                {models.map((m) => (
+                                  <DropdownMenuItem
+                                    key={m.id}
+                                    onClick={() => handleModelQuickSend(m.id)}
+                                    className={cn(m.id === currentModel && 'font-medium text-[var(--accent)]')}
+                                  >
+                                    <span className="truncate">{m.name ?? m.id}</span>
+                                    {m.reasoning && (
+                                      <span className="type-badge rounded bg-[var(--accent)]/15 px-1 py-px text-[var(--accent)]">
+                                        R
+                                      </span>
+                                    )}
+                                    {m.contextWindow && (
+                                      <span className="ml-auto pl-2 type-badge rounded bg-[var(--info)]/15 px-1 py-px text-[var(--info)]">
+                                        {formatContextWindow(m.contextWindow)}
+                                      </span>
+                                    )}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                          ))}
+                          {modelCatalog.length === 0 && (
+                            <DropdownMenuItem disabled>
+                              <span className="text-[var(--text-muted)] italic">
+                                {t('chatInput.noModelsAvailable')}
+                              </span>
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    <div className="flex items-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <ToolbarButton
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                              'rounded-lg border-none px-2 text-[var(--text-secondary)] shadow-none',
+                              currentThinking !== 'off' && 'text-[var(--accent)]',
+                            )}
+                            title={t(THINKING_LABEL_KEYS[currentThinking])}
+                          >
+                            <span>{t(THINKING_LABEL_KEYS[currentThinking])}</span>
+                            <ChevronDown size={14} className="opacity-50" />
+                          </ToolbarButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          {THINKING_LEVELS.map((level) => (
+                            <DropdownMenuItem
+                              key={level}
+                              onClick={() => handleThinkingQuickSend(level)}
+                              className={cn(level === currentThinking && 'font-medium text-[var(--accent)]')}
+                            >
+                              {t(THINKING_LABEL_KEYS[level])}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            variant={isVoiceListening ? 'soft' : 'ghost'}
+                            size="icon"
+                            onClick={() => {
+                              if (isVoiceListening) {
+                                stopVoiceInput();
+                                return;
+                              }
+                              void startVoiceInput();
+                            }}
+                            disabled={disabled}
+                            className={cn(
+                              'rounded-xl',
+                              isVoiceListening && 'text-[var(--accent)]',
+                              !isVoiceListening && 'text-[var(--text-muted)] hover:text-[var(--text-primary)]',
+                            )}
+                          >
+                            <Mic size={18} />
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>{voiceTooltip}</TooltipContent>
+                    </Tooltip>
+                    <AnimatePresence mode="wait">
+                      {isGenerating ? (
+                        <motion.div
+                          key="stop"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: motionDuration.normal }}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="danger"
+                                size="icon"
+                                onClick={handleAbort}
+                                disabled={aborting}
+                                className="rounded-xl"
+                              >
+                                <Square size={16} fill="currentColor" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t('chatInput.stopGenerating')}</TooltipContent>
+                          </Tooltip>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="send"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: motionDuration.normal }}
+                          whileHover={reduced ? undefined : motionPresets.scale.whileHover}
+                          whileTap={reduced ? undefined : motionPresets.scale.whileTap}
+                        >
+                          <Button
+                            variant={canSend ? 'default' : 'secondary'}
+                            size="icon"
+                            onClick={handleSend}
+                            disabled={disabled || !canSend}
+                            className={cn(
+                              'rounded-2xl',
+                              canSend
+                                ? 'bg-[var(--accent)] text-[var(--accent-foreground)] hover:bg-[var(--accent-hover)]'
+                                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-muted)]',
+                            )}
+                          >
+                            <Send size={18} />
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {(!isOffline || contextFolders.length > 0 || activeTask) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {!isOffline && (
+              <div className="flex items-center gap-1.5 px-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ToolbarButton
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDashboardOpen(true)}
+                      icon={<TerminalSquare size={14} className="flex-shrink-0" />}
+                      className="rounded-lg text-[var(--text-secondary)]"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{t('slashDashboard.tooltip')}</TooltipContent>
+                </Tooltip>
+
+                {toolsCatalog?.groups && toolsCatalog.groups.length > 0 && (
+                  <ToolsCatalog groups={toolsCatalog.groups} onToolSelect={handleToolSelect} />
+                )}
+              </div>
+            )}
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {contextFolders.length > 0 && (
+                <div className="flex min-w-0 max-w-xl items-center gap-1.5 overflow-x-auto py-0.5">
+                  {contextFolders.map((folder) => (
                     <span
-                      key={`task-${task.id}`}
+                      key={folder}
                       className={cn(
-                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                        'bg-[var(--accent)]/10 text-[var(--accent)]',
+                        'type-mono-data inline-flex max-w-48 flex-shrink-0 items-center gap-1 rounded-full px-2 py-1',
+                        'border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
                       )}
                     >
-                      <ListTodo size={14} className="flex-shrink-0" />
-                      {task.title}
+                      <span className="truncate">{folder.split('/').pop()}</span>
                       <button
-                        onClick={() => removeSelectedTask(task.id)}
-                        className="ml-0.5 opacity-50 hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-                  {selectedArtifacts.map((a) => (
-                    <span
-                      key={a.id}
-                      className={cn(
-                        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                        'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
-                      )}
-                    >
-                      <File size={14} className="flex-shrink-0" />
-                      {a.name}
-                      <button
-                        onClick={() => removeSelectedArtifact(a.id)}
-                        className="ml-0.5 opacity-50 hover:opacity-100"
+                        onClick={() => handleRemoveContextFolder(folder)}
+                        className="flex-shrink-0 opacity-50 transition-opacity hover:opacity-100"
                       >
                         <X size={12} />
                       </button>
@@ -708,169 +827,26 @@ export default function ChatInput() {
                   ))}
                 </div>
               )}
-              <textarea
-                ref={textareaRef}
-                rows={1}
-                placeholder={placeholder}
-                disabled={disabled || isVoiceTranscribing}
-                onKeyDown={handleKeyDown}
-                onKeyUp={handleVoiceKeyUp}
-                onInput={handleInput}
-                onPaste={handlePaste}
-                onClick={updateSlashMenu}
-                className={cn(
-                  'w-full resize-none bg-transparent',
-                  'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
-                  'outline-none max-h-40 disabled:opacity-50',
-                  voiceActive && 'invisible',
-                )}
-              />
-              <AnimatePresence>
-                {voiceActive && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: motionDuration.normal }}
-                    className="absolute inset-0 flex items-center gap-2.5"
-                  >
-                    {isVoiceListening && (
-                      <>
-                        <span className="relative flex h-2.5 w-2.5">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-60" />
-                          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
-                        </span>
-                        <span className="type-body text-[var(--text-secondary)]">
-                          {t('voiceInput.listeningStatus')}
-                        </span>
-                      </>
-                    )}
-                    {isVoiceTranscribing && (
-                      <>
-                        <Loader2 size={14} className="animate-spin text-[var(--accent)]" />
-                        <span className="type-body text-[var(--text-secondary)]">{t('voiceInput.transcribing')}</span>
-                      </>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <div className="flex items-center gap-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Button
-                      variant={isVoiceListening ? 'soft' : 'ghost'}
-                      size="icon"
-                      onClick={() => {
-                        if (isVoiceListening) {
-                          stopVoiceInput();
-                          return;
-                        }
-                        void startVoiceInput();
-                      }}
+              <div className="flex items-center gap-1.5 px-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <ToolbarButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleAddContextFolder}
                       disabled={disabled}
-                      className={cn(
-                        'rounded-xl',
-                        isVoiceListening && 'text-[var(--accent)]',
-                        !isVoiceListening && 'text-[var(--text-muted)] hover:text-[var(--text-primary)]',
-                      )}
+                      className="rounded-lg text-[var(--text-secondary)]"
                     >
-                      <Mic size={18} />
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{voiceTooltip}</TooltipContent>
-              </Tooltip>
+                      {t('chatInput.linkLocalFolders')}
+                      <FolderOpen size={14} className="flex-shrink-0" />
+                    </ToolbarButton>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{t('chatInput.addContextFolder')}</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
-            <AnimatePresence mode="wait">
-              {isGenerating ? (
-                <motion.div
-                  key="stop"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: motionDuration.normal }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="danger"
-                        size="icon"
-                        onClick={handleAbort}
-                        disabled={aborting}
-                        className="rounded-xl"
-                      >
-                        <Square size={16} fill="currentColor" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t('chatInput.stopGenerating')}</TooltipContent>
-                  </Tooltip>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="send"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: motionDuration.normal }}
-                  whileHover={reduced ? undefined : motionPresets.scale.whileHover}
-                  whileTap={reduced ? undefined : motionPresets.scale.whileTap}
-                >
-                  <Button variant="soft" size="icon" onClick={handleSend} disabled={disabled} className="rounded-xl">
-                    <Send size={18} />
-                  </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
-        </div>
-
-        <div className="flex items-center mt-2 gap-1.5 min-h-6">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleAddContextFolder}
-                disabled={disabled}
-                className={cn(
-                  'type-support inline-flex flex-shrink-0 items-center gap-1 rounded-lg px-1.5 py-1',
-                  'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                  'hover:bg-[var(--bg-hover)] transition-colors',
-                )}
-              >
-                <FolderPlus size={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top">{t('chatInput.addContextFolder')}</TooltipContent>
-          </Tooltip>
-          {contextFolders.map((folder) => (
-            <span
-              key={folder}
-              className={cn(
-                'type-mono-data inline-flex max-w-48 flex-shrink-0 items-center gap-1 rounded-md px-2 py-1',
-                'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
-              )}
-            >
-              <span className="truncate">{folder.split('/').pop()}</span>
-              <button
-                onClick={() => handleRemoveContextFolder(folder)}
-                className="opacity-50 hover:opacity-100 flex-shrink-0"
-              >
-                <X size={12} />
-              </button>
-            </span>
-          ))}
-          {contextFolders.length > 0 && contextFileCount > 0 && (
-            <span className="type-mono-data flex-shrink-0 text-[var(--text-muted)]">{contextFileCount} files</span>
-          )}
-          <p className="type-support flex-1 text-right text-[var(--text-muted)]">
-            {isOffline
-              ? t('chatInput.offlineHint')
-              : sendShortcut === 'cmdEnter'
-                ? t('chatInput.poweredBy') + ' · ' + t('chatInput.toSend', { mod: modKey })
-                : t('chatInput.poweredBy')}
-          </p>
-        </div>
+        )}
       </div>
       <VoiceIntroDialog open={isVoiceIntroOpen} onConfirm={confirmVoiceIntro} onCancel={dismissVoiceIntro} />
       <SlashCommandDashboard

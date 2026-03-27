@@ -9,18 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Plus,
-  Search,
-  FolderOpen,
-  Settings,
-  Archive,
-  Server,
-  ChevronDown,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Clock,
-} from 'lucide-react';
+import { Plus, Search, FolderOpen, Settings, Archive, PanelLeftClose, PanelLeftOpen, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
@@ -28,15 +17,9 @@ import { useUiStore } from '@/stores/uiStore';
 import { useTaskContextMenu, TaskContextMenuPopover, type SessionActions } from '@/components/ContextMenu';
 import SearchResults, { type SearchResult } from '@/components/SearchResults';
 import { cn } from '@/lib/utils';
-import { motionDuration } from '@/styles/design-tokens';
+import { motionDuration, motion as motionPresets } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
   Dialog,
@@ -48,9 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import TaskItem from './TaskItem';
-import ConnectionStatus from './ConnectionStatus';
 import type { TaskStatus } from '@clawwork/shared';
-import ToolbarButton from '@/components/semantic/ToolbarButton';
 import EmptyState from '@/components/semantic/EmptyState';
 
 type ConfirmAction = 'reset' | 'delete' | null;
@@ -77,7 +58,7 @@ function IconButton({
           onClick={onClick}
           className={cn(
             'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md transition-colors relative',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+            'focus-visible:outline-none glow-focus',
             'active:scale-95',
             className,
           )}
@@ -109,7 +90,7 @@ function NavButton({
       onClick={onClick}
       className={cn(
         'titlebar-no-drag type-label relative flex w-full items-center gap-2.5 rounded-md px-3 py-2 transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+        'focus-visible:outline-none glow-focus',
         'active:scale-[0.98]',
         active
           ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
@@ -139,21 +120,11 @@ export default function LeftNav() {
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const gwStatusMap = useUiStore((s) => s.gatewayStatusMap);
-  const gwInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const hasUpdate = useUiStore((s) => s.hasUpdate);
   const leftNavCollapsed = useUiStore((s) => s.leftNavCollapsed);
   const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
   const focusSearch = useUiStore((s) => s.focusSearch);
-  const connectedGateways = Object.values(gwInfoMap).filter((gw) => gwStatusMap[gw.id] === 'connected');
-  const hasMultipleGateways = connectedGateways.length > 1;
   const searchFocusTrigger = useUiStore((s) => s.searchFocusTrigger);
-
-  const gwStatusValues = Object.values(gwStatusMap);
-  const aggregatedGwStatus: 'connected' | 'connecting' | 'disconnected' = gwStatusValues.some((s) => s === 'connected')
-    ? 'connected'
-    : gwStatusValues.some((s) => s === 'connecting')
-      ? 'connecting'
-      : 'disconnected';
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [confirmTaskId, setConfirmTaskId] = useState('');
@@ -279,7 +250,7 @@ export default function LeftNav() {
       <TooltipTrigger asChild>
         <button
           onClick={toggleLeftNavCollapsed}
-          className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)] active:scale-95"
+          className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors focus-visible:outline-none glow-focus active:scale-95"
         >
           {leftNavCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
         </button>
@@ -328,40 +299,45 @@ export default function LeftNav() {
   if (leftNavCollapsed) {
     return (
       <div className="flex flex-col h-full items-center py-2 gap-1 overflow-hidden">
-        <div className="flex-shrink-0 flex items-center justify-center w-full h-12">{CollapseToggleButton}</div>
+        <div className="flex-shrink-0 flex flex-col items-center gap-1 w-full">{CollapseToggleButton}</div>
 
-        <IconButton
-          icon={Plus}
-          tooltip={t('common.newTask')}
-          onClick={() => startNewTask()}
-          className="bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80"
-        />
+        <div className="flex flex-col items-center gap-0.5">
+          <IconButton
+            icon={Plus}
+            tooltip={t('common.newTask')}
+            onClick={() => startNewTask()}
+            className="bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80"
+          />
+          <IconButton
+            icon={Search}
+            tooltip={t('leftNav.searchTasks')}
+            onClick={() => {
+              toggleLeftNavCollapsed();
+              focusSearch();
+            }}
+            className="text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
+          />
+          <IconButton
+            icon={FolderOpen}
+            tooltip={t('common.fileManager')}
+            onClick={() => setMainView('files')}
+            className={
+              mainView === 'files'
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+          />
+        </div>
 
-        <IconButton
-          icon={Search}
-          tooltip={t('leftNav.searchTasks')}
-          onClick={() => {
-            toggleLeftNavCollapsed();
-            focusSearch();
-          }}
-          className="text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
-        />
-
-        <IconButton
-          icon={FolderOpen}
-          tooltip={t('common.fileManager')}
-          onClick={() => setMainView('files')}
-          className={
-            mainView === 'files'
-              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-          }
-        />
-
-        <div className="w-6 h-px bg-[var(--border)] my-1" />
+        <div className="w-6 h-px bg-[var(--border)]" />
 
         <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col items-center gap-0.5 px-1.5">
+          <motion.div
+            variants={motionPresets.staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="flex flex-col items-center gap-0.5 px-1.5"
+          >
             {activeTasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -383,50 +359,48 @@ export default function LeftNav() {
                 collapsed
               />
             ))}
-          </div>
+          </motion.div>
         </ScrollArea>
 
-        <div className="w-6 h-px bg-[var(--border)] my-1" />
+        <div className="w-6 h-px bg-[var(--border)]" />
 
-        <IconButton
-          icon={Clock}
-          tooltip={t('leftNav.scheduledTasks')}
-          onClick={() => setMainView('cron')}
-          className={
-            mainView === 'cron'
-              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-          }
-        />
-
-        <IconButton
-          icon={Archive}
-          tooltip={t('leftNav.archivedChats')}
-          onClick={() => setMainView('archived')}
-          className={
-            mainView === 'archived'
-              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-          }
-        />
-
-        <IconButton
-          icon={Settings}
-          tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
-          onClick={() => setSettingsOpen(!settingsOpen)}
-          className={
-            settingsOpen
-              ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
-          }
-          badge={
-            hasUpdate ? (
-              <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
-            ) : undefined
-          }
-        />
-
-        <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed />
+        <div className="flex flex-col items-center gap-0.5">
+          <IconButton
+            icon={Clock}
+            tooltip={t('leftNav.scheduledTasks')}
+            onClick={() => setMainView('cron')}
+            className={
+              mainView === 'cron'
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+          />
+          <IconButton
+            icon={Archive}
+            tooltip={t('leftNav.archivedChats')}
+            onClick={() => setMainView('archived')}
+            className={
+              mainView === 'archived'
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+          />
+          <IconButton
+            icon={Settings}
+            tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={
+              settingsOpen
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+            badge={
+              hasUpdate ? (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
+              ) : undefined
+            }
+          />
+        </div>
 
         {overlays}
       </div>
@@ -434,44 +408,21 @@ export default function LeftNav() {
   }
 
   return (
-    <div className="flex flex-col h-full pt-14 relative">
-      <div className="absolute top-[8px] right-2 z-[51]">{CollapseToggleButton}</div>
-      <div className="px-4 pb-3 space-y-2 flex-shrink-0">
-        {hasMultipleGateways ? (
-          <div className="titlebar-no-drag flex items-center gap-0.5">
-            <Button variant="soft" onClick={() => startNewTask()} className="flex-1 gap-2 rounded-r-none">
-              <Plus size={16} /> {t('common.newTask')}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="soft" className="px-1.5 rounded-l-none border-l border-[var(--border)]">
-                  <ChevronDown size={14} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40">
-                {connectedGateways.map((gw) => (
-                  <DropdownMenuItem key={gw.id} onClick={() => startNewTask(gw.id)}>
-                    {gw.color ? (
-                      <span className="mr-2 w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: gw.color }} />
-                    ) : (
-                      <Server size={12} className="mr-2 flex-shrink-0 opacity-60" />
-                    )}
-                    {gw.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ) : (
-          <ToolbarButton
-            variant="soft"
+    <div className="flex flex-col h-full pt-10 relative">
+      <div className="titlebar-drag absolute top-0 left-0 right-0 h-10 flex items-center justify-between px-3 z-[51]">
+        <div className="titlebar-no-drag flex items-center gap-1" style={{ marginLeft: 68 }}>
+          {CollapseToggleButton}
+        </div>
+        <div className="titlebar-no-drag flex items-center gap-1">
+          <IconButton
+            icon={Plus}
+            tooltip={t('common.newTask')}
             onClick={() => startNewTask()}
-            className="w-full justify-start"
-            icon={<Plus size={16} />}
-          >
-            {t('common.newTask')}
-          </ToolbarButton>
-        )}
+            className="bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80"
+          />
+        </div>
+      </div>
+      <div className="px-3 pb-2 flex-shrink-0">
         <div className="titlebar-no-drag relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
           <input
@@ -480,7 +431,7 @@ export default function LeftNav() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('leftNav.searchTasks')}
-            className="w-full h-[var(--density-control-height)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent transition-all"
+            className="w-full h-[var(--density-control-height-sm)] pl-9 pr-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] type-body glow-focus focus:border-transparent transition-all"
           />
         </div>
       </div>
@@ -501,7 +452,7 @@ export default function LeftNav() {
         </AnimatePresence>
 
         <div className="flex flex-col h-full">
-          <div className="px-4 pb-2 flex-shrink-0">
+          <div className="px-3 pb-1 flex-shrink-0">
             <NavButton
               icon={FolderOpen}
               label={t('common.fileManager')}
@@ -510,8 +461,13 @@ export default function LeftNav() {
             />
           </div>
 
-          <ScrollArea className="flex-1 px-4">
-            <div className="space-y-0.5">
+          <ScrollArea className="flex-1">
+            <motion.div
+              variants={motionPresets.staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="px-3 py-1"
+            >
               {visibleTasks.length === 0 && <EmptyState title={t('leftNav.emptyHint')} className="py-8" />}
               {activeTasks.length > 0 && (
                 <>
@@ -529,7 +485,7 @@ export default function LeftNav() {
               )}
               {completedTasks.length > 0 && (
                 <>
-                  <p className="type-meta px-3 py-2 text-[var(--text-secondary)] mt-3">
+                  <p className="type-meta px-3 py-1.5 text-[var(--text-muted)] mt-2">
                     {t('common.completed')} ({completedTasks.length})
                   </p>
                   {completedTasks.map((task) => (
@@ -544,26 +500,21 @@ export default function LeftNav() {
                   ))}
                 </>
               )}
-            </div>
+            </motion.div>
           </ScrollArea>
         </div>
       </div>
 
-      <div className="flex-shrink-0 px-4 pb-1">
+      <div className="flex-shrink-0 px-3" style={{ paddingBottom: 'calc(var(--density-panel-gap) / 4)' }}>
         <NavButton
           icon={Clock}
           label={t('leftNav.scheduledTasks')}
           active={mainView === 'cron'}
           onClick={() => setMainView('cron')}
-          badge={
-            <span className="type-badge ml-auto rounded-full bg-[var(--accent-dim)] px-1.5 py-0.5 text-[var(--accent)]">
-              beta
-            </span>
-          }
         />
       </div>
 
-      <div className="flex-shrink-0 px-4 py-2 border-t border-[var(--border)]">
+      <div className="flex-shrink-0 px-3 py-2 border-t border-[var(--border)]">
         <div className="flex items-center">
           <IconButton
             icon={Archive}
@@ -577,7 +528,6 @@ export default function LeftNav() {
             }
           />
           <div className="flex-1" />
-          <ConnectionStatus gatewayStatus={aggregatedGwStatus} collapsed className="mr-1.5" />
           <IconButton
             icon={Settings}
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}

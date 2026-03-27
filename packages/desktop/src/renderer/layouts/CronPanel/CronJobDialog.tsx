@@ -69,7 +69,7 @@ const inputClass = [
   'type-body w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2',
   'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
   'hover:border-[var(--text-muted)]',
-  'focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent',
+  'glow-focus focus:border-transparent',
   'transition-colors',
 ].join(' ');
 
@@ -77,7 +77,7 @@ const selectClass = [
   'type-body w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2',
   'text-[var(--text-primary)]',
   'hover:border-[var(--text-muted)]',
-  'focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)] focus:border-transparent',
+  'glow-focus focus:border-transparent',
   'transition-colors appearance-none cursor-pointer',
 ].join(' ');
 
@@ -673,7 +673,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
           <DialogDescription>{t('cron.subtitle')}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-5 py-2" style={{ scrollbarWidth: 'none' }}>
+        <div className="flex-1 overflow-y-auto space-y-5 py-2">
           <div>
             <label className={labelClass}>{t('cron.fieldName')}</label>
             <input
@@ -693,7 +693,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                   key={kind}
                   type="button"
                   className={[
-                    'type-label flex-1 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
+                    'type-label flex-1 px-3 py-1.5 transition-colors glow-focus',
                     scheduleKind === kind
                       ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
                       : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
@@ -789,7 +789,7 @@ export default function CronJobDialog({ open, onOpenChange, gatewayId, editingJo
                     type="button"
                     disabled={disabled}
                     className={[
-                      'type-label flex-1 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring-accent)]',
+                      'type-label flex-1 px-3 py-1.5 transition-colors glow-focus',
                       payloadKind === kind
                         ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
                         : 'bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',

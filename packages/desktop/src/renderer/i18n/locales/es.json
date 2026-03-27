@@ -2,7 +2,6 @@
   "common": {
     "newTask": "Nueva tarea",
     "completed": "Completada",
-    "inProgress": "En progreso",
     "settings": "Configuración",
     "fileManager": "Gestor de archivos",
     "noFiles": "Sin archivos aún",
@@ -16,7 +15,6 @@
     "dark": "Oscuro",
     "light": "Claro",
     "missing": "Faltante",
-    "moreActions": "Más acciones",
     "switch": "cambiar",
     "navigate": "navegar",
     "select": "seleccionar",
@@ -39,7 +37,8 @@
     "welcomeDesc2": "Los archivos generados se archivan automáticamente.",
     "starOnGithub": "¿Te gusta ClawWork? Déjanos una estrella en GitHub",
     "toggleContextPanel": "Alternar panel de contexto",
-    "moreActions": "Más acciones"
+    "messageLayoutWide": "Expandir ancho de mensajes",
+    "messageLayoutCentered": "Volver a centrar mensajes"
   },
   "settings": {
     "appearance": "Apariencia",
@@ -136,7 +135,6 @@
     "agentsDesc": "Administrar agentes de IA en los Gateways conectados",
     "aboutDesc": "Versión, actualizaciones y enlaces",
     "deviceId": "ID del dispositivo",
-    "deviceIdDesc": "Único para esta instalación. Las sesiones están asociadas al ID del dispositivo. Para sincronizar sesiones entre dispositivos, copia este ID al archivo de configuración del otro dispositivo.",
     "devMode": "Modo Desarrollador",
     "devModeSteps": "{{count}} toque(s) más para activar el Modo Desarrollador",
     "devModeEnabled": "Modo Desarrollador activado",
@@ -320,12 +318,10 @@
   "chatInput": {
     "describeTask": "Describe tu tarea…",
     "offlineReadOnly": "Sin conexión — solo lectura",
-    "poweredBy": "La IA puede cometer errores. Verifica la información importante.",
-    "offlineHint": "Sin conexión — consulta tareas y archivos anteriores",
-    "toSend": "{{mod}}↵ para enviar",
     "image": "Imagen",
     "noModelsAvailable": "No hay modelos disponibles",
     "addContextFolder": "Agregar carpeta de contexto para referencias de archivos con @",
+    "linkLocalFolders": "Vincular directorios locales",
     "slashCommands": "Comandos slash",
     "taskContextLimitExceeded": "El contexto de la tarea excede el límite de 500KB",
     "fileContextLimitExceeded": "El contexto total de archivos excede el límite de 500KB",
@@ -394,13 +390,6 @@
     "newRequest": "El agente solicita aprobación de ejecución"
   },
   "usage": {
-    "sessionCost": "Esta sesión",
-    "instanceCost": "Total de la instancia (30d)",
-    "inputTokens": "Entrada",
-    "outputTokens": "Salida",
-    "cacheRead": "Lectura de caché",
-    "cacheWrite": "Escritura de caché",
-    "totalTokens": "Tokens totales",
     "period": "Últimos {{days}} días",
     "rateLimits": "Límites de uso",
     "resetsAt": "Se reinicia a las {{time}}"
@@ -553,5 +542,18 @@
     "toggleFailed": "Error al actualizar el trabajo",
     "deleteFailed": "Error al eliminar el trabajo",
     "loadingCatalogs": "Cargando catálogos..."
+  },
+  "commandPalette": {
+    "placeholder": "Escribe un comando o busca…",
+    "recentTasks": "Tareas recientes",
+    "actions": "Acciones",
+    "activeTasks": "Tareas activas",
+    "newTask": "Nueva tarea",
+    "openFiles": "Abrir archivos",
+    "toggleTheme": "Cambiar tema",
+    "togglePanels": "Alternar paneles",
+    "openSettings": "Abrir ajustes",
+    "noResults": "Sin resultados",
+    "running": "En ejecución"
   }
 }

@@ -7,6 +7,7 @@ import RightPanel from './layouts/RightPanel';
 import Setup from './layouts/Setup';
 import Settings from './layouts/Settings';
 import ApprovalDialog from './components/ApprovalDialog';
+import CommandPalette from './components/CommandPalette';
 import { useUiStore } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
 import { useFileStore } from './stores/fileStore';
@@ -29,7 +30,8 @@ export default function App() {
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const setMainView = useUiStore((s) => s.setMainView);
-  const focusSearch = useUiStore((s) => s.focusSearch);
+  const toggleCommandPalette = useUiStore((s) => s.toggleCommandPalette);
+  const commandPaletteOpen = useUiStore((s) => s.commandPaletteOpen);
   const startNewTask = useTaskStore((s) => s.startNewTask);
   const createTask = useTaskStore((s) => s.createTask);
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
@@ -121,8 +123,7 @@ export default function App() {
 
       if (!e.shiftKey && e.code === 'KeyK') {
         e.preventDefault();
-        if (leftNavCollapsed) toggleLeftNavCollapsed();
-        focusSearch();
+        toggleCommandPalette();
         return;
       }
 
@@ -143,8 +144,7 @@ export default function App() {
     [
       startNewTask,
       setMainView,
-      focusSearch,
-      leftNavCollapsed,
+      toggleCommandPalette,
       leftNavShortcut,
       rightPanelShortcut,
       toggleLeftNavCollapsed,
@@ -214,6 +214,7 @@ export default function App() {
 
   return (
     <TooltipProvider>
+      <AnimatePresence>{commandPaletteOpen && <CommandPalette />}</AnimatePresence>
       <div
         className="relative flex h-screen overflow-hidden bg-[var(--bg-primary)]"
         style={{ backgroundImage: 'var(--bg-ambient)' }}
@@ -222,7 +223,7 @@ export default function App() {
         <motion.aside
           animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
           transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
-          className={cn('glass-heavy noise relative flex-shrink-0 overflow-hidden z-[1]')}
+          className={cn('glass-heavy noise relative flex-shrink-0 overflow-hidden z-[1] border-r-0')}
           style={{ minWidth: leftNavCollapsed ? 52 : 180 }}
         >
           <LeftNav />
@@ -230,36 +231,32 @@ export default function App() {
 
         {!leftNavCollapsed && (
           <div
-            className="group w-1.5 flex-shrink-0 cursor-col-resize z-10"
+            className="group w-1.5 flex-shrink-0 cursor-col-resize z-10 -mx-[3px]"
             onMouseDown={(e) => startPanelDrag(e, leftNavWidth, setLeftNavWidth, 1)}
           >
-            <div className="h-full w-px mx-auto opacity-0 group-hover:opacity-100 bg-[var(--accent)] transition-opacity" />
+            <div className="h-full w-px mx-auto bg-[var(--border)] group-hover:bg-[var(--accent)] transition-colors" />
           </div>
         )}
 
         <main className="relative flex-1 min-w-0 flex flex-col z-[1]">
-          {settingsOpen ? (
-            <Settings onClose={() => setSettingsOpen(false)} />
-          ) : (
-            <MainArea onTogglePanel={toggleRightPanel} />
-          )}
+          {settingsOpen ? <Settings /> : <MainArea onTogglePanel={toggleRightPanel} />}
         </main>
 
         <AnimatePresence>
           {rightPanelOpen && !settingsOpen && mainView === 'chat' && (
             <>
               <div
-                className="group w-1.5 flex-shrink-0 cursor-col-resize z-10"
+                className="group w-1.5 flex-shrink-0 cursor-col-resize z-10 -mx-[3px]"
                 onMouseDown={(e) => startPanelDrag(e, rightPanelWidth, setRightPanelWidth, -1)}
               >
-                <div className="h-full w-px mx-auto opacity-0 group-hover:opacity-100 bg-[var(--accent)] transition-opacity" />
+                <div className="h-full w-px mx-auto bg-[var(--border)] group-hover:bg-[var(--accent)] transition-colors" />
               </div>
               <motion.aside
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: rightPanelWidth, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
                 transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
-                className={cn('glass noise relative flex-shrink-0 overflow-hidden z-[1]')}
+                className={cn('glass-heavy noise relative flex-shrink-0 overflow-hidden z-[1] border-l-0')}
               >
                 <RightPanel />
               </motion.aside>

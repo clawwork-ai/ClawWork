@@ -114,150 +114,153 @@ export default function GeneralSection() {
   ];
 
   return (
-    <div>
-      <h3 className="type-section-title text-[var(--text-primary)]">{t('settings.general')}</h3>
-      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.generalDesc')}</p>
-      <SettingGroup>
-        <SettingRow label={t('settings.theme')}>
-          <SegmentedControl
-            layoutId="seg-theme"
-            value={theme}
-            onChange={handleThemeToggle}
-            ariaLabel={t('settings.theme')}
-            options={[
-              {
-                value: 'auto' as const,
-                label: (
-                  <>
-                    <Monitor size={14} /> {t('settings.themeAuto')}
-                  </>
-                ),
-              },
-              {
-                value: 'dark' as const,
-                label: (
-                  <>
-                    <Moon size={14} /> {t('common.dark')}
-                  </>
-                ),
-              },
-              {
-                value: 'light' as const,
-                label: (
-                  <>
-                    <Sun size={14} /> {t('common.light')}
-                  </>
-                ),
-              },
-            ]}
-          />
-        </SettingRow>
-        <SettingRow label={t('settings.density')}>
-          <SegmentedControl
-            layoutId="seg-density"
-            value={density}
-            onChange={handleDensityChange}
-            ariaLabel={t('settings.density')}
-            options={[
-              { value: 'compact' as const, label: t('settings.densityCompact') },
-              { value: 'comfortable' as const, label: t('settings.densityComfortable') },
-              { value: 'spacious' as const, label: t('settings.densitySpacious') },
-            ]}
-          />
-        </SettingRow>
-        <SettingRow label={t('settings.language')}>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as Language)}
-            aria-label={t('settings.language')}
-            className="type-body rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-primary)]"
-          >
-            {SUPPORTED_LANGUAGES.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </SettingRow>
-        <SettingRow label={t('settings.sendShortcut')}>
-          <SegmentedControl
-            layoutId="seg-send"
-            value={sendShortcut}
-            onChange={handleShortcutChange}
-            ariaLabel={t('settings.sendShortcut')}
-            options={[
-              { value: 'enter' as const, label: t('settings.sendEnter') },
-              { value: 'cmdEnter' as const, label: t('settings.sendCmdEnter', { mod: modKey }) },
-            ]}
-          />
-        </SettingRow>
-        <SettingRow label={t('settings.leftNavShortcut')}>
-          <SegmentedControl
-            layoutId="seg-left-nav"
-            value={leftNavShortcut}
-            onChange={handleLeftNavShortcutChange}
-            ariaLabel={t('settings.leftNavShortcut')}
-            options={[
-              { value: 'Comma' as const, label: `${modKey} ,` },
-              { value: 'BracketLeft' as const, label: `${modKey} [` },
-            ]}
-          />
-        </SettingRow>
-        <SettingRow label={t('settings.rightPanelShortcut')}>
-          <SegmentedControl
-            layoutId="seg-right-panel"
-            value={rightPanelShortcut}
-            onChange={handleRightPanelShortcutChange}
-            ariaLabel={t('settings.rightPanelShortcut')}
-            options={[
-              { value: 'Period' as const, label: `${modKey} .` },
-              { value: 'BracketRight' as const, label: `${modKey} ]` },
-            ]}
-          />
-        </SettingRow>
-      </SettingGroup>
+    <div className="space-y-8">
+      <div>
+        <h3 className="type-section-title mb-4 text-[var(--text-primary)]">{t('settings.general')}</h3>
+        <SettingGroup>
+          <SettingRow label={t('settings.theme')}>
+            <SegmentedControl
+              layoutId="seg-theme"
+              value={theme}
+              onChange={handleThemeToggle}
+              ariaLabel={t('settings.theme')}
+              options={[
+                {
+                  value: 'auto' as const,
+                  label: (
+                    <>
+                      <Monitor size={14} /> {t('settings.themeAuto')}
+                    </>
+                  ),
+                },
+                {
+                  value: 'dark' as const,
+                  label: (
+                    <>
+                      <Moon size={14} /> {t('common.dark')}
+                    </>
+                  ),
+                },
+                {
+                  value: 'light' as const,
+                  label: (
+                    <>
+                      <Sun size={14} /> {t('common.light')}
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </SettingRow>
+          <SettingRow label={t('settings.density')}>
+            <SegmentedControl
+              layoutId="seg-density"
+              value={density}
+              onChange={handleDensityChange}
+              ariaLabel={t('settings.density')}
+              options={[
+                { value: 'compact' as const, label: t('settings.densityCompact') },
+                { value: 'comfortable' as const, label: t('settings.densityComfortable') },
+                { value: 'spacious' as const, label: t('settings.densitySpacious') },
+              ]}
+            />
+          </SettingRow>
+          <SettingRow label={t('settings.language')}>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              aria-label={t('settings.language')}
+              className="glow-focus type-body rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-1.5 text-[var(--text-primary)]"
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </SettingRow>
+          <SettingRow label={t('settings.sendShortcut')}>
+            <SegmentedControl
+              layoutId="seg-send"
+              value={sendShortcut}
+              onChange={handleShortcutChange}
+              ariaLabel={t('settings.sendShortcut')}
+              options={[
+                { value: 'enter' as const, label: t('settings.sendEnter') },
+                { value: 'cmdEnter' as const, label: t('settings.sendCmdEnter', { mod: modKey }) },
+              ]}
+            />
+          </SettingRow>
+          <SettingRow label={t('settings.leftNavShortcut')}>
+            <SegmentedControl
+              layoutId="seg-left-nav"
+              value={leftNavShortcut}
+              onChange={handleLeftNavShortcutChange}
+              ariaLabel={t('settings.leftNavShortcut')}
+              options={[
+                { value: 'Comma' as const, label: `${modKey} ,` },
+                { value: 'BracketLeft' as const, label: `${modKey} [` },
+              ]}
+            />
+          </SettingRow>
+          <SettingRow label={t('settings.rightPanelShortcut')}>
+            <SegmentedControl
+              layoutId="seg-right-panel"
+              value={rightPanelShortcut}
+              onChange={handleRightPanelShortcutChange}
+              ariaLabel={t('settings.rightPanelShortcut')}
+              options={[
+                { value: 'Period' as const, label: `${modKey} .` },
+                { value: 'BracketRight' as const, label: `${modKey} ]` },
+              ]}
+            />
+          </SettingRow>
+        </SettingGroup>
+      </div>
 
-      <h3 className="type-section-title mt-8 text-[var(--text-primary)]">{t('settings.notifications')}</h3>
-      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.notificationsDesc')}</p>
-      <SettingGroup>
-        {notificationToggles.map(({ key, i18nKey }) => (
+      <div>
+        <h3 className="type-section-title mb-4 text-[var(--text-primary)]">{t('settings.notifications')}</h3>
+        <SettingGroup>
+          {notificationToggles.map(({ key, i18nKey }) => (
+            <SettingRow
+              key={key}
+              label={
+                <div className="flex items-center gap-3">
+                  <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
+                  <span className="type-label text-[var(--text-primary)]">{t(i18nKey)}</span>
+                </div>
+              }
+            >
+              <Toggle
+                checked={notifyState[key]}
+                onChange={(v) => handleNotificationToggle(key, v)}
+                ariaLabel={t(i18nKey)}
+              />
+            </SettingRow>
+          ))}
+        </SettingGroup>
+      </div>
+
+      <div>
+        <h3 className="type-section-title mb-4 text-[var(--text-primary)]">{t('settings.mobile')}</h3>
+        <SettingGroup>
           <SettingRow
-            key={key}
             label={
               <div className="flex items-center gap-3">
-                <Bell size={14} className="text-[var(--text-muted)] flex-shrink-0" />
-                <span className="type-label text-[var(--text-primary)]">{t(i18nKey)}</span>
+                <Smartphone size={14} className="flex-shrink-0 text-[var(--text-muted)]" />
+                <span className="type-label text-[var(--text-primary)]">{t('settings.pairMobile')}</span>
               </div>
             }
           >
-            <Toggle
-              checked={notifyState[key]}
-              onChange={(v) => handleNotificationToggle(key, v)}
-              ariaLabel={t(i18nKey)}
-            />
+            <button
+              onClick={() => setShowPairDialog(true)}
+              className="glow-focus type-label rounded-lg border border-[var(--border)] px-3 py-1.5 text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
+            >
+              {t('settings.pairMobileButton')}
+            </button>
           </SettingRow>
-        ))}
-      </SettingGroup>
-
-      <h3 className="type-section-title mt-8 text-[var(--text-primary)]">{t('settings.mobile')}</h3>
-      <p className="type-support mt-1 mb-4 text-[var(--text-muted)]">{t('settings.mobileDesc')}</p>
-      <SettingGroup>
-        <SettingRow
-          label={
-            <div className="flex items-center gap-3">
-              <Smartphone size={14} className="flex-shrink-0 text-[var(--text-muted)]" />
-              <span className="type-label text-[var(--text-primary)]">{t('settings.pairMobile')}</span>
-            </div>
-          }
-        >
-          <button
-            onClick={() => setShowPairDialog(true)}
-            className="type-label rounded-lg border border-[var(--border)] px-3 py-1.5 text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-hover)]"
-          >
-            {t('settings.pairMobileButton')}
-          </button>
-        </SettingRow>
-      </SettingGroup>
+        </SettingGroup>
+      </div>
 
       <PairMobileDialog open={showPairDialog} onOpenChange={setShowPairDialog} />
     </div>

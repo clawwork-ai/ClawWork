@@ -1,7 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { Bot } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
+import MessageAvatar from './MessageAvatar';
 
 export default function ThinkingIndicator() {
   const reduced = useReducedMotion();
@@ -14,14 +13,7 @@ export default function ThinkingIndicator() {
       transition={{ duration: motionDuration.normal }}
       className="flex gap-3.5 py-4"
     >
-      <div
-        className={cn(
-          'flex-shrink-0 size-[var(--density-avatar-size)] rounded-full flex items-center justify-center',
-          'bg-[var(--accent-dim)]',
-        )}
-      >
-        <Bot size={16} className="text-[var(--accent)]" />
-      </div>
+      <MessageAvatar role="assistant" />
       <div className="flex items-center gap-1.5 py-2">
         {[0, 1, 2].map((i) => (
           <motion.span

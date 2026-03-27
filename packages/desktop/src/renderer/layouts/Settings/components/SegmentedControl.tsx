@@ -29,7 +29,7 @@ export default function SegmentedControl<T extends string>({
           onClick={() => onChange(opt.value)}
           className={cn(
             'type-label relative flex items-center gap-1.5 px-3.5 py-1.5 transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+            'focus-visible:outline-none glow-focus',
             value === opt.value
               ? 'text-[var(--text-primary)]'
               : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',

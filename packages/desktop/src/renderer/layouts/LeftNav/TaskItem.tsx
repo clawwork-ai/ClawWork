@@ -1,15 +1,15 @@
 import { type MouseEvent, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { MessageSquare, Circle, Loader2, Wrench } from 'lucide-react';
+import { MessageSquare, Circle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn, formatRelativeTime } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
-import { useMessageStore, type ActiveTurn } from '@/stores/messageStore';
+import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
-import type { Message } from '@clawwork/shared';
 import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import type { Task } from '@clawwork/shared';
+import ActivityBars from '@/components/ActivityBars';
 
 interface TaskItemProps {
   task: Task;
@@ -57,21 +57,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
     const turn = s.activeTurnByTask[task.id];
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
-  const preview = useMessageStore((s) => {
-    const turn: ActiveTurn | undefined = s.activeTurnByTask[task.id];
-    let text = '';
-    if (turn && !turn.finalized) {
-      if (turn.toolCalls.length > 0) text = turn.toolCalls[turn.toolCalls.length - 1].name;
-      else if (turn.streamingText) text = turn.streamingText;
-      else if (turn.streamingThinking) text = t('chat.thinking');
-    }
-    if (!text) {
-      const msgs: Message[] = s.messagesByTask[task.id] ?? [];
-      const last = msgs[msgs.length - 1];
-      if (last) text = last.toolCalls?.length > 0 ? last.toolCalls[last.toolCalls.length - 1].name : last.content;
-    }
-    return text.replace(/\n+/g, ' ').slice(0, 80);
-  });
+  const isCompleted = task.status === 'completed';
 
   const handleClick = (): void => {
     setActiveTask(task.id);
@@ -84,24 +70,29 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
       <Tooltip>
         <TooltipTrigger asChild>
           <motion.button
-            {...motionPresets.listItem}
+            variants={motionPresets.listItem}
             whileTap={reduced ? undefined : { scale: 0.95 }}
             onClick={handleClick}
             onContextMenu={onContextMenu}
-            className="titlebar-no-drag w-full flex justify-center py-1.5 relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]"
+            className={cn(
+              'titlebar-no-drag w-full flex justify-center py-1.5 relative rounded-md',
+              'focus-visible:outline-none glow-focus',
+              active && 'glow-selected',
+            )}
           >
-            {active && <span className="absolute left-0 top-1 bottom-1 w-1 rounded-full bg-[var(--accent)]" />}
             <span
               className={cn(
                 'type-label flex h-8 w-8 items-center justify-center rounded-md transition-colors',
                 active
                   ? 'bg-[var(--accent-dim)] text-[var(--accent)]'
-                  : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+                  : isCompleted
+                    ? 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]'
+                    : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
               )}
             >
               {task.title ? task.title[0].toUpperCase() : <MessageSquare size={14} />}
             </span>
-            {isStreaming && <Loader2 className="absolute top-0.5 right-1 w-3 h-3 animate-spin text-[var(--accent)]" />}
+            {isStreaming && <ActivityBars className="absolute top-0 right-0.5 scale-50 origin-top-right" />}
             {hasUnread && !isStreaming && (
               <span className="absolute top-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />
             )}
@@ -114,63 +105,68 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
 
   return (
     <motion.button
-      {...motionPresets.listItem}
-      whileHover={reduced ? undefined : { x: 2 }}
+      variants={motionPresets.listItem}
+      whileHover={reduced ? undefined : { backgroundColor: active ? undefined : 'var(--bg-hover)' }}
       whileTap={reduced ? undefined : { scale: 0.98 }}
       transition={{ duration: motionDuration.normal, ease: motionEase.exit }}
       onClick={handleClick}
       onContextMenu={onContextMenu}
       className={cn(
-        'titlebar-no-drag w-full flex flex-col px-3 py-2.5 rounded-md text-left transition-all relative',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+        'group titlebar-no-drag w-full rounded-md text-left transition-all relative',
+        'focus-visible:outline-none glow-focus',
         active
-          ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]'
-          : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
+          ? 'glow-selected bg-[var(--bg-elevated)]'
+          : isStreaming
+            ? 'bg-[var(--accent-dim)]'
+            : isCompleted
+              ? ''
+              : 'hover:bg-[var(--bg-hover)]',
       )}
-      style={active ? { boxShadow: 'var(--shadow-card)' } : undefined}
     >
-      {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[var(--accent)]" />}
-      <div className="flex w-full items-center gap-1.5">
-        {editing ? (
-          <input
-            ref={inputRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={commitRename}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                commitRename();
-              }
-              if (e.key === 'Escape') {
-                e.preventDefault();
-                cancelRename();
-              }
-              e.stopPropagation();
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="type-label min-w-0 flex-1 rounded border border-[var(--ring-accent)] bg-[var(--bg-primary)] px-1 py-0 text-[var(--text-primary)] outline-none"
-          />
-        ) : (
-          <span className="type-label min-w-0 flex-1 truncate">{task.title || t('common.newTask')}</span>
-        )}
-        {isStreaming && <Loader2 size={12} className="flex-shrink-0 animate-spin text-[var(--accent)]" />}
-        {hasUnread && !isStreaming && (
+      <div className="flex items-center gap-2 px-3 h-9">
+        {hasUnread && !active && (
           <Circle size={6} className="flex-shrink-0 fill-[var(--accent)] text-[var(--accent)]" />
         )}
-        <span className="type-support flex-shrink-0 text-[var(--text-muted)]">
-          {formatRelativeTime(new Date(task.updatedAt))}
-        </span>
+
+        <div className="flex-1 min-w-0">
+          {editing ? (
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitRename();
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancelRename();
+                }
+                e.stopPropagation();
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="type-label w-full rounded border border-[var(--ring-accent)] bg-[var(--bg-primary)] px-1 py-0 text-[var(--text-primary)] outline-none"
+            />
+          ) : (
+            <span
+              className={cn(
+                'block truncate type-body',
+                active
+                  ? 'text-[var(--text-primary)]'
+                  : isCompleted
+                    ? 'text-[var(--text-muted)]'
+                    : 'text-[var(--text-secondary)]',
+              )}
+            >
+              {task.title || t('common.newTask')}
+            </span>
+          )}
+        </div>
+
+        {isStreaming && <ActivityBars className="flex-shrink-0 scale-75 origin-center" />}
       </div>
-      <p
-        className={cn(
-          'type-support mt-0.5 truncate',
-          isStreaming ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]',
-        )}
-      >
-        {isStreaming && preview.includes('.') && <Wrench size={10} className="mr-1 inline-block align-[-1px]" />}
-        {preview || '\u00A0'}
-      </p>
     </motion.button>
   );
 }
