@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, LazyMotion, domMax, m } from 'framer-motion';
 import { Menu, Settings, LogOut, ChevronDown, Search, SquarePen } from 'lucide-react';
@@ -12,6 +13,10 @@ import { GatewayStatus } from '../components/GatewayStatus';
 import { ChatView } from './ChatView';
 import { SettingsSheet } from '../components/SettingsSheet';
 import { ensureHydrationReady } from '../stores';
+import { useOverlay } from '../hooks/useOverlay';
+
+const DRAWER_SPRING = { type: 'spring' as const, damping: 28, stiffness: 320 };
+const INSTANT = { duration: 0 };
 
 interface DrawerLayoutProps {
   onSignedOut: () => void;
@@ -28,64 +33,14 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const tasks = useTaskStore((s) => s.tasks);
   const activeTask = tasks.find((tk) => tk.id === activeTaskId);
-  const drawerRef = useRef<HTMLElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const edgeTouchRef = useRef<number | null>(null);
 
-  const closeDrawer = useCallback(() => {
-    setDrawerOpen(false);
-    menuButtonRef.current?.focus();
-  }, []);
+  const { portalTarget, containerRef, reducedMotion, handleKeyDown } = useOverlay(drawerOpen, () =>
+    setDrawerOpen(false),
+  );
+  const drawerTransition = reducedMotion ? INSTANT : DRAWER_SPRING;
 
-  useEffect(() => {
-    if (drawerOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [drawerOpen]);
-
-  useEffect(() => {
-    if (!drawerOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeDrawer();
-        return;
-      }
-      if (e.key !== 'Tab' || !drawerRef.current) return;
-      const focusable = drawerRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    requestAnimationFrame(() => {
-      const firstBtn = drawerRef.current?.querySelector<HTMLElement>('button');
-      firstBtn?.focus();
-    });
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [drawerOpen, closeDrawer]);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const handleSignOut = useCallback(async () => {
     destroyAllClients();
@@ -114,7 +69,6 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
 
         <header className="flex shrink-0 items-center gap-2 px-3 py-2">
           <button
-            ref={menuButtonRef}
             onClick={() => setDrawerOpen(true)}
             aria-label={t('drawer.menuButton')}
             className="rounded-lg p-1.5 transition-colors"
@@ -157,7 +111,9 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
             }}
           />
         )}
+      </div>
 
+      {createPortal(
         <AnimatePresence>
           {drawerOpen && (
             <>
@@ -170,23 +126,25 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                 onClick={closeDrawer}
                 aria-hidden="true"
               />
-              <m.aside
+              <m.div
                 key="drawer"
-                ref={drawerRef}
+                ref={containerRef}
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('drawer.title', { defaultValue: 'Navigation drawer' })}
+                tabIndex={-1}
+                onKeyDown={handleKeyDown}
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                transition={drawerTransition}
                 drag="x"
                 dragConstraints={{ right: 0 }}
                 dragElastic={0.1}
                 onDragEnd={(_e, info) => {
                   if (info.offset.x < -80 || info.velocity.x < -300) closeDrawer();
                 }}
-                className="fixed inset-y-0 left-0 z-50 flex w-80 flex-col"
+                className="fixed inset-y-0 left-0 z-50 flex w-80 flex-col outline-none"
                 style={{ backgroundColor: 'var(--bg-secondary)', maxWidth: '80vw' }}
               >
                 <div className="safe-area-top" />
@@ -239,11 +197,12 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                   </button>
                 </div>
                 <div className="safe-area-bottom" />
-              </m.aside>
+              </m.div>
             </>
           )}
-        </AnimatePresence>
-      </div>
+        </AnimatePresence>,
+        portalTarget,
+      )}
 
       <AgentSelector
         open={agentSelectorOpen}

@@ -1,7 +1,10 @@
-import { useEffect, useRef, useCallback, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, m, useDragControls } from 'framer-motion';
+import { useOverlay } from '../hooks/useOverlay';
 
 const SPRING = { type: 'spring' as const, damping: 25, stiffness: 300 };
+const INSTANT = { duration: 0 };
 const DRAG_DISMISS_OFFSET = 100;
 const DRAG_DISMISS_VELOCITY = 500;
 
@@ -22,55 +25,11 @@ export function BottomSheet({
   ariaLabel,
   ariaLabelledBy,
 }: BottomSheetProps) {
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const prevFocusRef = useRef<HTMLElement | null>(null);
+  const { portalTarget, containerRef, reducedMotion, handleKeyDown } = useOverlay(open, onClose);
   const dragControls = useDragControls();
+  const transition = reducedMotion ? INSTANT : SPRING;
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key !== 'Tab' || !sheetRef.current) return;
-      const focusable = sheetRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    },
-    [onClose],
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    prevFocusRef.current = document.activeElement as HTMLElement | null;
-    document.body.style.overflow = 'hidden';
-    document.addEventListener('keydown', handleKeyDown);
-    requestAnimationFrame(() => {
-      const first = sheetRef.current?.querySelector<HTMLElement>('button');
-      first?.focus();
-    });
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('keydown', handleKeyDown);
-      prevFocusRef.current?.focus();
-    };
-  }, [open, handleKeyDown]);
-
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -85,15 +44,17 @@ export function BottomSheet({
           />
           <m.div
             key="bs-sheet"
-            ref={sheetRef}
+            ref={containerRef}
             role="dialog"
             aria-modal="true"
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
+            tabIndex={-1}
+            onKeyDown={handleKeyDown}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={SPRING}
+            transition={transition}
             drag="y"
             dragControls={dragControls}
             dragListener={false}
@@ -102,7 +63,7 @@ export function BottomSheet({
             onDragEnd={(_e, info) => {
               if (info.offset.y > DRAG_DISMISS_OFFSET || info.velocity.y > DRAG_DISMISS_VELOCITY) onClose();
             }}
-            className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl outline-none"
             style={{ backgroundColor: 'var(--bg-secondary)', maxHeight }}
           >
             <div
@@ -117,6 +78,7 @@ export function BottomSheet({
           </m.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    portalTarget,
   );
 }
