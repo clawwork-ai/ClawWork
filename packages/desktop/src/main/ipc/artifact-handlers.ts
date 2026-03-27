@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow, dialog, net, shell } from 'electron';
 import { readFileSync, writeFileSync } from 'fs';
+import { fileURLToPath } from 'node:url';
 import { resolve, sep } from 'path';
 import { eq } from 'drizzle-orm';
 import { getDb, getSqlite } from '../db/index.js';
@@ -153,7 +154,7 @@ export function registerArtifactHandlers(): void {
           if (!res.ok) return { ok: false, error: `fetch failed: ${res.status}` };
           buffer = Buffer.from(await res.arrayBuffer());
         } else if (url.startsWith('file://')) {
-          const filePath = resolve(url.replace('file://', ''));
+          const filePath = resolve(fileURLToPath(url));
           if (!filePath.startsWith(resolve(workspacePath) + sep)) {
             return { ok: false, error: 'file path outside workspace' };
           }
