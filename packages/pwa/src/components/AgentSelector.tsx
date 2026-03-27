@@ -1,8 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence, m, useDragControls } from 'framer-motion';
 import type { AgentInfo } from '@clawwork/shared';
 import { useUiStore } from '../stores/hooks';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { X } from 'lucide-react';
 
 interface AgentSelectorProps {
@@ -17,52 +18,10 @@ export function AgentSelector({ open, onClose, onSelect }: AgentSelectorProps) {
   const catalog = useUiStore((s) => (defaultGatewayId ? s.agentCatalogByGateway[defaultGatewayId] : undefined));
   const agents: AgentInfo[] = catalog?.agents ?? [];
   const sheetRef = useRef<HTMLDivElement>(null);
-  const prevFocusRef = useRef<HTMLElement | null>(null);
   const titleId = 'agent-selector-title';
   const dragControls = useDragControls();
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key !== 'Tab' || !sheetRef.current) return;
-      const focusable = sheetRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    },
-    [onClose],
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    prevFocusRef.current = document.activeElement as HTMLElement | null;
-    document.addEventListener('keydown', handleKeyDown);
-    requestAnimationFrame(() => {
-      const firstAgent = sheetRef.current?.querySelector<HTMLElement>('[role="dialog"] button:nth-of-type(2)');
-      const fallback = sheetRef.current?.querySelector<HTMLElement>('button');
-      (firstAgent ?? fallback)?.focus();
-    });
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      prevFocusRef.current?.focus();
-    };
-  }, [open, handleKeyDown]);
+  useFocusTrap(sheetRef, open, onClose, 'button:nth-of-type(2)');
 
   return (
     <AnimatePresence>
