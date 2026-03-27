@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import type { DebugEvent } from '@clawwork/shared';
 import { listGateways, getIdentity, updateGatewayToken } from '../persistence/db.js';
 import { importDeviceIdentity } from '../gateway/device-identity.js';
-import { BrowserGatewayClient, registerClient, destroyAllClients } from '../gateway/client.js';
+import { BrowserGatewayClient } from '../gateway/client.js';
+import { registerClient, destroyAllClients } from '../gateway/client-registry.js';
 import { getGatewayBroadcasters } from '../platform/index.js';
-import { dispatcher, composerBridge, uiStoreApi } from '../stores/index.js';
+import { dispatcher, uiStoreApi } from '../stores/index.js';
 import { reportDebugEvent } from '../lib/debug.js';
 import type { GatewayAuth } from '@clawwork/shared';
 import { toast } from 'sonner';
@@ -77,8 +78,6 @@ export function useGatewayBootstrap(): void {
         registerClient(client);
         client.connect();
       }
-
-      composerBridge.markAbortedByUser = (taskId) => dispatcher.markAbortedByUser(taskId);
 
       const removeEvents = dispatcher.start();
       const removeStatus = dispatcher.startGatewayStatus();

@@ -4,7 +4,7 @@ import { createBrowserGatewayTransport } from './gateway-adapter.js';
 import type { BrowserGatewayTransportResult } from './gateway-adapter.js';
 import { createBrowserSettings } from './settings-adapter.js';
 import { createBrowserNotifications } from './notifications-adapter.js';
-import { getAllClients, getClient } from '../gateway/client.js';
+import { getAllClients, getClient } from '../gateway/client-registry.js';
 import { getIdentity, getScopeId } from '../persistence/db.js';
 
 let _ports: PlatformPorts | null = null;

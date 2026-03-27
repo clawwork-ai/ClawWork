@@ -5,7 +5,7 @@ import { Menu, Settings, LogOut, ChevronDown, Search, SquarePen } from 'lucide-r
 import { useUiStore, useTaskStore } from '../stores/hooks';
 import { AgentSelector } from '../components/AgentSelector';
 import { GatewayDebugLog } from '../components/GatewayDebugLog';
-import { destroyAllClients } from '../gateway/client';
+import { destroyAllClients } from '../gateway/client-registry';
 import { clearAll } from '../persistence/db';
 import { TaskList } from '../components/TaskList';
 import { GatewayStatus } from '../components/GatewayStatus';

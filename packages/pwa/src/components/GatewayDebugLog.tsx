@@ -2,7 +2,7 @@ import { useSyncExternalStore, useRef, useEffect } from 'react';
 import { AnimatePresence, m, useDragControls } from 'framer-motion';
 import { X, Trash2, Copy, RefreshCw } from 'lucide-react';
 import { getDebugLog, subscribeDebugLog, clearDebugLog } from '../lib/debug';
-import { reconnectAllClients } from '../gateway/client';
+import { reconnectAllClients } from '../gateway/client-registry';
 import type { DebugLogEntry } from '../lib/debug';
 
 interface GatewayDebugLogProps {
