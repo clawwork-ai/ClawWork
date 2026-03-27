@@ -17,6 +17,7 @@ import { useTraySync } from './hooks/useTraySync';
 import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
+import AmbientShell from '@/components/ambient/AmbientShell';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -213,11 +214,15 @@ export default function App() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen overflow-hidden bg-[var(--bg-primary)]">
+      <div
+        className="relative flex h-screen overflow-hidden bg-[var(--bg-primary)]"
+        style={{ backgroundImage: 'var(--bg-ambient)' }}
+      >
+        <AmbientShell />
         <motion.aside
           animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
           transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
-          className={cn('flex-shrink-0 border-r border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
+          className={cn('glass-heavy noise relative flex-shrink-0 overflow-hidden z-[1]')}
           style={{ minWidth: leftNavCollapsed ? 52 : 180 }}
         >
           <LeftNav />
@@ -225,12 +230,14 @@ export default function App() {
 
         {!leftNavCollapsed && (
           <div
-            className="w-1.5 flex-shrink-0 cursor-col-resize hover:bg-[var(--accent)]/20 transition-colors z-10"
+            className="group w-1.5 flex-shrink-0 cursor-col-resize z-10"
             onMouseDown={(e) => startPanelDrag(e, leftNavWidth, setLeftNavWidth, 1)}
-          />
+          >
+            <div className="h-full w-px mx-auto opacity-0 group-hover:opacity-100 bg-[var(--accent)] transition-opacity" />
+          </div>
         )}
 
-        <main className="flex-1 min-w-0 flex flex-col">
+        <main className="relative flex-1 min-w-0 flex flex-col z-[1]">
           {settingsOpen ? (
             <Settings onClose={() => setSettingsOpen(false)} />
           ) : (
@@ -242,15 +249,17 @@ export default function App() {
           {rightPanelOpen && !settingsOpen && mainView === 'chat' && (
             <>
               <div
-                className="w-1.5 flex-shrink-0 cursor-col-resize hover:bg-[var(--accent)]/20 transition-colors z-10"
+                className="group w-1.5 flex-shrink-0 cursor-col-resize z-10"
                 onMouseDown={(e) => startPanelDrag(e, rightPanelWidth, setRightPanelWidth, -1)}
-              />
+              >
+                <div className="h-full w-px mx-auto opacity-0 group-hover:opacity-100 bg-[var(--accent)] transition-opacity" />
+              </div>
               <motion.aside
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: rightPanelWidth, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
                 transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
-                className={cn('flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden')}
+                className={cn('glass noise relative flex-shrink-0 overflow-hidden z-[1]')}
               >
                 <RightPanel />
               </motion.aside>

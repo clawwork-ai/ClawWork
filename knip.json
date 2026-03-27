@@ -5,7 +5,13 @@
     "packages/shared": {},
     "packages/core": {},
     "packages/desktop": {
-      "entry": ["src/main/index.ts", "src/preload/index.ts", "src/renderer/main.tsx", "electron.vite.config.ts"],
+      "entry": [
+        "src/main/index.ts",
+        "src/preload/index.ts",
+        "src/renderer/main.tsx",
+        "src/renderer/styles/design-tokens.ts",
+        "electron.vite.config.ts"
+      ],
       "project": ["src/**/*.{ts,tsx}"],
       "paths": {
         "@/*": ["src/renderer/*"]
@@ -13,6 +19,7 @@
       "ignoreDependencies": [
         "@fontsource-variable/inter",
         "@fontsource-variable/jetbrains-mono",
+        "@fontsource/instrument-serif",
         "tailwindcss",
         "autoprefixer",
         "postcss"
@@ -25,6 +32,6 @@
     },
     "website": {}
   },
-  "ignore": ["keynote/**"],
+  "ignore": ["keynote/**", "packages/desktop/src/renderer/components/ActivityBars.tsx"],
   "exclude": ["unlisted"]
 }

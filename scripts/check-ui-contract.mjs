@@ -9,6 +9,7 @@ const EXCLUDED_FILES = new Set([
   'packages/desktop/src/renderer/styles/theme.css',
   'packages/desktop/src/renderer/styles/design-tokens.ts',
   'packages/desktop/src/renderer/styles/typography.css',
+  'packages/desktop/src/renderer/components/ambient/AmbientShell.tsx',
   'packages/pwa/src/styles/index.css',
 ]);
 
@@ -58,6 +59,16 @@ const RULES = [
     category: 'hardcoded-content-width',
     regex: /\bmax-w-3xl\b/g,
     message: 'Use --content-max-width for content area max width.',
+  },
+  {
+    category: 'glass-bypass',
+    regex: /backdrop-filter\s*:|backdrop-blur/g,
+    message: 'Use .glass* utility classes instead of raw backdrop-filter/backdrop-blur.',
+  },
+  {
+    category: 'raw-glow',
+    regex: /box-shadow\s*:.*glow/g,
+    message: 'Use .glow-* utility classes instead of raw glow box-shadow patterns.',
   },
   {
     category: 'layout-escape',
@@ -116,6 +127,8 @@ function isRuleExcluded(filePath, category) {
     return category !== 'raw-tailwind-text-size' && category !== 'quick-launch-font-size';
   if (category === 'quick-launch-font-size') return true;
   if (category === 'raw-tailwind-text-size' && filePath.includes('components/ui/')) return true;
+  if (category === 'glass-bypass' && filePath.includes('components/ui/')) return true;
+  if (category === 'glass-bypass' && filePath.includes('MarkdownContent.tsx')) return true;
   return false;
 }
 
@@ -218,6 +231,12 @@ const COMPONENT_USAGE_RULES = [
     requiredPattern: /\bInlineNotice\b/,
     category: 'component-usage',
     message: 'Connection banners must use semantic inline notices.',
+  },
+  {
+    file: 'packages/desktop/src/renderer/components/CommandPalette.tsx',
+    requiredPattern: /\bglass-command\b/,
+    category: 'component-usage',
+    message: 'CommandPalette must use .glass-command utility class.',
   },
 ];
 

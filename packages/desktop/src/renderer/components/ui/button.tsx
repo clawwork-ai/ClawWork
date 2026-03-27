@@ -7,7 +7,7 @@ const buttonVariants = cva(
   [
     'type-label inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg',
     'transition-all duration-150 ease-out',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-accent)]',
+    'focus-visible:outline-none glow-focus',
     'disabled:pointer-events-none disabled:opacity-50',
     '[&_svg]:pointer-events-none [&_svg]:size-[18px] [&_svg]:shrink-0',
   ].join(' '),
@@ -15,7 +15,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          'bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold',
+          'bg-[image:var(--accent-gradient-vibrant)] text-[var(--accent-foreground)] font-semibold',
           'hover:bg-[var(--accent-hover)] hover:shadow-[var(--glow-accent)]',
           'active:brightness-90 active:scale-[0.98]',
         ].join(' '),
