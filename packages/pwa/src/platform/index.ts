@@ -39,8 +39,10 @@ export const ports = new Proxy({} as PlatformPorts, {
 
 export function getGatewayBroadcasters() {
   ensurePorts();
+  const result = _gwResult;
+  if (!result) throw new Error('Gateway transport not initialized');
   return {
-    broadcastEvent: _gwResult!.broadcastEvent,
-    broadcastStatus: _gwResult!.broadcastStatus,
+    broadcastEvent: result.broadcastEvent,
+    broadcastStatus: result.broadcastStatus,
   };
 }

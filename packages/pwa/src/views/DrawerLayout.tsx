@@ -142,7 +142,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
         {!drawerOpen && (
           <div
             className="fixed inset-y-0 left-0 z-30"
-            style={{ width: 20 }}
+            style={{ width: 12 }}
             onTouchStart={(e) => {
               edgeTouchRef.current = e.touches[0]!.clientX;
             }}
