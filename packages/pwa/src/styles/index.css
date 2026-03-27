@@ -33,7 +33,6 @@
     --text-primary: #f3f4f4;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
-    --text-tertiary: #838b97;
     --border: rgba(255, 255, 255, 0.04);
     --border-accent: rgba(15, 253, 93, 0.15);
     --scrollbar-thumb: #444444;
@@ -92,7 +91,6 @@
     --text-primary: #111827;
     --text-secondary: #6b7280;
     --text-muted: #9ca3af;
-    --text-tertiary: #838b97;
     --border: rgba(0, 0, 0, 0.08);
     --border-accent: rgba(11, 138, 10, 0.15);
     --scrollbar-thumb: #d1d5db;

@@ -4,9 +4,9 @@ import { is } from '@electron-toolkit/utils';
 import { readConfig, updateConfig } from './workspace/config.js';
 import type { QuickLaunchConfig } from './workspace/config.js';
 import { getDebugLogger } from './debug/index.js';
+import { getMainWindow } from './window-manager.js';
 
 let quickLaunchWindow: BrowserWindow | null = null;
-let mainWindowRef: BrowserWindow | null = null;
 let registeredShortcut: string | null = null;
 
 const DEFAULT_SHORTCUT = 'Alt+Space';
@@ -86,11 +86,11 @@ export function hideQuickLaunch(): void {
 
 export function handleQuickLaunchSubmit(message: string): void {
   hideQuickLaunch();
-
-  if (mainWindowRef && !mainWindowRef.isDestroyed()) {
-    mainWindowRef.webContents.send('quick-launch:submit', message);
-    mainWindowRef.show();
-    mainWindowRef.focus();
+  const win = getMainWindow();
+  if (win) {
+    win.webContents.send('quick-launch:submit', message);
+    win.show();
+    win.focus();
   }
 }
 
@@ -137,9 +137,7 @@ function unregisterShortcutKey(): void {
   }
 }
 
-export function initQuickLaunch(mainWindow: BrowserWindow): void {
-  mainWindowRef = mainWindow;
-
+export function initQuickLaunch(): void {
   const config = getConfig();
   if (config.enabled) {
     registerShortcutKey(config.shortcut);
@@ -161,10 +159,6 @@ export function updateQuickLaunchConfig(enabled: boolean, shortcut?: string): bo
   unregisterShortcutKey();
   updateConfig({ quickLaunch: { enabled: false, shortcut: newShortcut } });
   return true;
-}
-
-export function updateQuickLaunchMainWindow(win: BrowserWindow): void {
-  mainWindowRef = win;
 }
 
 export function destroyQuickLaunch(): void {

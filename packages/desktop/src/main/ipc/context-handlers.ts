@@ -1,6 +1,6 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import { scanFolder } from '../context/file-index.js';
-import { readContextFile, validatePathSecurity } from '../context/file-reader.js';
+import { readContextFile } from '../context/file-reader.js';
 import { watchFolder, unwatchFolder } from '../context/file-watcher.js';
 
 export function registerContextHandlers(): void {
@@ -56,13 +56,7 @@ export function registerContextHandlers(): void {
 
   ipcMain.handle('context:read-file', (_event, params: { absolutePath: string; folders: string[] }) => {
     try {
-      const folders = params?.folders ?? [];
-
-      if (!validatePathSecurity(params.absolutePath, folders)) {
-        return { ok: false, error: 'path outside provided context folders' };
-      }
-
-      const result = readContextFile(params.absolutePath);
+      const result = readContextFile(params.absolutePath, params?.folders ?? []);
       return { ok: true, result };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown error';

@@ -1,7 +1,7 @@
 import { useSyncExternalStore, useRef, useEffect } from 'react';
 import { X, Trash2, Copy, RefreshCw } from 'lucide-react';
 import { getDebugLog, subscribeDebugLog, clearDebugLog } from '../lib/debug';
-import { reconnectAllClients } from '../gateway/client';
+import { reconnectAllClients } from '../gateway/client-registry';
 import type { DebugLogEntry } from '../lib/debug';
 import { BottomSheet } from './BottomSheet';
 
@@ -26,7 +26,7 @@ function formatTime(iso: string): string {
 function levelColor(level: string): string {
   if (level === 'error') return 'var(--danger)';
   if (level === 'warn') return 'var(--warning)';
-  return 'var(--text-tertiary)';
+  return 'var(--text-muted)';
 }
 
 function eventColor(event: string): string {
@@ -111,7 +111,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
         style={{ touchAction: 'pan-y' }}
       >
         {log.length === 0 && (
-          <div className="py-8 text-center" style={{ color: 'var(--text-tertiary)' }}>
+          <div className="py-8 text-center" style={{ color: 'var(--text-muted)' }}>
             No events yet
           </div>
         )}
@@ -119,7 +119,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
           const data = compactData(entry);
           return (
             <div key={i} className="flex gap-2 py-0.5" style={{ wordBreak: 'break-all' }}>
-              <span className="shrink-0 tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
+              <span className="shrink-0 tabular-nums" style={{ color: 'var(--text-muted)' }}>
                 {formatTime(entry.ts)}
               </span>
               <span className="shrink-0 uppercase" style={{ color: levelColor(entry.level), width: '2.5rem' }}>
@@ -127,7 +127,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
               </span>
               <span>
                 <span style={{ color: eventColor(entry.event) }}>{entry.event}</span>
-                {data && <span style={{ color: 'var(--text-tertiary)' }}> {data}</span>}
+                {data && <span style={{ color: 'var(--text-muted)' }}> {data}</span>}
               </span>
             </div>
           );

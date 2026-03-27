@@ -83,19 +83,21 @@ let dbPromise: Promise<IDBPDatabase<ClawWorkDBSchema>> | null = null;
 function getDb(): Promise<IDBPDatabase<ClawWorkDBSchema>> {
   if (!dbPromise) {
     dbPromise = openDB<ClawWorkDBSchema>('clawwork-pwa', 1, {
-      upgrade(db) {
-        db.createObjectStore('identity', { keyPath: 'id' });
-        db.createObjectStore('gateways', { keyPath: 'id' });
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore('identity', { keyPath: 'id' });
+          db.createObjectStore('gateways', { keyPath: 'id' });
 
-        const taskStore = db.createObjectStore('tasks', { keyPath: 'id' });
-        taskStore.createIndex('by-gateway', 'gatewayId');
-        taskStore.createIndex('by-updated', 'updatedAt');
+          const taskStore = db.createObjectStore('tasks', { keyPath: 'id' });
+          taskStore.createIndex('by-gateway', 'gatewayId');
+          taskStore.createIndex('by-updated', 'updatedAt');
 
-        const messageStore = db.createObjectStore('messages', { keyPath: 'id' });
-        messageStore.createIndex('by-task', 'taskId');
-        messageStore.createIndex('by-task-timestamp', ['taskId', 'timestamp']);
+          const messageStore = db.createObjectStore('messages', { keyPath: 'id' });
+          messageStore.createIndex('by-task', 'taskId');
+          messageStore.createIndex('by-task-timestamp', ['taskId', 'timestamp']);
 
-        db.createObjectStore('preferences', { keyPath: 'key' });
+          db.createObjectStore('preferences', { keyPath: 'key' });
+        }
       },
     });
   }

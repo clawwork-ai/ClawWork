@@ -380,7 +380,7 @@ export class BrowserGatewayClient {
           client: {
             id: 'gateway-client',
             displayName: 'ClawWork PWA',
-            version: '0.1.0',
+            version: __APP_VERSION__,
             platform: 'pwa',
             mode: 'backend',
             deviceFamily: 'mobile',
@@ -656,33 +656,4 @@ export class BrowserGatewayClient {
     this.reqCounter++;
     return `pwa-${this.reqCounter}-${Date.now().toString(36)}`;
   }
-}
-
-const clients = new Map<string, BrowserGatewayClient>();
-
-export function registerClient(client: BrowserGatewayClient): void {
-  clients.set(client.id, client);
-}
-
-export function getClient(id: string): BrowserGatewayClient | undefined {
-  return clients.get(id);
-}
-
-export function getAllClients(): BrowserGatewayClient[] {
-  return Array.from(clients.values());
-}
-
-export function reconnectAllClients(): void {
-  for (const client of clients.values()) {
-    if (!client.isConnected) {
-      client.reconnect();
-    }
-  }
-}
-
-export function destroyAllClients(): void {
-  for (const client of clients.values()) {
-    client.destroy();
-  }
-  clients.clear();
 }

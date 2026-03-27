@@ -2,7 +2,8 @@ import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } from
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { nativeTheme } from 'electron';
-import { initAllGateways, destroyAllGateways, rebindAllWindows } from './ws/index.js';
+import { initAllGateways, destroyAllGateways } from './ws/index.js';
+import { getMainWindow, setMainWindow } from './window-manager.js';
 import { initDebugLogger, getDebugLogger } from './debug/index.js';
 import { registerWsHandlers } from './ipc/ws-handlers.js';
 import { registerArtifactHandlers } from './ipc/artifact-handlers.js';
@@ -19,8 +20,8 @@ import { registerContextHandlers } from './ipc/context-handlers.js';
 import { registerNotificationHandlers } from './ipc/notification-handlers.js';
 import { unwatchAll } from './context/file-watcher.js';
 import { isInstallingUpdate } from './auto-updater.js';
-import { initTray, destroyTray, updateTrayWindow } from './tray.js';
-import { initQuickLaunch, destroyQuickLaunch, updateQuickLaunchMainWindow } from './quick-launch.js';
+import { initTray, destroyTray } from './tray.js';
+import { initQuickLaunch, destroyQuickLaunch } from './quick-launch.js';
 import { getWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
 import { initDatabase, closeDatabase } from './db/index.js';
 
@@ -92,11 +93,7 @@ function createWindow(): BrowserWindow {
   const devMode = readConfig()?.devMode === true;
   Menu.setApplicationMenu(buildAppMenu(devMode));
 
-  ipcMain.handle('app:rebuild-menu', () => {
-    const dm = readConfig()?.devMode === true;
-    Menu.setApplicationMenu(buildAppMenu(dm));
-  });
-  const mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 960,
@@ -117,50 +114,52 @@ function createWindow(): BrowserWindow {
     },
   });
 
-  ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
-    if (process.platform === 'darwin') {
-      mainWindow.setWindowButtonVisibility(visible);
+  win.on('close', (e) => {
+    if (!isQuitting && !isInstallingUpdate()) {
+      e.preventDefault();
+      win.hide();
     }
   });
 
-  mainWindow.on('ready-to-show', () => {
+  win.on('ready-to-show', () => {
     const savedZoom = readConfig()?.zoomLevel;
     if (savedZoom) {
-      mainWindow.webContents.setZoomLevel(savedZoom);
+      win.webContents.setZoomLevel(savedZoom);
     }
-    mainWindow.show();
+    win.show();
   });
 
-  mainWindow.webContents.on('before-input-event', (_event, input) => {
+  win.webContents.on('before-input-event', (_event, input) => {
     if (!(input.meta || input.control) || input.type !== 'keyDown') return;
     if (input.key === '-' || input.key === '_') {
-      const level = mainWindow.webContents.getZoomLevel() - 0.5;
-      mainWindow.webContents.setZoomLevel(level);
+      const level = win.webContents.getZoomLevel() - 0.5;
+      win.webContents.setZoomLevel(level);
       updateConfig({ zoomLevel: level });
     }
   });
 
-  mainWindow.on('blur', () => {
-    if (mainWindow.isDestroyed()) return;
-    const level = mainWindow.webContents.getZoomLevel();
+  win.on('blur', () => {
+    if (win.isDestroyed()) return;
+    const level = win.webContents.getZoomLevel();
     const saved = readConfig()?.zoomLevel ?? 0;
     if (level !== saved) {
       updateConfig({ zoomLevel: level });
     }
   });
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
   });
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    win.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    win.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  return mainWindow;
+  setMainWindow(win);
+  return win;
 }
 
 app.whenReady().then(() => {
@@ -187,6 +186,18 @@ app.whenReady().then(() => {
   registerContextHandlers();
   registerNotificationHandlers();
 
+  ipcMain.handle('app:rebuild-menu', () => {
+    const dm = readConfig()?.devMode === true;
+    Menu.setApplicationMenu(buildAppMenu(dm));
+  });
+
+  ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
+    if (process.platform === 'darwin') {
+      const win = getMainWindow();
+      if (win) win.setWindowButtonVisibility(visible);
+    }
+  });
+
   const wsPath = getWorkspacePath();
   if (wsPath) {
     getDebugLogger().info({ domain: 'workspace', event: 'workspace.detected', data: { workspacePath: wsPath } });
@@ -208,27 +219,18 @@ app.whenReady().then(() => {
     }
   }
 
-  const mainWindow = createWindow();
-  initAllGateways(mainWindow);
-  initTray(mainWindow);
-  initQuickLaunch(mainWindow);
-
-  mainWindow.on('close', (e) => {
-    if (!isQuitting && !isInstallingUpdate()) {
-      e.preventDefault();
-      mainWindow.hide();
-    }
-  });
+  createWindow();
+  initAllGateways();
+  initTray();
+  initQuickLaunch();
 
   app.on('activate', () => {
-    if (mainWindow && !mainWindow.isVisible()) {
-      mainWindow.show();
-      mainWindow.focus();
-    } else if (BrowserWindow.getAllWindows().length === 0) {
-      const win = createWindow();
-      rebindAllWindows(win);
-      updateTrayWindow(win);
-      updateQuickLaunchMainWindow(win);
+    const win = getMainWindow();
+    if (win) {
+      win.show();
+      win.focus();
+    } else {
+      createWindow();
     }
   });
 });

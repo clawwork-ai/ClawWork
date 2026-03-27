@@ -17,8 +17,8 @@ import type {
   GatewayAuth,
   ChatAttachment,
 } from '@clawwork/shared';
-import type { BrowserWindow } from 'electron';
 import { sendToWindow } from './window-utils.js';
+import { getMainWindow } from '../window-manager.js';
 import {
   loadOrCreateDeviceIdentity,
   buildDeviceConnectPayload,
@@ -52,7 +52,6 @@ const REQ_TIMEOUT_MS = 15_000;
 
 export class GatewayClient {
   private ws: WebSocket | null = null;
-  private mainWindow: BrowserWindow | null = null;
   private authenticated = false;
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -96,10 +95,6 @@ export class GatewayClient {
     if (config.auth !== undefined) this.auth = config.auth;
     this.reconnectAttempts = 0;
     this.connect();
-  }
-
-  setMainWindow(win: BrowserWindow): void {
-    this.mainWindow = win;
   }
 
   connect(): void {
@@ -147,15 +142,13 @@ export class GatewayClient {
       this.authenticated = false;
       this.serverVersion = undefined;
       this.stopHeartbeat();
-      if (this.mainWindow) {
-        sendToWindow(this.mainWindow, 'gateway-status', {
-          gatewayId: this.gatewayId,
-          connected: false,
-          error,
-          reconnectAttempt: this.reconnectAttempts,
-          maxAttempts: MAX_RECONNECT_ATTEMPTS,
-        });
-      }
+      sendToWindow(getMainWindow(), 'gateway-status', {
+        gatewayId: this.gatewayId,
+        connected: false,
+        error,
+        reconnectAttempt: this.reconnectAttempts,
+        maxAttempts: MAX_RECONNECT_ATTEMPTS,
+      });
       // Don't retry when server explicitly rejects (pairing required, auth denied)
       if (code === WS_CLOSE_POLICY_VIOLATION) return;
       this.scheduleReconnect();
@@ -169,13 +162,11 @@ export class GatewayClient {
         gatewayId: this.gatewayId,
         error: { name: err.name, message: err.message, stack: err.stack },
       });
-      if (this.mainWindow) {
-        sendToWindow(this.mainWindow, 'gateway-status', {
-          gatewayId: this.gatewayId,
-          connected: false,
-          error: err.message,
-        });
-      }
+      sendToWindow(getMainWindow(), 'gateway-status', {
+        gatewayId: this.gatewayId,
+        connected: false,
+        error: err.message,
+      });
     });
   }
 
@@ -268,14 +259,12 @@ export class GatewayClient {
       data: { payload: summarizePayload(frame.payload) },
     });
 
-    if (this.mainWindow) {
-      sendToWindow(this.mainWindow, 'gateway-event', {
-        gatewayId: this.gatewayId,
-        event: frame.event,
-        payload: frame.payload,
-        seq: frame.seq,
-      });
-    }
+    sendToWindow(getMainWindow(), 'gateway-event', {
+      gatewayId: this.gatewayId,
+      event: frame.event,
+      payload: frame.payload,
+      seq: frame.seq,
+    });
   }
 
   private buildAuthWithDeviceToken(): GatewayAuth {
@@ -338,13 +327,11 @@ export class GatewayClient {
           this.serverVersion = typeof rawVersion === 'string' ? rawVersion : undefined;
           this.storeDeviceTokenFromPayload(payload);
           this.startHeartbeat();
-          if (this.mainWindow) {
-            sendToWindow(this.mainWindow, 'gateway-status', {
-              gatewayId: this.gatewayId,
-              connected: true,
-              serverVersion: this.serverVersion,
-            });
-          }
+          sendToWindow(getMainWindow(), 'gateway-status', {
+            gatewayId: this.gatewayId,
+            connected: true,
+            serverVersion: this.serverVersion,
+          });
         } else {
           getDebugLogger().error({
             domain: 'gateway',
@@ -729,16 +716,14 @@ export class GatewayClient {
         attempt: this.reconnectAttempts,
         error: { message: 'max reconnect attempts reached' },
       });
-      if (this.mainWindow) {
-        sendToWindow(this.mainWindow, 'gateway-status', {
-          gatewayId: this.gatewayId,
-          connected: false,
-          error: 'max reconnect attempts',
-          reconnectAttempt: this.reconnectAttempts,
-          maxAttempts: MAX_RECONNECT_ATTEMPTS,
-          gaveUp: true,
-        });
-      }
+      sendToWindow(getMainWindow(), 'gateway-status', {
+        gatewayId: this.gatewayId,
+        connected: false,
+        error: 'max reconnect attempts',
+        reconnectAttempt: this.reconnectAttempts,
+        maxAttempts: MAX_RECONNECT_ATTEMPTS,
+        gaveUp: true,
+      });
       return;
     }
 

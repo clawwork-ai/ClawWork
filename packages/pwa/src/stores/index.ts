@@ -10,8 +10,9 @@ import type { PlatformPorts, ChatComposer } from '@clawwork/core';
 import type { ModelCatalogEntry, AgentInfo, DebugEvent } from '@clawwork/shared';
 import { ports } from '../platform/index.js';
 import { getIdentity } from '../persistence/db.js';
-import { getClient } from '../gateway/client.js';
+import { getClient } from '../gateway/client-registry.js';
 import { reportDebugEvent } from '../lib/debug.js';
+import { THEME_STORAGE_KEY } from '../lib/constants.js';
 import i18next from 'i18next';
 import { toast } from 'sonner';
 
@@ -58,6 +59,11 @@ const uiStoreApi = createUiStore({
   storage: localStorageAdapter,
   getViewportWidth: () => (typeof window !== 'undefined' ? window.innerWidth : 0),
 });
+
+const storedTheme = localStorageAdapter.get(THEME_STORAGE_KEY);
+if (storedTheme === 'dark' || storedTheme === 'light') {
+  uiStoreApi.setState({ theme: storedTheme });
+}
 
 const messageStoreApi = createMessageStore({
   persistMessage: (...args) => getPorts().persistence.persistMessage(...args),
@@ -111,10 +117,6 @@ const sessionSync = createSessionSync({
     setState: messageStoreApi.setState,
   }),
 });
-
-export const composerBridge = {
-  markAbortedByUser: (_taskId: string): void => {},
-};
 
 let _dispatcher: ReturnType<typeof createGatewayDispatcher> | null = null;
 let hydrationReady: Promise<void> | null = null;
@@ -175,7 +177,7 @@ function getComposer(): ChatComposer {
       getTaskStore: () => taskStoreApi.getState(),
       getMessageStore: () => messageStoreApi.getState(),
       persistMessage: (...args) => getPorts().persistence.persistMessage(...args),
-      markAbortedByUser: (taskId) => composerBridge.markAbortedByUser(taskId),
+      markAbortedByUser: (taskId) => getDispatcher().markAbortedByUser(taskId),
       compactSession: (gwId, sk) => {
         const c = getClient(gwId);
         if (!c) return Promise.resolve({ ok: false, error: 'Gateway not found' });

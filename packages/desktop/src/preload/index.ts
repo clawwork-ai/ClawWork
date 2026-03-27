@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { electronAPI } from '@electron-toolkit/preload';
 import type {
   ApprovalDecision,
   CronJobCreate,
@@ -285,12 +284,6 @@ function buildApi(): ClawWorkAPI {
     setWindowButtonVisibility: (visible: boolean) => ipcRenderer.send('ui:set-window-button-visibility', visible),
 
     getDeviceId: () => ipcRenderer.invoke('workspace:get-device-id') as Promise<string>,
-    getDeviceIdentity: () =>
-      ipcRenderer.invoke('pairing:get-device-identity') as Promise<{
-        deviceId: string;
-        publicKeyPem: string;
-        privateKeyPem: string;
-      }>,
 
     selectContextFolder: () => ipcRenderer.invoke('context:select-folder'),
     listContextFiles: (folders: string[], query?: string) =>
@@ -336,7 +329,6 @@ function buildApi(): ClawWorkAPI {
 
 if (process.contextIsolated) {
   try {
-    contextBridge.exposeInMainWorld('electron', electronAPI);
     contextBridge.exposeInMainWorld('clawwork', buildApi());
   } catch (error) {
     throw new Error(
