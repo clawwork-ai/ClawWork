@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "読み込み中...",
     "error": "エラーが発生しました",
     "reload": "再読み込み",
     "paired": "モバイルデバイスがペアリングされました"
   },
   "pairing": {
-    "title": "PCとペアリング",
     "subtitle": "デスクトップアプリに表示されたQRコードをスキャンしてください",
     "instruction": "スキャン後、デスクトップでこのデバイスを承認してください。",
-    "scanning": "スキャン中...",
     "loadingCamera": "カメラを起動中...",
     "scanButton": "QRコードをスキャン",
     "cancelButton": "キャンセル",
-    "error": "ペアリング失敗",
     "invalidQr": "無効なQRコード",
-    "retryButton": "再試行",
     "cameraError": "カメラの権限が拒否されました",
     "videoError": "カメラを起動できません",
     "scannerUnsupported": "このブラウザではQRスキャンがサポートされていません"
@@ -30,7 +27,6 @@
     "systemMessage": "システムメッセージ",
     "userMessage": "あなたのメッセージ",
     "assistantMessage": "アシスタントメッセージ",
-    "you": "あなた",
     "assistant": "アシスタント",
     "mainArea": "チャット",
     "virtualizedList": "チャット履歴"
@@ -48,7 +44,6 @@
     "connected": "接続済み",
     "connecting": "接続中...",
     "disconnected": "切断",
-    "notFound": "ゲートウェイが見つかりません",
     "statusLabel": "ゲートウェイ接続状態"
   },
   "agents": {
@@ -56,19 +51,18 @@
     "empty": "利用可能なエージェントがありません"
   },
   "drawer": {
+    "title": "ナビゲーションメニュー",
     "settings": "設定",
     "signOut": "サインアウト",
     "menuButton": "メニューを開く",
     "closeButton": "メニューを閉じる",
-    "newTaskButton": "新しいタスク"
+    "newTaskButton": "新しいタスク",
+    "search": "検索"
   },
   "tools": {
-    "expandButton": "詳細を表示",
-    "collapseButton": "詳細を非表示"
+    "emptyDetails": "詳細情報なし"
   },
   "shell": {
-    "connected": "ゲートウェイ接続済み",
-    "bootstrapping": "ゲートウェイに接続中...",
     "reconnect": "再接続"
   },
   "errors": {
@@ -95,5 +89,13 @@
     "darkMode": "ダークモード",
     "lightMode": "ライトモード",
     "language": "言語"
+  },
+  "debugLog": {
+    "title": "ゲートウェイログ",
+    "reconnect": "再接続",
+    "copyLog": "ログをコピー",
+    "clearLog": "ログをクリア",
+    "close": "閉じる",
+    "empty": "イベントはまだありません"
   }
 }

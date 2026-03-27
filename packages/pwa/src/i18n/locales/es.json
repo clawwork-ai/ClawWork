@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "Cargando...",
     "error": "Algo salió mal",
     "reload": "Recargar",
     "paired": "Dispositivo móvil emparejado"
   },
   "pairing": {
-    "title": "Emparejar con PC",
     "subtitle": "Escanea el código QR que aparece en tu app de escritorio",
     "instruction": "Después de escanear, aprueba este dispositivo en el escritorio.",
-    "scanning": "Escaneando...",
     "loadingCamera": "Iniciando cámara...",
     "scanButton": "Escanear código QR",
     "cancelButton": "Cancelar",
-    "error": "Error de emparejamiento",
     "invalidQr": "Código QR no válido",
-    "retryButton": "Reintentar",
     "cameraError": "Acceso a la cámara denegado",
     "videoError": "No se pudo iniciar la cámara",
     "scannerUnsupported": "Escáner QR no soportado en este navegador"
@@ -30,7 +27,6 @@
     "systemMessage": "Mensaje del sistema",
     "userMessage": "Tu mensaje",
     "assistantMessage": "Mensaje del asistente",
-    "you": "Tú",
     "assistant": "Asistente",
     "mainArea": "Chat",
     "virtualizedList": "Historial de chat"
@@ -48,19 +44,20 @@
     "connected": "Conectado",
     "connecting": "Conectando...",
     "disconnected": "Desconectado",
-    "notFound": "Gateway no encontrado",
     "statusLabel": "Estado de conexión del gateway"
   },
   "agents": { "selectTitle": "Seleccionar agente", "empty": "No hay agentes disponibles" },
   "drawer": {
+    "title": "Panel de navegación",
     "settings": "Configuración",
     "signOut": "Cerrar sesión",
     "menuButton": "Abrir menú",
     "closeButton": "Cerrar menú",
-    "newTaskButton": "Nueva tarea"
+    "newTaskButton": "Nueva tarea",
+    "search": "Buscar"
   },
-  "tools": { "expandButton": "Mostrar detalles", "collapseButton": "Ocultar detalles" },
-  "shell": { "connected": "Gateway conectado", "bootstrapping": "Conectando al gateway...", "reconnect": "Reconectar" },
+  "tools": { "emptyDetails": "Sin detalles disponibles" },
+  "shell": { "reconnect": "Reconectar" },
   "errors": {
     "requestFailed": "Solicitud fallida",
     "sendFailed": "Envío fallido",
@@ -78,5 +75,13 @@
     }
   },
   "qrScanner": { "videoLabel": "Visor de cámara para escaneo QR", "scanFrameLabel": "Área de escaneo QR" },
-  "settings": { "darkMode": "Modo oscuro", "lightMode": "Modo claro", "language": "Idioma" }
+  "settings": { "darkMode": "Modo oscuro", "lightMode": "Modo claro", "language": "Idioma" },
+  "debugLog": {
+    "title": "Registro del gateway",
+    "reconnect": "Reconectar",
+    "copyLog": "Copiar registro",
+    "clearLog": "Borrar registro",
+    "close": "Cerrar",
+    "empty": "Sin eventos aún"
+  }
 }

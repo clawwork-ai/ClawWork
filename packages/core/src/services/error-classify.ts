@@ -31,13 +31,13 @@ export function formatErrorForUser(err: AppError, t: TranslateFn): string {
   const stageLabel = t(`errors.stage.${err.stage}`, { defaultValue: err.stage });
   if (err.rawMessage) return `${stageLabel}: ${err.rawMessage}`;
   if (err.code) return `${stageLabel}: [${err.code}]`;
-  return `${stageLabel}: ${t('errors.unknown', { defaultValue: 'Unknown error' })}`;
+  return `${stageLabel}: ${t('errors.unknown')}`;
 }
 
 export function formatErrorForToast(err: AppError, t: TranslateFn): { title: string; description: string } {
   const stageKey = `errors.stage.${err.stage}`;
   const stageLabel = t(stageKey, { defaultValue: err.stage });
-  const title = `${stageLabel} ${t('errors.failed', { defaultValue: 'failed' })}`;
-  const description = err.rawMessage || err.code || t('errors.unknown', { defaultValue: 'Unknown error' });
+  const title = `${stageLabel} ${t('errors.failed')}`;
+  const description = err.rawMessage || err.code || t('errors.unknown');
   return { title, description };
 }

@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "Loading...",
     "error": "Something went wrong",
     "reload": "Reload",
     "paired": "Mobile device paired"
   },
   "pairing": {
-    "title": "Pair with your PC",
     "subtitle": "Scan the QR code shown on your desktop app to get started",
     "instruction": "After scanning, approve this device on your desktop before the mobile app can connect.",
-    "scanning": "Scanning...",
     "loadingCamera": "Loading camera...",
     "scanButton": "Scan QR Code",
     "cancelButton": "Cancel",
-    "error": "Pairing failed",
     "invalidQr": "Invalid QR code",
-    "retryButton": "Try Again",
     "cameraError": "Camera access denied",
     "videoError": "Failed to start camera",
     "scannerUnsupported": "QR scanner not supported on this browser"
@@ -30,7 +27,6 @@
     "systemMessage": "System message",
     "userMessage": "Your message",
     "assistantMessage": "Assistant message",
-    "you": "You",
     "assistant": "Assistant",
     "mainArea": "Chat",
     "virtualizedList": "Chat transcript"
@@ -48,7 +44,6 @@
     "connected": "Connected",
     "connecting": "Connecting...",
     "disconnected": "Disconnected",
-    "notFound": "Gateway not found",
     "statusLabel": "Gateway connection status"
   },
   "agents": {
@@ -56,19 +51,19 @@
     "empty": "No agents available"
   },
   "drawer": {
+    "title": "Navigation drawer",
     "settings": "Settings",
     "signOut": "Sign out",
     "menuButton": "Open menu",
     "closeButton": "Close menu",
-    "newTaskButton": "New task"
+    "newTaskButton": "New task",
+    "search": "Search"
   },
   "tools": {
-    "expandButton": "Show details",
-    "collapseButton": "Hide details"
+    "emptyDetails": "No details available"
   },
   "shell": {
-    "connected": "Gateway connected",
-    "bootstrapping": "Connecting to gateway..."
+    "reconnect": "Reconnect"
   },
   "errors": {
     "requestFailed": "Request failed",
@@ -89,5 +84,18 @@
   "qrScanner": {
     "videoLabel": "Camera viewfinder for QR code scanning",
     "scanFrameLabel": "QR code scan area"
+  },
+  "settings": {
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "language": "Language"
+  },
+  "debugLog": {
+    "title": "Gateway Log",
+    "reconnect": "Reconnect",
+    "copyLog": "Copy log",
+    "clearLog": "Clear log",
+    "close": "Close",
+    "empty": "No events yet"
   }
 }

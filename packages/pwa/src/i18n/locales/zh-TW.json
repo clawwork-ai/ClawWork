@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "載入中...",
     "error": "發生錯誤",
     "reload": "重新載入",
     "paired": "行動裝置已配對"
   },
   "pairing": {
-    "title": "與電腦配對",
     "subtitle": "掃描桌面應用程式上顯示的 QR Code 以開始",
     "instruction": "掃碼後，請在桌面端批准此裝置，然後手機端即可連線。",
-    "scanning": "掃描中...",
     "loadingCamera": "正在啟動相機...",
     "scanButton": "掃描 QR Code",
     "cancelButton": "取消",
-    "error": "配對失敗",
     "invalidQr": "無效的 QR Code",
-    "retryButton": "重試",
     "cameraError": "相機權限被拒絕",
     "videoError": "無法啟動相機",
     "scannerUnsupported": "此瀏覽器不支援 QR Code 掃描"
@@ -30,7 +27,6 @@
     "systemMessage": "系統訊息",
     "userMessage": "你的訊息",
     "assistantMessage": "助手訊息",
-    "you": "你",
     "assistant": "助手",
     "mainArea": "聊天",
     "virtualizedList": "聊天記錄"
@@ -48,7 +44,6 @@
     "connected": "已連線",
     "connecting": "連線中...",
     "disconnected": "未連線",
-    "notFound": "未找到閘道",
     "statusLabel": "閘道連線狀態"
   },
   "agents": {
@@ -56,19 +51,18 @@
     "empty": "暫無可用智能體"
   },
   "drawer": {
+    "title": "導航選單",
     "settings": "設定",
     "signOut": "登出",
     "menuButton": "開啟選單",
     "closeButton": "關閉選單",
-    "newTaskButton": "新建任務"
+    "newTaskButton": "新建任務",
+    "search": "搜尋"
   },
   "tools": {
-    "expandButton": "顯示詳情",
-    "collapseButton": "隱藏詳情"
+    "emptyDetails": "暫無詳情"
   },
   "shell": {
-    "connected": "閘道已連線",
-    "bootstrapping": "正在連接閘道...",
     "reconnect": "重新連線"
   },
   "errors": {
@@ -95,5 +89,13 @@
     "darkMode": "深色模式",
     "lightMode": "淺色模式",
     "language": "語言"
+  },
+  "debugLog": {
+    "title": "閘道日誌",
+    "reconnect": "重新連線",
+    "copyLog": "複製日誌",
+    "clearLog": "清除日誌",
+    "close": "關閉",
+    "empty": "尚無事件"
   }
 }

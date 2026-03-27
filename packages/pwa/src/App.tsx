@@ -87,7 +87,7 @@ function AppShell({ onSignedOut }: { onSignedOut: () => void }) {
             minHeight: 44,
           }}
         >
-          {t('shell.reconnect', { defaultValue: 'Reconnect' })}
+          {t('shell.reconnect')}
         </button>
       </div>
     );

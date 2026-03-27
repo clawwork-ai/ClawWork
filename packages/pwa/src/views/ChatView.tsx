@@ -101,7 +101,7 @@ export function ChatView() {
       <div
         className="flex h-full flex-col items-center justify-center px-8"
         role="main"
-        aria-label={t('chat.mainArea', { defaultValue: 'Chat' })}
+        aria-label={t('chat.mainArea')}
       >
         <p className="text-center type-body" style={{ color: 'var(--text-muted)' }}>
           {t('chat.emptyState')}
@@ -112,7 +112,7 @@ export function ChatView() {
 
   if (!activeTaskId && pendingNewTask) {
     return (
-      <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea', { defaultValue: 'Chat' })}>
+      <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea')}>
         <div className="flex-1" />
         <ChatInput taskId="__pending__" />
       </div>
@@ -120,7 +120,7 @@ export function ChatView() {
   }
 
   return (
-    <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea', { defaultValue: 'Chat' })}>
+    <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea')}>
       <div
         ref={useVirtualization ? undefined : scrollRef}
         className={`flex-1 px-4 py-4 ${useVirtualization ? 'overflow-hidden' : 'overflow-y-auto'}`}

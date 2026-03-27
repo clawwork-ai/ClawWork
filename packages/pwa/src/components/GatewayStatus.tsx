@@ -10,11 +10,7 @@ export function GatewayStatus() {
   if (entries.length === 0) return null;
 
   return (
-    <div
-      className="flex flex-wrap gap-1.5"
-      role="status"
-      aria-label={t('gateway.statusLabel', { defaultValue: 'Gateway connection status' })}
-    >
+    <div className="flex flex-wrap gap-1.5" role="status" aria-label={t('gateway.statusLabel')}>
       {entries.map(([gwId, status]) => {
         const info = infoMap[gwId];
         const color =

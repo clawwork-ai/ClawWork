@@ -14,7 +14,7 @@ export function StreamingMessage({ turn }: StreamingMessageProps) {
   const text = turn.streamingText || turn.content;
 
   return (
-    <div className="mb-4" role="article" aria-label={t('chat.assistantMessage', { defaultValue: 'Assistant message' })}>
+    <div className="mb-4" role="article" aria-label={t('chat.assistantMessage')}>
       {!text && !turn.finalized && (
         <div className="flex items-center gap-1.5 py-3" aria-label={t('chat.thinking')}>
           <div className="h-2 w-2 animate-pulse rounded-full" style={{ backgroundColor: 'var(--text-muted)' }} />

@@ -5,6 +5,7 @@ const IS_DEV = import.meta.env.DEV;
 const MAX_LOG_ENTRIES = 200;
 
 export interface DebugLogEntry {
+  id: number;
   ts: string;
   level: string;
   domain: string;
@@ -13,6 +14,7 @@ export interface DebugLogEntry {
   error?: { message: string };
 }
 
+let nextId = 0;
 const logBuffer: DebugLogEntry[] = [];
 const listeners = new Set<() => void>();
 
@@ -70,6 +72,7 @@ export function reportDebugEvent(event: Partial<DebugEvent>): void {
   }
 
   const entry: DebugLogEntry = {
+    id: nextId++,
     ts: full.ts,
     level: full.level,
     domain: full.domain,

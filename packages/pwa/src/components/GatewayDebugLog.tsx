@@ -1,4 +1,5 @@
 import { useSyncExternalStore, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Trash2, Copy, RefreshCw } from 'lucide-react';
 import { getDebugLog, subscribeDebugLog, clearDebugLog } from '../lib/debug';
 import { reconnectAllClients } from '../gateway/client-registry';
@@ -47,6 +48,7 @@ function compactData(entry: DebugLogEntry): string | null {
 }
 
 export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
+  const { t } = useTranslation();
   const log = useSyncExternalStore(subscribeDebugLog, getDebugLog);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -65,17 +67,17 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose} maxHeight="80vh" ariaLabel="Gateway Log">
+    <BottomSheet open={open} onClose={onClose} maxHeight="80vh" ariaLabel={t('debugLog.title')}>
       <div className="flex shrink-0 items-center justify-between px-4 py-2" style={{ touchAction: 'manipulation' }}>
         <span className="type-label" style={{ color: 'var(--text-primary)' }}>
-          Gateway Log ({log.length})
+          {t('debugLog.title')} ({log.length})
         </span>
         <div className="flex items-center gap-2">
           <button
             onClick={reconnectAllClients}
             className="rounded-lg p-1.5 transition-colors"
             style={{ color: 'var(--accent)', minHeight: 36, minWidth: 36 }}
-            aria-label="Reconnect"
+            aria-label={t('debugLog.reconnect')}
           >
             <RefreshCw size={16} />
           </button>
@@ -83,7 +85,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
             onClick={handleCopy}
             className="rounded-lg p-1.5 transition-colors"
             style={{ color: 'var(--text-secondary)', minHeight: 36, minWidth: 36 }}
-            aria-label="Copy log"
+            aria-label={t('debugLog.copyLog')}
           >
             <Copy size={16} />
           </button>
@@ -91,7 +93,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
             onClick={clearDebugLog}
             className="rounded-lg p-1.5 transition-colors"
             style={{ color: 'var(--text-secondary)', minHeight: 36, minWidth: 36 }}
-            aria-label="Clear log"
+            aria-label={t('debugLog.clearLog')}
           >
             <Trash2 size={16} />
           </button>
@@ -99,7 +101,7 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
             onClick={onClose}
             className="rounded-lg p-1.5 transition-colors"
             style={{ color: 'var(--text-secondary)', minHeight: 36, minWidth: 36 }}
-            aria-label="Close"
+            aria-label={t('debugLog.close')}
           >
             <X size={16} />
           </button>
@@ -112,13 +114,13 @@ export function GatewayDebugLog({ open, onClose }: GatewayDebugLogProps) {
       >
         {log.length === 0 && (
           <div className="py-8 text-center" style={{ color: 'var(--text-muted)' }}>
-            No events yet
+            {t('debugLog.empty')}
           </div>
         )}
-        {log.map((entry, i) => {
+        {log.map((entry) => {
           const data = compactData(entry);
           return (
-            <div key={i} className="flex gap-2 py-0.5" style={{ wordBreak: 'break-all' }}>
+            <div key={entry.id} className="flex gap-2 py-0.5" style={{ wordBreak: 'break-all' }}>
               <span className="shrink-0 tabular-nums" style={{ color: 'var(--text-muted)' }}>
                 {formatTime(entry.ts)}
               </span>

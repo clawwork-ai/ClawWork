@@ -55,7 +55,7 @@ export function TaskList({ onSelect }: TaskListProps) {
   });
 
   return (
-    <nav className="py-2" role="navigation" aria-label={t('tasks.navigationLabel', { defaultValue: 'Task list' })}>
+    <nav className="py-2" role="navigation" aria-label={t('tasks.navigationLabel')}>
       {groupedTasks.map((group) => (
         <div key={group.label}>
           <div className="px-4 py-1.5">

@@ -25,7 +25,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     return (
       <div
         role="article"
-        aria-label={t('chat.systemMessage', { defaultValue: 'System message' })}
+        aria-label={t('chat.systemMessage')}
         className="mb-3 flex items-start gap-2 rounded-lg px-3 py-2"
         style={{ backgroundColor: 'var(--bg-tertiary)', opacity: 0.7 }}
       >
@@ -41,11 +41,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   if (isUser) {
     return (
-      <div
-        role="article"
-        aria-label={t('chat.userMessage', { defaultValue: 'Your message' })}
-        className="mb-4 flex justify-end"
-      >
+      <div role="article" aria-label={t('chat.userMessage')} className="mb-4 flex justify-end">
         <div className="rounded-2xl px-4 py-2.5" style={{ backgroundColor: 'var(--user-bubble-bg)', maxWidth: '85%' }}>
           <p className="whitespace-pre-wrap type-body" style={{ color: 'var(--text-primary)' }}>
             {message.content}
@@ -56,7 +52,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   }
 
   return (
-    <div role="article" aria-label={t('chat.assistantMessage', { defaultValue: 'Assistant message' })} className="mb-4">
+    <div role="article" aria-label={t('chat.assistantMessage')} className="mb-4">
       {message.content && (
         <div className="prose-chat type-body">
           <Suspense fallback={<MarkdownFallback content={message.content} />}>

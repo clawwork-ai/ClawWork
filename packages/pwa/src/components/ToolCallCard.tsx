@@ -79,7 +79,7 @@ export function ToolCallCard({ toolCall }: ToolCallCardProps) {
           )}
           {!toolCall.args && !toolCall.result && (
             <span className="type-support" style={{ color: 'var(--text-muted)' }}>
-              {t('tools.emptyDetails', { defaultValue: 'No details available' })}
+              {t('tools.emptyDetails')}
             </span>
           )}
         </div>

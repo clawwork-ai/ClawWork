@@ -59,9 +59,7 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
         >
           {isDark ? <Moon size={18} /> : <Sun size={18} />}
           <span className="flex-1 text-left type-body">
-            {isDark
-              ? t('settings.darkMode', { defaultValue: 'Dark Mode' })
-              : t('settings.lightMode', { defaultValue: 'Light Mode' })}
+            {isDark ? t('settings.darkMode') : t('settings.lightMode')}
           </span>
           <span className="type-support" style={{ color: 'var(--text-muted)' }}>
             {isDark ? '🌙' : '☀️'}
@@ -72,7 +70,7 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
           <div className="flex items-center gap-3 px-3 py-3">
             <Globe size={18} style={{ color: 'var(--text-primary)' }} />
             <span className="type-body" style={{ color: 'var(--text-primary)' }}>
-              {t('settings.language', { defaultValue: 'Language' })}
+              {t('settings.language')}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-1 px-1">

@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "로딩 중...",
     "error": "오류가 발생했습니다",
     "reload": "새로고침",
     "paired": "모바일 기기가 페어링되었습니다"
   },
   "pairing": {
-    "title": "PC와 페어링",
     "subtitle": "데스크톱 앱에 표시된 QR 코드를 스캔하세요",
     "instruction": "스캔 후 데스크톱에서 이 기기를 승인해 주세요.",
-    "scanning": "스캔 중...",
     "loadingCamera": "카메라 시작 중...",
     "scanButton": "QR 코드 스캔",
     "cancelButton": "취소",
-    "error": "페어링 실패",
     "invalidQr": "유효하지 않은 QR 코드",
-    "retryButton": "다시 시도",
     "cameraError": "카메라 권한이 거부되었습니다",
     "videoError": "카메라를 시작할 수 없습니다",
     "scannerUnsupported": "이 브라우저에서는 QR 스캔이 지원되지 않습니다"
@@ -30,7 +27,6 @@
     "systemMessage": "시스템 메시지",
     "userMessage": "내 메시지",
     "assistantMessage": "어시스턴트 메시지",
-    "you": "나",
     "assistant": "어시스턴트",
     "mainArea": "채팅",
     "virtualizedList": "채팅 기록"
@@ -48,19 +44,20 @@
     "connected": "연결됨",
     "connecting": "연결 중...",
     "disconnected": "연결 끊김",
-    "notFound": "게이트웨이를 찾을 수 없음",
     "statusLabel": "게이트웨이 연결 상태"
   },
   "agents": { "selectTitle": "에이전트 선택", "empty": "사용 가능한 에이전트 없음" },
   "drawer": {
+    "title": "탐색 메뉴",
     "settings": "설정",
     "signOut": "로그아웃",
     "menuButton": "메뉴 열기",
     "closeButton": "메뉴 닫기",
-    "newTaskButton": "새 작업"
+    "newTaskButton": "새 작업",
+    "search": "검색"
   },
-  "tools": { "expandButton": "상세 보기", "collapseButton": "상세 숨기기" },
-  "shell": { "connected": "게이트웨이 연결됨", "bootstrapping": "게이트웨이 연결 중...", "reconnect": "재연결" },
+  "tools": { "emptyDetails": "상세 정보 없음" },
+  "shell": { "reconnect": "재연결" },
   "errors": {
     "requestFailed": "요청 실패",
     "sendFailed": "전송 실패",
@@ -78,5 +75,13 @@
     }
   },
   "qrScanner": { "videoLabel": "QR 코드 스캔 뷰파인더", "scanFrameLabel": "QR 코드 스캔 영역" },
-  "settings": { "darkMode": "다크 모드", "lightMode": "라이트 모드", "language": "언어" }
+  "settings": { "darkMode": "다크 모드", "lightMode": "라이트 모드", "language": "언어" },
+  "debugLog": {
+    "title": "게이트웨이 로그",
+    "reconnect": "재연결",
+    "copyLog": "로그 복사",
+    "clearLog": "로그 지우기",
+    "close": "닫기",
+    "empty": "아직 이벤트가 없습니다"
+  }
 }

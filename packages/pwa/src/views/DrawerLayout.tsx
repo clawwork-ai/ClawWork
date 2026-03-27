@@ -82,7 +82,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
             aria-label={t('agents.selectTitle')}
           >
             <span className="type-label truncate" style={{ color: 'var(--text-primary)' }}>
-              {activeTask?.title || (pendingNewTask ? t('tasks.newTask') : t('app.name', { defaultValue: 'ClawWork' }))}
+              {activeTask?.title || (pendingNewTask ? t('tasks.newTask') : t('app.name'))}
             </span>
             <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
           </button>
@@ -131,7 +131,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                 ref={containerRef}
                 role="dialog"
                 aria-modal="true"
-                aria-label={t('drawer.title', { defaultValue: 'Navigation drawer' })}
+                aria-label={t('drawer.title')}
                 tabIndex={-1}
                 onKeyDown={handleKeyDown}
                 initial={{ x: '-100%' }}
@@ -155,7 +155,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                   >
                     <Search size={16} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
                     <span className="type-body" style={{ color: 'var(--text-muted)' }}>
-                      {t('drawer.search', { defaultValue: 'Search' })}
+                      {t('drawer.search')}
                     </span>
                   </div>
                   <button

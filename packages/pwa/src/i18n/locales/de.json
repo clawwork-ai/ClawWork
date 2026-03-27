@@ -1,21 +1,18 @@
 {
   "app": {
+    "name": "ClawWork",
     "loading": "Laden...",
     "error": "Ein Fehler ist aufgetreten",
     "reload": "Neu laden",
     "paired": "Mobilgerät gekoppelt"
   },
   "pairing": {
-    "title": "Mit PC koppeln",
     "subtitle": "Scannen Sie den QR-Code auf Ihrer Desktop-App",
     "instruction": "Nach dem Scannen genehmigen Sie dieses Gerät auf dem Desktop.",
-    "scanning": "Scannen...",
     "loadingCamera": "Kamera wird gestartet...",
     "scanButton": "QR-Code scannen",
     "cancelButton": "Abbrechen",
-    "error": "Kopplung fehlgeschlagen",
     "invalidQr": "Ungültiger QR-Code",
-    "retryButton": "Erneut versuchen",
     "cameraError": "Kamerazugriff verweigert",
     "videoError": "Kamera konnte nicht gestartet werden",
     "scannerUnsupported": "QR-Scanner wird in diesem Browser nicht unterstützt"
@@ -30,7 +27,6 @@
     "systemMessage": "Systemnachricht",
     "userMessage": "Ihre Nachricht",
     "assistantMessage": "Assistenznachricht",
-    "you": "Sie",
     "assistant": "Assistent",
     "mainArea": "Chat",
     "virtualizedList": "Chatverlauf"
@@ -48,21 +44,20 @@
     "connected": "Verbunden",
     "connecting": "Verbinde...",
     "disconnected": "Getrennt",
-    "notFound": "Gateway nicht gefunden",
     "statusLabel": "Gateway-Verbindungsstatus"
   },
   "agents": { "selectTitle": "Agent auswählen", "empty": "Keine Agenten verfügbar" },
   "drawer": {
+    "title": "Navigationsmenü",
     "settings": "Einstellungen",
     "signOut": "Abmelden",
     "menuButton": "Menü öffnen",
     "closeButton": "Menü schließen",
-    "newTaskButton": "Neue Aufgabe"
+    "newTaskButton": "Neue Aufgabe",
+    "search": "Suchen"
   },
-  "tools": { "expandButton": "Details anzeigen", "collapseButton": "Details ausblenden" },
+  "tools": { "emptyDetails": "Keine Details verfügbar" },
   "shell": {
-    "connected": "Gateway verbunden",
-    "bootstrapping": "Verbinde mit Gateway...",
     "reconnect": "Neu verbinden"
   },
   "errors": {
@@ -82,5 +77,13 @@
     }
   },
   "qrScanner": { "videoLabel": "Kamerasucher für QR-Code-Scan", "scanFrameLabel": "QR-Code-Scanbereich" },
-  "settings": { "darkMode": "Dunkelmodus", "lightMode": "Hellmodus", "language": "Sprache" }
+  "settings": { "darkMode": "Dunkelmodus", "lightMode": "Hellmodus", "language": "Sprache" },
+  "debugLog": {
+    "title": "Gateway-Protokoll",
+    "reconnect": "Neu verbinden",
+    "copyLog": "Protokoll kopieren",
+    "clearLog": "Protokoll löschen",
+    "close": "Schließen",
+    "empty": "Noch keine Ereignisse"
+  }
 }
