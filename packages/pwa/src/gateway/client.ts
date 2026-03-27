@@ -380,7 +380,7 @@ export class BrowserGatewayClient {
           client: {
             id: 'gateway-client',
             displayName: 'ClawWork PWA',
-            version: '0.1.0',
+            version: __APP_VERSION__,
             platform: 'pwa',
             mode: 'backend',
             deviceFamily: 'mobile',
