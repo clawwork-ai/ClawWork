@@ -5,8 +5,6 @@ import { Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { useUiStore } from '../stores/hooks';
 import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 
-const THEME_STORAGE_KEY = 'clawwork-theme';
-
 const LANGUAGE_LABELS: Record<string, string> = {
   en: 'English',
   zh: '简体中文',
@@ -33,14 +31,7 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
   const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   const toggleTheme = useCallback(() => {
-    const next = isDark ? 'light' : 'dark';
-    setTheme(next);
-    document.documentElement.setAttribute('data-theme', next);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      /* storage unavailable */
-    }
+    setTheme(isDark ? 'light' : 'dark');
   }, [isDark, setTheme]);
 
   const changeLanguage = useCallback(

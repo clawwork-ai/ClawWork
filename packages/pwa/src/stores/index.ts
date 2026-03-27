@@ -12,6 +12,7 @@ import { ports } from '../platform/index.js';
 import { getIdentity } from '../persistence/db.js';
 import { getClient } from '../gateway/client.js';
 import { reportDebugEvent } from '../lib/debug.js';
+import { THEME_STORAGE_KEY } from '../lib/constants.js';
 import i18next from 'i18next';
 import { toast } from 'sonner';
 
@@ -58,6 +59,11 @@ const uiStoreApi = createUiStore({
   storage: localStorageAdapter,
   getViewportWidth: () => (typeof window !== 'undefined' ? window.innerWidth : 0),
 });
+
+const storedTheme = localStorageAdapter.get(THEME_STORAGE_KEY);
+if (storedTheme === 'dark' || storedTheme === 'light') {
+  uiStoreApi.setState({ theme: storedTheme });
+}
 
 const messageStoreApi = createMessageStore({
   persistMessage: (...args) => getPorts().persistence.persistMessage(...args),

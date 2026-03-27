@@ -7,56 +7,17 @@ import { useUiStore } from './stores/hooks';
 import { reconnectAllClients } from './gateway/client';
 import { DrawerLayout } from './views/DrawerLayout';
 import { Toaster } from 'sonner';
+import { useThemeInit } from './hooks/useThemeInit';
 
 const PairingViewLazy = lazy(() => import('./views/PairingView').then((m) => ({ default: m.PairingView })));
-
-const THEME_STORAGE_KEY = 'clawwork-theme';
-
-type ThemeValue = 'dark' | 'light';
-
-function resolveTheme(): ThemeValue {
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
-  } catch (err) {
-    reportDebugEvent({
-      level: 'warn',
-      domain: 'app',
-      event: 'theme.storage.read.failed',
-      error: { message: err instanceof Error ? err.message : 'theme storage read failed' },
-    });
-  }
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-}
-
-function applyTheme(theme: ThemeValue): void {
-  document.documentElement.setAttribute('data-theme', theme);
-}
 
 export default function App() {
   const { t } = useTranslation();
   const [ready, setReady] = useState(false);
   const [paired, setPaired] = useState(false);
-  const [theme, setThemeState] = useState<ThemeValue>(resolveTheme);
+  const storeTheme = useUiStore((s) => s.theme);
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: light)');
-    const onChange = () => {
-      try {
-        if (!localStorage.getItem(THEME_STORAGE_KEY)) {
-          setThemeState(mq.matches ? 'light' : 'dark');
-        }
-      } catch {
-        setThemeState(mq.matches ? 'light' : 'dark');
-      }
-    };
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
+  useThemeInit();
 
   useEffect(() => {
     isPaired()
@@ -86,7 +47,7 @@ export default function App() {
           <PairingViewLazy onPaired={() => setPaired(true)} />
         )}
       </Suspense>
-      <Toaster theme={theme} richColors position="top-center" />
+      <Toaster theme={storeTheme === 'auto' ? 'system' : storeTheme} richColors position="top-center" />
     </ErrorBoundary>
   );
 }
