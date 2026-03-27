@@ -1,9 +1,9 @@
 import { Tray, Menu, nativeImage, app } from 'electron';
-import type { BrowserWindow } from 'electron';
 import { join } from 'path';
 import { is } from '@electron-toolkit/utils';
 import { getDebugLogger } from './debug/index.js';
 import { readConfig, updateConfig } from './workspace/config.js';
+import { getMainWindow } from './window-manager.js';
 
 export type TrayStatus = 'idle' | 'running' | 'unread' | 'disconnected';
 
@@ -20,7 +20,6 @@ interface TrayState {
 }
 
 let tray: Tray | null = null;
-let mainWindowRef: BrowserWindow | null = null;
 let animationTimer: ReturnType<typeof setInterval> | null = null;
 let animationFrame = 0;
 
@@ -63,24 +62,23 @@ function startAnimation(): void {
 }
 
 function focusMainWindow(): void {
-  if (!mainWindowRef) return;
-  if (mainWindowRef.isMinimized()) mainWindowRef.restore();
-  if (!mainWindowRef.isVisible()) mainWindowRef.show();
-  mainWindowRef.focus();
+  const win = getMainWindow();
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  if (!win.isVisible()) win.show();
+  win.focus();
 }
 
 function navigateToTask(taskId: string): void {
   focusMainWindow();
-  if (mainWindowRef && !mainWindowRef.isDestroyed()) {
-    mainWindowRef.webContents.send('tray:navigate-task', taskId);
-  }
+  const win = getMainWindow();
+  if (win) win.webContents.send('tray:navigate-task', taskId);
 }
 
 function openSettings(): void {
   focusMainWindow();
-  if (mainWindowRef && !mainWindowRef.isDestroyed()) {
-    mainWindowRef.webContents.send('tray:open-settings');
-  }
+  const win = getMainWindow();
+  if (win) win.webContents.send('tray:open-settings');
 }
 
 function buildMenu(state: TrayState): Menu {
@@ -117,8 +115,7 @@ function createTray(): void {
   getDebugLogger().info({ domain: 'tray', event: 'tray.init' });
 }
 
-export function initTray(win: BrowserWindow): void {
-  mainWindowRef = win;
+export function initTray(): void {
   const config = readConfig();
   if (config?.trayEnabled !== false) {
     createTray();
@@ -136,10 +133,6 @@ export function setTrayEnabled(enabled: boolean): void {
   } else {
     destroyTray();
   }
-}
-
-export function updateTrayWindow(win: BrowserWindow): void {
-  mainWindowRef = win;
 }
 
 export function updateTrayStatus(state: TrayState): void {

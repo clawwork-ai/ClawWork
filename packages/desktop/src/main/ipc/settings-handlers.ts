@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 import { readConfig, updateConfig, writeConfig, buildGatewayAuth } from '../workspace/config.js';
 import type { AppConfig, GatewayServerConfig } from '../workspace/config.js';
 import { getGatewayClient, addGateway, removeGateway } from '../ws/index.js';
@@ -6,11 +6,6 @@ import { GatewayClient } from '../ws/gateway-client.js';
 import { loadOrCreateDeviceIdentity } from '../ws/device-identity.js';
 import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 import type { GatewayAuth } from '@clawwork/shared';
-
-function getMainWindow(): BrowserWindow | null {
-  const wins = BrowserWindow.getAllWindows();
-  return wins.length > 0 ? wins[0] : null;
-}
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('pairing:get-device-identity', () => loadOrCreateDeviceIdentity());
@@ -37,10 +32,7 @@ export function registerSettingsHandlers(): void {
       config.defaultGatewayId = gateway.id;
     }
     writeConfig(config);
-    const mainWindow = getMainWindow();
-    if (mainWindow) {
-      addGateway({ id: gateway.id, name: gateway.name, url: gateway.url, auth: buildGatewayAuth(gateway) }, mainWindow);
-    }
+    addGateway({ id: gateway.id, name: gateway.name, url: gateway.url, auth: buildGatewayAuth(gateway) });
     return { ok: true };
   });
 
