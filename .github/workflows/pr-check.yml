@@ -9,7 +9,112 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      quality: ${{ steps.plan.outputs.quality }}
+      architecture: ${{ steps.plan.outputs.architecture }}
+      ui_contract: ${{ steps.plan.outputs.ui_contract }}
+      renderer_copy: ${{ steps.plan.outputs.renderer_copy }}
+      i18n: ${{ steps.plan.outputs.i18n }}
+      dead_code: ${{ steps.plan.outputs.dead_code }}
+      typecheck_shared: ${{ steps.plan.outputs.typecheck_shared }}
+      typecheck_core: ${{ steps.plan.outputs.typecheck_core }}
+      typecheck_desktop: ${{ steps.plan.outputs.typecheck_desktop }}
+      typecheck_pwa: ${{ steps.plan.outputs.typecheck_pwa }}
+      typecheck_website: ${{ steps.plan.outputs.typecheck_website }}
+      test_shared: ${{ steps.plan.outputs.test_shared }}
+      test_desktop: ${{ steps.plan.outputs.test_desktop }}
+      test_pwa: ${{ steps.plan.outputs.test_pwa }}
+      build_desktop: ${{ steps.plan.outputs.build_desktop }}
+      test_job: ${{ steps.plan.outputs.test_job }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            global:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - 'eslint.config.mjs'
+              - 'knip.json'
+              - 'scripts/**'
+              - '.github/workflows/pr-check.yml'
+              - '.github/workflows/e2e.yml'
+            shared:
+              - 'packages/shared/**'
+            core:
+              - 'packages/core/**'
+            desktop_renderer:
+              - 'packages/desktop/src/renderer/**'
+              - 'packages/desktop/test/**/*.tsx'
+            desktop_main:
+              - 'packages/desktop/src/main/**'
+              - 'packages/desktop/src/preload/**'
+              - 'packages/desktop/test/**/*.ts'
+            desktop_package:
+              - 'packages/desktop/package.json'
+              - 'packages/desktop/electron.vite.config.ts'
+              - 'packages/desktop/scripts/**'
+            pwa:
+              - 'packages/pwa/**'
+            website:
+              - 'website/**'
+              - '.github/workflows/website.yml'
+            keynote:
+              - 'keynote/**'
+
+      - id: plan
+        env:
+          GLOBAL: ${{ steps.filter.outputs.global }}
+          SHARED: ${{ steps.filter.outputs.shared }}
+          CORE: ${{ steps.filter.outputs.core }}
+          DESKTOP_RENDERER: ${{ steps.filter.outputs.desktop_renderer }}
+          DESKTOP_MAIN: ${{ steps.filter.outputs.desktop_main }}
+          DESKTOP_PACKAGE: ${{ steps.filter.outputs.desktop_package }}
+          PWA: ${{ steps.filter.outputs.pwa }}
+          WEBSITE: ${{ steps.filter.outputs.website }}
+          KEYNOTE: ${{ steps.filter.outputs.keynote }}
+        run: |
+          set_flag() {
+            local name="$1"
+            shift
+            local value=false
+            for item in "$@"; do
+              if [ "$item" = "true" ]; then
+                value=true
+                break
+              fi
+            done
+            echo "$name=$value" >> "$GITHUB_OUTPUT"
+          }
+
+          set_flag quality "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$PWA" "$WEBSITE"
+          set_flag architecture "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_MAIN"
+          set_flag ui_contract "$GLOBAL" "$DESKTOP_RENDERER" "$PWA"
+          set_flag renderer_copy "$GLOBAL" "$DESKTOP_RENDERER"
+          set_flag i18n "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$PWA"
+          set_flag dead_code "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$PWA" "$WEBSITE"
+          set_flag typecheck_shared "$GLOBAL" "$SHARED"
+          set_flag typecheck_core "$GLOBAL" "$SHARED" "$CORE"
+          set_flag typecheck_desktop "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE"
+          set_flag typecheck_pwa "$GLOBAL" "$SHARED" "$CORE" "$PWA"
+          set_flag typecheck_website "$GLOBAL" "$WEBSITE"
+          set_flag test_shared "$GLOBAL" "$SHARED"
+          set_flag test_desktop "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE"
+          set_flag test_pwa "$GLOBAL" "$SHARED" "$CORE" "$PWA"
+          set_flag build_desktop "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE"
+          set_flag test_job "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$PWA" "$WEBSITE"
+
   quality:
+    needs: [changes]
+    if: needs.changes.outputs.quality == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -36,22 +141,28 @@ jobs:
         run: pnpm format:check
 
       - name: Architecture guardrails
+        if: needs.changes.outputs.architecture == 'true'
         run: pnpm check:architecture
 
       - name: UI contract
+        if: needs.changes.outputs.ui_contract == 'true'
         run: pnpm check:ui-contract
 
       - name: Renderer copy contract
+        if: needs.changes.outputs.renderer_copy == 'true'
         run: pnpm check:renderer-copy
 
       - name: i18n key parity
+        if: needs.changes.outputs.i18n == 'true'
         run: pnpm check:i18n
 
       - name: Dead code detection
+        if: needs.changes.outputs.dead_code == 'true'
         run: pnpm check:dead-code
 
   test:
-    needs: [quality]
+    needs: [changes]
+    if: needs.changes.outputs.test_job == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -71,29 +182,42 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type check
-        run: pnpm typecheck
+      - name: Type check shared
+        if: needs.changes.outputs.typecheck_shared == 'true'
+        run: pnpm --filter @clawwork/shared exec tsc -b
 
-      - name: Run tests with coverage
-        run: pnpm test:coverage
+      - name: Type check core
+        if: needs.changes.outputs.typecheck_core == 'true'
+        run: pnpm --filter @clawwork/core exec tsc -b
+
+      - name: Type check desktop
+        if: needs.changes.outputs.typecheck_desktop == 'true'
+        run: pnpm --filter @clawwork/desktop exec tsc --noEmit
+
+      - name: Type check PWA
+        if: needs.changes.outputs.typecheck_pwa == 'true'
+        run: pnpm --filter @clawwork/pwa exec tsc --noEmit
+
+      - name: Type check website
+        if: needs.changes.outputs.typecheck_website == 'true'
+        run: pnpm --filter @clawwork/website exec tsc --noEmit
+
+      - name: Test shared
+        if: needs.changes.outputs.test_shared == 'true'
+        run: pnpm --filter @clawwork/shared test
+
+      - name: Test desktop
+        if: needs.changes.outputs.test_desktop == 'true'
+        run: pnpm --filter @clawwork/desktop test
+
+      - name: Test PWA
+        if: needs.changes.outputs.test_pwa == 'true'
+        run: pnpm --filter @clawwork/pwa test
 
   build:
-    needs: [quality]
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            platform: mac
-            build_args: '--mac --arm64'
-          - os: windows-latest
-            platform: win
-            build_args: '--win --x64'
-          - os: ubuntu-latest
-            platform: linux
-            build_args: '--linux --x64'
-
-    runs-on: ${{ matrix.os }}
-
+    needs: [changes, quality, test]
+    if: needs.changes.outputs.build_desktop == 'true' && needs.quality.result != 'failure' && needs.test.result != 'failure'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -115,7 +239,5 @@ jobs:
       - name: Build Electron app
         run: pnpm --filter @clawwork/desktop build
 
-      - name: Package (${{ matrix.platform }})
-        run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package Linux smoke build
+        run: pnpm --filter @clawwork/desktop exec electron-builder --linux --x64 --publish never

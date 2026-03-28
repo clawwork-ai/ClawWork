@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v1.0.0)'
+        description: 'Release tag (for example: v1.0.0 or v1.0.0-beta.1)'
         required: true
         type: string
 
@@ -16,7 +16,43 @@ permissions:
   actions: write
 
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+      is_prerelease: ${{ steps.meta.outputs.is_prerelease }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Verify tag format and version consistency
+        id: meta
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-((alpha|beta|rc)\.[0-9]+))?$ ]]; then
+            echo "::error::Unsupported release tag format: $RELEASE_TAG"
+            exit 1
+          fi
+
+          DESKTOP_VERSION=$(node -p "require('./packages/desktop/package.json').version")
+          TAG_VERSION="${RELEASE_TAG#v}"
+          if [ "$DESKTOP_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Version mismatch: package.json=${DESKTOP_VERSION}, tag=${TAG_VERSION}"
+            exit 1
+          fi
+
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
+    needs: prepare-release
     strategy:
       matrix:
         include:
@@ -39,7 +75,8 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+      IS_PRERELEASE: ${{ needs.prepare-release.outputs.is_prerelease }}
     defaults:
       run:
         shell: bash
@@ -49,16 +86,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ env.RELEASE_TAG }}
-
-      - name: Verify tag/version consistency
-        run: |
-          DESKTOP_VERSION=$(node -p "require('./packages/desktop/package.json').version")
-          TAG_VERSION="${RELEASE_TAG#v}"
-          if [ "$DESKTOP_VERSION" != "$TAG_VERSION" ]; then
-            echo "::error::Version mismatch: package.json=${DESKTOP_VERSION}, tag=${TAG_VERSION}"
-            exit 1
-          fi
-          echo "Version check passed: ${DESKTOP_VERSION}"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -107,7 +134,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_VERSION: ${{ github.run_number }}
-          EP_PRE_RELEASE: ${{ contains(env.RELEASE_TAG, '-rc') || contains(env.RELEASE_TAG, '-beta') || contains(env.RELEASE_TAG, '-alpha') }}
+          EP_PRE_RELEASE: ${{ env.IS_PRERELEASE }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -121,10 +148,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   verify-release:
-    needs: release
+    needs: [prepare-release, release]
     runs-on: ubuntu-latest
     env:
-      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
     steps:
       - name: Verify update metadata files
         run: |
@@ -142,8 +169,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-homebrew:
-    needs: [release, verify-release]
-    if: ${{ !contains(inputs.tag || github.ref_name, '-rc') && !contains(inputs.tag || github.ref_name, '-beta') && !contains(inputs.tag || github.ref_name, '-alpha') }}
+    needs: [prepare-release, release, verify-release]
+    if: ${{ needs.prepare-release.outputs.is_prerelease != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Homebrew tap update
@@ -153,4 +180,4 @@ jobs:
             --field tag="$RELEASE_TAG"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}

@@ -9,10 +9,80 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      smoke: ${{ steps.plan.outputs.smoke }}
+      gateway: ${{ steps.plan.outputs.gateway }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            global:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - '.github/workflows/e2e.yml'
+              - '.github/workflows/pr-check.yml'
+              - 'e2e/playwright.config.ts'
+              - 'e2e/helpers/**'
+            shared:
+              - 'packages/shared/**'
+            core:
+              - 'packages/core/**'
+            desktop_renderer:
+              - 'packages/desktop/src/renderer/**'
+            desktop_main:
+              - 'packages/desktop/src/main/**'
+              - 'packages/desktop/src/preload/**'
+            desktop_package:
+              - 'packages/desktop/package.json'
+              - 'packages/desktop/electron.vite.config.ts'
+              - 'packages/desktop/scripts/**'
+            smoke_specs:
+              - 'e2e/smoke/**'
+            gateway_specs:
+              - 'e2e/gateway/**'
+              - 'e2e/docker-compose.yml'
+
+      - id: plan
+        env:
+          GLOBAL: ${{ steps.filter.outputs.global }}
+          SHARED: ${{ steps.filter.outputs.shared }}
+          CORE: ${{ steps.filter.outputs.core }}
+          DESKTOP_RENDERER: ${{ steps.filter.outputs.desktop_renderer }}
+          DESKTOP_MAIN: ${{ steps.filter.outputs.desktop_main }}
+          DESKTOP_PACKAGE: ${{ steps.filter.outputs.desktop_package }}
+          SMOKE_SPECS: ${{ steps.filter.outputs.smoke_specs }}
+          GATEWAY_SPECS: ${{ steps.filter.outputs.gateway_specs }}
+        run: |
+          set_flag() {
+            local name="$1"
+            shift
+            local value=false
+            for item in "$@"; do
+              if [ "$item" = "true" ]; then
+                value=true
+                break
+              fi
+            done
+            echo "$name=$value" >> "$GITHUB_OUTPUT"
+          }
+
+          set_flag smoke "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$SMOKE_SPECS"
+          set_flag gateway "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$GATEWAY_SPECS"
+
+  smoke:
+    needs: [changes]
+    if: needs.changes.outputs.smoke == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,27 +110,48 @@ jobs:
       - name: Install Xvfb
         run: sudo apt-get install -y xvfb
 
-      - name: Diagnose Electron environment
-        working-directory: packages/desktop
-        shell: bash {0}
-        run: |
-          echo "=== node / electron versions ==="
-          node -v
-          ELECTRON_BIN=$(node -e "console.log(require('electron'))" 2>&1) || true
-          echo "electron binary: $ELECTRON_BIN"
-          if [ -f "$ELECTRON_BIN" ]; then
-            ls -la "$ELECTRON_BIN"
-            echo "=== ldd missing libs ==="
-            ldd "$ELECTRON_BIN" 2>&1 | grep "not found" || echo "(none missing)"
-          else
-            echo "WARN: electron binary not resolved, searching..."
-            find ../../node_modules/.pnpm -name electron -type f 2>/dev/null | head -5 || true
-            find node_modules -name electron -type f 2>/dev/null | head -5 || true
-          fi
-          echo "=== build output ==="
-          ls -R out/ 2>/dev/null | head -40 || echo "out/ not found"
-          echo "=== DISPLAY ==="
-          echo "${DISPLAY:-unset}"
+      - name: Run smoke tests
+        run: xvfb-run --auto-servernum -- npx playwright test --config=e2e/playwright.config.ts --project=smoke
+
+      - name: Upload smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-smoke-report
+          path: playwright-report/
+          retention-days: 7
+
+  gateway:
+    needs: [changes]
+    if: needs.changes.outputs.gateway == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter @clawwork/desktop exec tsc -b ../../packages/shared/tsconfig.json
+
+      - name: Build Electron app
+        run: pnpm --filter @clawwork/desktop exec electron-vite build
+
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
 
       - name: Pull OpenClaw image
         run: docker pull ghcr.io/openclaw/openclaw@$OPENCLAW_DIGEST
@@ -70,30 +161,17 @@ jobs:
       - name: Start OpenClaw Gateway
         run: docker compose -f e2e/docker-compose.yml up -d --wait
 
-      - name: Layer 1 — Smoke tests
-        id: smoke
-        continue-on-error: true
-        run: xvfb-run --auto-servernum -- npx playwright test --config=e2e/playwright.config.ts --project=smoke
-
-      - name: Layer 2 — Gateway integration tests
-        id: gateway
-        continue-on-error: true
+      - name: Run gateway tests
         run: xvfb-run --auto-servernum -- npx playwright test --config=e2e/playwright.config.ts --project=gateway
 
       - name: Stop OpenClaw Gateway
         if: always()
         run: docker compose -f e2e/docker-compose.yml down
 
-      - name: Upload test report
+      - name: Upload gateway report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-report
+          name: e2e-gateway-report
           path: playwright-report/
           retention-days: 7
-
-      - name: Check results
-        if: steps.smoke.outcome == 'failure' || steps.gateway.outcome == 'failure'
-        run: |
-          echo "::error::E2E tests failed — smoke=${{ steps.smoke.outcome }} gateway=${{ steps.gateway.outcome }}"
-          exit 1

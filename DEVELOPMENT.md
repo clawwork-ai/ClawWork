@@ -55,7 +55,7 @@ Rules that shape the whole codebase:
 
 ```text
 OpenClaw Gateway (:18789)
-  <- WS -> Electron main process
+  <- WS -> Electron main process / PWA gateway client
               |- ws/          gateway client, auth, reconnect, heartbeat
               |- ipc/         main <-> renderer boundary
               |- db/          SQLite + Drizzle + FTS
@@ -65,20 +65,21 @@ OpenClaw Gateway (:18789)
               |- debug/       ring buffer + NDJSON export
               |- tray.ts      tray integration
               `- quick-launch.ts
-                    <- contextBridge -> preload/
-                    <- API -> renderer/
-                              |- stores/
-                              |- layouts/
-                              |- components/
-                              |- hooks/
-                              |- lib/
-                              `- styles/
+                    <- @clawwork/core ->
+                    |- stores/    message, task, ui (shared between desktop & pwa)
+                    |- services/  dispatcher, session-sync, composer
+                    |- ports/     platform abstraction interfaces
+                    `- protocol/  message parsing, history normalization
+                          <- contextBridge / direct import ->
+                          renderer / PWA
 ```
 
 Design split:
 
 - `packages/shared`: protocol, constants, domain types; zero runtime baggage
-- `packages/desktop`: actual app; main process owns IO, renderer owns UI state
+- `packages/core`: stores, services, ports, protocol; shared business logic between desktop and pwa
+- `packages/desktop`: Electron app; main process owns IO, renderer owns UI state
+- `packages/pwa`: Progressive Web App; shares core stores and services with desktop
 
 ## Repository Map
 
@@ -90,6 +91,30 @@ packages/
       gateway-protocol.ts  Gateway request/response/event frames
       types.ts             Task, Message, Artifact, ToolCall domain types
       debug.ts             structured debug event types
+
+  core/
+    src/
+      index.ts             public API surface
+      stores/              Zustand stores — the single source of truth
+        message-store.ts   message lifecycle, streaming, finalization
+        task-store.ts      task CRUD, session adoption, selection
+        ui-store.ts        panels, modals, preferences
+      services/            business logic
+        gateway-dispatcher.ts  sole event router for all Gateway messages
+        session-sync.ts    reconcile local state with Gateway sessions
+        chat-composer.ts   message construction and send orchestration
+        auto-title.ts      task auto-titling from first message
+        error-classify.ts  error categorization for user display
+      protocol/            Gateway protocol utilities
+        normalize-history.ts  history response → local message format
+        parse-content.ts   content block parsing
+        types.ts           protocol-specific types
+      ports/               dependency inversion interfaces
+        gateway-transport.ts  WS transport abstraction
+        persistence.ts     DB abstraction for desktop/pwa
+        platform.ts        platform detection
+        notifications.ts   notification abstraction
+        settings.ts        settings abstraction
 
   desktop/
     src/main/
@@ -277,10 +302,19 @@ pnpm format
 pnpm format:check
 pnpm test
 pnpm check
+pnpm check:architecture
 pnpm check:ui-contract
+pnpm check:renderer-copy
+pnpm check:i18n
+pnpm check:dead-code
+pnpm dev:pwa
+pnpm dev:website
+pnpm dev:slides
 pnpm test:e2e
 pnpm test:e2e:smoke
 pnpm test:e2e:gateway
+pnpm test:coverage
+pnpm clean
 pnpm --filter @clawwork/desktop build
 pnpm --filter @clawwork/desktop build:mac
 pnpm --filter @clawwork/desktop build:win
@@ -340,21 +374,22 @@ PR body must cover:
 
 `pr-check.yml` is the baseline gate:
 
-- `quality`: `pnpm lint` + `pnpm format:check`
-- `test`: `pnpm typecheck` + `pnpm test`
-- `build`: macOS arm64 package + Windows x64 package
+- `quality`: `pnpm lint` + `pnpm format:check`, plus conditional architecture, UI, i18n, and dead-code checks
+- `test`: package-scoped typecheck and unit tests based on the changed workspace area
+- `build`: Linux smoke package for desktop-affecting pull requests
 
-`e2e.yml` adds smoke and Gateway integration coverage on pull requests.
+`e2e.yml` adds smoke and Gateway integration coverage only when the affected files justify it.
 
 Local expectation: do not open a PR that obviously cannot survive CI.
 
 ### Releases
 
-- push `v*` tag on `main` to trigger `release.yml`
-- release verifies tag/package version match
-- artifacts: macOS universal + Windows x64
+- push a release tag on `main` to trigger `release.yml`
+- supported tags: `vX.Y.Z`, `vX.Y.Z-beta.N`, `vX.Y.Z-rc.N`, `vX.Y.Z-alpha.N`
+- release verifies tag format and tag/package version match
+- prerelease tags publish GitHub prereleases
 - stable releases trigger Homebrew update
-- `dev-release.yml` continuously publishes the moving `dev` build from `main`
+- artifacts: macOS arm64 + macOS x64 + Windows x64 + Linux x64
 
 ## OpenClaw-Specific Rules
 

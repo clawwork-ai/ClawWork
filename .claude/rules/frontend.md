@@ -1,0 +1,7 @@
+- TypeScript strict mode; `any` is not allowed
+- All colors via CSS Variables (`var(--xxx)`) — no hardcoded hex values
+- No comments in code — includes `//`, `/* */`, and JSDoc (global rule 7)
+- Component files go in `layouts/` (layout components) or `components/` (general components), organized by feature
+- State management uses Zustand, one store per domain (`taskStore`, `messageStore`, `uiStore`)
+- WebSocket message types are defined in `@clawwork/shared`; desktop imports from there
+- No Chinese in code, comments, or git messages (global rule 0)
