@@ -12,7 +12,7 @@ import { useUiStore } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
 import { useFileStore } from './stores/fileStore';
 import { composer } from './platform';
-import { useGatewayEventDispatcher } from './hooks/useGatewayDispatcher';
+import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
 import { cn } from '@/lib/utils';
@@ -46,7 +46,7 @@ export default function App() {
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
   const themeMode = useUiStore((s) => s.theme);
 
-  useGatewayEventDispatcher();
+  useGatewayBootstrap();
   useUpdateCheck();
   useTraySync();
 

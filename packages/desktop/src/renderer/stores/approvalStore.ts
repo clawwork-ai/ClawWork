@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import i18n from '../i18n';
 import { useTaskStore } from './taskStore';
 import { useUiStore } from './uiStore';
-import { buildAppError, formatErrorForToast } from '../lib/error-format';
+import { buildAppError, formatErrorForToast } from '@clawwork/core';
 
 type PendingApproval = ExecApprovalRequest & { gatewayId: string; taskId: string | null };
 

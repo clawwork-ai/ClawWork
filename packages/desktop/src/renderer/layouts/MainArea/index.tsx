@@ -39,7 +39,7 @@ import FileBrowser from '../FileBrowser';
 import CronPanel from '@/layouts/CronPanel';
 import logo from '@/assets/logo.png';
 import { useUsageStore } from '@/stores/usageStore';
-import { fetchAgentsForGateway } from '@/hooks/useGatewayDispatcher';
+import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
 import DataTable, { type DataTableColumn } from '@/components/data-display/DataTable';
 import EmptyState from '@/components/semantic/EmptyState';
 import StatusTag from '@/components/semantic/StatusTag';
