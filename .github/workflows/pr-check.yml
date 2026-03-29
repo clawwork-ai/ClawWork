@@ -183,11 +183,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check shared
-        if: needs.changes.outputs.typecheck_shared == 'true'
+        if: needs.changes.outputs.typecheck_shared == 'true' || needs.changes.outputs.typecheck_core == 'true' || needs.changes.outputs.typecheck_desktop == 'true' || needs.changes.outputs.typecheck_pwa == 'true'
         run: pnpm --filter @clawwork/shared exec tsc -b
 
       - name: Type check core
-        if: needs.changes.outputs.typecheck_core == 'true'
+        if: needs.changes.outputs.typecheck_core == 'true' || needs.changes.outputs.typecheck_desktop == 'true' || needs.changes.outputs.typecheck_pwa == 'true'
         run: pnpm --filter @clawwork/core exec tsc -b
 
       - name: Type check desktop
