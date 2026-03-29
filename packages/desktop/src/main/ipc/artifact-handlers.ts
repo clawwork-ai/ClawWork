@@ -1,5 +1,6 @@
 import { ipcMain, BrowserWindow, dialog, shell } from 'electron';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, realpathSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { fileURLToPath } from 'node:url';
 import { resolve, sep } from 'path';
 import { eq } from 'drizzle-orm';
@@ -25,10 +26,16 @@ export function registerArtifactHandlers(): void {
       return { ok: false, error: 'workspace not configured' };
     }
     try {
+      const realSource = realpathSync(params.sourcePath);
+      const allowedPrefixes = [resolve(workspacePath) + sep, tmpdir() + sep];
+      if (!allowedPrefixes.some((p) => realSource.startsWith(p))) {
+        return { ok: false, error: 'source path outside allowed locations' };
+      }
+
       const artifact = await saveArtifact({
         workspacePath,
         taskId: params.taskId,
-        sourcePath: params.sourcePath,
+        sourcePath: realSource,
         messageId: params.messageId,
         fileName: params.fileName,
         mediaType: params.mediaType,
