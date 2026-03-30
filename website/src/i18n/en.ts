@@ -3,7 +3,7 @@ export interface Translations {
     features: string;
     architecture: string;
     quickStart: string;
-    docs: string;
+    blogs: string;
     pwa: string;
     github: string;
   };
@@ -37,7 +37,9 @@ export interface Translations {
     steps: Array<{ title: string; code: string | null }>;
   };
   docs: {
-    backToHome: string;
+    title: string;
+    backToList: string;
+    articles: Array<{ slug: string; title: string; description: string }>;
   };
   footer: {
     product: { title: string; links: Array<{ label: string; href: string }> };
@@ -52,7 +54,7 @@ export const en: Translations = {
     features: 'Features',
     architecture: 'Architecture',
     quickStart: 'Quick Start',
-    docs: 'Docs',
+    blogs: 'Blogs',
     pwa: 'PWA',
     github: 'GitHub',
   },
@@ -144,7 +146,20 @@ export const en: Translations = {
     ],
   },
   docs: {
-    backToHome: 'Back to home',
+    title: 'Blogs',
+    backToList: 'All posts',
+    articles: [
+      {
+        slug: 'pairing-gateway',
+        title: 'Pairing with an OpenClaw Gateway',
+        description: 'Add a gateway and authenticate your device with token, password, or pairing code.',
+      },
+      {
+        slug: 'pairing-pwa',
+        title: 'Using ClawWork PWA',
+        description: 'Access ClawWork from any browser — install, connect, and pair on mobile or desktop.',
+      },
+    ],
   },
   footer: {
     product: {
@@ -167,8 +182,7 @@ export const en: Translations = {
     resources: {
       title: 'Resources',
       links: [
-        { label: 'Pairing Guide', href: 'docs/pairing-gateway' },
-        { label: 'PWA Guide', href: 'docs/pairing-pwa' },
+        { label: 'Blogs', href: 'docs' },
         { label: 'Changelog', href: 'https://github.com/clawwork-ai/clawwork/releases' },
         { label: 'License', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],

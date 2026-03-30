@@ -79,13 +79,13 @@ export function Header({ navigate }: HeaderProps) {
           ))}
 
           <a
-            href="docs/pairing-gateway"
-            onClick={(e) => handleInternalLink(e, 'docs/pairing-gateway')}
+            href="docs"
+            onClick={(e) => handleInternalLink(e, 'docs')}
             style={linkStyle}
             onMouseEnter={hoverIn}
             onMouseLeave={hoverOut}
           >
-            {t.nav.docs}
+            {t.nav.blogs}
           </a>
 
           <a

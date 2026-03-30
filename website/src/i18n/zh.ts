@@ -5,7 +5,7 @@ export const zh: Translations = {
     features: '功能',
     architecture: '架构',
     quickStart: '快速开始',
-    docs: '文档',
+    blogs: '博客',
     pwa: 'PWA',
     github: 'GitHub',
   },
@@ -93,7 +93,20 @@ export const zh: Translations = {
     ],
   },
   docs: {
-    backToHome: '返回首页',
+    title: '博客',
+    backToList: '所有文章',
+    articles: [
+      {
+        slug: 'pairing-gateway',
+        title: '与 OpenClaw 网关配对',
+        description: '添加网关并通过 Token、密码或配对码完成设备认证。',
+      },
+      {
+        slug: 'pairing-pwa',
+        title: '使用 ClawWork PWA',
+        description: '在任何浏览器中访问 ClawWork——安装、连接和配对。',
+      },
+    ],
   },
   footer: {
     product: {
@@ -116,8 +129,7 @@ export const zh: Translations = {
     resources: {
       title: '资源',
       links: [
-        { label: '配对指南', href: 'docs/pairing-gateway' },
-        { label: 'PWA 指南', href: 'docs/pairing-pwa' },
+        { label: '博客', href: 'docs' },
         { label: '更新日志', href: 'https://github.com/clawwork-ai/clawwork/releases' },
         { label: '许可证', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],
