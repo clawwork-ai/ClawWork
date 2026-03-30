@@ -13,7 +13,6 @@ export const zh: Translations = {
     headline: '开源 OpenClaw 桌面客户端',
     tagline: '并行运行多个 AI 任务，实时观察每次工具调用，所有输出自动本地保存。',
     downloadFor: '下载',
-    allDownloads: '全部下载',
     download: {
       macOS: 'macOS (Apple Silicon)',
       macOSIntel: 'macOS (Intel)',

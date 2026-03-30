@@ -11,7 +11,6 @@ export interface Translations {
     headline: string;
     tagline: string;
     downloadFor: string;
-    allDownloads: string;
     download: {
       macOS: string;
       macOSIntel: string;
@@ -62,7 +61,6 @@ export const en: Translations = {
     headline: 'Open Source OpenClaw Client',
     tagline: 'Run parallel AI tasks. Watch every tool call. Every output saved locally.',
     downloadFor: 'Download for',
-    allDownloads: 'All downloads',
     download: {
       macOS: 'macOS (Apple Silicon)',
       macOSIntel: 'macOS (Intel)',

@@ -158,29 +158,6 @@ export function Hero() {
         })}
       </div>
 
-      <div style={{ marginTop: '12px' }}>
-        <a
-          href={`https://github.com/${REPO}/releases/latest`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            fontSize: '13px',
-            color: '#6b7280',
-            textDecoration: 'none',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            transition: 'color 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.color = '#9ca3af';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.color = '#6b7280';
-          }}
-        >
-          {t.hero.allDownloads}
-        </a>
-      </div>
-
       <div style={{ marginTop: '48px' }}>
         <img
           src={`${import.meta.env.BASE_URL}screenshot.png`}
