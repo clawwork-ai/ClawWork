@@ -8,24 +8,18 @@ import { Architecture } from './components/Architecture';
 import { QuickStart } from './components/QuickStart';
 import { Footer } from './components/Footer';
 import { DocsLayout } from './components/DocsLayout';
-import { PairingGateway } from './components/docs/PairingGateway';
-import { PairingPwa } from './components/docs/PairingPwa';
+import { DocPage } from './components/DocPage';
+
+const DOC_SLUGS = ['pairing-gateway', 'pairing-pwa'];
 
 function Router() {
   const { path, navigate } = useRoute();
 
-  if (path === 'docs/pairing-gateway') {
+  const docMatch = path.startsWith('docs/') ? path.slice(5) : null;
+  if (docMatch && DOC_SLUGS.includes(docMatch)) {
     return (
       <DocsLayout navigate={navigate}>
-        <PairingGateway />
-      </DocsLayout>
-    );
-  }
-
-  if (path === 'docs/pairing-pwa') {
-    return (
-      <DocsLayout navigate={navigate}>
-        <PairingPwa />
+        <DocPage slug={docMatch} />
       </DocsLayout>
     );
   }
