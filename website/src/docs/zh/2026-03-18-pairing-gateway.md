@@ -1,11 +1,17 @@
+---
+title: 与 OpenClaw 网关配对
+description: 添加网关并通过 Token、密码或配对码完成设备认证
+date: 2026-03-18
+---
+
 # 与 OpenClaw 网关配对
 
-ClawWork 通过 Gateway 服务器连接 OpenClaw。本指南将引导你添加网关并完成设备认证。
+ClawWork 通过 Gateway 连接 OpenClaw。以下是添加网关并完成设备认证的流程。
 
 ## 前置条件
 
-- 一个正在运行且可访问的 OpenClaw Gateway 实例
-- 已安装 ClawWork 桌面应用，或在浏览器中打开了 PWA
+- 一个正在运行且网络可达的 OpenClaw Gateway 实例
+- 已安装 ClawWork 桌面应用
 - 网关 URL（本地默认：`ws://127.0.0.1:18789`）
 
 ```bash
@@ -15,19 +21,19 @@ openclaw gateway start
 ## 添加网关
 
 1. 打开 ClawWork，进入**设置**（侧栏齿轮图标）
-2. 滚动到**网关（Gateways）**区域
-3. 点击**添加网关**
-4. 输入名称（如「本地网关」）和 WebSocket URL
-5. 选择认证方式：**Token**、**密码**或**配对码**
+2. 滚动到**网关**区域，点击**添加网关**
+3. 输入名称（如「本地网关」）和 WebSocket URL
+4. 选择认证方式：**Token**、**密码**或**配对码**
 
-## 认证方式：Token
+## 认证方式：Token（推荐）
 
-使用预共享的 API Token。适合自动化部署或管理员已分配 Token 的场景。
+使用预共享的 API Token，适合管理员已分配 Token 的场景。
 
 1. 在网关表单中选择 **Token** 标签页
 2. 粘贴管理员提供的 API Token
 3. 点击**测试连接**验证
-4. 保存网关配置
+4. 前往 OpenClaw WebUI > Node > Device 允许授权
+5. 保存网关配置
 
 ## 认证方式：密码
 
@@ -40,7 +46,7 @@ openclaw gateway start
 
 ## 认证方式：配对码
 
-配对码是首次设备配对的推荐方式。网关会生成一个 setup code（Base64 字符串），你可以粘贴或扫描二维码。
+配对码适用于首次设备配对。网关会生成一个 setup code（Base64 字符串），可以粘贴或扫描二维码。
 
 1. 在网关表单中选择**配对码**标签页
 2. 从网关管理员或网关 Web UI 获取 setup code
@@ -54,5 +60,5 @@ openclaw gateway start
 ## 验证连接
 
 1. 保存后，网关应在设置中显示绿色**已连接**状态
-2. 返回主界面——创建新任务时应能看到该网关的 Agent 列表
+2. 返回主界面，创建新任务时应能看到该网关的 Agent 列表
 3. 如果连接失败，检查网关 URL 是否可达以及认证信息是否正确

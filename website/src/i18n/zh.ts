@@ -94,18 +94,7 @@ export const zh: Translations = {
   docs: {
     title: '博客',
     backToList: '所有文章',
-    articles: [
-      {
-        slug: 'pairing-gateway',
-        title: '与 OpenClaw 网关配对',
-        description: '添加网关并通过 Token、密码或配对码完成设备认证。',
-      },
-      {
-        slug: 'pairing-pwa',
-        title: '使用 ClawWork PWA',
-        description: '在任何浏览器中访问 ClawWork——安装、连接和配对。',
-      },
-    ],
+    noTranslation: '本文暂无当前语言版本，显示原始语言内容。',
   },
   footer: {
     product: {

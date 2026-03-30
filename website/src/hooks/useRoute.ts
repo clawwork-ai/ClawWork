@@ -16,19 +16,33 @@ export function useRoute() {
 
   const navigate = useCallback((to: string) => {
     const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-    const hash = to.includes('#') ? to.slice(to.indexOf('#')) : '';
-    const pathname = hash ? '' : to;
+    const currentPath = getPath();
 
-    window.history.pushState(null, '', base + '/' + pathname + hash);
-    setPath(pathname);
-
-    if (hash) {
-      requestAnimationFrame(() => {
-        document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
-      });
-    } else {
-      window.scrollTo(0, 0);
+    if (to.startsWith('#')) {
+      if (currentPath === '') {
+        document.querySelector(to)?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      window.history.pushState(null, '', base + '/' + to);
+      setPath('');
+      let tries = 0;
+      const poll = () => {
+        const el = document.querySelector(to);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else if (++tries < 20) requestAnimationFrame(poll);
+      };
+      requestAnimationFrame(poll);
+      return;
     }
+
+    if (to === currentPath) {
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    window.history.pushState(null, '', base + '/' + to);
+    setPath(to);
+    window.scrollTo(0, 0);
   }, []);
 
   return { path, navigate };

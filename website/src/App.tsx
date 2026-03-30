@@ -9,8 +9,7 @@ import { Footer } from './components/Footer';
 import { DocsLayout } from './components/DocsLayout';
 import { DocIndex } from './components/DocIndex';
 import { DocPage } from './components/DocPage';
-
-const DOC_SLUGS = ['pairing-gateway', 'pairing-pwa'];
+import { allSlugs } from './docs/registry';
 
 function Router() {
   const { path, navigate } = useRoute();
@@ -24,7 +23,7 @@ function Router() {
   }
 
   const docMatch = path.startsWith('blogs/') ? path.slice(6) : null;
-  if (docMatch && DOC_SLUGS.includes(docMatch)) {
+  if (docMatch && allSlugs.has(docMatch)) {
     return (
       <DocsLayout navigate={navigate} backTo="blogs">
         <DocPage slug={docMatch} />

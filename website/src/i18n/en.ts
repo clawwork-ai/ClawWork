@@ -38,7 +38,7 @@ export interface Translations {
   docs: {
     title: string;
     backToList: string;
-    articles: Array<{ slug: string; title: string; description: string }>;
+    noTranslation: string;
   };
   footer: {
     product: { title: string; links: Array<{ label: string; href: string }> };
@@ -146,18 +146,7 @@ export const en: Translations = {
   docs: {
     title: 'Blogs',
     backToList: 'All posts',
-    articles: [
-      {
-        slug: 'pairing-gateway',
-        title: 'Pairing with an OpenClaw Gateway',
-        description: 'Add a gateway and authenticate your device with token, password, or pairing code.',
-      },
-      {
-        slug: 'pairing-pwa',
-        title: 'Using ClawWork PWA',
-        description: 'Access ClawWork from any browser — install, connect, and pair on mobile or desktop.',
-      },
-    ],
+    noTranslation: 'This article is not yet available in English. Showing the original version.',
   },
   footer: {
     product: {

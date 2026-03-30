@@ -19,12 +19,7 @@ export function Footer({ navigate }: FooterProps) {
   };
 
   return (
-    <footer
-      style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        padding: '48px 24px 32px',
-      }}
-    >
+    <footer style={{ borderTop: '1px solid var(--color-border)', padding: '48px 24px 32px' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <div
           style={{
@@ -37,11 +32,11 @@ export function Footer({ navigate }: FooterProps) {
           {cols.map((col) => (
             <div key={col.title}>
               <h4
+                className="mono"
                 style={{
-                  fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: '#f3f4f4',
+                  color: 'var(--color-text-primary)',
                   margin: '0 0 16px 0',
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
@@ -57,18 +52,8 @@ export function Footer({ navigate }: FooterProps) {
                       target={isExternal(link.href) ? '_blank' : undefined}
                       rel={isExternal(link.href) ? 'noopener noreferrer' : undefined}
                       onClick={(e) => handleClick(e, link.href)}
-                      style={{
-                        fontSize: '14px',
-                        color: '#9ca3af',
-                        textDecoration: 'none',
-                        transition: 'color 0.15s',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = '#f3f4f4';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLAnchorElement).style.color = '#9ca3af';
-                      }}
+                      className="link"
+                      style={{ fontSize: '14px' }}
                     >
                       {link.label}
                     </a>
@@ -80,7 +65,7 @@ export function Footer({ navigate }: FooterProps) {
         </div>
         <div
           style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: '1px solid var(--color-border)',
             paddingTop: '24px',
             display: 'flex',
             alignItems: 'center',
@@ -88,13 +73,7 @@ export function Footer({ navigate }: FooterProps) {
           }}
         >
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '20px', height: '20px' }} />
-          <span
-            style={{
-              fontSize: '13px',
-              color: '#6b7280',
-              fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
-            }}
-          >
+          <span className="mono" style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {t.footer.copyright}
           </span>
         </div>

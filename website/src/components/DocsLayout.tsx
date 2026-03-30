@@ -15,7 +15,6 @@ export function DocsLayout({ navigate, backTo, children }: DocsLayoutProps) {
   return (
     <>
       <Header navigate={navigate} />
-
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px 96px' }}>
         {backTo != null && (
           <button
@@ -25,7 +24,7 @@ export function DocsLayout({ navigate, backTo, children }: DocsLayoutProps) {
               alignItems: 'center',
               gap: '6px',
               fontSize: '14px',
-              color: '#0ffd0d',
+              color: 'var(--color-accent)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -37,7 +36,6 @@ export function DocsLayout({ navigate, backTo, children }: DocsLayoutProps) {
             {t.docs.backToList}
           </button>
         )}
-
         {children}
       </main>
     </>
