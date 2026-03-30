@@ -1,5 +1,8 @@
-import { Github } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Github, Star } from 'lucide-react';
 import { useI18n } from '../i18n/context';
+
+const REPO = 'clawwork-ai/clawwork';
 
 const ANCHOR_LINKS = [
   { key: 'features' as const, href: '#features' },
@@ -22,12 +25,33 @@ function hoverOut(e: React.MouseEvent) {
   (e.currentTarget as HTMLElement).style.color = '#9ca3af';
 }
 
+function formatStars(count: number): string {
+  if (count >= 1000) return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  return String(count);
+}
+
+function useStarCount() {
+  const [stars, setStars] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch(`https://api.github.com/repos/${REPO}`)
+      .then((r) => r.json())
+      .then((d: { stargazers_count?: number }) => {
+        if (d.stargazers_count != null) setStars(d.stargazers_count);
+      })
+      .catch(() => {});
+  }, []);
+
+  return stars;
+}
+
 interface HeaderProps {
   navigate: (to: string) => void;
 }
 
 export function Header({ navigate }: HeaderProps) {
   const { t, locale, toggle } = useI18n();
+  const stars = useStarCount();
 
   const handleLink = (e: React.MouseEvent, to: string) => {
     e.preventDefault();
@@ -111,15 +135,31 @@ export function Header({ navigate }: HeaderProps) {
             href="https://cpwa.pages.dev"
             target="_blank"
             rel="noopener noreferrer"
-            style={linkStyle}
+            style={{ ...linkStyle, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onMouseEnter={hoverIn}
             onMouseLeave={hoverOut}
           >
             {t.nav.pwa}
+            <span
+              style={{
+                fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: '#0ffd0d',
+                background: 'rgba(15, 253, 13, 0.1)',
+                border: '1px solid rgba(15, 253, 13, 0.2)',
+                borderRadius: '3px',
+                padding: '1px 5px',
+                lineHeight: '14px',
+                letterSpacing: '0.03em',
+              }}
+            >
+              BETA
+            </span>
           </a>
 
           <a
-            href="https://github.com/clawwork-ai/clawwork"
+            href={`https://github.com/${REPO}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -147,7 +187,20 @@ export function Header({ navigate }: HeaderProps) {
             }}
           >
             <Github size={15} />
-            {t.nav.github}
+            {stars != null && (
+              <>
+                <Star size={12} fill="#f3f4f4" />
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
+                    fontSize: '12px',
+                  }}
+                >
+                  {formatStars(stars)}
+                </span>
+              </>
+            )}
+            {stars == null && t.nav.github}
           </a>
 
           <button
