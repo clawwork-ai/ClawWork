@@ -66,9 +66,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   return (
     <LazyMotion features={domMax}>
       <div className="flex h-full flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="safe-area-top" />
-
-        <header className="flex shrink-0 items-center gap-2 px-3 py-2">
+        <header className="safe-area-top flex shrink-0 items-center gap-2 px-3 py-2">
           <button
             onClick={() => setDrawerOpen(true)}
             aria-label={t('drawer.menuButton')}
@@ -148,8 +146,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
                 className="fixed inset-y-0 left-0 z-50 flex w-80 flex-col outline-none"
                 style={{ backgroundColor: 'var(--bg-secondary)', maxWidth: '80vw' }}
               >
-                <div className="safe-area-top" />
-                <div className="flex items-center gap-2 px-4 py-3">
+                <div className="safe-area-top flex items-center gap-2 px-4 py-3">
                   <div
                     className="flex flex-1 items-center gap-2 rounded-lg px-3 py-2"
                     style={{ backgroundColor: 'var(--bg-tertiary)' }}
