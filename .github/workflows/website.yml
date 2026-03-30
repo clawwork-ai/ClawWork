@@ -6,17 +6,11 @@ on:
     paths:
       - 'website/**'
       - 'keynote/**'
-      - 'packages/pwa/**'
-      - 'packages/shared/**'
-      - 'packages/core/**'
       - '.github/workflows/website.yml'
   pull_request:
     paths:
       - 'website/**'
       - 'keynote/**'
-      - 'packages/pwa/**'
-      - 'packages/shared/**'
-      - 'packages/core/**'
       - '.github/workflows/website.yml'
   workflow_dispatch:
 
@@ -56,16 +50,8 @@ jobs:
       - name: Patch keynote SPA redirect
         run: node -e "const f='keynote/dist/index.html';const fs=require('fs');const h=fs.readFileSync(f,'utf8');fs.writeFileSync(f,h.replace('<head>','<head><script>(function(){var q=location.search.slice(1);if(q&&!q.includes(\"=\")){history.replaceState(null,\"\",location.pathname+q+location.hash)}})()</script>'))"
 
-      - name: Build shared and core declarations
-        run: pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/core exec tsc -b
-
-      - name: Build PWA
-        run: pnpm --filter @clawwork/pwa build --base /ClawWork/pwa/
-
       - name: Merge outputs
-        run: |
-          cp -r keynote/dist website/dist/keynote
-          cp -r packages/pwa/dist website/dist/pwa
+        run: cp -r keynote/dist website/dist/keynote
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
