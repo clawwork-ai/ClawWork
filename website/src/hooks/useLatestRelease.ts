@@ -42,9 +42,15 @@ export function useLatestRelease() {
   return release;
 }
 
-export function detectPlatform(): 'mac' | 'win' | 'linux' | null {
+export type Platform = 'mac-arm' | 'mac-intel' | 'win' | 'linux';
+
+export function detectPlatform(): Platform | null {
   const ua = navigator.userAgent;
-  if (/Mac/i.test(ua)) return 'mac';
+  if (/Mac/i.test(ua)) {
+    const uad = (navigator as Navigator & { userAgentData?: { architecture?: string } }).userAgentData;
+    if (uad?.architecture === 'x86') return 'mac-intel';
+    return 'mac-arm';
+  }
   if (/Win/i.test(ua)) return 'win';
   if (/Linux/i.test(ua)) return 'linux';
   return null;

@@ -57,15 +57,15 @@ export function Hero() {
   const platform = detectPlatform();
 
   const buttons: { label: string; href: string | null; platformKey: string }[] = [
-    { label: t.hero.download.macOS, href: release?.macARM ?? null, platformKey: 'mac' },
+    { label: t.hero.download.macOS, href: release?.macARM ?? null, platformKey: 'mac-arm' },
     { label: t.hero.download.macOSIntel, href: release?.macIntel ?? null, platformKey: 'mac-intel' },
     { label: t.hero.download.windows, href: release?.windows ?? null, platformKey: 'win' },
     { label: t.hero.download.linux, href: release?.linux ?? null, platformKey: 'linux' },
   ];
 
   const sorted = [...buttons].sort((a, b) => {
-    const aMatch = platform === 'mac' ? a.platformKey.startsWith('mac') : a.platformKey === platform;
-    const bMatch = platform === 'mac' ? b.platformKey.startsWith('mac') : b.platformKey === platform;
+    const aMatch = a.platformKey === platform;
+    const bMatch = b.platformKey === platform;
     return aMatch === bMatch ? 0 : aMatch ? -1 : 1;
   });
 
@@ -154,8 +154,7 @@ export function Hero() {
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
         {sorted.map(({ label, href, platformKey }) => {
-          const isPrimary = platform === 'mac' ? platformKey === 'mac' : platform === platformKey;
-          return <DownloadButton key={platformKey} label={label} href={href} primary={isPrimary} />;
+          return <DownloadButton key={platformKey} label={label} href={href} primary={platformKey === platform} />;
         })}
       </div>
 
