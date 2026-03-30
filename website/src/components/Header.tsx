@@ -4,7 +4,6 @@ import { useI18n } from '../i18n/context';
 const ANCHOR_LINKS = [
   { key: 'features' as const, href: '#features' },
   { key: 'architecture' as const, href: '#architecture' },
-  { key: 'quickStart' as const, href: '#quick-start' },
 ];
 
 const linkStyle = {
@@ -97,6 +96,15 @@ export function Header({ navigate }: HeaderProps) {
             onMouseLeave={hoverOut}
           >
             {t.nav.blogs}
+          </a>
+
+          <a
+            href={`${import.meta.env.BASE_URL}keynote/`}
+            style={linkStyle}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            {t.nav.keynote}
           </a>
 
           <a

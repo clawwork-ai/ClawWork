@@ -4,8 +4,8 @@ export const zh: Translations = {
   nav: {
     features: '功能',
     architecture: '架构',
-    quickStart: '快速开始',
     blogs: '博客',
+    keynote: 'Keynote',
     pwa: 'PWA',
     github: 'GitHub',
   },
@@ -112,7 +112,6 @@ export const zh: Translations = {
       title: '产品',
       links: [
         { label: '功能', href: '#features' },
-        { label: '快速开始', href: '#quick-start' },
         { label: 'PWA', href: 'https://cpwa.pages.dev' },
         { label: 'Keynote', href: 'keynote/' },
       ],

@@ -5,7 +5,6 @@ import { Hero } from './components/Hero';
 import { InstallBlock } from './components/InstallBlock';
 import { Features } from './components/Features';
 import { Architecture } from './components/Architecture';
-import { QuickStart } from './components/QuickStart';
 import { Footer } from './components/Footer';
 import { DocsLayout } from './components/DocsLayout';
 import { DocIndex } from './components/DocIndex';
@@ -41,7 +40,6 @@ function Router() {
         <InstallBlock />
         <Features />
         <Architecture />
-        <QuickStart />
       </main>
       <Footer navigate={navigate} />
     </>

@@ -2,8 +2,8 @@ export interface Translations {
   nav: {
     features: string;
     architecture: string;
-    quickStart: string;
     blogs: string;
+    keynote: string;
     pwa: string;
     github: string;
   };
@@ -52,8 +52,8 @@ export const en: Translations = {
   nav: {
     features: 'Features',
     architecture: 'Architecture',
-    quickStart: 'Quick Start',
     blogs: 'Blogs',
+    keynote: 'Keynote',
     pwa: 'PWA',
     github: 'GitHub',
   },
@@ -164,7 +164,6 @@ export const en: Translations = {
       title: 'Product',
       links: [
         { label: 'Features', href: '#features' },
-        { label: 'Quick Start', href: '#quick-start' },
         { label: 'PWA', href: 'https://cpwa.pages.dev' },
         { label: 'Keynote', href: 'keynote/' },
       ],
