@@ -75,7 +75,17 @@
     }
   },
   "qrScanner": { "videoLabel": "Visor da câmera para escaneamento QR", "scanFrameLabel": "Área de escaneamento QR" },
-  "settings": { "darkMode": "Modo escuro", "lightMode": "Modo claro", "language": "Idioma" },
+  "settings": {
+    "darkMode": "Modo escuro",
+    "lightMode": "Modo claro",
+    "language": "Idioma",
+    "version": "Versão {{version}}",
+    "checkUpdate": "Verificar atualizações",
+    "checking": "Verificando...",
+    "applyUpdate": "Atualização disponível — toque para instalar",
+    "upToDate": "Já está atualizado",
+    "updateFailed": "Falha ao verificar atualizações"
+  },
   "debugLog": {
     "title": "Registro do gateway",
     "reconnect": "Reconectar",

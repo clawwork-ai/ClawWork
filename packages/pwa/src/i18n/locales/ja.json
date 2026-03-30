@@ -88,7 +88,13 @@
   "settings": {
     "darkMode": "ダークモード",
     "lightMode": "ライトモード",
-    "language": "言語"
+    "language": "言語",
+    "version": "バージョン {{version}}",
+    "checkUpdate": "アップデートを確認",
+    "checking": "確認中...",
+    "applyUpdate": "アップデートあり — タップしてインストール",
+    "upToDate": "最新バージョンです",
+    "updateFailed": "アップデート確認に失敗"
   },
   "debugLog": {
     "title": "ゲートウェイログ",

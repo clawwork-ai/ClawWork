@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => ({
     ...(command === 'serve' ? [basicSsl()] : []),
     VitePWA({
       strategies: 'generateSW',
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       injectRegister: null,
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
@@ -36,7 +36,9 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,woff2,woff}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2,woff,wasm}'],
+        globIgnores: ['manifest.webmanifest'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/],
         cleanupOutdatedCaches: true,

@@ -88,7 +88,13 @@
   "settings": {
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode",
-    "language": "Language"
+    "language": "Language",
+    "version": "Version {{version}}",
+    "checkUpdate": "Check for Updates",
+    "checking": "Checking...",
+    "applyUpdate": "Update Available — Tap to Install",
+    "upToDate": "Already Up to Date",
+    "updateFailed": "Update Check Failed"
   },
   "debugLog": {
     "title": "Gateway Log",

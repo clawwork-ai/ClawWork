@@ -75,7 +75,17 @@
     }
   },
   "qrScanner": { "videoLabel": "QR 코드 스캔 뷰파인더", "scanFrameLabel": "QR 코드 스캔 영역" },
-  "settings": { "darkMode": "다크 모드", "lightMode": "라이트 모드", "language": "언어" },
+  "settings": {
+    "darkMode": "다크 모드",
+    "lightMode": "라이트 모드",
+    "language": "언어",
+    "version": "버전 {{version}}",
+    "checkUpdate": "업데이트 확인",
+    "checking": "확인 중...",
+    "applyUpdate": "업데이트 가능 — 탭하여 설치",
+    "upToDate": "최신 버전입니다",
+    "updateFailed": "업데이트 확인 실패"
+  },
   "debugLog": {
     "title": "게이트웨이 로그",
     "reconnect": "재연결",

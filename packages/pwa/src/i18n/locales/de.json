@@ -77,7 +77,17 @@
     }
   },
   "qrScanner": { "videoLabel": "Kamerasucher für QR-Code-Scan", "scanFrameLabel": "QR-Code-Scanbereich" },
-  "settings": { "darkMode": "Dunkelmodus", "lightMode": "Hellmodus", "language": "Sprache" },
+  "settings": {
+    "darkMode": "Dunkelmodus",
+    "lightMode": "Hellmodus",
+    "language": "Sprache",
+    "version": "Version {{version}}",
+    "checkUpdate": "Nach Updates suchen",
+    "checking": "Wird geprüft...",
+    "applyUpdate": "Update verfügbar — zum Installieren tippen",
+    "upToDate": "Bereits aktuell",
+    "updateFailed": "Update-Prüfung fehlgeschlagen"
+  },
   "debugLog": {
     "title": "Gateway-Protokoll",
     "reconnect": "Neu verbinden",

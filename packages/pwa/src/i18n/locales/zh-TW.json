@@ -88,7 +88,13 @@
   "settings": {
     "darkMode": "深色模式",
     "lightMode": "淺色模式",
-    "language": "語言"
+    "language": "語言",
+    "version": "版本 {{version}}",
+    "checkUpdate": "檢查更新",
+    "checking": "檢查中...",
+    "applyUpdate": "有可用更新 — 點擊安裝",
+    "upToDate": "已是最新版本",
+    "updateFailed": "檢查更新失敗"
   },
   "debugLog": {
     "title": "閘道日誌",

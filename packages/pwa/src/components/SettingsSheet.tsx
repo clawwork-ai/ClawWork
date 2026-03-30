@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Moon, Sun, Globe, LogOut } from 'lucide-react';
+import { Moon, Sun, Globe, LogOut, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { useUiStore } from '../stores/hooks';
+import { useSwUpdateStore } from '../stores/sw-update-store';
 import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 import { BottomSheet } from './BottomSheet';
 
@@ -26,6 +28,18 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
   const { t, i18n } = useTranslation();
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
+  const updateAvailable = useSwUpdateStore((s) => s.updateAvailable);
+  const checking = useSwUpdateStore((s) => s.checking);
+  const checkResult = useSwUpdateStore((s) => s.checkResult);
+  const applyUpdate = useSwUpdateStore((s) => s.applyUpdate);
+  const checkForUpdate = useSwUpdateStore((s) => s.checkForUpdate);
+
+  const handleCheckUpdate = useCallback(async () => {
+    await checkForUpdate();
+    const result = useSwUpdateStore.getState().checkResult;
+    if (result === 'up-to-date') toast.success(t('settings.upToDate'));
+    if (result === 'error') toast.error(t('settings.updateFailed'));
+  }, [checkForUpdate, t]);
 
   const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
@@ -91,6 +105,42 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
               );
             })}
           </div>
+        </div>
+
+        <div className="mt-2" style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+          <div className="flex items-center gap-3 px-3 py-2">
+            <RefreshCw size={18} style={{ color: 'var(--text-primary)' }} />
+            <span className="flex-1 type-body" style={{ color: 'var(--text-primary)' }}>
+              {t('settings.version', { version: __APP_VERSION__ })}
+            </span>
+          </div>
+          {updateAvailable ? (
+            <button
+              onClick={() => applyUpdate?.()}
+              className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-3 type-body font-medium transition-colors"
+              style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
+            >
+              {t('settings.applyUpdate')}
+            </button>
+          ) : (
+            <button
+              onClick={handleCheckUpdate}
+              disabled={checking}
+              className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-3 type-body transition-colors disabled:opacity-50"
+              style={{
+                backgroundColor: checkResult === 'error' ? 'var(--danger-bg)' : 'var(--bg-hover)',
+                color: checkResult === 'error' ? 'var(--danger)' : 'var(--text-secondary)',
+              }}
+            >
+              {checking
+                ? t('settings.checking')
+                : checkResult === 'up-to-date'
+                  ? t('settings.upToDate')
+                  : checkResult === 'error'
+                    ? t('settings.updateFailed')
+                    : t('settings.checkUpdate')}
+            </button>
+          )}
         </div>
 
         <div className="mt-4" style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
