@@ -1,26 +1,73 @@
-import { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
 import { useI18n } from '../i18n/context';
+import { useLatestRelease, detectPlatform } from '../hooks/useLatestRelease';
 
 const REPO = 'clawwork-ai/clawwork';
 
-function useLatestRelease() {
-  const [version, setVersion] = useState<string | null>(null);
+interface DownloadButtonProps {
+  label: string;
+  href: string | null;
+  primary: boolean;
+}
 
-  useEffect(() => {
-    fetch(`https://api.github.com/repos/${REPO}/releases/latest`)
-      .then((r) => r.json())
-      .then((d: { tag_name?: string }) => {
-        if (d.tag_name) setVersion(d.tag_name);
-      })
-      .catch(() => {});
-  }, []);
+function DownloadButton({ label, href, primary }: DownloadButtonProps) {
+  const bg = primary ? 'rgba(15, 253, 13, 0.12)' : 'transparent';
+  const border = primary ? '1px solid rgba(15, 253, 13, 0.3)' : '1px solid rgba(255, 255, 255, 0.12)';
+  const color = primary ? '#0ffd0d' : '#9ca3af';
 
-  return version;
+  return (
+    <a
+      href={href ?? `https://github.com/${REPO}/releases/latest`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
+        fontSize: '13px',
+        padding: '8px 18px',
+        borderRadius: '6px',
+        border,
+        color,
+        background: bg,
+        textDecoration: 'none',
+        transition: 'background 0.15s, border-color 0.15s',
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.background = primary ? 'rgba(15, 253, 13, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+        el.style.borderColor = primary ? 'rgba(15, 253, 13, 0.5)' : 'rgba(255, 255, 255, 0.25)';
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLAnchorElement;
+        el.style.background = bg;
+        el.style.borderColor = primary ? 'rgba(15, 253, 13, 0.3)' : 'rgba(255, 255, 255, 0.12)';
+      }}
+    >
+      <Download size={14} />
+      {label}
+    </a>
+  );
 }
 
 export function Hero() {
   const { t } = useI18n();
-  const version = useLatestRelease();
+  const release = useLatestRelease();
+  const platform = detectPlatform();
+
+  const buttons: { label: string; href: string | null; platformKey: string }[] = [
+    { label: t.hero.download.macOS, href: release?.macARM ?? null, platformKey: 'mac' },
+    { label: t.hero.download.macOSIntel, href: release?.macIntel ?? null, platformKey: 'mac-intel' },
+    { label: t.hero.download.windows, href: release?.windows ?? null, platformKey: 'win' },
+    { label: t.hero.download.linux, href: release?.linux ?? null, platformKey: 'linux' },
+  ];
+
+  const sorted = [...buttons].sort((a, b) => {
+    const aMatch = platform === 'mac' ? a.platformKey.startsWith('mac') : a.platformKey === platform;
+    const bMatch = platform === 'mac' ? b.platformKey.startsWith('mac') : b.platformKey === platform;
+    return aMatch === bMatch ? 0 : aMatch ? -1 : 1;
+  });
 
   return (
     <section
@@ -75,7 +122,7 @@ export function Hero() {
             color: '#0ffd0d',
           }}
         >
-          {version ?? '...'}
+          {release?.version ?? '...'}
         </span>
       </a>
 
@@ -106,26 +153,33 @@ export function Hero() {
       </p>
 
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-        {[
-          { label: t.hero.badgeMacOS, available: true },
-          { label: t.hero.badgeWindows, available: true },
-          { label: t.hero.badgeLinux, available: false },
-        ].map(({ label, available }) => (
-          <span
-            key={label}
-            style={{
-              fontFamily: 'var(--font-mono, "JetBrains Mono Variable", monospace)',
-              fontSize: '12px',
-              padding: '5px 14px',
-              borderRadius: '4px',
-              border: available ? '1px solid rgba(15, 253, 13, 0.3)' : '1px solid rgba(255, 255, 255, 0.08)',
-              color: available ? '#0ffd0d' : '#6b7280',
-              background: available ? 'rgba(15, 253, 13, 0.06)' : 'transparent',
-            }}
-          >
-            {label}
-          </span>
-        ))}
+        {sorted.map(({ label, href, platformKey }) => {
+          const isPrimary = platform === 'mac' ? platformKey === 'mac' : platform === platformKey;
+          return <DownloadButton key={platformKey} label={label} href={href} primary={isPrimary} />;
+        })}
+      </div>
+
+      <div style={{ marginTop: '12px' }}>
+        <a
+          href={`https://github.com/${REPO}/releases/latest`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: '13px',
+            color: '#6b7280',
+            textDecoration: 'none',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            transition: 'color 0.15s',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.color = '#9ca3af';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.color = '#6b7280';
+          }}
+        >
+          {t.hero.allDownloads}
+        </a>
       </div>
 
       <div style={{ marginTop: '48px' }}>

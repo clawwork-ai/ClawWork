@@ -1,14 +1,39 @@
 import { Github } from 'lucide-react';
 import { useI18n } from '../i18n/context';
 
-const NAV_LINKS = [
+const ANCHOR_LINKS = [
   { key: 'features' as const, href: '#features' },
   { key: 'architecture' as const, href: '#architecture' },
   { key: 'quickStart' as const, href: '#quick-start' },
 ];
 
-export function Header() {
+const linkStyle = {
+  fontSize: '14px',
+  color: '#9ca3af',
+  textDecoration: 'none' as const,
+  padding: '6px 12px',
+  borderRadius: '4px',
+  transition: 'color 0.15s',
+};
+
+function hoverIn(e: React.MouseEvent) {
+  (e.currentTarget as HTMLElement).style.color = '#f3f4f4';
+}
+function hoverOut(e: React.MouseEvent) {
+  (e.currentTarget as HTMLElement).style.color = '#9ca3af';
+}
+
+interface HeaderProps {
+  navigate: (to: string) => void;
+}
+
+export function Header({ navigate }: HeaderProps) {
   const { t, locale, toggle } = useI18n();
+
+  const handleInternalLink = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    navigate(href);
+  };
 
   return (
     <header
@@ -47,28 +72,32 @@ export function Header() {
         </a>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {NAV_LINKS.map(({ key, href }) => (
-            <a
-              key={key}
-              href={href}
-              style={{
-                fontSize: '14px',
-                color: '#9ca3af',
-                textDecoration: 'none',
-                padding: '6px 12px',
-                borderRadius: '4px',
-                transition: 'color 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = '#f3f4f4';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = '#9ca3af';
-              }}
-            >
+          {ANCHOR_LINKS.map(({ key, href }) => (
+            <a key={key} href={href} style={linkStyle} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
               {t.nav[key]}
             </a>
           ))}
+
+          <a
+            href="docs/pairing-gateway"
+            onClick={(e) => handleInternalLink(e, 'docs/pairing-gateway')}
+            style={linkStyle}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            {t.nav.docs}
+          </a>
+
+          <a
+            href="https://cpwa.pages.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={linkStyle}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            {t.nav.pwa}
+          </a>
 
           <a
             href="https://github.com/clawwork-ai/clawwork"

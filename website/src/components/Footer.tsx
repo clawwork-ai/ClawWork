@@ -1,8 +1,22 @@
 import { useI18n } from '../i18n/context';
 
-export function Footer() {
+interface FooterProps {
+  navigate: (to: string) => void;
+}
+
+export function Footer({ navigate }: FooterProps) {
   const { t } = useI18n();
   const cols = [t.footer.product, t.footer.community, t.footer.resources];
+
+  const isExternal = (href: string) => href.startsWith('http');
+  const isAnchor = (href: string) => href.startsWith('#');
+
+  const handleClick = (e: React.MouseEvent, href: string) => {
+    if (!isExternal(href) && !isAnchor(href)) {
+      e.preventDefault();
+      navigate(href);
+    }
+  };
 
   return (
     <footer
@@ -39,9 +53,10 @@ export function Footer() {
                 {col.links.map((link) => (
                   <li key={link.label} style={{ marginBottom: '10px' }}>
                     <a
-                      href={link.href}
-                      target={link.href.startsWith('http') ? '_blank' : undefined}
-                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      href={isExternal(link.href) ? link.href : `${import.meta.env.BASE_URL}${link.href}`}
+                      target={isExternal(link.href) ? '_blank' : undefined}
+                      rel={isExternal(link.href) ? 'noopener noreferrer' : undefined}
+                      onClick={(e) => handleClick(e, link.href)}
                       style={{
                         fontSize: '14px',
                         color: '#9ca3af',
