@@ -158,13 +158,34 @@ export function Hero() {
         })}
       </div>
 
-      <div style={{ marginTop: '48px' }}>
+      <div
+        style={{
+          marginTop: '48px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '24px',
+        }}
+      >
         <img
           src={`${import.meta.env.BASE_URL}screenshot.png`}
-          alt="ClawWork screenshot"
+          alt="ClawWork Desktop"
           style={{
-            maxWidth: '100%',
+            flex: '1 1 0',
+            minWidth: 0,
+            maxWidth: '780px',
             borderRadius: '8px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
+          }}
+        />
+        <img
+          src={`${import.meta.env.BASE_URL}screenshot-mobile.png`}
+          alt="ClawWork PWA"
+          style={{
+            flex: '0 0 auto',
+            height: '420px',
+            borderRadius: '12px',
             border: '1px solid rgba(255, 255, 255, 0.08)',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
           }}
