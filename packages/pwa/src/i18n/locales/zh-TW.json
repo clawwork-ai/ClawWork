@@ -95,7 +95,8 @@
     "checking": "檢查中...",
     "applyUpdate": "有可用更新 — 點擊安裝",
     "upToDate": "已是最新版本",
-    "updateFailed": "檢查更新失敗"
+    "updateFailed": "檢查更新失敗",
+    "updateUnavailable": "暫不支援更新"
   },
   "debugLog": {
     "title": "閘道日誌",

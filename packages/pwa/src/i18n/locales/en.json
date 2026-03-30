@@ -95,7 +95,8 @@
     "checking": "Checking...",
     "applyUpdate": "Update Available — Tap to Install",
     "upToDate": "Already Up to Date",
-    "updateFailed": "Update Check Failed"
+    "updateFailed": "Update Check Failed",
+    "updateUnavailable": "Updates Not Available"
   },
   "debugLog": {
     "title": "Gateway Log",

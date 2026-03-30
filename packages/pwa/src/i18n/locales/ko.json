@@ -85,7 +85,8 @@
     "checking": "확인 중...",
     "applyUpdate": "업데이트 가능 — 탭하여 설치",
     "upToDate": "최신 버전입니다",
-    "updateFailed": "업데이트 확인 실패"
+    "updateFailed": "업데이트 확인 실패",
+    "updateUnavailable": "업데이트를 사용할 수 없습니다"
   },
   "debugLog": {
     "title": "게이트웨이 로그",

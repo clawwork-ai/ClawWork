@@ -95,7 +95,8 @@
     "checking": "检查中...",
     "applyUpdate": "有可用更新 — 点击安装",
     "upToDate": "已是最新版本",
-    "updateFailed": "检查更新失败"
+    "updateFailed": "检查更新失败",
+    "updateUnavailable": "暂不支持更新"
   },
   "debugLog": {
     "title": "网关日志",

@@ -87,7 +87,8 @@
     "checking": "Wird geprüft...",
     "applyUpdate": "Update verfügbar — zum Installieren tippen",
     "upToDate": "Bereits aktuell",
-    "updateFailed": "Update-Prüfung fehlgeschlagen"
+    "updateFailed": "Update-Prüfung fehlgeschlagen",
+    "updateUnavailable": "Updates nicht verfügbar"
   },
   "debugLog": {
     "title": "Gateway-Protokoll",

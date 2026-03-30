@@ -68,7 +68,7 @@ function AppShell({ onSignedOut }: { onSignedOut: () => void }) {
         className="safe-area-top safe-area-bottom flex h-full flex-col items-center justify-center gap-4 px-8"
         style={{ backgroundColor: 'var(--bg-primary)' }}
       >
-        <img src="/icons/logo.png" alt="ClawWork" className="mb-2 h-16 w-16" />
+        <img src={`${import.meta.env.BASE_URL}icons/logo.png`} alt="ClawWork" className="mb-2 h-16 w-16" />
         {!gaveUp && (
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
         )}

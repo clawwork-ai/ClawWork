@@ -120,7 +120,7 @@ export function PairingView({ onPaired }: PairingViewProps) {
       className="safe-area-top safe-area-bottom flex h-full flex-col items-center justify-center px-8"
       style={{ backgroundColor: 'var(--bg-primary)' }}
     >
-      <img src="/icons/logo.png" alt="ClawWork" className="mb-6 h-20 w-20" />
+      <img src={`${import.meta.env.BASE_URL}icons/logo.png`} alt="ClawWork" className="mb-6 h-20 w-20" />
       <h1 className="type-page-title mb-2" style={{ color: 'var(--text-primary)' }}>
         ClawWork
       </h1>

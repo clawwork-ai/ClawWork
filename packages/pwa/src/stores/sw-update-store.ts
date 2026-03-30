@@ -1,6 +1,6 @@
 import { createStore, useStore } from 'zustand';
 
-type CheckResult = 'idle' | 'up-to-date' | 'error';
+type CheckResult = 'idle' | 'up-to-date' | 'error' | 'unavailable';
 
 interface SwUpdateState {
   updateAvailable: boolean;
@@ -27,7 +27,7 @@ const swUpdateStore = createStore<SwUpdateState>((set, get) => ({
   checkForUpdate: async () => {
     const { registration } = get();
     if (!registration) {
-      set({ checkResult: 'up-to-date' });
+      set({ checkResult: 'unavailable' });
       upToDateTimer = setTimeout(() => set({ checkResult: 'idle' }), UP_TO_DATE_DISPLAY_MS);
       return;
     }

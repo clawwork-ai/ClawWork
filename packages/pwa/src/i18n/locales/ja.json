@@ -95,7 +95,8 @@
     "checking": "確認中...",
     "applyUpdate": "アップデートあり — タップしてインストール",
     "upToDate": "最新バージョンです",
-    "updateFailed": "アップデート確認に失敗"
+    "updateFailed": "アップデート確認に失敗",
+    "updateUnavailable": "アップデートは利用できません"
   },
   "debugLog": {
     "title": "ゲートウェイログ",

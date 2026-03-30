@@ -39,6 +39,7 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
     const result = useSwUpdateStore.getState().checkResult;
     if (result === 'up-to-date') toast.success(t('settings.upToDate'));
     if (result === 'error') toast.error(t('settings.updateFailed'));
+    if (result === 'unavailable') toast.info(t('settings.updateUnavailable'));
   }, [checkForUpdate, t]);
 
   const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -138,7 +139,9 @@ export function SettingsSheet({ open, onClose, onSignOut }: SettingsSheetProps) 
                   ? t('settings.upToDate')
                   : checkResult === 'error'
                     ? t('settings.updateFailed')
-                    : t('settings.checkUpdate')}
+                    : checkResult === 'unavailable'
+                      ? t('settings.updateUnavailable')
+                      : t('settings.checkUpdate')}
             </button>
           )}
         </div>

@@ -85,7 +85,8 @@
     "checking": "Verificando...",
     "applyUpdate": "Atualização disponível — toque para instalar",
     "upToDate": "Já está atualizado",
-    "updateFailed": "Falha ao verificar atualizações"
+    "updateFailed": "Falha ao verificar atualizações",
+    "updateUnavailable": "Atualizações indisponíveis"
   },
   "debugLog": {
     "title": "Registro do gateway",
