@@ -182,7 +182,7 @@ export const en: Translations = {
     resources: {
       title: 'Resources',
       links: [
-        { label: 'Blogs', href: 'docs' },
+        { label: 'Blogs', href: 'blogs' },
         { label: 'Changelog', href: 'https://github.com/clawwork-ai/clawwork/releases' },
         { label: 'License', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],

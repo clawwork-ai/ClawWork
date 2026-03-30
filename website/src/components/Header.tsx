@@ -30,9 +30,9 @@ interface HeaderProps {
 export function Header({ navigate }: HeaderProps) {
   const { t, locale, toggle } = useI18n();
 
-  const handleInternalLink = (e: React.MouseEvent, href: string) => {
+  const handleLink = (e: React.MouseEvent, to: string) => {
     e.preventDefault();
-    navigate(href);
+    navigate(to);
   };
 
   return (
@@ -57,7 +57,11 @@ export function Header({ navigate }: HeaderProps) {
           justifyContent: 'space-between',
         }}
       >
-        <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <a
+          href={import.meta.env.BASE_URL}
+          onClick={(e) => handleLink(e, '')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
+        >
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '28px', height: '28px' }} />
           <span
             style={{
@@ -73,14 +77,21 @@ export function Header({ navigate }: HeaderProps) {
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           {ANCHOR_LINKS.map(({ key, href }) => (
-            <a key={key} href={href} style={linkStyle} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+            <a
+              key={key}
+              href={href}
+              onClick={(e) => handleLink(e, href)}
+              style={linkStyle}
+              onMouseEnter={hoverIn}
+              onMouseLeave={hoverOut}
+            >
               {t.nav[key]}
             </a>
           ))}
 
           <a
-            href="docs"
-            onClick={(e) => handleInternalLink(e, 'docs')}
+            href="blogs"
+            onClick={(e) => handleLink(e, 'blogs')}
             style={linkStyle}
             onMouseEnter={hoverIn}
             onMouseLeave={hoverOut}

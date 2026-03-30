@@ -16,9 +16,19 @@ export function useRoute() {
 
   const navigate = useCallback((to: string) => {
     const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-    window.history.pushState(null, '', base + '/' + to);
-    setPath(to);
-    window.scrollTo(0, 0);
+    const hash = to.includes('#') ? to.slice(to.indexOf('#')) : '';
+    const pathname = hash ? '' : to;
+
+    window.history.pushState(null, '', base + '/' + pathname + hash);
+    setPath(pathname);
+
+    if (hash) {
+      requestAnimationFrame(() => {
+        document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   return { path, navigate };

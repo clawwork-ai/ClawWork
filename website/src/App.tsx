@@ -16,7 +16,7 @@ const DOC_SLUGS = ['pairing-gateway', 'pairing-pwa'];
 function Router() {
   const { path, navigate } = useRoute();
 
-  if (path === 'docs') {
+  if (path === 'blogs') {
     return (
       <DocsLayout navigate={navigate}>
         <DocIndex navigate={navigate} />
@@ -24,10 +24,10 @@ function Router() {
     );
   }
 
-  const docMatch = path.startsWith('docs/') ? path.slice(5) : null;
+  const docMatch = path.startsWith('blogs/') ? path.slice(6) : null;
   if (docMatch && DOC_SLUGS.includes(docMatch)) {
     return (
-      <DocsLayout navigate={navigate} backTo="docs">
+      <DocsLayout navigate={navigate} backTo="blogs">
         <DocPage slug={docMatch} />
       </DocsLayout>
     );

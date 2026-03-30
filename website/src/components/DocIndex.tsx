@@ -25,7 +25,7 @@ export function DocIndex({ navigate }: DocIndexProps) {
         {t.docs.articles.map((article) => (
           <button
             key={article.slug}
-            onClick={() => navigate(`docs/${article.slug}`)}
+            onClick={() => navigate(`blogs/${article.slug}`)}
             style={{
               display: 'flex',
               alignItems: 'center',

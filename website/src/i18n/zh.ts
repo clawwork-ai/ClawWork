@@ -129,7 +129,7 @@ export const zh: Translations = {
     resources: {
       title: '资源',
       links: [
-        { label: '博客', href: 'docs' },
+        { label: '博客', href: 'blogs' },
         { label: '更新日志', href: 'https://github.com/clawwork-ai/clawwork/releases' },
         { label: '许可证', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],
