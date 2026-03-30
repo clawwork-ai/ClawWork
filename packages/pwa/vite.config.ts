@@ -28,7 +28,7 @@ export default defineConfig(({ command }) => ({
         background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: '.',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -39,7 +39,7 @@ export default defineConfig(({ command }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2,woff,wasm}'],
         globIgnores: ['manifest.webmanifest'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-        navigateFallback: '/index.html',
+        navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api/],
         cleanupOutdatedCaches: true,
       },
