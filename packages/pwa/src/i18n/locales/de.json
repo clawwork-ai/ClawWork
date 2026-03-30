@@ -51,6 +51,7 @@
     "title": "Navigationsmenü",
     "settings": "Einstellungen",
     "signOut": "Abmelden",
+    "signOutConfirm": "Abmelden? Alle lokalen Daten werden gelöscht.",
     "menuButton": "Menü öffnen",
     "closeButton": "Menü schließen",
     "newTaskButton": "Neue Aufgabe",

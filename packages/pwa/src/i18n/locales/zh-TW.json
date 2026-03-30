@@ -54,6 +54,7 @@
     "title": "導航選單",
     "settings": "設定",
     "signOut": "登出",
+    "signOutConfirm": "確定登出？所有本地資料將被清除。",
     "menuButton": "開啟選單",
     "closeButton": "關閉選單",
     "newTaskButton": "新建任務",

@@ -51,6 +51,7 @@
     "title": "Painel de navegação",
     "settings": "Configurações",
     "signOut": "Sair",
+    "signOutConfirm": "Sair? Todos os dados locais serão apagados.",
     "menuButton": "Abrir menu",
     "closeButton": "Fechar menu",
     "newTaskButton": "Nova tarefa",

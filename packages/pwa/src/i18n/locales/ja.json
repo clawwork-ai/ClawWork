@@ -54,6 +54,7 @@
     "title": "ナビゲーションメニュー",
     "settings": "設定",
     "signOut": "サインアウト",
+    "signOutConfirm": "サインアウトしますか？ローカルデータはすべて削除されます。",
     "menuButton": "メニューを開く",
     "closeButton": "メニューを閉じる",
     "newTaskButton": "新しいタスク",

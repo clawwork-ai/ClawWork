@@ -51,6 +51,7 @@
     "title": "Panel de navegación",
     "settings": "Configuración",
     "signOut": "Cerrar sesión",
+    "signOutConfirm": "¿Cerrar sesión? Se eliminarán todos los datos locales.",
     "menuButton": "Abrir menú",
     "closeButton": "Cerrar menú",
     "newTaskButton": "Nueva tarea",

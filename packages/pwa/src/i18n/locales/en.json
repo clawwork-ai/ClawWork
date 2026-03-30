@@ -54,6 +54,7 @@
     "title": "Navigation drawer",
     "settings": "Settings",
     "signOut": "Sign out",
+    "signOutConfirm": "Sign out? All local data will be cleared.",
     "menuButton": "Open menu",
     "closeButton": "Close menu",
     "newTaskButton": "New task",

@@ -51,6 +51,7 @@
     "title": "탐색 메뉴",
     "settings": "설정",
     "signOut": "로그아웃",
+    "signOutConfirm": "로그아웃하시겠습니까? 모든 로컬 데이터가 삭제됩니다.",
     "menuButton": "메뉴 열기",
     "closeButton": "메뉴 닫기",
     "newTaskButton": "새 작업",

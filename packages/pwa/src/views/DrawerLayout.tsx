@@ -43,11 +43,12 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const handleSignOut = useCallback(async () => {
+    if (!window.confirm(t('drawer.signOutConfirm'))) return;
     destroyAllClients();
     await clearAll();
     closeDrawer();
     onSignedOut();
-  }, [closeDrawer, onSignedOut]);
+  }, [closeDrawer, onSignedOut, t]);
 
   const handleNewTask = useCallback(async () => {
     await ensureHydrationReady();
