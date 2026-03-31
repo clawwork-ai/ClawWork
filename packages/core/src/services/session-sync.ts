@@ -1,3 +1,4 @@
+import { parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork/shared';
 import type { Message, MessageRole, ToolCall, IpcResult } from '@clawwork/shared';
 import type { RawHistoryMessage } from '../protocol/types.js';
 import type { ActiveTurn, MessageState } from '../stores/message-store.js';
@@ -14,6 +15,9 @@ export interface SessionSyncDeps {
         role: string;
         content: string;
         timestamp: string;
+        sessionKey?: string;
+        agentId?: string;
+        runId?: string;
         imageAttachments?: unknown[];
         toolCalls?: unknown[];
       }[];
@@ -24,6 +28,9 @@ export interface SessionSyncDeps {
       role: string;
       content: string;
       timestamp: string;
+      sessionKey?: string;
+      agentId?: string;
+      runId?: string;
       imageAttachments?: unknown[];
       toolCalls?: unknown[];
     }) => Promise<IpcResult>;
@@ -82,7 +89,7 @@ export interface SessionSyncDeps {
   };
   getMessageStore: () => Pick<
     MessageState,
-    'messagesByTask' | 'activeTurnByTask' | 'bulkLoad' | 'promoteActiveTurn' | 'clearActiveTurn'
+    'messagesByTask' | 'activeTurnBySession' | 'bulkLoad' | 'promoteActiveTurn' | 'clearActiveTurn'
   > & {
     setState: (
       updater: (state: {
@@ -117,6 +124,9 @@ export function createSessionSync(deps: SessionSyncDeps) {
                 artifacts: [],
                 toolCalls: Array.isArray(r.toolCalls) ? (r.toolCalls as ToolCall[]) : [],
                 timestamp: r.timestamp,
+                sessionKey: r.sessionKey,
+                agentId: r.agentId,
+                runId: r.runId,
                 imageAttachments: r.imageAttachments as Message['imageAttachments'],
               }));
               messageStore.bulkLoad(t.id, msgs);
@@ -128,11 +138,12 @@ export function createSessionSync(deps: SessionSyncDeps) {
     await hydrationPromise;
   }
 
-  async function doSyncSession(taskId: string): Promise<void> {
+  async function doSyncSession(taskId: string, sessionKeyOverride?: string): Promise<void> {
     const task = deps.getTaskStore().tasks.find((t) => t.id === taskId);
-    if (!task?.gatewayId || !task?.sessionKey) return;
+    const sessionKey = sessionKeyOverride ?? task?.sessionKey;
+    if (!task?.gatewayId || !sessionKey) return;
 
-    const res = await deps.gateway.chatHistory(task.gatewayId, task.sessionKey);
+    const res = await deps.gateway.chatHistory(task.gatewayId, sessionKey);
     if (!res.ok || !res.result) return;
 
     const raw = res.result as { messages?: RawHistoryMessage[] };
@@ -140,13 +151,15 @@ export function createSessionSync(deps: SessionSyncDeps) {
 
     const messageStore = deps.getMessageStore();
     const localMsgs = messageStore.messagesByTask[taskId] ?? [];
-    const localAssistantTimestamps = new Set(localMsgs.filter((m) => m.role === 'assistant').map((m) => m.timestamp));
+    const localAssistantKeys = new Set(
+      localMsgs.filter((m) => m.role === 'assistant').map((m) => `${m.sessionKey ?? task.sessionKey}|${m.timestamp}`),
+    );
 
     const gatewayAssistant = normalizeAssistantTurns(rawMsgs);
 
-    const newest = gatewayAssistant.filter((m) => !localAssistantTimestamps.has(m.timestamp));
+    const newest = gatewayAssistant.filter((m) => !localAssistantKeys.has(`${sessionKey}|${m.timestamp}`));
     if (newest.length === 0) {
-      messageStore.clearActiveTurn(taskId);
+      messageStore.clearActiveTurn(sessionKey);
       return;
     }
 
@@ -159,13 +172,18 @@ export function createSessionSync(deps: SessionSyncDeps) {
         content: gm.content,
         artifacts: [],
         toolCalls: gm.toolCalls,
+        sessionKey,
+        agentId: parseAgentIdFromSessionKey(sessionKey),
         timestamp: gm.timestamp,
       };
       const currentStore = deps.getMessageStore();
-      const mergedCanonical = mergeCanonicalMessageWithActiveTurn(canonical, currentStore.activeTurnByTask[taskId]);
+      const mergedCanonical = mergeCanonicalMessageWithActiveTurn(
+        canonical,
+        currentStore.activeTurnBySession[sessionKey],
+      );
 
       if (i === newest.length - 1) {
-        currentStore.promoteActiveTurn(taskId, canonical);
+        currentStore.promoteActiveTurn(sessionKey, taskId, canonical);
       } else {
         currentStore.setState((s) => ({
           messagesByTask: {
@@ -182,26 +200,30 @@ export function createSessionSync(deps: SessionSyncDeps) {
           role: 'assistant',
           content: mergedCanonical.content,
           timestamp: mergedCanonical.timestamp,
+          sessionKey,
+          agentId: mergedCanonical.agentId,
+          runId: mergedCanonical.runId,
           toolCalls: mergedCanonical.toolCalls,
         })
         .catch(() => {});
     }
   }
 
-  function syncSessionMessages(taskId: string): Promise<void> {
-    const prev = syncChains.get(taskId) ?? Promise.resolve();
-    const job = prev.then(() => syncWithRetry(taskId));
+  function syncSessionMessages(taskId: string, sessionKeyOverride?: string): Promise<void> {
+    const chainKey = sessionKeyOverride ?? deps.getTaskStore().tasks.find((t) => t.id === taskId)?.sessionKey ?? taskId;
+    const prev = syncChains.get(chainKey) ?? Promise.resolve();
+    const job = prev.then(() => syncWithRetry(taskId, sessionKeyOverride));
     syncChains.set(
-      taskId,
+      chainKey,
       job.catch(() => {}),
     );
     return job;
   }
 
-  async function syncWithRetry(taskId: string): Promise<void> {
+  async function syncWithRetry(taskId: string, sessionKeyOverride?: string): Promise<void> {
     for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
       try {
-        await doSyncSession(taskId);
+        await doSyncSession(taskId, sessionKeyOverride);
         return;
       } catch {
         if (attempt < RETRY_DELAYS.length) {
@@ -213,10 +235,11 @@ export function createSessionSync(deps: SessionSyncDeps) {
   }
 
   function retrySyncPending(): void {
-    const turns = deps.getMessageStore().activeTurnByTask;
-    for (const [taskId, turn] of Object.entries(turns)) {
+    const turns = deps.getMessageStore().activeTurnBySession;
+    for (const [sessionKey, turn] of Object.entries(turns)) {
       if ((turn as ActiveTurn).finalized) {
-        syncSessionMessages(taskId).catch(() => {});
+        const taskId = parseTaskIdFromSessionKey(sessionKey);
+        if (taskId) syncSessionMessages(taskId, sessionKey).catch(() => {});
       }
     }
   }
@@ -265,6 +288,8 @@ export function createSessionSync(deps: SessionSyncDeps) {
           const mapped: Message[] = newAssistantMsgs.map((message) => ({
             ...message,
             id: crypto.randomUUID(),
+            sessionKey: d.sessionKey,
+            agentId: d.agentId,
           }));
           const merged = [...local, ...mapped].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
           messageStore.bulkLoad(d.taskId, merged);
@@ -276,6 +301,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
                 role: msg.role,
                 content: msg.content,
                 timestamp: msg.timestamp,
+                sessionKey: d.sessionKey,
                 toolCalls: msg.toolCalls,
               })
               .catch(() => {});
@@ -284,6 +310,8 @@ export function createSessionSync(deps: SessionSyncDeps) {
           const mapped: Message[] = collapsedMessages.map((message) => ({
             ...message,
             id: crypto.randomUUID(),
+            sessionKey: message.role === 'assistant' ? d.sessionKey : undefined,
+            agentId: message.role === 'assistant' ? d.agentId : undefined,
           }));
           messageStore.bulkLoad(d.taskId, mapped);
           for (const msg of mapped) {
@@ -294,6 +322,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
                 role: msg.role,
                 content: msg.content,
                 timestamp: msg.timestamp,
+                sessionKey: d.sessionKey,
                 toolCalls: msg.toolCalls,
               })
               .catch(() => {});

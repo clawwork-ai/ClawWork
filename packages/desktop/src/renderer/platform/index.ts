@@ -1,6 +1,12 @@
 import { useStore } from 'zustand';
-import { createMessageStore, createTaskStore, createUiStore, createChatComposer } from '@clawwork/core';
-import type { MessageState, TaskState, UiState, PlatformPorts, ChatComposer } from '@clawwork/core';
+import {
+  createMessageStore,
+  createTaskStore,
+  createUiStore,
+  createRoomStore,
+  createChatComposer,
+} from '@clawwork/core';
+import type { MessageState, TaskState, UiState, RoomState, PlatformPorts, ChatComposer } from '@clawwork/core';
 import { toast } from 'sonner';
 import { createElectronPorts } from './electron-adapter';
 import i18n from '../i18n';
@@ -61,6 +67,15 @@ const taskStoreApi = createTaskStore({
   onTaskCreated: () => uiStoreApi.getState().setMainView('chat'),
 });
 
+const roomStoreApi = createRoomStore({
+  createSession: (gwId, params) => window.clawwork.createSession(gwId, params),
+  abortChat: (gwId, sk) => getPorts().gateway.abortChat(gwId, sk),
+  listSessionsBySpawner: (gwId, spawnerKey) => getPorts().gateway.listSessionsBySpawner(gwId, spawnerKey),
+  persistRoom: (params) => window.clawwork.persistRoom(params),
+  persistPerformer: (params) => window.clawwork.persistPerformer(params),
+  loadRoom: (taskId) => window.clawwork.loadRoom(taskId),
+});
+
 export const composerBridge = {
   markAbortedByUser: (_taskId: string): void => {},
 };
@@ -81,6 +96,8 @@ function getComposer(): ChatComposer {
         const catalog = uiStoreApi.getState().modelCatalogByGateway[gwId];
         return catalog?.find((m) => m.id === modelId)?.provider;
       },
+      getRoomState: (taskId) => roomStoreApi.getState().rooms[taskId],
+      setRoomStatus: (taskId, status) => roomStoreApi.getState().setRoomStatus(taskId, status),
       translate: (key, opts) => i18n.t(key, opts),
       onError: (toastMsg) => toast.error(toastMsg.title, { description: toastMsg.description }),
     });
@@ -120,3 +137,12 @@ export function useUiStore<T>(selector?: (state: UiState) => T) {
 useUiStore.getState = uiStoreApi.getState;
 useUiStore.setState = uiStoreApi.setState;
 useUiStore.subscribe = uiStoreApi.subscribe;
+
+export function useRoomStore(): RoomState;
+export function useRoomStore<T>(selector: (state: RoomState) => T): T;
+export function useRoomStore<T>(selector?: (state: RoomState) => T) {
+  return useStore(roomStoreApi, selector!);
+}
+useRoomStore.getState = roomStoreApi.getState;
+useRoomStore.setState = roomStoreApi.setState;
+useRoomStore.subscribe = roomStoreApi.subscribe;

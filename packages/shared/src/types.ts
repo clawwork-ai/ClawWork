@@ -31,12 +31,31 @@ export interface Task {
   artifactDir: string;
   gatewayId: string;
   agentId?: string;
+  ensemble?: boolean;
   model?: string;
   modelProvider?: string;
   thinkingLevel?: string;
   inputTokens?: number;
   outputTokens?: number;
   contextTokens?: number;
+}
+
+export type RoomStatus = 'active' | 'stopping' | 'stopped';
+
+export interface RoomPerformer {
+  sessionKey: string;
+  agentId: string;
+  agentName: string;
+  emoji?: string;
+  verifiedAt: string;
+}
+
+export interface TaskRoom {
+  taskId: string;
+  conductorSessionKey: string;
+  conductorReady: boolean;
+  status: RoomStatus;
+  performers: RoomPerformer[];
 }
 
 export interface MessageImageAttachment {
@@ -53,6 +72,8 @@ export interface Message {
   toolCalls: ToolCall[];
   imageAttachments?: MessageImageAttachment[];
   timestamp: string;
+  sessionKey?: string;
+  agentId?: string;
   runId?: string;
   thinkingContent?: string;
 }

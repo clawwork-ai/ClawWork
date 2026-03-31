@@ -193,6 +193,35 @@ export function registerWsHandlers(): void {
     },
   );
 
+  ipcMain.handle('ws:list-sessions-by-spawner', async (_event, payload: { gatewayId: string; spawnedBy: string }) => {
+    const gw = getGatewayClient(payload.gatewayId);
+    if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
+    try {
+      const result = await gw.listSessionsBySpawner(payload.spawnedBy);
+      return { ok: true, result };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    }
+  });
+
+  ipcMain.handle(
+    'ws:create-session',
+    async (_event, payload: { gatewayId: string; key: string; agentId: string; message?: string }) => {
+      const gw = getGatewayClient(payload.gatewayId);
+      if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
+      try {
+        const result = await gw.createSession({
+          key: payload.key,
+          agentId: payload.agentId,
+          message: payload.message,
+        });
+        return { ok: true, result };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+      }
+    },
+  );
+
   ipcMain.handle('ws:gateway-status', () => {
     const clients = getAllGatewayClients();
     const statusMap: Record<string, { connected: boolean; name: string; error?: string; serverVersion?: string }> = {};
@@ -426,7 +455,7 @@ export function registerWsHandlers(): void {
       const gw = getGatewayClient(payload.gatewayId);
       if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
       try {
-        const result = await gw.patchSession({ sessionKey: payload.sessionKey, ...payload.patch });
+        const result = await gw.patchSession({ key: payload.sessionKey, ...payload.patch });
         return { ok: true, result };
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'unknown error';

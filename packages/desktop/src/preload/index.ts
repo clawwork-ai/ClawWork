@@ -190,6 +190,7 @@ function buildApi(): ClawWorkAPI {
       sessionId: string;
       title: string;
       status: string;
+      ensemble?: boolean;
       model?: string;
       modelProvider?: string;
       thinkingLevel?: string;
@@ -222,11 +223,32 @@ function buildApi(): ClawWorkAPI {
       role: string;
       content: string;
       timestamp: string;
+      sessionKey?: string;
+      agentId?: string;
+      runId?: string;
       imageAttachments?: unknown[];
       toolCalls?: unknown[];
     }) => ipcRenderer.invoke('data:create-message', msg),
 
     deleteTask: (taskId: string) => ipcRenderer.invoke('data:delete-task', { id: taskId }),
+
+    persistRoom: (params: { taskId: string; status: string; conductorReady: boolean }) =>
+      ipcRenderer.invoke('data:persist-room', params),
+    loadRoom: (taskId: string) => ipcRenderer.invoke('data:load-room', { taskId }),
+    persistPerformer: (params: {
+      taskId: string;
+      sessionKey: string;
+      agentId: string;
+      agentName: string;
+      emoji?: string;
+      verifiedAt: string;
+    }) => ipcRenderer.invoke('data:persist-performer', params),
+    deleteRoom: (taskId: string) => ipcRenderer.invoke('data:delete-room', { taskId }),
+
+    listSessionsBySpawner: (gatewayId: string, spawnedBy: string) =>
+      ipcRenderer.invoke('ws:list-sessions-by-spawner', { gatewayId, spawnedBy }),
+    createSession: (gatewayId: string, params: { key: string; agentId: string; message?: string }) =>
+      ipcRenderer.invoke('ws:create-session', { gatewayId, ...params }),
 
     getUsageStatus: (gatewayId: string) => ipcRenderer.invoke('ws:usage-status', { gatewayId }),
     getUsageCost: (gatewayId: string, params?: { startDate?: string; endDate?: string; days?: number }) =>

@@ -15,13 +15,11 @@ export function ChatInput({ taskId }: ChatInputProps) {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sendShortcut = useUiStore((s) => s.sendShortcut);
-  const storeTaskId = taskId === '__pending__' ? '' : taskId;
-  const processing = useMessageStore((s) => (storeTaskId ? s.processingTasks.has(storeTaskId) : false));
-  const hasActiveTurn = useMessageStore((s) => (storeTaskId ? !!s.activeTurnByTask[storeTaskId] : false));
-  const isStreaming = processing || hasActiveTurn;
-
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const task = useTaskStore((s) => s.tasks.find((tk) => tk.id === taskId));
+  const processing = useMessageStore((s) => (task?.sessionKey ? s.processingBySession.has(task.sessionKey) : false));
+  const hasActiveTurn = useMessageStore((s) => (task?.sessionKey ? !!s.activeTurnBySession[task.sessionKey] : false));
+  const isStreaming = processing || hasActiveTurn;
   const gatewayStatus = useUiStore((s) => (task?.gatewayId ? s.gatewayStatusMap[task.gatewayId] : undefined));
   const pendingGatewayStatus = useUiStore((s) =>
     pendingNewTask?.gatewayId ? s.gatewayStatusMap[pendingNewTask.gatewayId] : undefined,

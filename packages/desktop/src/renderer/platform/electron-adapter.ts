@@ -17,6 +17,7 @@ export function createElectronPorts(): PlatformPorts {
       chatHistory: api.chatHistory,
       abortChat: api.abortChat,
       patchSession: api.patchSession,
+      listSessionsBySpawner: api.listSessionsBySpawner,
       gatewayStatus: api.gatewayStatus,
       syncSessions: api.syncSessions,
       listGateways: api.listGateways,

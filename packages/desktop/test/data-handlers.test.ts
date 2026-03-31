@@ -8,7 +8,11 @@ const conflictRunMock = vi.fn();
 const onConflictDoUpdateMock = vi.fn(() => ({ run: conflictRunMock }));
 const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock, run: runMock }));
 const insertMock = vi.fn(() => ({ values: valuesMock }));
-const getDbMock = vi.fn(() => ({ insert: insertMock }));
+const selectGetMock = vi.fn(() => ({ sk: 'agent:main:clawwork:task:task-1' }));
+const selectWhereMock = vi.fn(() => ({ get: selectGetMock }));
+const selectFromMock = vi.fn(() => ({ where: selectWhereMock }));
+const selectMock = vi.fn(() => ({ from: selectFromMock }));
+const getDbMock = vi.fn(() => ({ insert: insertMock, select: selectMock }));
 
 vi.mock('electron', () => ({
   ipcMain: {

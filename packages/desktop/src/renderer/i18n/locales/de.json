@@ -36,6 +36,7 @@
     "welcomeDesc1": "Beschreiben Sie Ihre Aufgabe und die KI plant und fuehrt sie aus.",
     "welcomeDesc2": "Dabei erzeugte Dateien werden automatisch archiviert.",
     "starOnGithub": "ClawWork gefaellt Ihnen? Geben Sie uns einen Stern auf GitHub",
+    "ensembleMode": "Ensemble",
     "toggleContextPanel": "Kontextbereich ein-/ausblenden",
     "messageLayoutWide": "Nachrichtenbereich verbreitern",
     "messageLayoutCentered": "Nachrichten wieder zentrieren"
@@ -287,6 +288,7 @@
     "failed": "Fehlgeschlagen",
     "boundaryTitle": "Etwas ist schiefgelaufen",
     "reload": "Neu laden",
+    "conductorInitFailed": "Failed to initialize ensemble conductor",
     "agentNotResponding": "Agent antwortet nicht — moeglicherweise ist er nicht verfuegbar oder auf dem Server falsch konfiguriert. Versuchen Sie einen anderen Agent.",
     "stage": {
       "send": "Senden",
@@ -308,9 +310,11 @@
     "local": "Lokal",
     "tasks": "Aufgaben",
     "files": "Dateien",
+    "agents": "Agents",
     "noLocalFiles": "Keine passenden lokalen Dateien",
     "noTasks": "Keine passenden Aufgaben",
-    "noFiles": "Keine passenden Dateien"
+    "noFiles": "Keine passenden Dateien",
+    "noAgents": "No performers discovered yet"
   },
   "slash": {
     "argOptions": "Optionen fuer /{{command}}"
@@ -352,6 +356,7 @@
     "introSkip": "Nicht jetzt"
   },
   "chatMessage": {
+    "conductor": "Conductor",
     "copyMessage": "Nachricht kopieren",
     "copyCode": "Code kopieren",
     "copied": "Kopiert",

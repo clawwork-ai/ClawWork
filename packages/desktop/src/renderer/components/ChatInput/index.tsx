@@ -2,6 +2,7 @@ import { useRef, useCallback, useState, useEffect, useMemo, type KeyboardEvent }
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
+  Bot,
   Send,
   Square,
   X,
@@ -39,7 +40,8 @@ import SlashCommandDashboard from '../SlashCommandDashboard';
 import ToolsCatalog from '../ToolsCatalog';
 import SlashArgPicker from '../SlashArgPicker';
 import VoiceIntroDialog from '../VoiceIntroDialog';
-import MentionPicker, { type MentionTab } from '../MentionPicker';
+import MentionPicker, { type MentionTab, type AgentMentionEntry } from '../MentionPicker';
+import { useRoomStore } from '@/stores/roomStore';
 import { ACCEPTED_TYPES, THINKING_LEVELS, THINKING_LABEL_KEYS } from './constants';
 import { formatContextWindow } from './utils';
 import { useImageAttachments } from './useImageAttachments';
@@ -63,6 +65,18 @@ export default function ChatInput() {
 
   const { contextFolders, localFilesForPicker, handleAddContextFolder, handleRemoveContextFolder, loadLocalFiles } =
     useContextFolders();
+
+  const activeTaskId = useTaskStore((s) => s.activeTaskId);
+  const performers = useRoomStore((s) => (activeTaskId ? s.rooms[activeTaskId]?.performers : undefined));
+  const mentionAgents = useMemo<AgentMentionEntry[]>(() => {
+    if (!performers) return [];
+    return performers.map((p) => ({
+      agentId: p.agentId,
+      agentName: p.agentName,
+      emoji: p.emoji,
+      sessionKey: p.sessionKey,
+    }));
+  }, [performers]);
 
   const {
     slashMenuVisible,
@@ -104,7 +118,10 @@ export default function ChatInput() {
     removeSelectedArtifact,
     removeSelectedLocalFile,
     handleMentionItemsChange,
-  } = useMentionPicker({ textareaRef, contextFolders, loadLocalFiles });
+    selectedAgents,
+    setSelectedAgents,
+    removeSelectedAgent,
+  } = useMentionPicker({ textareaRef, contextFolders, loadLocalFiles, hasAgents: mentionAgents.length > 0 });
 
   const [whisperAvailable, setWhisperAvailable] = useState(false);
   useEffect(() => {
@@ -161,6 +178,8 @@ export default function ChatInput() {
     setSelectedArtifacts,
     selectedLocalFiles,
     setSelectedLocalFiles,
+    selectedAgents,
+    setSelectedAgents,
     contextFolders,
     stopVoiceInput: () => stopVoiceInput(),
     onComposerCleared: () => setCanSend(false),
@@ -205,14 +224,24 @@ export default function ChatInput() {
       if (mentionVisible) {
         if (e.key === 'Tab' || e.key === 'ArrowRight') {
           e.preventDefault();
-          const tabs: MentionTab[] = contextFolders.length > 0 ? ['local', 'tasks', 'files'] : ['tasks', 'files'];
+          const tabs: MentionTab[] = [
+            ...(mentionAgents.length > 0 ? (['agents'] as const) : []),
+            ...(contextFolders.length > 0 ? (['local'] as const) : []),
+            'tasks',
+            'files',
+          ];
           setMentionTab((cur) => tabs[(tabs.indexOf(cur) + 1) % tabs.length]);
           setMentionIndex(0);
           return;
         }
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          const tabs: MentionTab[] = contextFolders.length > 0 ? ['local', 'tasks', 'files'] : ['tasks', 'files'];
+          const tabs: MentionTab[] = [
+            ...(mentionAgents.length > 0 ? (['agents'] as const) : []),
+            ...(contextFolders.length > 0 ? (['local'] as const) : []),
+            'tasks',
+            'files',
+          ];
           setMentionTab((cur) => tabs[(tabs.indexOf(cur) - 1 + tabs.length) % tabs.length]);
           setMentionIndex(0);
           return;
@@ -435,12 +464,14 @@ export default function ChatInput() {
             query={mentionQuery}
             tasks={mentionTasks}
             localFiles={localFilesForPicker}
+            agents={mentionAgents}
             hasContextFolders={contextFolders.length > 0}
             activeTab={mentionTab}
             selectedIndex={mentionIndex}
             onSelectTask={(task) => commitMention({ kind: 'task', task })}
             onSelectArtifact={(a) => commitMention({ kind: 'file', artifact: a })}
             onSelectLocalFile={(f) => commitMention({ kind: 'local', file: f })}
+            onSelectAgent={(a) => commitMention({ kind: 'agent', agent: a })}
             onTabChange={(tab) => {
               setMentionTab(tab);
               setMentionIndex(0);
@@ -478,8 +509,33 @@ export default function ChatInput() {
 
             <div className="px-4 pt-3 pb-3">
               <div className="relative">
-                {(selectedTasks.length > 0 || selectedArtifacts.length > 0 || selectedLocalFiles.length > 0) && (
+                {(selectedTasks.length > 0 ||
+                  selectedArtifacts.length > 0 ||
+                  selectedLocalFiles.length > 0 ||
+                  selectedAgents.length > 0) && (
                   <div className="flex flex-wrap gap-1.5 pb-2">
+                    {selectedAgents.map((a) => (
+                      <span
+                        key={`agent-${a.agentId}`}
+                        className={cn(
+                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
+                          'bg-[var(--accent)]/10 text-[var(--accent)]',
+                        )}
+                      >
+                        {a.emoji ? (
+                          <span className="emoji-sm">{a.emoji}</span>
+                        ) : (
+                          <Bot size={14} className="flex-shrink-0" />
+                        )}
+                        {a.agentName}
+                        <button
+                          onClick={() => removeSelectedAgent(a.agentId)}
+                          className="ml-0.5 opacity-50 hover:opacity-100"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
                     {selectedLocalFiles.map((f) => (
                       <span
                         key={f.absolutePath}

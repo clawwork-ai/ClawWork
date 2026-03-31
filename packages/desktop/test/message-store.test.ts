@@ -43,12 +43,12 @@ describe('message store tool call persistence', () => {
           },
         ],
       },
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
-    useMessageStore.getState().upsertToolCall('task-1', {
+    useMessageStore.getState().upsertToolCall('agent:main:clawwork:task:task-1', 'task-1', {
       id: 'exec-1',
       name: 'exec',
       status: 'done',

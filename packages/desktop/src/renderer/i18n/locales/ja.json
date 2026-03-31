@@ -36,6 +36,7 @@
     "welcomeDesc1": "タスクを入力すると、AIが計画・実行します。",
     "welcomeDesc2": "生成されたファイルは自動的にアーカイブされます。",
     "starOnGithub": "ClawWork を気に入っていただけましたか？GitHub でスターをお願いします",
+    "ensembleMode": "Ensemble",
     "toggleContextPanel": "コンテキストパネルの切替",
     "messageLayoutWide": "メッセージ幅を広げる",
     "messageLayoutCentered": "メッセージを中央寄せに戻す"
@@ -287,6 +288,7 @@
     "failed": "失敗",
     "boundaryTitle": "問題が発生しました",
     "reload": "再読み込み",
+    "conductorInitFailed": "Failed to initialize ensemble conductor",
     "agentNotResponding": "エージェントが応答していません — サーバー上で利用できないか、設定に誤りがある可能性があります。別のエージェントをお試しください。",
     "stage": {
       "send": "送信",
@@ -308,9 +310,11 @@
     "local": "ローカル",
     "tasks": "タスク",
     "files": "ファイル",
+    "agents": "Agents",
     "noLocalFiles": "一致するローカルファイルがありません",
     "noTasks": "一致するタスクがありません",
-    "noFiles": "一致するファイルがありません"
+    "noFiles": "一致するファイルがありません",
+    "noAgents": "No performers discovered yet"
   },
   "slash": {
     "argOptions": "/{{command}} のオプション"
@@ -352,6 +356,7 @@
     "introSkip": "後で"
   },
   "chatMessage": {
+    "conductor": "Conductor",
     "copyMessage": "メッセージをコピー",
     "copyCode": "コードをコピー",
     "copied": "コピーしました",

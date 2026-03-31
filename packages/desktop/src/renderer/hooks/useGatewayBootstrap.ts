@@ -4,7 +4,7 @@ import type { ExecApprovalRequest, ModelCatalogEntry, AgentInfo } from '@clawwor
 import { parseTaskIdFromSessionKey } from '@clawwork/shared';
 import { toast } from 'sonner';
 import i18n from '../i18n';
-import { ports, composerBridge, useMessageStore, useTaskStore, useUiStore } from '../platform';
+import { ports, composerBridge, useMessageStore, useTaskStore, useUiStore, useRoomStore } from '../platform';
 import { useApprovalStore } from '../stores/approvalStore';
 import { hydrateFromLocal, syncFromGateway, syncSessionMessages, retrySyncPending } from '../lib/session-sync';
 
@@ -37,6 +37,26 @@ function getDispatcher() {
         useUiStore.getState().setAgentCatalogForGateway(gwId, agents as AgentInfo[], defaultId),
       setToolsCatalogForGateway: (gwId, catalog) => useUiStore.getState().setToolsCatalogForGateway(gwId, catalog),
 
+      lookupTaskIdBySubagentKey: (key) => useRoomStore.getState().lookupTaskIdBySubagentKey(key),
+      onSubagentCandidate: (sessionKey, gatewayId) => {
+        const tasks = useTaskStore.getState().tasks;
+        const ensembleTasks = tasks.filter((t) => t.ensemble && t.gatewayId === gatewayId);
+        if (ensembleTasks.length === 0) return;
+        for (const task of ensembleTasks) {
+          const room = useRoomStore.getState().rooms[task.id];
+          if (!room || room.status === 'stopped') continue;
+          void useRoomStore
+            .getState()
+            .verifyCandidates(task.id, task.gatewayId)
+            .then(() => {
+              if (useRoomStore.getState().lookupTaskIdBySubagentKey(sessionKey) === task.id) {
+                return syncSessionMessages(task.id, sessionKey);
+              }
+              return undefined;
+            })
+            .catch(() => {});
+        }
+      },
       onApprovalRequested: (gatewayId, payload) => {
         const approvalReq = payload as ExecApprovalRequest;
         useApprovalStore.getState().addApproval(gatewayId, approvalReq);
@@ -86,14 +106,22 @@ export function useGatewayBootstrap(): void {
     const removeStatus = d.startGatewayStatus();
     d.initialize();
 
-    const removeDebug = window.clawwork.onDebugEvent((event) => {
-      console.debug(`[main-debug] ${event.event}`, event);
+    const unsubTasks = useTaskStore.subscribe((state, prev) => {
+      if (state.tasks.length > 0 && prev.tasks.length === 0) {
+        for (const task of state.tasks) {
+          if (!task.ensemble) continue;
+          useRoomStore.getState().hydrateRoom(task.id, task.sessionKey);
+        }
+      }
     });
+
+    const removeDebug = window.clawwork.onDebugEvent(() => {});
 
     return () => {
       removeEvents();
       removeStatus();
       removeDebug();
+      unsubTasks();
       d.reset();
     };
   }, []);

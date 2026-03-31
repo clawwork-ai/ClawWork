@@ -60,8 +60,12 @@ export function ChatView() {
   const messages: Message[] = useMessageStore((s) =>
     activeTaskId ? (s.messagesByTask[activeTaskId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
-  const activeTurn = useMessageStore((s) => (activeTaskId ? s.activeTurnByTask[activeTaskId] : undefined));
-  const processing = useMessageStore((s) => activeTaskId !== null && s.processingTasks.has(activeTaskId));
+  const activeTurn = useMessageStore((s) =>
+    activeTask?.sessionKey ? s.activeTurnBySession[activeTask.sessionKey] : undefined,
+  );
+  const processing = useMessageStore((s) =>
+    activeTask?.sessionKey ? s.processingBySession.has(activeTask.sessionKey) : false,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const useVirtualization = messages.length >= VIRTUALIZATION_THRESHOLD;

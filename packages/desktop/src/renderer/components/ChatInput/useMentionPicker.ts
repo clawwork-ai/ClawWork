@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, type RefObject } from 'react';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
-import type { MentionItem, MentionTab } from '../MentionPicker';
+import type { MentionItem, MentionTab, AgentMentionEntry } from '../MentionPicker';
 import { useFileStore } from '../../stores/fileStore';
 import { useTaskStore } from '../../stores/taskStore';
 
@@ -8,10 +8,11 @@ interface UseMentionPickerOpts {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   contextFolders: string[];
   loadLocalFiles: (query?: string) => Promise<void>;
+  hasAgents?: boolean;
 }
 
 export function useMentionPicker(opts: UseMentionPickerOpts) {
-  const { textareaRef, contextFolders, loadLocalFiles } = opts;
+  const { textareaRef, contextFolders, loadLocalFiles, hasAgents } = opts;
 
   const [mentionVisible, setMentionVisible] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
@@ -20,6 +21,7 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
   const [selectedTasks, setSelectedTasks] = useState<Task[]>([]);
   const [selectedArtifacts, setSelectedArtifacts] = useState<Artifact[]>([]);
   const [selectedLocalFiles, setSelectedLocalFiles] = useState<FileIndexEntry[]>([]);
+  const [selectedAgents, setSelectedAgents] = useState<AgentMentionEntry[]>([]);
   const mentionItemsRef = useRef<MentionItem[]>([]);
   const mentionWasVisible = useRef(false);
 
@@ -29,6 +31,7 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
     setSelectedTasks([]);
     setSelectedArtifacts([]);
     setSelectedLocalFiles([]);
+    setSelectedAgents([]);
   }, [activeTaskId]);
 
   const updateMentionPicker = useCallback(() => {
@@ -39,11 +42,13 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
     const atMatch = before.match(/@([^\s@]*)$/);
     if (atMatch) {
       if (!mentionWasVisible.current) {
-        if (contextFolders.length > 0) {
+        if (hasAgents) {
+          setMentionTab('agents');
+        } else if (contextFolders.length > 0) {
           setMentionTab('local');
         } else {
-          const hasArtifacts = useFileStore.getState().artifacts.length > 0;
-          setMentionTab(hasArtifacts ? 'files' : 'tasks');
+          const hasArtifactsNow = useFileStore.getState().artifacts.length > 0;
+          setMentionTab(hasArtifactsNow ? 'files' : 'tasks');
         }
         loadLocalFiles();
       }
@@ -55,7 +60,7 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
       mentionWasVisible.current = false;
       setMentionVisible(false);
     }
-  }, [textareaRef, contextFolders, loadLocalFiles]);
+  }, [textareaRef, contextFolders, loadLocalFiles, hasAgents]);
 
   const closeMentionPicker = useCallback(() => {
     mentionWasVisible.current = false;
@@ -80,8 +85,22 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
     ta.focus();
   }, [textareaRef]);
 
+  const removeSelectedAgent = useCallback((agentId: string) => {
+    setSelectedAgents((prev) => prev.filter((a) => a.agentId !== agentId));
+  }, []);
+
   const commitMention = useCallback(
     (item: MentionItem) => {
+      if (item.kind === 'agent') {
+        if (selectedAgents.some((a) => a.agentId === item.agent.agentId)) {
+          closeMentionPicker();
+          return;
+        }
+        stripAtQuery();
+        setSelectedAgents((prev) => [...prev, item.agent]);
+        closeMentionPicker();
+        return;
+      }
       if (item.kind === 'task') {
         if (selectedTasks.some((t) => t.id === item.task.id)) {
           closeMentionPicker();
@@ -106,7 +125,7 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
       }
       closeMentionPicker();
     },
-    [selectedTasks, selectedArtifacts, selectedLocalFiles, closeMentionPicker, stripAtQuery],
+    [selectedTasks, selectedArtifacts, selectedLocalFiles, selectedAgents, closeMentionPicker, stripAtQuery],
   );
 
   const removeSelectedTask = useCallback((taskId: string) => {
@@ -145,6 +164,9 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
     removeSelectedTask,
     removeSelectedArtifact,
     removeSelectedLocalFile,
+    selectedAgents,
+    setSelectedAgents,
+    removeSelectedAgent,
     handleMentionItemsChange,
   };
 }

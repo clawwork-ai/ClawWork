@@ -149,6 +149,10 @@ export function createBrowserGatewayTransport(
       }
     },
 
+    async listSessionsBySpawner(_gatewayId, _spawnedBy) {
+      return { ok: false as const, error: 'not supported in PWA', errorCode: 'NOT_SUPPORTED' };
+    },
+
     async patchSession(gatewayId, sessionKey, patch) {
       const client = getClient(gatewayId);
       if (!client?.isConnected)

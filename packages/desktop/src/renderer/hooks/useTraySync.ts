@@ -13,7 +13,7 @@ function formatDuration(updatedAt: string): string {
 
 export function useTraySync(): void {
   const tasks = useTaskStore((s) => s.tasks);
-  const processingTasks = useMessageStore((s) => s.processingTasks);
+  const processingBySession = useMessageStore((s) => s.processingBySession);
   const gatewayStatusMap = useUiStore((s) => s.gatewayStatusMap);
   const unreadTaskIds = useUiStore((s) => s.unreadTaskIds);
 
@@ -21,7 +21,7 @@ export function useTraySync(): void {
 
   useEffect(() => {
     const anyDisconnected = Object.values(gatewayStatusMap).some((s) => s === 'disconnected');
-    const isRunning = processingTasks.size > 0;
+    const isRunning = processingBySession.size > 0;
     const hasUnread = unreadTaskIds.size > 0;
 
     let status: 'idle' | 'running' | 'unread' | 'disconnected';
@@ -30,23 +30,23 @@ export function useTraySync(): void {
     else if (hasUnread) status = 'unread';
     else status = 'idle';
 
-    const activeIds = tasks.filter((t) => processingTasks.has(t.id)).map((t) => t.id);
+    const activeIds = tasks.filter((t) => processingBySession.has(t.sessionKey)).map((t) => t.id);
     const taskIdsKey = activeIds.join(',');
 
     if (prevRef.current.status === status && prevRef.current.taskIds === taskIdsKey) return;
     prevRef.current = { status, taskIds: taskIdsKey };
 
-    const activeTurnByTask = useMessageStore.getState().activeTurnByTask;
+    const activeTurnBySession = useMessageStore.getState().activeTurnBySession;
     const activeTasks = activeIds.map((id) => {
       const t = tasks.find((task) => task.id === id)!;
       return {
         taskId: id,
         title: t.title || 'Untitled',
-        snippet: (activeTurnByTask[id]?.streamingText ?? '').slice(0, 60),
+        snippet: (activeTurnBySession[t.sessionKey]?.streamingText ?? '').slice(0, 60),
         duration: formatDuration(t.updatedAt),
       };
     });
 
     window.clawwork.updateTrayStatus(status, activeTasks);
-  }, [tasks, processingTasks, gatewayStatusMap, unreadTaskIds]);
+  }, [tasks, processingBySession, gatewayStatusMap, unreadTaskIds]);
 }

@@ -1,0 +1,1 @@
+export { useRoomStore } from '../platform';

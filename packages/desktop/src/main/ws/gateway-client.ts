@@ -547,6 +547,14 @@ export class GatewayClient {
     return this.sendReq('sessions.list', {}, { requestId: randomUUID() });
   }
 
+  async listSessionsBySpawner(spawnedBy: string): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.list', { spawnedBy }, { requestId: randomUUID() });
+  }
+
+  async createSession(params: { key: string; agentId: string; message?: string }): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.create', params, { requestId: randomUUID() });
+  }
+
   async listModels(): Promise<Record<string, unknown>> {
     return this.sendReq('models.list', {});
   }

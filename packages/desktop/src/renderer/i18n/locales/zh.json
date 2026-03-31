@@ -36,6 +36,7 @@
     "welcomeDesc1": "描述你的任务，AI 将帮你规划并执行。",
     "welcomeDesc2": "过程中产生的文件会自动归档管理。",
     "starOnGithub": "觉得好用？在 GitHub 上给我们一颗 Star",
+    "ensembleMode": "Ensemble",
     "toggleContextPanel": "切换上下文面板",
     "messageLayoutWide": "铺开消息区域",
     "messageLayoutCentered": "切回居中消息区域"
@@ -287,6 +288,7 @@
     "failed": "失败",
     "boundaryTitle": "应用出现异常",
     "reload": "重新加载",
+    "conductorInitFailed": "Failed to initialize ensemble conductor",
     "agentNotResponding": "Agent 未响应 — 可能不可用或服务端配置有误，请尝试其他 Agent",
     "stage": {
       "send": "发送",
@@ -308,9 +310,11 @@
     "local": "本地",
     "tasks": "任务",
     "files": "文件",
+    "agents": "Agents",
     "noLocalFiles": "没有匹配的本地文件",
     "noTasks": "没有匹配的任务",
-    "noFiles": "没有匹配的文件"
+    "noFiles": "没有匹配的文件",
+    "noAgents": "No performers discovered yet"
   },
   "slash": {
     "argOptions": "/{{command}} 的可选项"
@@ -352,6 +356,7 @@
     "introSkip": "暂不使用"
   },
   "chatMessage": {
+    "conductor": "Conductor",
     "copyMessage": "复制消息",
     "copyCode": "复制代码",
     "copied": "已复制",

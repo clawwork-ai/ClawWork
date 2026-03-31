@@ -43,6 +43,9 @@ export interface StoredMessage {
   role: string;
   content: string;
   timestamp: string;
+  sessionKey?: string;
+  agentId?: string;
+  runId?: string;
   imageAttachments?: unknown[];
   toolCalls?: unknown[];
 }

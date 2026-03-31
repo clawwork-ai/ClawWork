@@ -1,4 +1,4 @@
-import type { Message, MessageImageAttachment, IpcResult, ErrorStage } from '@clawwork/shared';
+import type { Message, MessageImageAttachment, IpcResult, ErrorStage, TaskRoom, RoomStatus } from '@clawwork/shared';
 import type { GatewayTransportPort, ChatAttachment } from '../ports/gateway-transport.js';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from './error-classify.js';
 import type { TranslateFn } from './error-classify.js';
@@ -8,6 +8,7 @@ interface TaskRef {
   gatewayId: string;
   sessionKey: string;
   title: string;
+  ensemble?: boolean;
 }
 
 export interface ChatComposerDeps {
@@ -30,8 +31,8 @@ export interface ChatComposerDeps {
     ) => Message;
     setProcessing: (taskId: string, processing: boolean) => void;
     clearMessages: (taskId: string) => void;
-    processingTasks: Set<string>;
-    activeTurnByTask: Record<string, { streamingText: string; streamingThinking: string }>;
+    processingBySession: Set<string>;
+    activeTurnBySession: Record<string, { streamingText: string; streamingThinking: string }>;
   };
 
   persistMessage: (msg: {
@@ -40,6 +41,7 @@ export interface ChatComposerDeps {
     role: string;
     content: string;
     timestamp: string;
+    sessionKey?: string;
     imageAttachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<unknown>;
@@ -50,6 +52,9 @@ export interface ChatComposerDeps {
   resetSession: (gatewayId: string, sessionKey: string, mode: string) => Promise<IpcResult>;
 
   getModelProvider?: (gatewayId: string, modelId: string) => string | undefined;
+
+  getRoomState?: (taskId: string) => TaskRoom | undefined;
+  setRoomStatus?: (taskId: string, status: RoomStatus) => void;
 
   translate: TranslateFn;
   onError?: (toast: { title: string; description: string }) => void;
@@ -62,9 +67,30 @@ export interface SendOptions {
   presetModel?: string;
   presetThinking?: string;
   titleHint?: string;
+  mentions?: string[];
+  mentionAll?: boolean;
 }
 
 const SEND_TIMEOUT_MS = 30_000;
+
+function resolveMentionTargets(
+  room: TaskRoom | undefined,
+  mentions: string[] | undefined,
+  mentionAll: boolean | undefined,
+): string[] {
+  if (!room || (!mentions?.length && !mentionAll)) return [];
+
+  if (mentionAll) {
+    return [room.conductorSessionKey, ...room.performers.map((p) => p.sessionKey)];
+  }
+
+  const targets: string[] = [];
+  for (const agentId of mentions!) {
+    const performer = room.performers.find((p) => p.agentId === agentId);
+    if (performer) targets.push(performer.sessionKey);
+  }
+  return targets;
+}
 
 export function createChatComposer(deps: ChatComposerDeps) {
   const responseTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -117,7 +143,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
     const pendingUserMessage = store.addMessage(task.id, 'user', options.content, options.imageAttachments, {
       persist: false,
     });
-    store.setProcessing(task.id, true);
+    store.setProcessing(task.sessionKey, true);
 
     if (!task.title && options.titleHint) {
       const title = options.titleHint.slice(0, 30).replace(/\n/g, ' ').trim();
@@ -125,36 +151,72 @@ export function createChatComposer(deps: ChatComposerDeps) {
     }
 
     try {
-      if (options.presetModel) {
-        await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/model ${options.presetModel}`);
-        deps.getTaskStore().updateTaskMetadata(task.id, {
-          model: options.presetModel,
-          modelProvider: deps.getModelProvider?.(task.gatewayId, options.presetModel),
-        });
-      }
-      if (options.presetThinking && options.presetThinking !== 'off') {
-        await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/think ${options.presetThinking}`);
-        deps.getTaskStore().updateTaskMetadata(task.id, { thinkingLevel: options.presetThinking });
+      const room = task.ensemble ? deps.getRoomState?.(task.id) : undefined;
+      const mentionTargets = resolveMentionTargets(room, options.mentions, options.mentionAll);
+      const isMentionSend = mentionTargets.length > 0;
+
+      if (!isMentionSend) {
+        if (options.presetModel) {
+          await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/model ${options.presetModel}`);
+          deps.getTaskStore().updateTaskMetadata(task.id, {
+            model: options.presetModel,
+            modelProvider: deps.getModelProvider?.(task.gatewayId, options.presetModel),
+          });
+        }
+        if (options.presetThinking && options.presetThinking !== 'off') {
+          await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/think ${options.presetThinking}`);
+          deps.getTaskStore().updateTaskMetadata(task.id, { thinkingLevel: options.presetThinking });
+        }
       }
 
-      const result = await deps.gateway.sendMessage(
-        task.gatewayId,
-        task.sessionKey,
-        options.content,
-        options.attachments?.length ? options.attachments : undefined,
-      );
-
-      if (result && !result.ok) {
-        store.setProcessing(task.id, false);
-        emitError(
-          task.id,
-          'gateway',
-          'send',
-          result.error || deps.translate('errors.sendFailed'),
-          result.errorCode,
-          result.errorDetails,
+      if (isMentionSend) {
+        const attachments = options.attachments?.length ? options.attachments : undefined;
+        const results = await Promise.allSettled(
+          mentionTargets.map((sk) => deps.gateway.sendMessage(task.gatewayId, sk, options.content, attachments)),
         );
-        return { ok: false, taskId: task.id };
+        const failed = results.find(
+          (r) => r.status === 'rejected' || (r.status === 'fulfilled' && r.value && !r.value.ok),
+        );
+        if (failed) {
+          store.setProcessing(task.sessionKey, false);
+          const reason =
+            failed.status === 'rejected'
+              ? String(failed.reason)
+              : ((failed as PromiseFulfilledResult<IpcResult>).value?.error ?? '');
+          emitError(task.id, 'gateway', 'send', reason || deps.translate('errors.sendFailed'));
+          return { ok: false, taskId: task.id };
+        }
+
+        if (room && !mentionTargets.includes(room.conductorSessionKey)) {
+          const targetNames = options.mentions?.join(', ') ?? 'performers';
+          const preview = options.content.slice(0, 200);
+          deps.gateway
+            .sendMessage(
+              task.gatewayId,
+              room.conductorSessionKey,
+              `[User directed message to ${targetNames}: "${preview}"]`,
+            )
+            .catch(() => {});
+        }
+      } else {
+        const result = await deps.gateway.sendMessage(
+          task.gatewayId,
+          task.sessionKey,
+          options.content,
+          options.attachments?.length ? options.attachments : undefined,
+        );
+        if (result && !result.ok) {
+          store.setProcessing(task.sessionKey, false);
+          emitError(
+            task.id,
+            'gateway',
+            'send',
+            result.error || deps.translate('errors.sendFailed'),
+            result.errorCode,
+            result.errorDetails,
+          );
+          return { ok: false, taskId: task.id };
+        }
       }
 
       clearTimer(task.id);
@@ -163,9 +225,12 @@ export function createChatComposer(deps: ChatComposerDeps) {
         setTimeout(() => {
           responseTimers.delete(task.id);
           const s = deps.getMessageStore();
-          const turn = s.activeTurnByTask[task.id];
-          if (s.processingTasks.has(task.id) && (!turn || (!turn.streamingText && !turn.streamingThinking))) {
-            s.setProcessing(task.id, false);
+          const turn = s.activeTurnBySession[task.sessionKey];
+          if (
+            s.processingBySession.has(task.sessionKey) &&
+            (!turn || (!turn.streamingText && !turn.streamingThinking))
+          ) {
+            s.setProcessing(task.sessionKey, false);
             const appError = buildAppError({
               source: 'gateway',
               stage: 'lifecycle',
@@ -183,6 +248,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
           role: pendingUserMessage.role,
           content: pendingUserMessage.content,
           timestamp: pendingUserMessage.timestamp,
+          sessionKey: task.sessionKey,
           imageAttachments: pendingUserMessage.imageAttachments as unknown[] | undefined,
           toolCalls: pendingUserMessage.toolCalls,
         })
@@ -190,7 +256,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
 
       return { ok: true, taskId: task.id };
     } catch (err) {
-      store.setProcessing(task.id, false);
+      store.setProcessing(task.sessionKey, false);
       emitError(task.id, 'local', 'send', err instanceof Error ? err.message : String(err));
       return { ok: false, taskId: task.id };
     }
@@ -203,7 +269,26 @@ export function createChatComposer(deps: ChatComposerDeps) {
     deps.markAbortedByUser(taskId);
     clearTimer(taskId);
 
-    await deps.gateway.abortChat(task.gatewayId, task.sessionKey);
+    if (!task.ensemble || !deps.getRoomState || !deps.setRoomStatus) {
+      await deps.gateway.abortChat(task.gatewayId, task.sessionKey);
+      return;
+    }
+
+    const room = deps.getRoomState(taskId);
+    if (!room || room.status !== 'active') {
+      await deps.gateway.abortChat(task.gatewayId, task.sessionKey);
+      return;
+    }
+
+    deps.setRoomStatus(taskId, 'stopping');
+
+    const allKeys = new Set<string>();
+    allKeys.add(room.conductorSessionKey);
+    for (const p of room.performers) allKeys.add(p.sessionKey);
+
+    await Promise.allSettled([...allKeys].map((sk) => deps.gateway.abortChat(task.gatewayId, sk)));
+
+    deps.setRoomStatus(taskId, 'stopped');
   }
 
   async function applySlashCommand(

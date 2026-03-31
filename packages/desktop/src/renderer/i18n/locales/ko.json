@@ -36,6 +36,7 @@
     "welcomeDesc1": "작업을 설명하면 AI가 계획하고 실행합니다.",
     "welcomeDesc2": "생성된 파일은 자동으로 보관됩니다.",
     "starOnGithub": "ClawWork가 마음에 드셨나요? GitHub에서 별을 눌러주세요",
+    "ensembleMode": "Ensemble",
     "toggleContextPanel": "컨텍스트 패널 전환",
     "messageLayoutWide": "메시지 영역 펼치기",
     "messageLayoutCentered": "메시지 가운데 정렬로 복귀"
@@ -287,6 +288,7 @@
     "failed": "실패",
     "boundaryTitle": "오류가 발생했습니다",
     "reload": "새로고침",
+    "conductorInitFailed": "Failed to initialize ensemble conductor",
     "agentNotResponding": "에이전트가 응답하지 않습니다 — 서버에서 사용할 수 없거나 잘못 구성되었을 수 있습니다. 다른 에이전트를 시도해 보세요.",
     "stage": {
       "send": "전송",
@@ -308,9 +310,11 @@
     "local": "로컬",
     "tasks": "작업",
     "files": "파일",
+    "agents": "Agents",
     "noLocalFiles": "일치하는 로컬 파일이 없습니다",
     "noTasks": "일치하는 작업이 없습니다",
-    "noFiles": "일치하는 파일이 없습니다"
+    "noFiles": "일치하는 파일이 없습니다",
+    "noAgents": "No performers discovered yet"
   },
   "slash": {
     "argOptions": "/{{command}} 옵션"
@@ -352,6 +356,7 @@
     "introSkip": "나중에"
   },
   "chatMessage": {
+    "conductor": "Conductor",
     "copyMessage": "메시지 복사",
     "copyCode": "코드 복사",
     "copied": "복사됨",

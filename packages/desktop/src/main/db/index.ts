@@ -86,12 +86,48 @@ function openDatabaseAt(workspacePath: string): void {
     sqlite.exec('ALTER TABLE messages ADD COLUMN tool_calls TEXT');
   } catch {}
 
+  for (const col of ['session_key TEXT', 'agent_id TEXT', 'run_id TEXT']) {
+    try {
+      sqlite.exec(`ALTER TABLE messages ADD COLUMN ${col}`);
+    } catch {}
+  }
+
+  try {
+    sqlite.exec('ALTER TABLE tasks ADD COLUMN ensemble INTEGER NOT NULL DEFAULT 0');
+  } catch {}
+
+  sqlite.exec(`
+    UPDATE messages SET session_key = (
+      SELECT t.session_key FROM tasks t WHERE t.id = messages.task_id
+    ) WHERE session_key IS NULL
+  `);
+  sqlite.exec(`UPDATE messages SET session_key = '' WHERE session_key IS NULL`);
+
   sqlite.exec(`DROP INDEX IF EXISTS messages_logical_unique`);
   sqlite.exec(`DROP INDEX IF EXISTS messages_dedup`);
 
   sqlite.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS messages_dedup
-    ON messages(task_id, role, timestamp)
+    ON messages(task_id, session_key, role, timestamp)
+  `);
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS task_rooms (
+      task_id TEXT PRIMARY KEY REFERENCES tasks(id),
+      status TEXT NOT NULL DEFAULT 'active',
+      conductor_ready INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS task_room_sessions (
+      session_key TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL REFERENCES tasks(id),
+      agent_id TEXT NOT NULL,
+      agent_name TEXT NOT NULL DEFAULT '',
+      emoji TEXT,
+      verified_at TEXT NOT NULL
+    )
   `);
 
   sqlite.exec("DELETE FROM messages WHERE role = 'assistant' AND (content = '' OR TRIM(content) = 'NO_REPLY')");

@@ -42,14 +42,16 @@ export default function CommandPalette() {
   const startNewTask = useTaskStore((s) => s.startNewTask);
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const tasks = useTaskStore((s) => s.tasks);
-  const activeTurnByTask = useMessageStore((s) => s.activeTurnByTask);
+  const activeTurnBySession = useMessageStore((s) => s.activeTurnBySession);
 
   const isTaskStreaming = useCallback(
     (taskId: string) => {
-      const turn = activeTurnByTask[taskId];
+      const t = tasks.find((task) => task.id === taskId);
+      if (!t) return false;
+      const turn = activeTurnBySession[t.sessionKey];
       return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
     },
-    [activeTurnByTask],
+    [activeTurnBySession, tasks],
   );
 
   const exec = useCallback(

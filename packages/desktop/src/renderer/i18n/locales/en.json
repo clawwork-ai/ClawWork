@@ -36,6 +36,7 @@
     "welcomeDesc1": "Describe your task and AI will plan and execute it.",
     "welcomeDesc2": "Files produced along the way are auto-archived.",
     "starOnGithub": "Enjoying ClawWork? Give us a star on GitHub",
+    "ensembleMode": "Ensemble",
     "toggleContextPanel": "Toggle context panel",
     "messageLayoutWide": "Expand message width",
     "messageLayoutCentered": "Center message width"
@@ -287,6 +288,7 @@
     "failed": "failed",
     "boundaryTitle": "Something went wrong",
     "reload": "Reload",
+    "conductorInitFailed": "Failed to initialize ensemble conductor",
     "agentNotResponding": "Agent is not responding — it may be unavailable or misconfigured on the server. Try a different agent.",
     "stage": {
       "send": "Send",
@@ -308,9 +310,11 @@
     "local": "Local",
     "tasks": "Tasks",
     "files": "Files",
+    "agents": "Agents",
     "noLocalFiles": "No matching local files",
     "noTasks": "No matching tasks",
-    "noFiles": "No matching files"
+    "noFiles": "No matching files",
+    "noAgents": "No performers discovered yet"
   },
   "slash": {
     "argOptions": "Options for /{{command}}"
@@ -352,6 +356,7 @@
     "introSkip": "Not now"
   },
   "chatMessage": {
+    "conductor": "Conductor",
     "copyMessage": "Copy message",
     "copyCode": "Copy code",
     "copied": "Copied",

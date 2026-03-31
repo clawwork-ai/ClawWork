@@ -54,8 +54,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -101,8 +101,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -189,8 +189,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -259,8 +259,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -320,8 +320,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -450,8 +450,8 @@ describe('session sync startup flow', () => {
           },
         ],
       },
-      activeTurnByTask: {
-        'task-runtime': {
+      activeTurnBySession: {
+        'agent:main:clawwork:task:task-runtime': {
           id: 'turn-1',
           streamingText: '',
           streamingThinking: '',
@@ -479,7 +479,7 @@ describe('session sync startup flow', () => {
           timestamp: '2026-03-16T10:00:03.000Z',
         },
       },
-      processingTasks: new Set(),
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -525,7 +525,7 @@ describe('session sync startup flow', () => {
 
     const state = messageStore.useMessageStore.getState();
     const msgs = state.messagesByTask['task-runtime'];
-    expect(state.activeTurnByTask['task-runtime']).toBeUndefined();
+    expect(state.activeTurnBySession['agent:main:clawwork:task:task-runtime']).toBeUndefined();
     expect(msgs).toHaveLength(2);
     expect(msgs[1]).toEqual(
       expect.objectContaining({
@@ -546,8 +546,8 @@ describe('session sync startup flow', () => {
 
     messageStore.useMessageStore.setState({
       messagesByTask: { 'task-promote': [] },
-      activeTurnByTask: {
-        'task-promote': {
+      activeTurnBySession: {
+        'agent:main:clawwork:task:task-promote': {
           id: 'turn-promote',
           streamingText: '',
           streamingThinking: '',
@@ -566,11 +566,11 @@ describe('session sync startup flow', () => {
           timestamp: '2026-03-16T10:00:01.500Z',
         },
       },
-      processingTasks: new Set(),
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
-    messageStore.useMessageStore.getState().promoteActiveTurn('task-promote', {
+    messageStore.useMessageStore.getState().promoteActiveTurn('agent:main:clawwork:task:task-promote', 'task-promote', {
       id: 'canonical-1',
       taskId: 'task-promote',
       role: 'assistant',
@@ -634,8 +634,8 @@ describe('session sync startup flow', () => {
           },
         ],
       },
-      activeTurnByTask: {
-        'task-sync-persist': {
+      activeTurnBySession: {
+        'agent:main:clawwork:task:task-sync-persist': {
           id: 'turn-sync-persist',
           streamingText: '',
           streamingThinking: '',
@@ -655,7 +655,7 @@ describe('session sync startup flow', () => {
           timestamp: '2026-03-16T10:00:01.000Z',
         },
       },
-      processingTasks: new Set(),
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -697,8 +697,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -742,8 +742,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 
@@ -808,8 +808,8 @@ describe('session sync startup flow', () => {
     taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
     messageStore.useMessageStore.setState({
       messagesByTask: {},
-      activeTurnByTask: {},
-      processingTasks: new Set(),
+      activeTurnBySession: {},
+      processingBySession: new Set(),
       highlightedMessageId: null,
     });
 

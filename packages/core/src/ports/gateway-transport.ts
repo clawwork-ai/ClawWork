@@ -79,6 +79,7 @@ export interface GatewayTransportPort {
   chatHistory: (gatewayId: string, sessionKey: string, limit?: number) => Promise<IpcResult>;
   abortChat: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
+  listSessionsBySpawner: (gatewayId: string, spawnedBy: string) => Promise<IpcResult>;
   gatewayStatus: () => Promise<GatewayStatusMap>;
   syncSessions: () => Promise<SyncResult>;
   listGateways: () => Promise<GatewayListItem[]>;

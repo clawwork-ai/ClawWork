@@ -1,4 +1,5 @@
-import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Message } from '@clawwork/shared';
 import { Check, ChevronDown, ChevronRight, Copy, FileCode, Loader2, Save, Wrench } from 'lucide-react';
@@ -15,7 +16,9 @@ import MarkdownContent from './MarkdownContent';
 
 interface ChatMessageProps {
   message: Message;
-  messageLayout?: 'centered' | 'wide';
+  agentName?: string;
+  agentEmoji?: string;
+  agentRoleLabel?: string;
   highlighted?: boolean;
   onHighlightDone?: () => void;
   onImageClick?: (src: string) => void;
@@ -149,7 +152,9 @@ function MessageActionButton({
 
 const ChatMessage = memo(function ChatMessage({
   message,
-  messageLayout = 'centered',
+  agentName,
+  agentEmoji,
+  agentRoleLabel,
   highlighted,
   onHighlightDone,
   onImageClick,
@@ -232,15 +237,19 @@ const ChatMessage = memo(function ChatMessage({
         highlighted && 'animate-highlight rounded-lg',
       )}
     >
-      <MessageAvatar role={isUser ? 'user' : 'assistant'} />
+      <MessageAvatar role={isUser ? 'user' : 'assistant'} agentEmoji={agentEmoji} />
 
-      <div
-        className={cn(
-          'min-w-0',
-          messageLayout === 'centered' ? 'max-w-[var(--content-max-width)]' : 'w-full max-w-none',
-          isUser && 'text-right',
+      <div className={cn('min-w-0 flex-1', isUser && 'text-right')}>
+        {!isUser && (agentName || agentRoleLabel) && (
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-2 text-[var(--text-muted)]">
+            {agentName ? <div className="type-label truncate text-[var(--text-secondary)]">{agentName}</div> : null}
+            {agentRoleLabel ? (
+              <span className="type-meta inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 text-[var(--text-muted)]">
+                {agentRoleLabel}
+              </span>
+            ) : null}
+          </div>
         )}
-      >
         {!isUser && message.thinkingContent && <ThinkingSection content={message.thinkingContent} />}
 
         {isUser && parsedFiles && (parsedFiles.files.length > 0 || parsedFiles.text) ? (

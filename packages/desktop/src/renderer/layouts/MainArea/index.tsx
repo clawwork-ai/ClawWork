@@ -17,11 +17,14 @@ import {
   RefreshCw,
   AlertTriangle,
   ArrowLeftRight,
+  Users,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { parseAgentIdFromSessionKey } from '@clawwork/shared';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useRoomStore } from '@/stores/roomStore';
 import { cn, formatRelativeTime, formatTokenCount, formatCost } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
@@ -58,6 +61,58 @@ interface ArchivedTaskRow {
   updatedAt: string;
 }
 
+interface AssistantIdentity {
+  agentName?: string;
+  agentEmoji?: string;
+  agentRoleLabel?: string;
+}
+
+function resolveAssistantIdentity({
+  task,
+  sessionKey,
+  agentId,
+  performerBySessionKey,
+  performerByAgentId,
+  catalogAgentById,
+  conductorLabel,
+}: {
+  task?: { sessionKey: string; agentId?: string; ensemble?: boolean };
+  sessionKey?: string;
+  agentId?: string;
+  performerBySessionKey: Map<string, { sessionKey: string; agentId: string; agentName: string; emoji?: string }>;
+  performerByAgentId: Map<string, { sessionKey: string; agentId: string; agentName: string; emoji?: string }>;
+  catalogAgentById: Map<string, { id: string; name?: string; identity?: { emoji?: string } }>;
+  conductorLabel: string;
+}): AssistantIdentity {
+  const resolvedAgentId = agentId ?? (sessionKey ? parseAgentIdFromSessionKey(sessionKey) : undefined);
+  const conductorAgentId =
+    task?.agentId ?? (task?.sessionKey ? parseAgentIdFromSessionKey(task.sessionKey) : undefined);
+  const performer =
+    (sessionKey ? performerBySessionKey.get(sessionKey) : undefined) ??
+    (resolvedAgentId ? performerByAgentId.get(resolvedAgentId) : undefined);
+  const catalogEntry = resolvedAgentId ? catalogAgentById.get(resolvedAgentId) : undefined;
+  const conductorCatalogEntry = conductorAgentId ? catalogAgentById.get(conductorAgentId) : undefined;
+  const isConductor = Boolean(
+    task?.ensemble &&
+    ((sessionKey && sessionKey === task.sessionKey) ||
+      (!sessionKey && resolvedAgentId && conductorAgentId && resolvedAgentId === conductorAgentId)),
+  );
+
+  if (isConductor) {
+    const agentName = conductorCatalogEntry?.name ?? catalogEntry?.name ?? conductorAgentId ?? conductorLabel;
+    return {
+      agentName,
+      agentEmoji: conductorCatalogEntry?.identity?.emoji ?? catalogEntry?.identity?.emoji,
+      agentRoleLabel: agentName === conductorLabel ? undefined : conductorLabel,
+    };
+  }
+
+  return {
+    agentName: performer?.agentName ?? catalogEntry?.name ?? resolvedAgentId,
+    agentEmoji: performer?.emoji ?? catalogEntry?.identity?.emoji,
+  };
+}
+
 function WelcomeScreen() {
   const { t } = useTranslation();
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
@@ -75,6 +130,7 @@ function WelcomeScreen() {
     agentCatalogByGateway[pendingNewTask?.gatewayId ?? defaultGatewayId ?? '']?.defaultId ||
     '';
   const [selectedAgentId, setSelectedAgentId] = useState(initialAgentId);
+  const [ensemble, setEnsemble] = useState(pendingNewTask?.ensemble ?? false);
   const [gwExpanded, setGwExpanded] = useState(false);
   const [agentExpanded, setAgentExpanded] = useState(false);
 
@@ -102,11 +158,11 @@ function WelcomeScreen() {
 
   useEffect(() => {
     const prev = useTaskStore.getState().pendingNewTask;
-    if (prev?.gatewayId === selectedGwId && prev?.agentId === selectedAgentId) return;
+    if (prev?.gatewayId === selectedGwId && prev?.agentId === selectedAgentId && prev?.ensemble === ensemble) return;
     useTaskStore.setState({
-      pendingNewTask: { gatewayId: selectedGwId, agentId: selectedAgentId },
+      pendingNewTask: { gatewayId: selectedGwId, agentId: selectedAgentId, ensemble: ensemble || undefined },
     });
-  }, [selectedGwId, selectedAgentId]);
+  }, [selectedGwId, selectedAgentId, ensemble]);
 
   const MAX_VISIBLE = 3;
 
@@ -195,6 +251,23 @@ function WelcomeScreen() {
               <ChevronRight size={10} />
             </button>
           )}
+        </div>
+      )}
+
+      {hasAgents && agentCatalog.length > 1 && (
+        <div className="mt-3 flex items-center justify-center">
+          <button
+            onClick={() => setEnsemble((v) => !v)}
+            className={cn(
+              'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer border',
+              ensemble
+                ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
+                : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+            )}
+          >
+            <Users size={12} />
+            <span>{t('mainArea.ensembleMode')}</span>
+          </button>
         </div>
       )}
 
@@ -487,16 +560,18 @@ function ChatHeader({
 }
 
 function ChatContent() {
+  const { t } = useTranslation();
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTask = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId));
+  const activeRoom = useRoomStore((s) => (activeTaskId ? s.rooms[activeTaskId] : undefined));
   const messageLayout = useUiStore((s) => s.messageLayout);
   const messages = useMessageStore((s) =>
     activeTaskId ? (s.messagesByTask[activeTaskId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES,
   );
-  const activeTurn = useMessageStore((s) => (activeTaskId ? (s.activeTurnByTask[activeTaskId] ?? null) : null));
+  const activeTurnBySession = useMessageStore((s) => s.activeTurnBySession);
+  const processingBySession = useMessageStore((s) => s.processingBySession);
   const highlightedId = useMessageStore((s) => s.highlightedMessageId);
   const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
-  const isProcessing = useMessageStore((s) => (activeTaskId ? s.processingTasks.has(activeTaskId) : false));
   const viewportRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -504,7 +579,62 @@ function ChatContent() {
   const [previewFile, setPreviewFile] = useState<{ path: string; content: string } | null>(null);
   const closeFilePreview = useCallback(() => setPreviewFile(null), []);
   const handleHighlightDone = useCallback(() => setHighlightedMessage(null), [setHighlightedMessage]);
-  const showWelcome = !activeTask || (messages.length === 0 && !activeTurn);
+  const sessionKeys = useMemo(() => {
+    if (!activeTask?.sessionKey) return [];
+    return [activeTask.sessionKey, ...(activeRoom?.performers.map((performer) => performer.sessionKey) ?? [])];
+  }, [activeRoom?.performers, activeTask?.sessionKey]);
+  const activeTurns = useMemo(
+    () =>
+      sessionKeys.reduce<Array<{ sessionKey: string; turn: (typeof activeTurnBySession)[string] }>>(
+        (items, sessionKey) => {
+          const turn = activeTurnBySession[sessionKey];
+          if (turn) items.push({ sessionKey, turn });
+          return items;
+        },
+        [],
+      ),
+    [activeTurnBySession, sessionKeys],
+  );
+  const isProcessing = useMemo(
+    () => sessionKeys.some((sessionKey) => processingBySession.has(sessionKey)),
+    [processingBySession, sessionKeys],
+  );
+  const timelineItems = useMemo(() => {
+    const messageItems = messages.map((message) => ({
+      key: message.id,
+      timestamp: message.timestamp,
+      kind: 'message' as const,
+      message,
+    }));
+    const turnItems = activeTurns.map(({ sessionKey, turn }) => ({
+      key: `turn-${sessionKey}-${turn.id}`,
+      timestamp: turn.timestamp,
+      kind: 'turn' as const,
+      sessionKey,
+      turn,
+    }));
+    return [...messageItems, ...turnItems].sort((left, right) => left.timestamp.localeCompare(right.timestamp));
+  }, [activeTurns, messages]);
+  const performerBySessionKey = useMemo(
+    () => new Map((activeRoom?.performers ?? []).map((performer) => [performer.sessionKey, performer])),
+    [activeRoom?.performers],
+  );
+  const performerByAgentId = useMemo(
+    () => new Map((activeRoom?.performers ?? []).map((performer) => [performer.agentId, performer])),
+    [activeRoom?.performers],
+  );
+  const agentCatalog = useUiStore((s) =>
+    activeTask?.gatewayId ? s.agentCatalogByGateway[activeTask.gatewayId] : undefined,
+  );
+  const catalogAgentById = useMemo(
+    () => new Map((agentCatalog?.agents ?? []).map((a) => [a.id, a])),
+    [agentCatalog?.agents],
+  );
+  const hasRenderableActiveTurn = activeTurns.some(
+    ({ turn }) => turn.finalized || turn.streamingText || turn.streamingThinking || turn.toolCalls.length > 0,
+  );
+  const showWelcome = !activeTask || (messages.length === 0 && !hasRenderableActiveTurn);
+  const conductorLabel = t('chatMessage.conductor');
 
   const handleScroll = useCallback(() => {
     const el = viewportRef.current;
@@ -516,7 +646,7 @@ function ChatContent() {
     if (!stickToBottom.current) return;
     const el = viewportRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, activeTurn, isProcessing]);
+  }, [messages.length, activeTurns.length, isProcessing]);
 
   if (showWelcome) {
     return (
@@ -546,47 +676,92 @@ function ChatContent() {
             messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
           )}
         >
-          {messages.map((msg, i) => (
-            <div key={msg.id} className={cn(i > 0 && msg.role === 'user' && messages[i - 1].role !== 'user' && 'pt-3')}>
-              <ChatMessage
-                message={msg}
-                messageLayout={messageLayout}
-                highlighted={msg.id === highlightedId}
-                onHighlightDone={handleHighlightDone}
-                onImageClick={setLightboxSrc}
-                onFileClick={setPreviewFile}
-              />
-            </div>
-          ))}
-          {activeTurn?.finalized && activeTurn.content && (
-            <ChatMessage
-              key={`turn-${activeTurn.id}`}
-              message={activeTurnToMessage(activeTurn, activeTaskId!)}
-              messageLayout={messageLayout}
-              highlighted={false}
-              onHighlightDone={handleHighlightDone}
-              onImageClick={setLightboxSrc}
-              onFileClick={setPreviewFile}
-            />
-          )}
-          {activeTurn &&
-            !activeTurn.finalized &&
-            (activeTurn.streamingText || activeTurn.streamingThinking || activeTurn.toolCalls.length > 0) && (
-              <StreamingMessage
-                content={activeTurn.streamingText}
-                thinkingContent={activeTurn.streamingThinking || undefined}
-                toolCalls={activeTurn.toolCalls}
-                messageLayout={messageLayout}
-              />
-            )}
-          <AnimatePresence>
-            {isProcessing &&
-              (!activeTurn ||
-                (!activeTurn.streamingText &&
-                  !activeTurn.streamingThinking &&
-                  activeTurn.toolCalls.length === 0 &&
-                  !activeTurn.finalized)) && <ThinkingIndicator />}
-          </AnimatePresence>
+          {timelineItems.map((item, index) => {
+            if (item.kind === 'message') {
+              const previous = index > 0 ? timelineItems[index - 1] : null;
+              const previousRole = previous?.kind === 'message' ? previous.message.role : 'assistant';
+              const identity =
+                item.message.role === 'assistant'
+                  ? resolveAssistantIdentity({
+                      task: activeTask,
+                      sessionKey: item.message.sessionKey,
+                      agentId: item.message.agentId,
+                      performerBySessionKey,
+                      performerByAgentId,
+                      catalogAgentById,
+                      conductorLabel,
+                    })
+                  : undefined;
+              return (
+                <div
+                  key={item.key}
+                  className={cn(index > 0 && item.message.role === 'user' && previousRole !== 'user' && 'pt-3')}
+                >
+                  <ChatMessage
+                    message={item.message}
+                    agentName={identity?.agentName}
+                    agentEmoji={identity?.agentEmoji}
+                    agentRoleLabel={identity?.agentRoleLabel}
+                    highlighted={item.message.id === highlightedId}
+                    onHighlightDone={handleHighlightDone}
+                    onImageClick={setLightboxSrc}
+                    onFileClick={setPreviewFile}
+                  />
+                </div>
+              );
+            }
+
+            if (item.turn.finalized && item.turn.content) {
+              const identity = resolveAssistantIdentity({
+                task: activeTask,
+                sessionKey: item.sessionKey,
+                agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                performerBySessionKey,
+                performerByAgentId,
+                catalogAgentById,
+                conductorLabel,
+              });
+              return (
+                <ChatMessage
+                  key={item.key}
+                  message={activeTurnToMessage(item.turn, activeTaskId!, item.sessionKey)}
+                  agentName={identity.agentName}
+                  agentEmoji={identity.agentEmoji}
+                  agentRoleLabel={identity.agentRoleLabel}
+                  highlighted={false}
+                  onHighlightDone={handleHighlightDone}
+                  onImageClick={setLightboxSrc}
+                  onFileClick={setPreviewFile}
+                />
+              );
+            }
+
+            if (item.turn.streamingText || item.turn.streamingThinking || item.turn.toolCalls.length > 0) {
+              const identity = resolveAssistantIdentity({
+                task: activeTask,
+                sessionKey: item.sessionKey,
+                agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                performerBySessionKey,
+                performerByAgentId,
+                catalogAgentById,
+                conductorLabel,
+              });
+              return (
+                <StreamingMessage
+                  key={item.key}
+                  content={item.turn.streamingText}
+                  thinkingContent={item.turn.streamingThinking || undefined}
+                  toolCalls={item.turn.toolCalls}
+                  agentEmoji={identity.agentEmoji}
+                  agentName={identity.agentName}
+                  agentRoleLabel={identity.agentRoleLabel}
+                />
+              );
+            }
+
+            return null;
+          })}
+          <AnimatePresence>{isProcessing && !hasRenderableActiveTurn && <ThinkingIndicator />}</AnimatePresence>
         </div>
       </ScrollArea>
       <ChatInput />

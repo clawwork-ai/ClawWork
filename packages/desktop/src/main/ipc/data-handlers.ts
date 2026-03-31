@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { eq, desc } from 'drizzle-orm';
 import { getDb, isDbReady } from '../db/index.js';
-import { tasks, messages, artifacts } from '../db/schema.js';
+import { tasks, messages, artifacts, taskRooms, taskRoomSessions } from '../db/schema.js';
 import { autoExtractArtifacts } from '../artifact/auto-extract.js';
 import { getWorkspacePath } from '../workspace/config.js';
 
@@ -20,6 +20,7 @@ export function registerDataHandlers(): void {
         sessionId: string;
         title: string;
         status: string;
+        ensemble?: boolean;
         model?: string;
         modelProvider?: string;
         thinkingLevel?: string;
@@ -43,6 +44,7 @@ export function registerDataHandlers(): void {
             sessionId: task.sessionId,
             title: task.title,
             status: task.status,
+            ensemble: task.ensemble ?? false,
             model: task.model,
             modelProvider: task.modelProvider,
             thinkingLevel: task.thinkingLevel,
@@ -112,6 +114,9 @@ export function registerDataHandlers(): void {
         role: string;
         content: string;
         timestamp: string;
+        sessionKey?: string;
+        agentId?: string;
+        runId?: string;
         imageAttachments?: unknown[];
         toolCalls?: unknown[];
       },
@@ -119,6 +124,11 @@ export function registerDataHandlers(): void {
       if (!isDbReady()) return ipcError(new Error('database not ready'));
       try {
         const db = getDb();
+        let resolvedSessionKey = msg.sessionKey;
+        if (!resolvedSessionKey) {
+          const task = db.select({ sk: tasks.sessionKey }).from(tasks).where(eq(tasks.id, msg.taskId)).get();
+          resolvedSessionKey = task?.sk ?? '';
+        }
         db.insert(messages)
           .values({
             id: msg.id,
@@ -126,13 +136,18 @@ export function registerDataHandlers(): void {
             role: msg.role,
             content: msg.content,
             timestamp: msg.timestamp,
+            sessionKey: resolvedSessionKey,
+            agentId: msg.agentId ?? null,
+            runId: msg.runId ?? null,
             imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
             toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
           })
           .onConflictDoUpdate({
-            target: [messages.taskId, messages.role, messages.timestamp],
+            target: [messages.taskId, messages.sessionKey, messages.role, messages.timestamp],
             set: {
               content: msg.content,
+              agentId: msg.agentId ?? null,
+              runId: msg.runId ?? null,
               imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
               toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
             },
@@ -158,6 +173,8 @@ export function registerDataHandlers(): void {
     if (!isDbReady()) return ipcError(new Error('database not ready'));
     try {
       const db = getDb();
+      db.delete(taskRoomSessions).where(eq(taskRoomSessions.taskId, params.id)).run();
+      db.delete(taskRooms).where(eq(taskRooms.taskId, params.id)).run();
       db.delete(artifacts).where(eq(artifacts.taskId, params.id)).run();
       db.delete(messages).where(eq(messages.taskId, params.id)).run();
       db.delete(tasks).where(eq(tasks.id, params.id)).run();
@@ -219,6 +236,110 @@ export function registerDataHandlers(): void {
       };
     } catch (err) {
       console.error('[data] list-messages failed:', err);
+      return ipcError(err);
+    }
+  });
+
+  ipcMain.handle(
+    'data:persist-room',
+    (
+      _event,
+      params: {
+        taskId: string;
+        status: string;
+        conductorReady: boolean;
+      },
+    ) => {
+      if (!isDbReady()) return ipcError(new Error('database not ready'));
+      try {
+        const db = getDb();
+        db.insert(taskRooms)
+          .values({
+            taskId: params.taskId,
+            status: params.status,
+            conductorReady: params.conductorReady,
+          })
+          .onConflictDoUpdate({
+            target: [taskRooms.taskId],
+            set: {
+              status: params.status,
+              conductorReady: params.conductorReady,
+            },
+          })
+          .run();
+        return { ok: true };
+      } catch (err) {
+        console.error('[data] persist-room failed:', err);
+        return ipcError(err);
+      }
+    },
+  );
+
+  ipcMain.handle('data:load-room', (_event, params: { taskId: string }) => {
+    if (!isDbReady()) return { ok: true, room: null, performers: [] };
+    try {
+      const db = getDb();
+      const room = db.select().from(taskRooms).where(eq(taskRooms.taskId, params.taskId)).get();
+      const performers = db.select().from(taskRoomSessions).where(eq(taskRoomSessions.taskId, params.taskId)).all();
+      return { ok: true, room: room ?? null, performers };
+    } catch (err) {
+      console.error('[data] load-room failed:', err);
+      return ipcError(err);
+    }
+  });
+
+  ipcMain.handle(
+    'data:persist-performer',
+    (
+      _event,
+      params: {
+        taskId: string;
+        sessionKey: string;
+        agentId: string;
+        agentName: string;
+        emoji?: string;
+        verifiedAt: string;
+      },
+    ) => {
+      if (!isDbReady()) return ipcError(new Error('database not ready'));
+      try {
+        const db = getDb();
+        db.insert(taskRoomSessions)
+          .values({
+            sessionKey: params.sessionKey,
+            taskId: params.taskId,
+            agentId: params.agentId,
+            agentName: params.agentName,
+            emoji: params.emoji ?? null,
+            verifiedAt: params.verifiedAt,
+          })
+          .onConflictDoUpdate({
+            target: [taskRoomSessions.sessionKey],
+            set: {
+              agentId: params.agentId,
+              agentName: params.agentName,
+              emoji: params.emoji ?? null,
+              verifiedAt: params.verifiedAt,
+            },
+          })
+          .run();
+        return { ok: true };
+      } catch (err) {
+        console.error('[data] persist-performer failed:', err);
+        return ipcError(err);
+      }
+    },
+  );
+
+  ipcMain.handle('data:delete-room', (_event, params: { taskId: string }) => {
+    if (!isDbReady()) return ipcError(new Error('database not ready'));
+    try {
+      const db = getDb();
+      db.delete(taskRoomSessions).where(eq(taskRoomSessions.taskId, params.taskId)).run();
+      db.delete(taskRooms).where(eq(taskRooms.taskId, params.taskId)).run();
+      return { ok: true };
+    } catch (err) {
+      console.error('[data] delete-room failed:', err);
       return ipcError(err);
     }
   });

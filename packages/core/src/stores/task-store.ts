@@ -7,6 +7,7 @@ export interface PendingNewTask {
   agentId: string;
   model?: string;
   thinkingLevel?: string;
+  ensemble?: boolean;
 }
 
 export interface TaskState {
@@ -18,7 +19,7 @@ export interface TaskState {
   startNewTask: (gatewayId?: string, agentId?: string) => void;
   commitPendingTask: () => Task;
   clearPending: () => void;
-  createTask: (gatewayId?: string, agentId?: string) => Task;
+  createTask: (gatewayId?: string, agentId?: string, ensemble?: boolean) => Task;
   setActiveTask: (id: string | null) => void;
   updateTaskTitle: (id: string, title: string) => void;
   updateTaskStatus: (id: string, status: TaskStatus) => void;
@@ -117,14 +118,14 @@ export function createTaskStore(deps: TaskStoreDeps) {
       const catalog = deps.getAgentCatalog(gwId);
       const agId = pending?.agentId || catalog.defaultId;
       if (!agId) throw new Error('no agent available — gateway catalog not loaded');
-      const task = get().createTask(gwId, agId);
+      const task = get().createTask(gwId, agId, pending?.ensemble);
       set({ pendingNewTask: null });
       return task;
     },
 
     clearPending: () => set({ pendingNewTask: null }),
 
-    createTask: (gatewayId?, agentId?) => {
+    createTask: (gatewayId?, agentId?, ensemble?) => {
       const resolvedGatewayId = gatewayId ?? deps.getDefaultGatewayId() ?? '';
       const catalog = deps.getAgentCatalog(resolvedGatewayId);
       const resolvedAgentId = agentId || catalog.defaultId;
@@ -137,6 +138,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
         sessionId: '',
         title: '',
         status: 'active',
+        ensemble: ensemble ?? undefined,
         createdAt: now,
         updatedAt: now,
         tags: [],

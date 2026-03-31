@@ -159,6 +159,7 @@ interface PersistedTask {
   sessionId: string;
   title: string;
   status: string;
+  ensemble?: boolean;
   createdAt: string;
   updatedAt: string;
   tags: string[];
@@ -172,6 +173,9 @@ interface PersistedMessage {
   role: string;
   content: string;
   timestamp: string;
+  sessionKey?: string;
+  agentId?: string;
+  runId?: string;
   imageAttachments?: unknown[];
   toolCalls?: unknown[];
 }
@@ -334,6 +338,7 @@ export interface ClawWorkAPI {
     sessionId: string;
     title: string;
     status: string;
+    ensemble?: boolean;
     model?: string;
     modelProvider?: string;
     thinkingLevel?: string;
@@ -366,11 +371,41 @@ export interface ClawWorkAPI {
     role: string;
     content: string;
     timestamp: string;
+    sessionKey?: string;
+    agentId?: string;
+    runId?: string;
     imageAttachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;
 
   deleteTask: (taskId: string) => Promise<IpcResult>;
+
+  persistRoom: (params: { taskId: string; status: string; conductorReady: boolean }) => Promise<IpcResult>;
+  loadRoom: (taskId: string) => Promise<{
+    ok: boolean;
+    room: { taskId: string; status: string; conductorReady: boolean } | null;
+    performers: Array<{
+      sessionKey: string;
+      taskId: string;
+      agentId: string;
+      agentName: string;
+      emoji: string | null;
+      verifiedAt: string;
+    }>;
+    error?: string;
+  }>;
+  persistPerformer: (params: {
+    taskId: string;
+    sessionKey: string;
+    agentId: string;
+    agentName: string;
+    emoji?: string;
+    verifiedAt: string;
+  }) => Promise<IpcResult>;
+  deleteRoom: (taskId: string) => Promise<IpcResult>;
+
+  listSessionsBySpawner: (gatewayId: string, spawnedBy: string) => Promise<IpcResult>;
+  createSession: (gatewayId: string, params: { key: string; agentId: string; message?: string }) => Promise<IpcResult>;
 
   getUsageStatus: (gatewayId: string) => Promise<IpcResult>;
   getUsageCost: (

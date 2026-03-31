@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import { mergeGatewayStreamText } from '@clawwork/shared';
+import { mergeGatewayStreamText, parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork/shared';
 import type { Message, MessageRole, MessageImageAttachment, ToolCall, IpcResult } from '@clawwork/shared';
 
 const EMPTY_MESSAGES: Message[] = [];
@@ -18,8 +18,8 @@ export interface ActiveTurn {
 
 export interface MessageState {
   messagesByTask: Record<string, Message[]>;
-  activeTurnByTask: Record<string, ActiveTurn>;
-  processingTasks: Set<string>;
+  activeTurnBySession: Record<string, ActiveTurn>;
+  processingBySession: Set<string>;
   highlightedMessageId: string | null;
 
   addMessage: (
@@ -29,16 +29,16 @@ export interface MessageState {
     imageAttachments?: MessageImageAttachment[],
     options?: { persist?: boolean },
   ) => Message;
-  upsertToolCall: (taskId: string, tc: ToolCall) => void;
+  upsertToolCall: (sessionKey: string, taskId: string, tc: ToolCall) => void;
   bulkLoad: (taskId: string, msgs: Message[]) => void;
-  appendStreamDelta: (taskId: string, delta: string) => void;
-  appendThinkingDelta: (taskId: string, delta: string) => void;
-  finalizeStream: (taskId: string, meta?: { runId?: string }) => void;
-  promoteActiveTurn: (taskId: string, canonical: Message) => void;
-  clearActiveTurn: (taskId: string) => void;
+  appendStreamDelta: (sessionKey: string, delta: string) => void;
+  appendThinkingDelta: (sessionKey: string, delta: string) => void;
+  finalizeStream: (sessionKey: string, meta?: { runId?: string }) => void;
+  promoteActiveTurn: (sessionKey: string, taskId: string, canonical: Message) => void;
+  clearActiveTurn: (sessionKey: string) => void;
   clearMessages: (taskId: string) => void;
   setHighlightedMessage: (id: string | null) => void;
-  setProcessing: (taskId: string, processing: boolean) => void;
+  setProcessing: (sessionKey: string, processing: boolean) => void;
 }
 
 export interface MessageStoreDeps {
@@ -48,6 +48,9 @@ export interface MessageStoreDeps {
     role: string;
     content: string;
     timestamp: string;
+    sessionKey?: string;
+    agentId?: string;
+    runId?: string;
     imageAttachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;
@@ -115,7 +118,7 @@ export function mergeCanonicalMessageWithActiveTurn(canonical: Message, turn?: A
   };
 }
 
-export function activeTurnToMessage(turn: ActiveTurn, taskId: string): Message {
+export function activeTurnToMessage(turn: ActiveTurn, taskId: string, sessionKey?: string): Message {
   return {
     id: turn.id,
     taskId,
@@ -124,6 +127,8 @@ export function activeTurnToMessage(turn: ActiveTurn, taskId: string): Message {
     thinkingContent: turn.thinkingContent,
     artifacts: [],
     toolCalls: turn.toolCalls,
+    sessionKey,
+    agentId: sessionKey ? parseAgentIdFromSessionKey(sessionKey) : undefined,
     runId: turn.runId,
     timestamp: turn.timestamp,
   };
@@ -137,6 +142,9 @@ function persistMessageUpdate(deps: MessageStoreDeps, msg: Message): void {
       role: msg.role,
       content: msg.content,
       timestamp: msg.timestamp,
+      sessionKey: msg.sessionKey,
+      agentId: msg.agentId,
+      runId: msg.runId,
       imageAttachments: msg.imageAttachments as unknown[] | undefined,
       toolCalls: msg.toolCalls,
     })
@@ -148,8 +156,8 @@ export { EMPTY_MESSAGES };
 export function createMessageStore(deps: MessageStoreDeps) {
   return createStore<MessageState>((set, _get) => ({
     messagesByTask: {},
-    activeTurnByTask: {},
-    processingTasks: new Set(),
+    activeTurnBySession: {},
+    processingBySession: new Set(),
     highlightedMessageId: null,
 
     addMessage: (taskId, role, content, imageAttachments?, options?) => {
@@ -175,20 +183,20 @@ export function createMessageStore(deps: MessageStoreDeps) {
       return msg;
     },
 
-    upsertToolCall: (taskId, tc) => {
+    upsertToolCall: (sessionKey, taskId, tc) => {
       let persistedMessage: Message | null = null;
 
       set((s) => {
-        const turn = s.activeTurnByTask[taskId];
+        const turn = s.activeTurnBySession[sessionKey];
         if (turn) {
           const idx = turn.toolCalls.findIndex((t) => t.id === tc.id);
           const next = [...turn.toolCalls];
           if (idx >= 0) next[idx] = mergeToolCallState(next[idx], tc);
           else next.push(tc);
           return {
-            activeTurnByTask: {
-              ...s.activeTurnByTask,
-              [taskId]: { ...turn, toolCalls: next },
+            activeTurnBySession: {
+              ...s.activeTurnBySession,
+              [sessionKey]: { ...turn, toolCalls: next },
             },
           };
         }
@@ -216,9 +224,9 @@ export function createMessageStore(deps: MessageStoreDeps) {
         }
 
         return {
-          activeTurnByTask: {
-            ...s.activeTurnByTask,
-            [taskId]: { ...newActiveTurn(), toolCalls: [tc] },
+          activeTurnBySession: {
+            ...s.activeTurnBySession,
+            [sessionKey]: { ...newActiveTurn(), toolCalls: [tc] },
           },
         };
       });
@@ -236,13 +244,13 @@ export function createMessageStore(deps: MessageStoreDeps) {
         },
       })),
 
-    appendStreamDelta: (taskId, delta) =>
+    appendStreamDelta: (sessionKey, delta) =>
       set((s) => {
-        const turn = s.activeTurnByTask[taskId] ?? newActiveTurn();
+        const turn = s.activeTurnBySession[sessionKey] ?? newActiveTurn();
         return {
-          activeTurnByTask: {
-            ...s.activeTurnByTask,
-            [taskId]: {
+          activeTurnBySession: {
+            ...s.activeTurnBySession,
+            [sessionKey]: {
               ...turn,
               streamingText: mergeGatewayStreamText(turn.streamingText, delta),
             },
@@ -250,13 +258,13 @@ export function createMessageStore(deps: MessageStoreDeps) {
         };
       }),
 
-    appendThinkingDelta: (taskId, delta) =>
+    appendThinkingDelta: (sessionKey, delta) =>
       set((s) => {
-        const turn = s.activeTurnByTask[taskId] ?? newActiveTurn();
+        const turn = s.activeTurnBySession[sessionKey] ?? newActiveTurn();
         return {
-          activeTurnByTask: {
-            ...s.activeTurnByTask,
-            [taskId]: {
+          activeTurnBySession: {
+            ...s.activeTurnBySession,
+            [sessionKey]: {
               ...turn,
               streamingThinking: mergeGatewayStreamText(turn.streamingThinking, delta),
             },
@@ -264,9 +272,9 @@ export function createMessageStore(deps: MessageStoreDeps) {
         };
       }),
 
-    finalizeStream: (taskId, meta?) => {
+    finalizeStream: (sessionKey, meta?) => {
       set((s) => {
-        const turn = s.activeTurnByTask[taskId];
+        const turn = s.activeTurnBySession[sessionKey];
         if (!turn) return s;
 
         const content = turn.streamingText;
@@ -274,17 +282,17 @@ export function createMessageStore(deps: MessageStoreDeps) {
 
         if (!content && !thinkingContent) {
           return {
-            activeTurnByTask: {
-              ...s.activeTurnByTask,
-              [taskId]: { ...turn, streamingText: '', streamingThinking: '' },
+            activeTurnBySession: {
+              ...s.activeTurnBySession,
+              [sessionKey]: { ...turn, streamingText: '', streamingThinking: '' },
             },
           };
         }
 
         return {
-          activeTurnByTask: {
-            ...s.activeTurnByTask,
-            [taskId]: {
+          activeTurnBySession: {
+            ...s.activeTurnBySession,
+            [sessionKey]: {
               ...turn,
               finalized: true,
               content,
@@ -298,54 +306,58 @@ export function createMessageStore(deps: MessageStoreDeps) {
       });
     },
 
-    promoteActiveTurn: (taskId, canonical) =>
+    promoteActiveTurn: (sessionKey, taskId, canonical) =>
       set((s) => {
-        const turn = s.activeTurnByTask[taskId];
+        const turn = s.activeTurnBySession[sessionKey];
         const merged = mergeCanonicalMessageWithActiveTurn(canonical, turn);
-        const nextTurns = { ...s.activeTurnByTask };
-        delete nextTurns[taskId];
+        const nextTurns = { ...s.activeTurnBySession };
+        delete nextTurns[sessionKey];
         return {
           messagesByTask: {
             ...s.messagesByTask,
             [taskId]: [...(s.messagesByTask[taskId] ?? []), merged],
           },
-          activeTurnByTask: nextTurns,
+          activeTurnBySession: nextTurns,
         };
       }),
 
-    clearActiveTurn: (taskId) =>
+    clearActiveTurn: (sessionKey) =>
       set((s) => {
-        if (!s.activeTurnByTask[taskId]) return s;
-        const next = { ...s.activeTurnByTask };
-        delete next[taskId];
-        return { activeTurnByTask: next };
+        if (!s.activeTurnBySession[sessionKey]) return s;
+        const next = { ...s.activeTurnBySession };
+        delete next[sessionKey];
+        return { activeTurnBySession: next };
       }),
 
     clearMessages: (taskId) =>
       set((s) => {
         const nextMessages = { ...s.messagesByTask };
-        const nextTurns = { ...s.activeTurnByTask };
-        const nextProcessing = new Set(s.processingTasks);
+        const nextTurns = { ...s.activeTurnBySession };
+        const nextProcessing = new Set(s.processingBySession);
 
         delete nextMessages[taskId];
-        delete nextTurns[taskId];
-        nextProcessing.delete(taskId);
+        for (const key of Object.keys(nextTurns)) {
+          if (parseTaskIdFromSessionKey(key) === taskId) delete nextTurns[key];
+        }
+        for (const key of nextProcessing) {
+          if (parseTaskIdFromSessionKey(key) === taskId) nextProcessing.delete(key);
+        }
 
         return {
           messagesByTask: nextMessages,
-          activeTurnByTask: nextTurns,
-          processingTasks: nextProcessing,
+          activeTurnBySession: nextTurns,
+          processingBySession: nextProcessing,
         };
       }),
 
     setHighlightedMessage: (id) => set({ highlightedMessageId: id }),
 
-    setProcessing: (taskId, processing) =>
+    setProcessing: (sessionKey, processing) =>
       set((s) => {
-        const next = new Set(s.processingTasks);
-        if (processing) next.add(taskId);
-        else next.delete(taskId);
-        return { processingTasks: next };
+        const next = new Set(s.processingBySession);
+        if (processing) next.add(sessionKey);
+        else next.delete(sessionKey);
+        return { processingBySession: next };
       }),
   }));
 }

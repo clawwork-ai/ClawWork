@@ -25,6 +25,9 @@ export interface PersistedMessage {
   role: string;
   content: string;
   timestamp: string;
+  sessionKey?: string;
+  agentId?: string;
+  runId?: string;
   imageAttachments?: unknown[];
   toolCalls?: unknown[];
 }
@@ -74,6 +77,9 @@ export interface PersistencePort {
     role: string;
     content: string;
     timestamp: string;
+    sessionKey?: string;
+    agentId?: string;
+    runId?: string;
     imageAttachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;

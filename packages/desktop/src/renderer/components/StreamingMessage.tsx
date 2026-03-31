@@ -11,14 +11,18 @@ interface StreamingMessageProps {
   content: string;
   thinkingContent?: string;
   toolCalls?: ToolCall[];
-  messageLayout?: 'centered' | 'wide';
+  agentEmoji?: string;
+  agentName?: string;
+  agentRoleLabel?: string;
 }
 
 const StreamingMessage = memo(function StreamingMessage({
   content,
   thinkingContent,
   toolCalls,
-  messageLayout = 'centered',
+  agentEmoji,
+  agentName,
+  agentRoleLabel,
 }: StreamingMessageProps) {
   const lastRunningId = useMemo(() => {
     if (!toolCalls?.length) return null;
@@ -35,12 +39,18 @@ const StreamingMessage = memo(function StreamingMessage({
       transition={motionPresets.fadeIn.transition}
       className="flex gap-3.5 py-4"
     >
-      <MessageAvatar role="assistant" />
-      <div
-        className={
-          messageLayout === 'centered' ? 'min-w-0 max-w-[var(--content-max-width)]' : 'min-w-0 w-full max-w-none'
-        }
-      >
+      <MessageAvatar role="assistant" agentEmoji={agentEmoji} />
+      <div className="min-w-0 flex-1">
+        {(agentName || agentRoleLabel) && (
+          <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-2 text-[var(--text-muted)]">
+            {agentName ? <div className="type-label truncate text-[var(--text-secondary)]">{agentName}</div> : null}
+            {agentRoleLabel ? (
+              <span className="type-meta inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-0.5 text-[var(--text-muted)]">
+                {agentRoleLabel}
+              </span>
+            ) : null}
+          </div>
+        )}
         {thinkingContent && <ThinkingSection content={thinkingContent} defaultOpen streaming showCursor={!content} />}
         {toolCalls?.length ? (
           <div className="mb-2 space-y-1">

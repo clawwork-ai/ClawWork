@@ -1,27 +1,37 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { File, FileCode, FolderOpen, Image as ImageIcon, ListTodo } from 'lucide-react';
+import { Bot, File, FileCode, FolderOpen, Image as ImageIcon, ListTodo } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
 
-export type MentionTab = 'local' | 'tasks' | 'files';
+export type MentionTab = 'local' | 'tasks' | 'files' | 'agents';
+
+export interface AgentMentionEntry {
+  agentId: string;
+  agentName: string;
+  emoji?: string;
+  sessionKey: string;
+}
 
 export type MentionItem =
   | { kind: 'task'; task: Task }
   | { kind: 'file'; artifact: Artifact }
-  | { kind: 'local'; file: FileIndexEntry };
+  | { kind: 'local'; file: FileIndexEntry }
+  | { kind: 'agent'; agent: AgentMentionEntry };
 interface MentionPickerProps {
   visible: boolean;
   query: string;
   tasks: Task[];
   localFiles: FileIndexEntry[];
+  agents: AgentMentionEntry[];
   hasContextFolders: boolean;
   activeTab: MentionTab;
   selectedIndex: number;
   onSelectTask: (task: Task) => void;
   onSelectArtifact: (artifact: Artifact) => void;
   onSelectLocalFile: (file: FileIndexEntry) => void;
+  onSelectAgent: (agent: AgentMentionEntry) => void;
   onTabChange: (tab: MentionTab) => void;
   onHoverIndex: (index: number) => void;
   onItemsChange?: (items: MentionItem[]) => void;
@@ -38,12 +48,14 @@ export default function MentionPicker({
   query,
   tasks,
   localFiles,
+  agents,
   hasContextFolders,
   activeTab,
   selectedIndex,
   onSelectTask,
   onSelectArtifact,
   onSelectLocalFile,
+  onSelectAgent,
   onTabChange,
   onHoverIndex,
   onItemsChange,
@@ -74,12 +86,19 @@ export default function MentionPicker({
       { id: 'tasks', label: t('mentionPicker.tasks'), icon: ListTodo },
       { id: 'files', label: t('mentionPicker.files'), icon: File },
     ];
-    if (hasContextFolders) return allTabs;
-    return allTabs.filter((tab) => tab.id !== 'local');
-  }, [hasContextFolders, t]);
+    if (agents.length > 0) allTabs.unshift({ id: 'agents', label: t('mentionPicker.agents'), icon: Bot });
+    if (!hasContextFolders) return allTabs.filter((tab) => tab.id !== 'local');
+    return allTabs;
+  }, [hasContextFolders, agents.length, t]);
 
   const items = useMemo<MentionItem[]>(() => {
     const q = query.toLowerCase();
+    if (activeTab === 'agents') {
+      const filtered = q
+        ? agents.filter((a) => a.agentName.toLowerCase().includes(q) || a.agentId.toLowerCase().includes(q))
+        : agents;
+      return filtered.map((a) => ({ kind: 'agent' as const, agent: a }));
+    }
     if (activeTab === 'local') {
       const filtered = q
         ? localFiles.filter((f) => f.fileName.toLowerCase().includes(q) || f.relativePath.toLowerCase().includes(q))
@@ -92,7 +111,7 @@ export default function MentionPicker({
     }
     const filtered = q ? artifacts.filter((a) => a.name.toLowerCase().includes(q)) : artifacts;
     return filtered.map((a) => ({ kind: 'file' as const, artifact: a }));
-  }, [activeTab, query, tasks, artifacts, localFiles]);
+  }, [activeTab, query, tasks, artifacts, localFiles, agents]);
 
   useEffect(() => {
     onItemsChange?.(items);
@@ -139,13 +158,43 @@ export default function MentionPicker({
       <div ref={listRef} className="max-h-56 overflow-y-auto py-1">
         {items.length === 0 && (
           <div className="type-support px-3 py-4 text-center text-[var(--text-muted)]">
-            {activeTab === 'local'
-              ? t('mentionPicker.noLocalFiles')
-              : activeTab === 'tasks'
-                ? t('mentionPicker.noTasks')
-                : t('mentionPicker.noFiles')}
+            {activeTab === 'agents'
+              ? t('mentionPicker.noAgents')
+              : activeTab === 'local'
+                ? t('mentionPicker.noLocalFiles')
+                : activeTab === 'tasks'
+                  ? t('mentionPicker.noTasks')
+                  : t('mentionPicker.noFiles')}
           </div>
         )}
+
+        {activeTab === 'agents' &&
+          items.map((item, i) => {
+            if (item.kind !== 'agent') return null;
+            const a = item.agent;
+            return (
+              <button
+                key={a.sessionKey}
+                data-mention-selected={i === selectedIndex ? '' : undefined}
+                className={cn(
+                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
+                  'hover:bg-[var(--bg-hover)] transition-colors',
+                  i === selectedIndex && 'bg-[var(--bg-hover)]',
+                )}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => onSelectAgent(a)}
+                onMouseEnter={() => onHoverIndex(i)}
+              >
+                {a.emoji ? (
+                  <span className="emoji-sm flex-shrink-0">{a.emoji}</span>
+                ) : (
+                  <Bot size={14} className="text-[var(--accent)] flex-shrink-0" />
+                )}
+                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.agentName}</span>
+                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{a.agentId}</span>
+              </button>
+            );
+          })}
 
         {activeTab === 'local' &&
           items.map((item, i) => {

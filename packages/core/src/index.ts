@@ -58,6 +58,9 @@ export type { MessageState, MessageStoreDeps, ActiveTurn } from './stores/messag
 export { createTaskStore } from './stores/task-store.js';
 export type { TaskState, TaskStoreDeps, PendingNewTask } from './stores/task-store.js';
 
+export { createRoomStore } from './stores/room-store.js';
+export type { RoomState, RoomStoreDeps, PerformerAgent } from './stores/room-store.js';
+
 export { createUiStore } from './stores/ui-store.js';
 export type {
   UiState,

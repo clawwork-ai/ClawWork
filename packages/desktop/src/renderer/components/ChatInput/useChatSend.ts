@@ -23,6 +23,7 @@ import type { PendingNewTask } from '@clawwork/core';
 import { useTaskStore } from '../../stores/taskStore';
 import { useMessageStore } from '../../stores/messageStore';
 import { useUiStore } from '../../stores/uiStore';
+import { useRoomStore } from '../../stores/roomStore';
 import { composer } from '../../platform';
 import type { PendingImage } from './types';
 import type { ThinkingLevel } from './constants';
@@ -39,6 +40,10 @@ interface UseChatSendOpts {
   setSelectedArtifacts: Dispatch<SetStateAction<Artifact[]>>;
   selectedLocalFiles: FileIndexEntry[];
   setSelectedLocalFiles: Dispatch<SetStateAction<FileIndexEntry[]>>;
+  selectedAgents: Array<{ agentId: string; agentName: string; emoji?: string; sessionKey: string }>;
+  setSelectedAgents: Dispatch<
+    SetStateAction<Array<{ agentId: string; agentName: string; emoji?: string; sessionKey: string }>>
+  >;
   contextFolders: string[];
   stopVoiceInput: () => void;
   onComposerCleared?: () => void;
@@ -55,6 +60,8 @@ export function useChatSend(opts: UseChatSendOpts) {
     setSelectedArtifacts,
     selectedLocalFiles,
     setSelectedLocalFiles,
+    selectedAgents,
+    setSelectedAgents,
     contextFolders,
     stopVoiceInput,
     onComposerCleared,
@@ -69,10 +76,10 @@ export function useChatSend(opts: UseChatSendOpts) {
   const addMessage = useMessageStore((s) => s.addMessage);
   const setProcessing = useMessageStore((s) => s.setProcessing);
 
-  const isProcessing = useMessageStore((s) => (activeTask ? s.processingTasks.has(activeTask.id) : false));
+  const isProcessing = useMessageStore((s) => (activeTask ? s.processingBySession.has(activeTask.sessionKey) : false));
   const isStreaming = useMessageStore((s) => {
     if (!activeTask) return false;
-    const turn = s.activeTurnByTask[activeTask.id];
+    const turn = s.activeTurnBySession[activeTask.sessionKey];
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
   const isGenerating = isProcessing || isStreaming;
@@ -155,6 +162,46 @@ export function useChatSend(opts: UseChatSendOpts) {
       }
     }
 
+    if (task.ensemble) {
+      const room = useRoomStore.getState().rooms[task.id];
+      if (!room || !room.conductorReady) {
+        const catalogEntry = useUiStore.getState().agentCatalogByGateway[task.gatewayId];
+        const agents = (catalogEntry?.agents ?? []).filter((a) => a.id !== 'main');
+        if (agents.length === 0) {
+          toast.error(t('errors.conductorInitFailed'));
+          return;
+        }
+        const agentCatalogStr = agents
+          .map(
+            (a) => `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}`,
+          )
+          .join('\n');
+        const ok = await useRoomStore
+          .getState()
+          .initConductor(task.id, task.gatewayId, task.sessionKey, agentCatalogStr, content);
+        if (!ok) {
+          toast.error(t('errors.conductorInitFailed'));
+          return;
+        }
+        const msgImages: MessageImageAttachment[] | undefined = pendingImages.length
+          ? pendingImages.map((img) => ({ fileName: img.file.name, dataUrl: img.previewUrl }))
+          : undefined;
+        if (content || msgImages?.length) {
+          addMessage(task.id, 'user', content, msgImages);
+        }
+        setProcessing(task.sessionKey, true);
+        textarea.value = '';
+        textarea.style.height = 'auto';
+        onComposerCleared?.();
+        setPendingImages([]);
+        setSelectedAgents([]);
+        setSelectedTasks([]);
+        setSelectedArtifacts([]);
+        setSelectedLocalFiles([]);
+        return;
+      }
+    }
+
     textarea.value = '';
     textarea.style.height = 'auto';
     onComposerCleared?.();
@@ -162,7 +209,9 @@ export function useChatSend(opts: UseChatSendOpts) {
     const taskMentions = [...selectedTasks];
     const artifactMentions = [...selectedArtifacts];
     const localFileMentions = [...selectedLocalFiles];
+    const agentMentions = [...selectedAgents];
     setPendingImages([]);
+    setSelectedAgents([]);
     setSelectedTasks([]);
     setSelectedArtifacts([]);
     setSelectedLocalFiles([]);
@@ -293,6 +342,7 @@ export function useChatSend(opts: UseChatSendOpts) {
         presetModel: pendingPresetModel,
         presetThinking: pendingPresetThinking,
         titleHint: task.title ? undefined : titleHint,
+        mentions: agentMentions.length > 0 ? agentMentions.map((a) => a.agentId) : undefined,
       });
     } catch (err) {
       setProcessing(task.id, false);
@@ -310,12 +360,14 @@ export function useChatSend(opts: UseChatSendOpts) {
     selectedTasks,
     selectedArtifacts,
     selectedLocalFiles,
+    selectedAgents,
     contextFolders,
     stopVoiceInput,
     setPendingImages,
     setSelectedTasks,
     setSelectedArtifacts,
     setSelectedLocalFiles,
+    setSelectedAgents,
     textareaRef,
     t,
     onComposerCleared,

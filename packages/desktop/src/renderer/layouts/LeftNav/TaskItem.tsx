@@ -54,7 +54,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
   const hasUnread = useUiStore((s) => s.unreadTaskIds.has(task.id));
   const setMainView = useUiStore((s) => s.setMainView);
   const isStreaming = useMessageStore((s) => {
-    const turn = s.activeTurnByTask[task.id];
+    const turn = s.activeTurnBySession[task.sessionKey];
     return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
   });
   const isCompleted = task.status === 'completed';
