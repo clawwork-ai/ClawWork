@@ -6,6 +6,8 @@ export const ACCEPTED_TYPES = 'image/png,image/jpeg,image/gif,image/webp';
 export const GATEWAY_INJECTED_MODEL = 'gateway-injected';
 export const EMPTY_MODELS_CATALOG: ModelCatalogEntry[] = [];
 
+export const MENTION_ALL_AGENT_ID = '__all__';
+
 export const THINKING_LEVELS = ['off', 'minimal', 'low', 'medium', 'high', 'adaptive'] as const;
 export type ThinkingLevel = (typeof THINKING_LEVELS)[number];
 

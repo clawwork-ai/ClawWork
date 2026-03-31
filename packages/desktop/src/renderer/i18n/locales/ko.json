@@ -332,7 +332,8 @@
     "noLocalFiles": "일치하는 로컬 파일이 없습니다",
     "noTasks": "일치하는 작업이 없습니다",
     "noFiles": "일치하는 파일이 없습니다",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "모든 에이전트"
   },
   "slash": {
     "argOptions": "/{{command}} 옵션"

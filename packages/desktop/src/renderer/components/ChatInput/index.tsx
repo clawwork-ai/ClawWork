@@ -15,6 +15,7 @@ import {
   FolderOpen,
   ListTodo,
   Plus,
+  Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -42,7 +43,7 @@ import SlashArgPicker from '../SlashArgPicker';
 import VoiceIntroDialog from '../VoiceIntroDialog';
 import MentionPicker, { type MentionTab, type AgentMentionEntry } from '../MentionPicker';
 import { useRoomStore } from '@/stores/roomStore';
-import { ACCEPTED_TYPES, THINKING_LEVELS, THINKING_LABEL_KEYS } from './constants';
+import { ACCEPTED_TYPES, THINKING_LEVELS, THINKING_LABEL_KEYS, MENTION_ALL_AGENT_ID } from './constants';
 import { formatContextWindow } from './utils';
 import { useImageAttachments } from './useImageAttachments';
 import { useContextFolders } from './useContextFolders';
@@ -70,12 +71,16 @@ export default function ChatInput() {
   const performers = useRoomStore((s) => (activeTaskId ? s.rooms[activeTaskId]?.performers : undefined));
   const mentionAgents = useMemo<AgentMentionEntry[]>(() => {
     if (!performers) return [];
-    return performers.map((p) => ({
-      agentId: p.agentId,
-      agentName: p.agentName,
-      emoji: p.emoji,
-      sessionKey: p.sessionKey,
-    }));
+    const byAgent = new Map<string, AgentMentionEntry>();
+    for (const p of performers) {
+      byAgent.set(p.agentId, {
+        agentId: p.agentId,
+        agentName: p.agentName,
+        emoji: p.emoji,
+        sessionKey: p.sessionKey,
+      });
+    }
+    return [...byAgent.values()];
   }, [performers]);
 
   const {
@@ -523,7 +528,9 @@ export default function ChatInput() {
                           'bg-[var(--accent)]/10 text-[var(--accent)]',
                         )}
                       >
-                        {a.emoji ? (
+                        {a.agentId === MENTION_ALL_AGENT_ID ? (
+                          <Users size={14} className="flex-shrink-0" />
+                        ) : a.emoji ? (
                           <span className="emoji-sm">{a.emoji}</span>
                         ) : (
                           <Bot size={14} className="flex-shrink-0" />

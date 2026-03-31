@@ -332,7 +332,8 @@
     "noLocalFiles": "No se encontraron archivos locales",
     "noTasks": "No se encontraron tareas",
     "noFiles": "No se encontraron archivos",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "Todos los agentes"
   },
   "slash": {
     "argOptions": "Opciones de /{{command}}"

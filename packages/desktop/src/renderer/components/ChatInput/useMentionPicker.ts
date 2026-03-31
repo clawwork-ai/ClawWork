@@ -3,6 +3,7 @@ import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import type { MentionItem, MentionTab, AgentMentionEntry } from '../MentionPicker';
 import { useFileStore } from '../../stores/fileStore';
 import { useTaskStore } from '../../stores/taskStore';
+import { MENTION_ALL_AGENT_ID } from './constants';
 
 interface UseMentionPickerOpts {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -97,7 +98,11 @@ export function useMentionPicker(opts: UseMentionPickerOpts) {
           return;
         }
         stripAtQuery();
-        setSelectedAgents((prev) => [...prev, item.agent]);
+        if (item.agent.agentId === MENTION_ALL_AGENT_ID) {
+          setSelectedAgents([item.agent]);
+        } else {
+          setSelectedAgents((prev) => prev.filter((a) => a.agentId !== MENTION_ALL_AGENT_ID).concat(item.agent));
+        }
         closeMentionPicker();
         return;
       }

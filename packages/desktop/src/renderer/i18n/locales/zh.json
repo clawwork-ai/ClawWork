@@ -332,7 +332,8 @@
     "noLocalFiles": "没有匹配的本地文件",
     "noTasks": "没有匹配的任务",
     "noFiles": "没有匹配的文件",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "所有智能体"
   },
   "slash": {
     "argOptions": "/{{command}} 的可选项"

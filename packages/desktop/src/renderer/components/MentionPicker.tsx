@@ -1,9 +1,10 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { Bot, File, FileCode, FolderOpen, Image as ImageIcon, ListTodo } from 'lucide-react';
+import { Bot, File, FileCode, FolderOpen, Image as ImageIcon, ListTodo, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
+import { MENTION_ALL_AGENT_ID } from './ChatInput/constants';
 
 export type MentionTab = 'local' | 'tasks' | 'files' | 'agents';
 
@@ -94,10 +95,19 @@ export default function MentionPicker({
   const items = useMemo<MentionItem[]>(() => {
     const q = query.toLowerCase();
     if (activeTab === 'agents') {
+      const allEntry: AgentMentionEntry = {
+        agentId: MENTION_ALL_AGENT_ID,
+        agentName: t('mentionPicker.allAgents'),
+        sessionKey: '',
+      };
       const filtered = q
         ? agents.filter((a) => a.agentName.toLowerCase().includes(q) || a.agentId.toLowerCase().includes(q))
         : agents;
-      return filtered.map((a) => ({ kind: 'agent' as const, agent: a }));
+      const allMatches = !q || allEntry.agentName.toLowerCase().includes(q);
+      return [
+        ...(allMatches ? [{ kind: 'agent' as const, agent: allEntry }] : []),
+        ...filtered.map((a) => ({ kind: 'agent' as const, agent: a })),
+      ];
     }
     if (activeTab === 'local') {
       const filtered = q
@@ -111,7 +121,7 @@ export default function MentionPicker({
     }
     const filtered = q ? artifacts.filter((a) => a.name.toLowerCase().includes(q)) : artifacts;
     return filtered.map((a) => ({ kind: 'file' as const, artifact: a }));
-  }, [activeTab, query, tasks, artifacts, localFiles, agents]);
+  }, [activeTab, query, tasks, artifacts, localFiles, agents, t]);
 
   useEffect(() => {
     onItemsChange?.(items);
@@ -185,7 +195,9 @@ export default function MentionPicker({
                 onClick={() => onSelectAgent(a)}
                 onMouseEnter={() => onHoverIndex(i)}
               >
-                {a.emoji ? (
+                {a.agentId === MENTION_ALL_AGENT_ID ? (
+                  <Users size={14} className="text-[var(--accent)] flex-shrink-0" />
+                ) : a.emoji ? (
                   <span className="emoji-sm flex-shrink-0">{a.emoji}</span>
                 ) : (
                   <Bot size={14} className="text-[var(--accent)] flex-shrink-0" />

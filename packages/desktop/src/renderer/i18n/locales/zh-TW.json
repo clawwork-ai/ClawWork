@@ -332,7 +332,8 @@
     "noLocalFiles": "找不到符合的本機檔案",
     "noTasks": "找不到符合的任務",
     "noFiles": "找不到符合的檔案",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "所有代理"
   },
   "slash": {
     "argOptions": "/{{command}} 的選項"

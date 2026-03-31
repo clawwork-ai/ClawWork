@@ -332,7 +332,8 @@
     "noLocalFiles": "No matching local files",
     "noTasks": "No matching tasks",
     "noFiles": "No matching files",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "All Agents"
   },
   "slash": {
     "argOptions": "Options for /{{command}}"

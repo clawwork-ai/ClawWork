@@ -163,8 +163,8 @@ export function createRoomStore(deps: RoomStoreDeps) {
       const room = get().rooms[taskId];
       if (!room) return;
 
-      const already = room.performers.some((p) => p.sessionKey === subagentKey);
-      if (already) return;
+      const bySession = room.performers.some((p) => p.sessionKey === subagentKey);
+      if (bySession) return;
 
       const performer: RoomPerformer = {
         sessionKey: subagentKey,
@@ -174,10 +174,10 @@ export function createRoomStore(deps: RoomStoreDeps) {
       };
 
       set((s) => {
-        const existing = s.rooms[taskId];
-        if (!existing) return s;
+        const current = s.rooms[taskId];
+        if (!current) return s;
         return {
-          rooms: { ...s.rooms, [taskId]: { ...existing, performers: [...existing.performers, performer] } },
+          rooms: { ...s.rooms, [taskId]: { ...current, performers: [...current.performers, performer] } },
           subagentKeyMap: { ...s.subagentKeyMap, [subagentKey]: taskId },
         };
       });

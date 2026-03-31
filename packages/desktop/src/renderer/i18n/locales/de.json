@@ -332,7 +332,8 @@
     "noLocalFiles": "Keine passenden lokalen Dateien",
     "noTasks": "Keine passenden Aufgaben",
     "noFiles": "Keine passenden Dateien",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "Alle Agents"
   },
   "slash": {
     "argOptions": "Optionen fuer /{{command}}"

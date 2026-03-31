@@ -332,7 +332,8 @@
     "noLocalFiles": "一致するローカルファイルがありません",
     "noTasks": "一致するタスクがありません",
     "noFiles": "一致するファイルがありません",
-    "noAgents": "No performers discovered yet"
+    "noAgents": "No performers discovered yet",
+    "allAgents": "全エージェント"
   },
   "slash": {
     "argOptions": "/{{command}} のオプション"

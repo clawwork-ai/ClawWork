@@ -27,7 +27,7 @@ import { useRoomStore } from '../../stores/roomStore';
 import { composer } from '../../platform';
 import type { PendingImage } from './types';
 import type { ThinkingLevel } from './constants';
-import { GATEWAY_INJECTED_MODEL, EMPTY_MODELS_CATALOG, MAX_TEXT_TOTAL } from './constants';
+import { GATEWAY_INJECTED_MODEL, EMPTY_MODELS_CATALOG, MAX_TEXT_TOTAL, MENTION_ALL_AGENT_ID } from './constants';
 import { getModelLabel, readAsBase64 } from './utils';
 
 interface UseChatSendOpts {
@@ -342,6 +342,7 @@ export function useChatSend(opts: UseChatSendOpts) {
         (artifactMentions.length ? `[@${artifactMentions[0].name}]` : '') ||
         (images.length ? `[${t('chatInput.image')}]` : '');
 
+      const isMentionAll = agentMentions.some((a) => a.agentId === MENTION_ALL_AGENT_ID);
       await composer.send(task.id, {
         content: finalContent,
         attachments: allAttachments.length > 0 ? allAttachments : undefined,
@@ -349,7 +350,8 @@ export function useChatSend(opts: UseChatSendOpts) {
         presetModel: pendingPresetModel,
         presetThinking: pendingPresetThinking,
         titleHint: task.title ? undefined : titleHint,
-        mentions: agentMentions.length > 0 ? agentMentions.map((a) => a.agentId) : undefined,
+        mentionAll: isMentionAll || undefined,
+        mentions: agentMentions.length > 0 && !isMentionAll ? agentMentions.map((a) => a.agentId) : undefined,
       });
     } catch (err) {
       setProcessing(task.id, false);
