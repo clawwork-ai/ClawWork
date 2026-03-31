@@ -46,14 +46,14 @@ import { t } from '../composables/i18n';
         <span>·</span>
         <span>{{
           t({
-            en: 'Updated 2026-03-26',
-            zh: '更新于 2026-03-26',
-            ja: '更新日 2026-03-26',
-            ko: '업데이트 2026-03-26',
-            fr: 'Mis à jour le 2026-03-26',
-            de: 'Aktualisiert am 2026-03-26',
-            es: 'Actualizado el 2026-03-26',
-            pt: 'Atualizado em 2026-03-26',
+            en: 'Updated 2026-03-27',
+            zh: '更新于 2026-03-27',
+            ja: '更新日 2026-03-27',
+            ko: '업데이트 2026-03-27',
+            fr: 'Mis à jour le 2026-03-27',
+            de: 'Aktualisiert am 2026-03-27',
+            es: 'Actualizado el 2026-03-27',
+            pt: 'Atualizado em 2026-03-27',
           })
         }}</span>
       </div>

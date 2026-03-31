@@ -277,7 +277,7 @@ const days: { day: I18nText; prs: number; phase: I18nText; tone: Tone }[] = [
       es: 'Jue 26/3',
       pt: 'Qui 26/3',
     },
-    prs: 4,
+    prs: 8,
     phase: {
       en: 'Toolchain',
       zh: '工具链',
@@ -290,17 +290,41 @@ const days: { day: I18nText; prs: number; phase: I18nText; tone: Tone }[] = [
     },
     tone: 'red',
   },
+  {
+    day: {
+      en: 'Fri 3/27',
+      zh: '周五 3/27',
+      ja: '金 3/27',
+      ko: '금 3/27',
+      fr: 'Ven 27/3',
+      de: 'Fr 27.3.',
+      es: 'Vie 27/3',
+      pt: 'Sex 27/3',
+    },
+    prs: 18,
+    phase: {
+      en: 'Ship v13',
+      zh: '发布 v13',
+      ja: 'v13 出荷',
+      ko: 'v13 릴리스',
+      fr: 'Livrer v13',
+      de: 'Ship v13',
+      es: 'Lanzar v13',
+      pt: 'Lançar v13',
+    },
+    tone: 'green',
+  },
 ];
 
 const maxPrs = Math.max(...days.map((d) => d.prs));
 
 const stats: { value: string; label: string; tone: Tone }[] = [
-  { value: '53', label: 'fix', tone: 'red' },
-  { value: '44', label: 'feat', tone: 'green' },
-  { value: '11', label: 'docs', tone: 'purple' },
+  { value: '64', label: 'fix', tone: 'red' },
+  { value: '48', label: 'feat', tone: 'green' },
+  { value: '14', label: 'refactor', tone: 'cyan' },
+  { value: '12', label: 'docs', tone: 'purple' },
   { value: '9', label: 'build', tone: 'yellow' },
-  { value: '8', label: 'refactor', tone: 'cyan' },
-  { value: '8', label: 'chore', tone: 'green' },
+  { value: '7', label: 'chore', tone: 'green' },
   { value: '6', label: 'UI', tone: 'cyan' },
 ];
 
@@ -340,7 +364,7 @@ const tools: { name: string; note: string; tone: Tone }[] = [
             })
           }}
         </div>
-        <div class="cw-stat-value">139</div>
+        <div class="cw-stat-value">161</div>
       </div>
 
       <div class="cw-sprint-breakdown">
@@ -353,18 +377,18 @@ const tools: { name: string; note: string; tone: Tone }[] = [
         <div class="cw-stat-label">
           {{
             t({
-              en: 'Token Consumed',
-              zh: 'Token 消耗量',
-              ja: 'Token 消費量',
-              ko: 'Token 소비량',
-              fr: 'Token consommés',
-              de: 'Token-Verbrauch',
-              es: 'Tokens consumidos',
-              pt: 'Tokens consumidos',
+              en: 'Stable Releases',
+              zh: '稳定版发布',
+              ja: '安定版リリース',
+              ko: '정식 릴리스',
+              fr: 'Releases stables',
+              de: 'Stabile Releases',
+              es: 'Releases estables',
+              pt: 'Releases estáveis',
             })
           }}
         </div>
-        <div class="cw-stat-value">1.2B</div>
+        <div class="cw-stat-value">13</div>
       </div>
 
       <div class="cw-sprint-tools">

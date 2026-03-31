@@ -299,6 +299,22 @@ const features: Feature[] = [
     ver: 'v0.0.12',
   },
   {
+    icon: '📲',
+    name: {
+      en: 'PWA Mobile',
+      zh: 'PWA 移动端',
+      ja: 'PWA モバイル',
+      ko: 'PWA 모바일',
+      fr: 'PWA Mobile',
+      de: 'PWA Mobil',
+      es: 'PWA Móvil',
+      pt: 'PWA Mobile',
+    },
+    tone: 'green',
+    stars: 3,
+    ver: 'v0.0.13',
+  },
+  {
     icon: '🎨',
     name: {
       en: 'Dark / Light',
@@ -333,21 +349,6 @@ const features: Feature[] = [
 ];
 
 const next: Omit<Feature, 'ver'>[] = [
-  {
-    icon: '📲',
-    name: {
-      en: 'PWA Mobile',
-      zh: 'PWA 移动端',
-      ja: 'PWA モバイル',
-      ko: 'PWA 모바일',
-      fr: 'PWA Mobile',
-      de: 'PWA Mobil',
-      es: 'PWA Móvil',
-      pt: 'PWA Mobile',
-    },
-    tone: 'green',
-    stars: 3,
-  },
   {
     icon: '🎯',
     name: {

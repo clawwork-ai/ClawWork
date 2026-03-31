@@ -98,7 +98,7 @@ exportFilename: clawwork-keynote
 
 # 🚀 {{ $t({ en: 'Launch Sprint', zh: '启动冲刺', ja: 'ローンチスプリント', ko: '런칭 스프린트', fr: 'Sprint de lancement', de: 'Start-Sprint', es: 'Sprint de lanzamiento', pt: 'Sprint de lançamento' }) }}
 
-<div class="cw-kicker">{{ $t({ en: '10 Releases in 12 Days', zh: '12 天发布 10 个版本', ja: '12日間で10リリース', ko: '12일 만에 10개 릴리스', fr: '10 versions en 12 jours', de: '10 Releases in 12 Tagen', es: '10 versiones en 12 días', pt: '10 versões em 12 dias' }) }}</div>
+<div class="cw-kicker">{{ $t({ en: '13 Releases in 15 Days', zh: '15 天发布 13 个版本', ja: '15日間で13リリース', ko: '15일 만에 13개 릴리스', fr: '13 versions en 15 jours', de: '13 Releases in 15 Tagen', es: '13 versiones en 15 días', pt: '13 versões em 15 dias' }) }}</div>
 
 <div class="cw-version-grid mt-6">
   <div class="cw-version-card" data-tone="green">
@@ -137,9 +137,21 @@ exportFilename: clawwork-keynote
     <div class="cw-version-num">v0.0.9</div>
     <div class="cw-version-desc">{{ $t({ en: '9 security fixes', zh: '9 项安全修复', ja: '9件のセキュリティ修正', ko: '보안 수정 9건', fr: '9 correctifs sécurité', de: '9 Sicherheitskorrekturen', es: '9 correcciones seguridad', pt: '9 correções de segurança' }) }}</div>
   </div>
-  <div class="cw-version-card cw-version-card--latest" data-tone="green">
+  <div class="cw-version-card" data-tone="green">
     <div class="cw-version-num">v0.0.10</div>
     <div class="cw-version-desc">{{ $t({ en: 'Auto-update + export', zh: '自动更新 + 导出', ja: '自動更新 + エクスポート', ko: '자동 업데이트 + 내보내기', fr: 'Mise à jour auto + export', de: 'Auto-Update + Export', es: 'Actualización auto + exportar', pt: 'Atualização auto + exportar' }) }}</div>
+  </div>
+  <div class="cw-version-card" data-tone="green">
+    <div class="cw-version-num">v0.0.11</div>
+    <div class="cw-version-desc">{{ $t({ en: 'Cron + notifications + live watch', zh: 'Cron + 通知 + 实时监听', ja: 'Cron + 通知 + ライブ監視', ko: 'Cron + 알림 + 실시간 감시', fr: 'Cron + notifications + surveillance', de: 'Cron + Benachrichtigungen + Live-Watch', es: 'Cron + notificaciones + monitoreo', pt: 'Cron + notificações + monitoramento' }) }}</div>
+  </div>
+  <div class="cw-version-card" data-tone="cyan">
+    <div class="cw-version-num">v0.0.12</div>
+    <div class="cw-version-desc">{{ $t({ en: '8 locales + local @ files', zh: '8 语种 + 本地 @ 文件', ja: '8言語 + ローカル @ ファイル', ko: '8개 언어 + 로컬 @ 파일', fr: '8 langues + fichiers @ locaux', de: '8 Sprachen + lokale @-Dateien', es: '8 idiomas + archivos @ locales', pt: '8 idiomas + arquivos @ locais' }) }}</div>
+  </div>
+  <div class="cw-version-card cw-version-card--latest" data-tone="green">
+    <div class="cw-version-num">v0.0.13</div>
+    <div class="cw-version-desc">{{ $t({ en: 'PWA + Linux + hardening', zh: 'PWA + Linux + 安全加固', ja: 'PWA + Linux + セキュリティ強化', ko: 'PWA + Linux + 보안 강화', fr: 'PWA + Linux + durcissement', de: 'PWA + Linux + Härtung', es: 'PWA + Linux + refuerzo', pt: 'PWA + Linux + reforço' }) }}</div>
   </div>
 </div>
 
@@ -270,7 +282,7 @@ gap: mt-6
 
 # 🧩 {{ $t({ en: 'Feature Matrix', zh: '功能大全', ja: '機能一覧', ko: '기능 매트릭스', fr: 'Matrice de fonctionnalités', de: 'Funktionsmatrix', es: 'Matriz de funciones', pt: 'Matriz de funcionalidades' }) }}
 
-<div class="cw-kicker">{{ $t({ en: '20 capabilities beyond chat. All shipped.', zh: '20 项超越聊天的能力，全部已发布。', ja: 'チャットを超える20の機能。すべて実装済み。', ko: '채팅을 넘어선 20개 기능. 모두 출시 완료.', fr: '20 capacités au-delà du chat. Toutes livrées.', de: '20 Funktionen über Chat hinaus. Alle ausgeliefert.', es: '20 capacidades más allá del chat. Todas entregadas.', pt: '20 capacidades além do chat. Todas entregues.' }) }}</div>
+<div class="cw-kicker">{{ $t({ en: '21 shipped capabilities. 1 next up.', zh: '21 项已发布能力，1 项正在路上。', ja: '21機能を出荷済み。次は1つ。', ko: '출시 완료 21개 기능. 다음은 1개.', fr: '21 capacités livrées. 1 en approche.', de: '21 ausgelieferte Funktionen. 1 als Nächstes.', es: '21 capacidades ya entregadas. 1 siguiente.', pt: '21 capacidades já entregues. 1 a seguir.' }) }}</div>
 
 <DeckFeatureMatrixSlide />
 
@@ -344,7 +356,7 @@ gap: mt-6
 
 # 📈 {{ $t({ en: 'Sprint Breakdown', zh: '冲刺全景', ja: 'スプリント内訳', ko: '스프린트 분석', fr: 'Bilan du sprint', de: 'Sprint-Aufschlüsselung', es: 'Desglose del sprint', pt: 'Detalhamento do sprint' }) }}
 
-<div class="cw-kicker">{{ $t({ en: '14 Days · 139 PRs · 1.2B Tokens', zh: '14 天 · 139 个 PR · 1.2B Token', ja: '14日間 · 139 PR · 1.2B Token', ko: '14일 · 139 PR · 1.2B Token', fr: '14 jours · 139 PR · 1.2B Token', de: '14 Tage · 139 PRs · 1.2B Token', es: '14 días · 139 PRs · 1.2B Tokens', pt: '14 dias · 139 PRs · 1.2B Tokens' }) }}</div>
+<div class="cw-kicker">{{ $t({ en: '15 Days · 161 PRs · 13 Releases', zh: '15 天 · 161 个 PR · 13 个版本', ja: '15日間 · 161 PR · 13リリース', ko: '15일 · 161 PR · 13개 릴리스', fr: '15 jours · 161 PR · 13 releases', de: '15 Tage · 161 PRs · 13 Releases', es: '15 días · 161 PRs · 13 releases', pt: '15 dias · 161 PRs · 13 releases' }) }}</div>
 
 <DeckVibeCodingSlide />
 
@@ -394,6 +406,6 @@ gap: mt-6
   </div>
 
   <div class="cw-final-note">
-    {{ $t({ en: 'Apache 2.0 · macOS & Windows · Built with OpenClaw', zh: 'Apache 2.0 · macOS & Windows · 基于 OpenClaw 构建', ja: 'Apache 2.0 · macOS & Windows · OpenClaw で構築', ko: 'Apache 2.0 · macOS & Windows · OpenClaw 기반', fr: 'Apache 2.0 · macOS & Windows · Construit avec OpenClaw', de: 'Apache 2.0 · macOS & Windows · Gebaut mit OpenClaw', es: 'Apache 2.0 · macOS & Windows · Hecho con OpenClaw', pt: 'Apache 2.0 · macOS & Windows · Feito com OpenClaw' }) }}
+    {{ $t({ en: 'Apache 2.0 · macOS & Windows & Linux & PWA · Built with OpenClaw', zh: 'Apache 2.0 · macOS & Windows & Linux & PWA · 基于 OpenClaw 构建', ja: 'Apache 2.0 · macOS & Windows & Linux & PWA · OpenClaw で構築', ko: 'Apache 2.0 · macOS & Windows & Linux & PWA · OpenClaw 기반', fr: 'Apache 2.0 · macOS & Windows & Linux & PWA · Construit avec OpenClaw', de: 'Apache 2.0 · macOS & Windows & Linux & PWA · Gebaut mit OpenClaw', es: 'Apache 2.0 · macOS & Windows & Linux & PWA · Hecho con OpenClaw', pt: 'Apache 2.0 · macOS & Windows & Linux & PWA · Feito com OpenClaw' }) }}
   </div>
 </div>
