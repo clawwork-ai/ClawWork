@@ -5,6 +5,7 @@ coverage/
 .codex/
 .serena/
 pnpm-lock.yaml
+keynote/slides.md
 *.db
 playwright-report/
 test-results/

@@ -144,8 +144,8 @@ exportFilename: clawwork-keynote
 </div>
 
 ---
-
-## layout: split-media
+layout: split-media
+---
 
 # 🏗 {{ $t({ en: 'Architecture at a Glance', zh: '架构概览', ja: 'アーキテクチャ概要', ko: '아키텍처 개요', fr: "Vue d'ensemble", de: 'Architektur im Überblick', es: 'Arquitectura general', pt: 'Visão geral da arquitetura' }) }}
 
@@ -168,8 +168,8 @@ exportFilename: clawwork-keynote
 </DeckMiniPanel>
 
 ---
-
-## layout: split-media
+layout: split-media
+---
 
 # 🖥 {{ $t({ en: 'Three-Panel Layout', zh: '三栏布局', ja: '3ペインレイアウト', ko: '3패널 레이아웃', fr: 'Disposition en trois panneaux', de: 'Drei-Panel-Layout', es: 'Diseño de tres paneles', pt: 'Layout de três painéis' }) }}
 
@@ -188,8 +188,8 @@ exportFilename: clawwork-keynote
 <DeckMiniPanel neutral tone="purple" :title="{ en: 'Right Panel', zh: '右侧面板', ja: '右パネル', ko: '우측 패널', fr: 'Panneau droit', de: 'Rechtes Panel', es: 'Panel derecho', pt: 'Painel direito' }" :body="{ en: 'Progress tracking and artifact browser.', zh: '进度追踪和产物浏览。', ja: '進捗追跡とアーティファクトブラウザ。', ko: '진행 상황 추적 및 아티팩트 브라우저.', fr: 'Suivi de progression et navigateur d’artefacts.', de: 'Fortschrittsverfolgung und Artefakt-Browser.', es: 'Seguimiento de progreso y explorador de artefactos.', pt: 'Acompanhamento de progresso e navegador de artefatos.' }" />
 
 ---
-
-## layout: split-media
+layout: split-media
+---
 
 # ⚡ {{ $t({ en: 'Multi-Session in Action', zh: '多会话实战', ja: 'マルチセッション実践', ko: '멀티 세션 실전', fr: 'Multi-session en action', de: 'Multi-Sitzung in Aktion', es: 'Multisesión en acción', pt: 'Multissessão em ação' }) }}
 
@@ -240,10 +240,8 @@ exportFilename: clawwork-keynote
 <DeckTaskProgressSlide />
 
 ---
-
 layout: split-media
 gap: mt-6
-
 ---
 
 # 🧠 {{ $t({ en: 'Token & Context Awareness', zh: 'Token 与上下文感知', ja: 'Token とコンテキスト管理', ko: 'Token 및 컨텍스트 인식', fr: 'Gestion Token et contexte', de: 'Token- & Kontext-Bewusstsein', es: 'Gestión de Token y contexto', pt: 'Gestão de Token e contexto' }) }}
