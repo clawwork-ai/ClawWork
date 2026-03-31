@@ -76,12 +76,19 @@ export function useChatSend(opts: UseChatSendOpts) {
   const addMessage = useMessageStore((s) => s.addMessage);
   const setProcessing = useMessageStore((s) => s.setProcessing);
 
-  const isProcessing = useMessageStore((s) => (activeTask ? s.processingBySession.has(activeTask.sessionKey) : false));
-  const isStreaming = useMessageStore((s) => {
-    if (!activeTask) return false;
-    const turn = s.activeTurnBySession[activeTask.sessionKey];
-    return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
-  });
+  const activeRoom = useRoomStore((s) => (activeTask?.ensemble ? s.rooms[activeTask.id] : undefined));
+  const sessionKeys = useMemo(() => {
+    if (!activeTask?.sessionKey) return [];
+    return [activeTask.sessionKey, ...(activeRoom?.performers.map((p) => p.sessionKey) ?? [])];
+  }, [activeTask?.sessionKey, activeRoom?.performers]);
+
+  const isProcessing = useMessageStore((s) => sessionKeys.some((sk) => s.processingBySession.has(sk)));
+  const isStreaming = useMessageStore((s) =>
+    sessionKeys.some((sk) => {
+      const turn = s.activeTurnBySession[sk];
+      return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
+    }),
+  );
   const isGenerating = isProcessing || isStreaming;
 
   const isOffline = useUiStore((s) => {

@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import type { RoomStatus, TaskRoom, RoomPerformer } from '@clawwork/shared';
+import type { RoomStatus, TaskRoom, RoomPerformer, IpcResult } from '@clawwork/shared';
 import { buildConductorPrompt, parseAgentIdFromSessionKey, isSubagentSession } from '@clawwork/shared';
 
 export interface PerformerAgent {
@@ -14,10 +14,7 @@ export interface RoomStoreDeps {
     params: { key: string; agentId: string; message?: string },
   ) => Promise<{ ok: boolean; error?: string }>;
   abortChat: (gatewayId: string, sessionKey: string) => Promise<unknown>;
-  listSessionsBySpawner: (
-    gatewayId: string,
-    spawnerKey: string,
-  ) => Promise<{ ok: boolean; sessions?: Array<{ key: string; agentId?: string }> }>;
+  listSessionsBySpawner: (gatewayId: string, spawnerKey: string) => Promise<IpcResult>;
   persistRoom: (params: { taskId: string; status: string; conductorReady: boolean }) => Promise<unknown>;
   persistPerformer: (params: {
     taskId: string;
@@ -163,8 +160,7 @@ export function createRoomStore(deps: RoomStoreDeps) {
     lookupTaskIdBySubagentKey: (subagentKey) => get().subagentKeyMap[subagentKey],
 
     registerPerformerKey: (taskId, subagentKey, agentId, agentName) => {
-      const state = get();
-      const room = state.rooms[taskId];
+      const room = get().rooms[taskId];
       if (!room) return;
 
       const already = room.performers.some((p) => p.sessionKey === subagentKey);
@@ -177,10 +173,14 @@ export function createRoomStore(deps: RoomStoreDeps) {
         verifiedAt: new Date().toISOString(),
       };
 
-      updateRoom(taskId, { performers: [...room.performers, performer] }, set);
-      set((s) => ({
-        subagentKeyMap: { ...s.subagentKeyMap, [subagentKey]: taskId },
-      }));
+      set((s) => {
+        const existing = s.rooms[taskId];
+        if (!existing) return s;
+        return {
+          rooms: { ...s.rooms, [taskId]: { ...existing, performers: [...existing.performers, performer] } },
+          subagentKeyMap: { ...s.subagentKeyMap, [subagentKey]: taskId },
+        };
+      });
       deps.persistPerformer({ taskId, ...performer }).catch(() => {});
     },
 
@@ -194,11 +194,9 @@ export function createRoomStore(deps: RoomStoreDeps) {
 
         const raw = await deps.listSessionsBySpawner(gatewayId, room.conductorSessionKey);
         if (!raw.ok) return;
-        const payload = (raw as Record<string, unknown>).result as Record<string, unknown> | undefined;
-        const sessions = (payload?.sessions ?? (raw as Record<string, unknown>).sessions) as
-          | Array<{ key: string; agentId?: string }>
-          | undefined;
-        if (!sessions) return;
+        const payload = raw.result as { sessions?: Array<{ key: string; agentId?: string }> } | undefined;
+        const sessions = payload?.sessions;
+        if (!Array.isArray(sessions)) return;
 
         for (const sess of sessions) {
           if (!isSubagentSession(sess.key)) continue;

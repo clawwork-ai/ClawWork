@@ -220,24 +220,27 @@ export function createChatComposer(deps: ChatComposerDeps) {
       }
 
       clearTimer(task.id);
+      const watchKeys = isMentionSend ? mentionTargets : [task.sessionKey];
       responseTimers.set(
         task.id,
         setTimeout(() => {
           responseTimers.delete(task.id);
           const s = deps.getMessageStore();
-          const turn = s.activeTurnBySession[task.sessionKey];
-          if (
-            s.processingBySession.has(task.sessionKey) &&
-            (!turn || (!turn.streamingText && !turn.streamingThinking))
-          ) {
-            s.setProcessing(task.sessionKey, false);
-            const appError = buildAppError({
-              source: 'gateway',
-              stage: 'lifecycle',
-              rawMessage: deps.translate('errors.agentNotResponding'),
-            });
-            s.addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate));
+          const anyResponded = watchKeys.some((sk) => {
+            const turn = s.activeTurnBySession[sk];
+            return turn && (turn.streamingText || turn.streamingThinking);
+          });
+          if (anyResponded) return;
+
+          for (const sk of watchKeys) {
+            if (s.processingBySession.has(sk)) s.setProcessing(sk, false);
           }
+          const appError = buildAppError({
+            source: 'gateway',
+            stage: 'lifecycle',
+            rawMessage: deps.translate('errors.agentNotResponding'),
+          });
+          s.addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate));
         }, SEND_TIMEOUT_MS),
       );
 
