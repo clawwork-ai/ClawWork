@@ -1,5 +1,12 @@
 import { parseTaskIdFromSessionKey, isSubagentSession } from '@clawwork/shared';
-import type { ToolCall, ToolCallStatus, ModelListResponse, AgentListResponse, ToolsCatalog } from '@clawwork/shared';
+import type {
+  ToolCall,
+  ToolCallStatus,
+  ModelListResponse,
+  AgentListResponse,
+  SkillStatusReport,
+  ToolsCatalog,
+} from '@clawwork/shared';
 import { extractText, extractThinking, extractToolCalls, parseToolArgs } from '../protocol/parse-content.js';
 import type { ChatEventPayload } from '../protocol/types.js';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from './error-classify.js';
@@ -100,6 +107,7 @@ export interface GatewayDispatcherDeps {
   setModelCatalogForGateway: (gatewayId: string, models: unknown[]) => void;
   setAgentCatalogForGateway: (gatewayId: string, agents: unknown[], defaultId: string) => void;
   setToolsCatalogForGateway: (gatewayId: string, catalog: ToolsCatalog) => void;
+  setSkillsStatusForGateway: (gatewayId: string, report: SkillStatusReport) => void;
 
   onPerformerCandidate?: (taskId: string, sessionKey: string, gatewayId: string) => void;
   lookupTaskIdBySubagentKey?: (subagentKey: string) => string | undefined;
@@ -517,10 +525,11 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
 
   async function fetchCatalogs(gatewayId: string): Promise<void> {
     try {
-      const [modelsRes, agentsRes, toolsRes] = await Promise.all([
+      const [modelsRes, agentsRes, toolsRes, skillsRes] = await Promise.all([
         deps.gateway.listModels(gatewayId),
         deps.gateway.listAgents(gatewayId),
         deps.gateway.getToolsCatalog(gatewayId),
+        deps.gateway.getSkillsStatus(gatewayId),
       ]);
       if (modelsRes.ok && modelsRes.result) {
         const data = modelsRes.result as unknown as ModelListResponse;
@@ -534,8 +543,12 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         const data = toolsRes.result as unknown as ToolsCatalog;
         if (data.groups) deps.setToolsCatalogForGateway(gatewayId, data);
       }
+      if (skillsRes.ok && skillsRes.result) {
+        const data = skillsRes.result as unknown as SkillStatusReport;
+        if (Array.isArray(data.skills)) deps.setSkillsStatusForGateway(gatewayId, data);
+      }
     } catch {
-      console.warn('[catalogs] Failed to fetch model/agent/tools catalogs');
+      console.warn('[catalogs] Failed to fetch model/agent/tools/skills catalogs');
     }
   }
 

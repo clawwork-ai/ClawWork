@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, Bot, Crown, Loader2, FileText, X, Server } from 'lucide-react';
+import { Plus, Trash2, Pencil, Bot, Crown, Loader2, FileText, X, Server, Wrench, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -9,13 +9,23 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore } from '@/stores/uiStore';
-import type { AgentInfo, AgentListResponse, AgentFileEntry, ModelCatalogEntry } from '@clawwork/shared';
+import type {
+  AgentInfo,
+  AgentListResponse,
+  AgentFileEntry,
+  ModelCatalogEntry,
+  SkillRequirements,
+  SkillStatusEntry,
+  SkillStatusReport,
+} from '@clawwork/shared';
 import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
+
+type AgentDetailSection = 'files' | 'skills';
 
 interface AgentFormData {
   name: string;
@@ -38,34 +48,77 @@ function AgentCard({
   isDefault,
   isEditing,
   workspace,
-  expandedFiles,
+  expanded,
+  activeSection,
   files,
   loadingFiles,
+  skills,
+  loadingSkills,
   selectedFile,
   fileContent,
   loadingFileContent,
   onEdit,
   onDelete,
-  onToggleFiles,
+  onToggleExpand,
+  onSelectSection,
   onSelectFile,
 }: {
   agent: AgentInfo;
   isDefault: boolean;
   isEditing: boolean;
   workspace: string | null;
-  expandedFiles: boolean;
+  expanded: boolean;
+  activeSection: AgentDetailSection;
   files: AgentFileEntry[];
   loadingFiles: boolean;
+  skills: SkillStatusEntry[];
+  loadingSkills: boolean;
   selectedFile: string | null;
   fileContent: string | null;
   loadingFileContent: boolean;
   onEdit: () => void;
   onDelete: () => void;
-  onToggleFiles: () => void;
+  onToggleExpand: () => void;
+  onSelectSection: (section: AgentDetailSection) => void;
   onSelectFile: (name: string) => void;
 }) {
   const { t } = useTranslation();
   const emoji = agent.identity?.emoji;
+  const availableSkills = skills.filter((skill) => skill.eligible);
+  const unavailableSkills = skills.filter((skill) => !skill.eligible);
+  const [collapsedSections, setCollapsedSections] = useState<Record<'available' | 'unavailable', boolean>>({
+    available: false,
+    unavailable: false,
+  });
+  const toggleSection = (key: 'available' | 'unavailable') =>
+    setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const summarizeMissing = (requirements: SkillRequirements): string | null => {
+    const missingParts: string[] = [];
+    if (requirements.bins.length > 0)
+      missingParts.push(t('settings.agentSkillMissingBins', { count: requirements.bins.length }));
+    if (requirements.anyBins.length > 0) {
+      missingParts.push(t('settings.agentSkillMissingAnyBins', { count: requirements.anyBins.length }));
+    }
+    if (requirements.env.length > 0)
+      missingParts.push(t('settings.agentSkillMissingEnv', { count: requirements.env.length }));
+    if (requirements.config.length > 0) {
+      missingParts.push(t('settings.agentSkillMissingConfig', { count: requirements.config.length }));
+    }
+    if (requirements.os.length > 0)
+      missingParts.push(t('settings.agentSkillMissingOs', { count: requirements.os.length }));
+    return missingParts.length > 0 ? missingParts.join(' • ') : null;
+  };
+
+  const getSkillReason = (skill: SkillStatusEntry): string | null => {
+    if (skill.disabled) return t('settings.agentSkillReasonDisabled');
+    if (skill.blockedByAllowlist) return t('settings.agentSkillReasonBlocked');
+    const failedConfigChecks = skill.configChecks.filter((check) => !check.satisfied).length;
+    if (failedConfigChecks > 0) {
+      return t('settings.agentSkillReasonConfig', { count: failedConfigChecks });
+    }
+    return summarizeMissing(skill.missing);
+  };
 
   return (
     <motion.div
@@ -106,11 +159,11 @@ function AgentCard({
         <div className="flex items-center gap-1 flex-shrink-0 ml-1 pl-3 border-l border-[var(--border-subtle)]">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={onToggleFiles} aria-label={t('settings.agentFiles')}>
+              <Button variant="ghost" size="icon-sm" onClick={onToggleExpand} aria-label={t('settings.agentDetails')}>
                 <FileText size={14} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{t('settings.agentFiles')}</TooltipContent>
+            <TooltipContent>{t('settings.agentDetails')}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -144,7 +197,7 @@ function AgentCard({
       </div>
 
       <AnimatePresence>
-        {expandedFiles && (
+        {expanded && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -152,53 +205,168 @@ function AgentCard({
             className="overflow-hidden"
           >
             <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
-              {loadingFiles ? (
-                <LoadingBlock mode="inline" label={t('settings.agentLoadingFiles')} className="py-2" />
-              ) : files.length === 0 ? (
-                <p className="type-support py-2 text-[var(--text-muted)]">{t('settings.agentNoFiles')}</p>
-              ) : (
-                <div className="flex gap-3 h-70">
-                  <div className="w-40 flex-shrink-0 space-y-0.5 overflow-y-auto">
-                    {files.map((f) => (
-                      <button
-                        key={f.name}
-                        type="button"
-                        onClick={() => onSelectFile(f.name)}
-                        className={cn(
-                          'glow-focus type-support flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
-                          'hover:bg-[var(--bg-tertiary)]',
-                          selectedFile === f.name
-                            ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
-                            : 'text-[var(--text-secondary)]',
-                        )}
-                      >
-                        <FileText size={12} className="flex-shrink-0" />
-                        <span className="type-code-inline truncate">{f.name}</span>
-                        {f.missing && (
-                          <span className="type-meta normal-case flex-shrink-0 rounded bg-[var(--bg-tertiary)] px-1 text-[var(--text-muted)]">
-                            {t('common.missing')}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {!selectedFile ? (
-                      <div className="type-support flex h-full items-center justify-center text-[var(--text-muted)]">
-                        {t('settings.agentFilePreview')}
-                      </div>
-                    ) : loadingFileContent ? (
-                      <div className="flex items-center justify-center h-full">
-                        <Loader2 size={16} className="animate-spin text-[var(--text-muted)]" />
-                      </div>
-                    ) : (
-                      <pre className="type-code-block h-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)]">
-                        {fileContent ?? ''}
-                      </pre>
+              <div className="flex gap-3 h-70">
+                <div className="w-32 flex-shrink-0 space-y-1 border-r border-[var(--border-subtle)] pr-3">
+                  <button
+                    type="button"
+                    onClick={() => onSelectSection('files')}
+                    className={cn(
+                      'glow-focus type-support flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors',
+                      activeSection === 'files'
+                        ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]',
                     )}
-                  </div>
+                  >
+                    <FileText size={12} className="flex-shrink-0" />
+                    <span>{t('settings.agentFiles')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectSection('skills')}
+                    className={cn(
+                      'glow-focus type-support flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors',
+                      activeSection === 'skills'
+                        ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]',
+                    )}
+                  >
+                    <Wrench size={12} className="flex-shrink-0" />
+                    <span>{t('settings.agentSkills')}</span>
+                  </button>
                 </div>
-              )}
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  {activeSection === 'files' ? (
+                    loadingFiles ? (
+                      <LoadingBlock mode="inline" label={t('settings.agentLoadingFiles')} className="py-2" />
+                    ) : files.length === 0 ? (
+                      <p className="type-support py-2 text-[var(--text-muted)]">{t('settings.agentNoFiles')}</p>
+                    ) : (
+                      <div className="flex gap-3 h-full">
+                        <div className="w-40 flex-shrink-0 space-y-0.5 overflow-y-auto">
+                          {files.map((f) => (
+                            <button
+                              key={f.name}
+                              type="button"
+                              onClick={() => onSelectFile(f.name)}
+                              className={cn(
+                                'glow-focus type-support flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left transition-colors',
+                                'hover:bg-[var(--bg-tertiary)]',
+                                selectedFile === f.name
+                                  ? 'bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium'
+                                  : 'text-[var(--text-secondary)]',
+                              )}
+                            >
+                              <FileText size={12} className="flex-shrink-0" />
+                              <span className="type-code-inline truncate">{f.name}</span>
+                              {f.missing && (
+                                <span className="type-meta normal-case flex-shrink-0 rounded bg-[var(--bg-tertiary)] px-1 text-[var(--text-muted)]">
+                                  {t('common.missing')}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {!selectedFile ? (
+                            <div className="type-support flex h-full items-center justify-center text-[var(--text-muted)]">
+                              {t('settings.agentFilePreview')}
+                            </div>
+                          ) : loadingFileContent ? (
+                            <div className="flex items-center justify-center h-full">
+                              <Loader2 size={16} className="animate-spin text-[var(--text-muted)]" />
+                            </div>
+                          ) : (
+                            <pre className="type-code-block h-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)]">
+                              {fileContent ?? ''}
+                            </pre>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  ) : loadingSkills ? (
+                    <LoadingBlock mode="inline" label={t('settings.agentLoadingSkills')} className="py-2" />
+                  ) : (
+                    <div className="h-full overflow-y-auto space-y-3 pr-1">
+                      {skills.length === 0 ? (
+                        <p className="type-support py-2 text-[var(--text-muted)]">{t('settings.agentNoSkills')}</p>
+                      ) : (
+                        <>
+                          {(
+                            [
+                              {
+                                key: 'available' as const,
+                                items: availableSkills,
+                                label: t('settings.agentSkillsAvailable'),
+                                emptyLabel: t('settings.agentNoAvailableSkills'),
+                              },
+                              {
+                                key: 'unavailable' as const,
+                                items: unavailableSkills,
+                                label: t('settings.agentSkillsUnavailable'),
+                                emptyLabel: t('settings.agentNoUnavailableSkills'),
+                              },
+                            ] as const
+                          ).map((section) => (
+                            <div key={section.key} className="space-y-2">
+                              <button
+                                type="button"
+                                onClick={() => toggleSection(section.key)}
+                                className="glow-focus flex w-full items-center gap-1.5 rounded-md py-1 text-left"
+                              >
+                                <ChevronDown
+                                  size={14}
+                                  className={cn(
+                                    'text-[var(--text-muted)] transition-transform',
+                                    collapsedSections[section.key] && '-rotate-90',
+                                  )}
+                                />
+                                <span className="type-label text-[var(--text-secondary)]">{section.label}</span>
+                                <span className="type-support text-[var(--text-muted)]">({section.items.length})</span>
+                              </button>
+                              {!collapsedSections[section.key] &&
+                                (section.items.length === 0 ? (
+                                  <p className="type-support pl-5 text-[var(--text-muted)]">{section.emptyLabel}</p>
+                                ) : (
+                                  section.items.map((skill) => {
+                                    const reason = skill.eligible ? null : getSkillReason(skill);
+                                    return (
+                                      <div
+                                        key={skill.skillKey}
+                                        className="rounded-lg border border-[var(--border-subtle)] p-3"
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <span className="type-label text-[var(--text-primary)]">{skill.name}</span>
+                                          <span
+                                            className={cn(
+                                              'type-badge rounded-md px-1.5 py-0.5',
+                                              skill.eligible
+                                                ? 'bg-[var(--accent-soft)] text-[var(--accent)]'
+                                                : 'bg-[var(--bg-tertiary)] text-[var(--text-muted)]',
+                                            )}
+                                          >
+                                            {skill.eligible
+                                              ? t('settings.agentSkillAvailable')
+                                              : t('settings.agentSkillUnavailable')}
+                                          </span>
+                                        </div>
+                                        <p className="type-support mt-1 text-[var(--text-muted)]">
+                                          {skill.description}
+                                        </p>
+                                        {reason && (
+                                          <p className="type-support mt-2 text-[var(--text-muted)]">{reason}</p>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                ))}
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -324,6 +492,7 @@ export default function AgentsSection() {
   const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
   const setAgentCatalogForGateway = useUiStore((s) => s.setAgentCatalogForGateway);
   const modelCatalogByGateway = useUiStore((s) => s.modelCatalogByGateway);
+  const skillsStatusByGateway = useUiStore((s) => s.skillsStatusByGateway);
 
   const connectedGatewayIds = Object.entries(gatewayStatusMap)
     .filter(([, status]) => status === 'connected')
@@ -339,9 +508,12 @@ export default function AgentsSection() {
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
   const [deleteFiles, setDeleteFiles] = useState(false);
   const [expandedFilesAgentId, setExpandedFilesAgentId] = useState<string | null>(null);
+  const [activeSectionByAgentId, setActiveSectionByAgentId] = useState<Record<string, AgentDetailSection>>({});
   const [agentFilesMap, setAgentFilesMap] = useState<Record<string, AgentFileEntry[]>>({});
   const [agentWorkspaceMap, setAgentWorkspaceMap] = useState<Record<string, string>>({});
+  const [agentSkillsMap, setAgentSkillsMap] = useState<Record<string, SkillStatusEntry[]>>({});
   const [loadingFilesFor, setLoadingFilesFor] = useState<string | null>(null);
+  const [loadingSkillsFor, setLoadingSkillsFor] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [loadingFileContent, setLoadingFileContent] = useState(false);
@@ -359,6 +531,7 @@ export default function AgentsSection() {
   const agents = useMemo(() => catalog?.agents ?? [], [catalog]);
   const defaultAgentId = catalog?.defaultId ?? 'main';
   const models = (selectedGatewayId ? modelCatalogByGateway[selectedGatewayId] : null) ?? EMPTY_MODELS;
+  const gatewaySkillStatus = selectedGatewayId ? skillsStatusByGateway[selectedGatewayId] : undefined;
 
   const refreshAgents = useCallback(async () => {
     if (!selectedGatewayId) return;
@@ -393,6 +566,41 @@ export default function AgentsSection() {
     },
     [selectedGatewayId],
   );
+
+  const fetchAgentSkills = useCallback(
+    async (agentId: string) => {
+      if (!selectedGatewayId) return;
+      setLoadingSkillsFor(agentId);
+      const res = await window.clawwork.getSkillsStatus(selectedGatewayId, agentId);
+      setLoadingSkillsFor((current) => (current === agentId ? null : current));
+      if (res.ok && res.result) {
+        const data = res.result as unknown as SkillStatusReport;
+        setAgentSkillsMap((prev) => {
+          const existing = prev[agentId];
+          if (existing && JSON.stringify(existing) === JSON.stringify(data.skills ?? [])) return prev;
+          return { ...prev, [agentId]: data.skills ?? [] };
+        });
+      }
+    },
+    [selectedGatewayId],
+  );
+
+  useEffect(() => {
+    if (!gatewaySkillStatus || !catalog?.defaultId) return;
+    setAgentSkillsMap((prev) =>
+      prev[catalog.defaultId] ? prev : { ...prev, [catalog.defaultId]: gatewaySkillStatus.skills },
+    );
+  }, [gatewaySkillStatus, catalog?.defaultId]);
+
+  useEffect(() => {
+    setAgentSkillsMap({});
+    setAgentFilesMap({});
+    setAgentWorkspaceMap({});
+    setActiveSectionByAgentId({});
+    setExpandedFilesAgentId(null);
+    setSelectedFileName(null);
+    setFileContent(null);
+  }, [selectedGatewayId]);
 
   useEffect(() => {
     if (!selectedGatewayId || agents.length === 0) return;
@@ -497,6 +705,11 @@ export default function AgentsSection() {
       toast.success(t('settings.agentDeleted'));
       if (expandedFilesAgentId === deletingAgentId) {
         setExpandedFilesAgentId(null);
+        setActiveSectionByAgentId((prev) => {
+          const next = { ...prev };
+          delete next[deletingAgentId];
+          return next;
+        });
         setSelectedFileName(null);
         setFileContent(null);
       }
@@ -506,6 +719,11 @@ export default function AgentsSection() {
         return next;
       });
       setAgentWorkspaceMap((prev) => {
+        const next = { ...prev };
+        delete next[deletingAgentId];
+        return next;
+      });
+      setAgentSkillsMap((prev) => {
         const next = { ...prev };
         delete next[deletingAgentId];
         return next;
@@ -527,11 +745,13 @@ export default function AgentsSection() {
         return;
       }
       setExpandedFilesAgentId(agentId);
+      setActiveSectionByAgentId((prev) => ({ ...prev, [agentId]: prev[agentId] ?? 'files' }));
       setSelectedFileName(null);
       setFileContent(null);
       fetchAgentMeta(agentId);
+      fetchAgentSkills(agentId);
     },
-    [expandedFilesAgentId, fetchAgentMeta],
+    [expandedFilesAgentId, fetchAgentMeta, fetchAgentSkills],
   );
 
   const handleSelectFile = useCallback(
@@ -619,9 +839,12 @@ export default function AgentsSection() {
                   isDefault={agent.id === defaultAgentId}
                   isEditing={editingAgentId === agent.id && showForm}
                   workspace={agentWorkspaceMap[agent.id] ?? null}
-                  expandedFiles={expandedFilesAgentId === agent.id}
+                  expanded={expandedFilesAgentId === agent.id}
+                  activeSection={activeSectionByAgentId[agent.id] ?? 'files'}
                   files={agentFilesMap[agent.id] ?? []}
                   loadingFiles={loadingFilesFor === agent.id}
+                  skills={agentSkillsMap[agent.id] ?? []}
+                  loadingSkills={loadingSkillsFor === agent.id}
                   selectedFile={expandedFilesAgentId === agent.id ? selectedFileName : null}
                   fileContent={expandedFilesAgentId === agent.id ? fileContent : null}
                   loadingFileContent={loadingFileContent}
@@ -633,7 +856,13 @@ export default function AgentsSection() {
                     }
                     setDeletingAgentId(agent.id);
                   }}
-                  onToggleFiles={() => handleToggleFiles(agent.id)}
+                  onToggleExpand={() => handleToggleFiles(agent.id)}
+                  onSelectSection={(section) =>
+                    setActiveSectionByAgentId((prev) => ({
+                      ...prev,
+                      [agent.id]: section,
+                    }))
+                  }
                   onSelectFile={(name) => handleSelectFile(agent.id, name)}
                 />
                 <AnimatePresence>

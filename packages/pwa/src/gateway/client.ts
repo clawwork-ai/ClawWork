@@ -275,6 +275,12 @@ export class BrowserGatewayClient {
     return this.sendReq('tools.catalog', params);
   }
 
+  async getSkillsStatus(agentId?: string): Promise<Record<string, unknown>> {
+    const params: Record<string, unknown> = {};
+    if (agentId) params.agentId = agentId;
+    return this.sendReq('skills.status', params);
+  }
+
   async compactSession(sessionKey: string): Promise<Record<string, unknown>> {
     return this.sendReq('sessions.compact', { key: sessionKey }, this.sessionMeta(sessionKey));
   }

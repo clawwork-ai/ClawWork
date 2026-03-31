@@ -234,6 +234,53 @@ export interface ToolsCatalog {
   groups: ToolGroup[];
 }
 
+export interface SkillStatusConfigCheck {
+  path: string;
+  satisfied: boolean;
+}
+
+export interface SkillRequirements {
+  bins: string[];
+  anyBins: string[];
+  env: string[];
+  config: string[];
+  os: string[];
+}
+
+export interface SkillInstallOption {
+  id: string;
+  kind: string;
+  label: string;
+  bins: string[];
+}
+
+export interface SkillStatusEntry {
+  name: string;
+  description: string;
+  source: string;
+  bundled: boolean;
+  filePath: string;
+  baseDir: string;
+  skillKey: string;
+  primaryEnv?: string;
+  emoji?: string;
+  homepage?: string;
+  always: boolean;
+  disabled: boolean;
+  blockedByAllowlist: boolean;
+  eligible: boolean;
+  requirements: SkillRequirements;
+  missing: SkillRequirements;
+  configChecks: SkillStatusConfigCheck[];
+  install: SkillInstallOption[];
+}
+
+export interface SkillStatusReport {
+  workspaceDir: string;
+  managedSkillsDir: string;
+  skills: SkillStatusEntry[];
+}
+
 export interface SessionPatchParams {
   sessionKey: string;
   thinkingLevel?: string | null;

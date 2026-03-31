@@ -345,6 +345,17 @@ export function createBrowserGatewayTransport(
       }
     },
 
+    async getSkillsStatus(gatewayId, agentId) {
+      const client = getClient(gatewayId);
+      if (!client?.isConnected) return { ok: false, error: 'gateway not connected' };
+      try {
+        const result = await client.getSkillsStatus(agentId);
+        return { ok: true, result };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'getSkillsStatus failed' };
+      }
+    },
+
     onGatewayEvent(callback) {
       eventListeners.add(callback);
       return () => {

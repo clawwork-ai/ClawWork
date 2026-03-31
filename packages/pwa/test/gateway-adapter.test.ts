@@ -33,6 +33,7 @@ function makeMockClient(
     listModels: vi.fn().mockResolvedValue({ models: [] }),
     listAgents: vi.fn().mockResolvedValue({ agents: [] }),
     getToolsCatalog: vi.fn().mockResolvedValue({ tools: [] }),
+    getSkillsStatus: vi.fn().mockResolvedValue({ skills: [] }),
     connect: vi.fn(),
     destroy: vi.fn(),
   } as unknown as BrowserGatewayClient & {
@@ -43,6 +44,7 @@ function makeMockClient(
     listModels: ReturnType<typeof vi.fn>;
     listAgents: ReturnType<typeof vi.fn>;
     getToolsCatalog: ReturnType<typeof vi.fn>;
+    getSkillsStatus: ReturnType<typeof vi.fn>;
   };
 }
 
@@ -344,6 +346,19 @@ describe('createBrowserGatewayTransport', () => {
 
       expect(result).toEqual({ ok: true, result: catalog });
       expect(mockClient.getToolsCatalog).toHaveBeenCalledWith('agent-1');
+    });
+  });
+
+  describe('getSkillsStatus', () => {
+    it('delegates to client.getSkillsStatus with agentId', async () => {
+      const report = { skills: [{ name: 'calendar', eligible: true }] };
+      mockClient.getSkillsStatus.mockResolvedValue(report);
+      const { transport } = createBrowserGatewayTransport(getClients, getClient, getDeviceId);
+
+      const result = await transport.getSkillsStatus('gw-1', 'agent-1');
+
+      expect(result).toEqual({ ok: true, result: report });
+      expect(mockClient.getSkillsStatus).toHaveBeenCalledWith('agent-1');
     });
   });
 });

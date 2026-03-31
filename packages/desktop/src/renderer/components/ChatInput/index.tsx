@@ -353,6 +353,7 @@ export default function ChatInput() {
       isGenerating,
       handleVoiceKeyDown,
       sendShortcut,
+      mentionAgents.length,
       mentionItemsRef,
       setMentionTab,
       setMentionIndex,

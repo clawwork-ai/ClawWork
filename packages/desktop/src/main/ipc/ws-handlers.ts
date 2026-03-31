@@ -496,6 +496,17 @@ export function registerWsHandlers(): void {
     ) => gatewayRpc(payload.gatewayId, (gw) => gw.getToolsCatalog(payload.agentId)),
   );
 
+  ipcMain.handle(
+    'ws:skills-status',
+    async (
+      _event,
+      payload: {
+        gatewayId: string;
+        agentId?: string;
+      },
+    ) => gatewayRpc(payload.gatewayId, (gw) => gw.getSkillsStatus(payload.agentId)),
+  );
+
   ipcMain.handle('ws:usage-status', async (_event, payload: { gatewayId: string }) =>
     gatewayRpc(payload.gatewayId, (gw) => gw.getUsageStatus()),
   );

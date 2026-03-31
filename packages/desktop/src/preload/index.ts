@@ -50,6 +50,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:session-patch', { gatewayId, sessionKey, patch }),
     getToolsCatalog: (gatewayId: string, agentId?: string) =>
       ipcRenderer.invoke('ws:tools-catalog', { gatewayId, agentId }),
+    getSkillsStatus: (gatewayId: string, agentId?: string) =>
+      ipcRenderer.invoke('ws:skills-status', { gatewayId, agentId }),
 
     onGatewayEvent: (callback) => {
       const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {

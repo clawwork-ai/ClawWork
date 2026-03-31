@@ -86,6 +86,7 @@ export interface GatewayTransportPort {
   listModels: (gatewayId: string) => Promise<IpcResult>;
   listAgents: (gatewayId: string) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
+  getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
   onGatewayEvent: (callback: (data: GatewayEvent) => void) => () => void;
   onGatewayStatus: (callback: (status: GatewayStatusEvent) => void) => () => void;
 }

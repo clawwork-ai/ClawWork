@@ -619,6 +619,12 @@ export class GatewayClient {
     return this.sendReq('tools.catalog', params);
   }
 
+  async getSkillsStatus(agentId?: string): Promise<Record<string, unknown>> {
+    const params: Record<string, unknown> = {};
+    if (agentId) params.agentId = agentId;
+    return this.sendReq('skills.status', params);
+  }
+
   async getUsageStatus(): Promise<Record<string, unknown>> {
     return this.sendReq('usage.status', {});
   }

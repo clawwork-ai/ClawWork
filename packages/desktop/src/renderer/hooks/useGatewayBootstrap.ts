@@ -36,6 +36,7 @@ function getDispatcher() {
       setAgentCatalogForGateway: (gwId, agents, defaultId) =>
         useUiStore.getState().setAgentCatalogForGateway(gwId, agents as AgentInfo[], defaultId),
       setToolsCatalogForGateway: (gwId, catalog) => useUiStore.getState().setToolsCatalogForGateway(gwId, catalog),
+      setSkillsStatusForGateway: (gwId, report) => useUiStore.getState().setSkillsStatusForGateway(gwId, report),
 
       lookupTaskIdBySubagentKey: (key) => useRoomStore.getState().lookupTaskIdBySubagentKey(key),
       onSubagentCandidate: (sessionKey, gatewayId) => {

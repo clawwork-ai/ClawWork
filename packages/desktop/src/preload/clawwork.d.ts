@@ -243,6 +243,7 @@ export interface ClawWorkAPI {
   getAgentFile: (gatewayId: string, agentId: string, name: string) => Promise<IpcResult>;
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
+  getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
 
   gatewayStatus: () => Promise<GatewayStatusMap>;
   syncSessions: () => Promise<SyncResult>;
