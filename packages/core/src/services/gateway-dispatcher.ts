@@ -548,7 +548,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         if (Array.isArray(data.skills)) deps.setSkillsStatusForGateway(gatewayId, data);
       }
     } catch (err) {
-      console.warn('[catalogs] Failed to fetch model/agent/tools/skills catalogs:', err);
+      console.warn('[catalogs] Failed to fetch model/agent/tools/skills catalogs for gateway', gatewayId, err);
     }
   }
 
