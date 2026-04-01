@@ -618,7 +618,7 @@ export default function AgentsSection() {
     (agent: AgentInfo) => {
       setEditingAgentId(agent.id);
       setForm({
-        name: agent.name ?? '',
+        name: agent.name ?? agent.id,
         workspace: agentWorkspaceMap[agent.id] ?? '',
         emoji: agent.identity?.emoji ?? '',
         model: '',
