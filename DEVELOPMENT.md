@@ -231,7 +231,7 @@ ChatInput
 -> IPC `ws:send-message`
 -> GatewayClient `chat.send`
 -> Gateway emits `chat`
--> useGatewayDispatcher routes by sessionKey
+-> useGatewayBootstrap routes by sessionKey
 -> messageStore streams/finalizes
 -> renderer updates
 ```

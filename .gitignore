@@ -21,8 +21,7 @@ __pycache__/
 package-lock.json
 
 # Local AI tooling
-.opencode/
-.claude/settings.local.json
+!.claude/rules/*
 
 # IDE
 .idea/
