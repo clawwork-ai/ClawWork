@@ -182,7 +182,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
           const reason =
             failed.status === 'rejected'
               ? String(failed.reason)
-              : ((failed as PromiseFulfilledResult<IpcResult>).value?.error ?? '');
+              : ('value' in failed ? failed.value?.error ?? '' : '');
           emitError(task.id, 'gateway', 'send', reason || deps.translate('errors.sendFailed'));
           return { ok: false, taskId: task.id };
         }
