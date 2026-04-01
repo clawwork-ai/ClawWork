@@ -68,20 +68,27 @@ export default function ChatInput() {
     useContextFolders();
 
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
+  const activeTaskGatewayId = useTaskStore((s) => s.tasks.find((task) => task.id === s.activeTaskId)?.gatewayId);
   const performers = useRoomStore((s) => (activeTaskId ? s.rooms[activeTaskId]?.performers : undefined));
+  const agentCatalog = useUiStore((s) =>
+    activeTaskGatewayId ? s.agentCatalogByGateway[activeTaskGatewayId] : undefined,
+  );
   const mentionAgents = useMemo<AgentMentionEntry[]>(() => {
     if (!performers) return [];
+    const catalogMap = new Map((agentCatalog?.agents ?? []).map((a) => [a.id, a]));
     const byAgent = new Map<string, AgentMentionEntry>();
     for (const p of performers) {
+      const catalogEntry = catalogMap.get(p.agentId);
       byAgent.set(p.agentId, {
         agentId: p.agentId,
         agentName: p.agentName,
         emoji: p.emoji,
+        avatarUrl: catalogEntry?.identity?.avatarUrl,
         sessionKey: p.sessionKey,
       });
     }
     return [...byAgent.values()];
-  }, [performers]);
+  }, [performers, agentCatalog]);
 
   const {
     slashMenuVisible,

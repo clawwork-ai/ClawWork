@@ -238,7 +238,13 @@ function WelcomeScreen() {
                   : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]',
               )}
             >
-              {agent.identity?.emoji ? <span className="emoji-sm">{agent.identity.emoji}</span> : <Bot size={12} />}
+              {agent.identity?.avatarUrl ? (
+                <img src={agent.identity.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+              ) : agent.identity?.emoji ? (
+                <span className="emoji-sm">{agent.identity.emoji}</span>
+              ) : (
+                <Bot size={12} />
+              )}
               <span className="max-w-24 truncate">{agent.name ?? agent.id}</span>
             </button>
           ))}

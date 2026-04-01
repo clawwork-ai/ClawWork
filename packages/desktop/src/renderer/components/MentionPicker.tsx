@@ -12,6 +12,7 @@ export interface AgentMentionEntry {
   agentId: string;
   agentName: string;
   emoji?: string;
+  avatarUrl?: string;
   sessionKey: string;
 }
 
@@ -197,6 +198,8 @@ export default function MentionPicker({
               >
                 {a.agentId === MENTION_ALL_AGENT_ID ? (
                   <Users size={14} className="text-[var(--accent)] flex-shrink-0" />
+                ) : a.avatarUrl ? (
+                  <img src={a.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover flex-shrink-0" />
                 ) : a.emoji ? (
                   <span className="emoji-sm flex-shrink-0">{a.emoji}</span>
                 ) : (

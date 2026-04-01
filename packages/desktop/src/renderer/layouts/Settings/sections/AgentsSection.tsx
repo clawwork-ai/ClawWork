@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -13,6 +13,7 @@ import {
   Wrench,
   ChevronDown,
   Save,
+  ImagePlus,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -35,6 +36,7 @@ import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
+import { AVATAR_ACCEPT, readFileAsDataUrl, validateAvatarFile } from '@/lib/avatar-utils';
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
 
@@ -43,10 +45,11 @@ type AgentDetailSection = 'files' | 'skills';
 interface AgentFormData {
   name: string;
   workspace: string;
+  avatar: string;
   model: string;
 }
 
-const EMPTY_FORM: AgentFormData = { name: '', workspace: '', model: '' };
+const EMPTY_FORM: AgentFormData = { name: '', workspace: '', avatar: '', model: '' };
 
 const inputClass = cn(
   'flex-1 h-[var(--density-control-height-lg)] px-3 py-2 rounded-md',
@@ -159,7 +162,9 @@ function AgentCard({
             isDefault ? 'bg-[var(--accent-soft)]' : 'bg-[var(--bg-tertiary)]',
           )}
         >
-          {emoji ? (
+          {agent.identity?.avatarUrl ? (
+            <img src={agent.identity.avatarUrl} alt="" className="w-9 h-9 rounded-lg object-cover" />
+          ) : emoji ? (
             <span className="emoji-lg">{emoji}</span>
           ) : (
             <Bot size={16} className={isDefault ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'} />
@@ -481,6 +486,7 @@ function AgentForm({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <motion.div
@@ -527,21 +533,75 @@ function AgentForm({
           )}
         </div>
 
-        <div>
-          <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentModel')}</label>
-          <select
-            value={form.model}
-            onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-            className={cn(inputClass, 'w-full')}
-          >
-            <option value="">{t('settings.agentModelPlaceholder')}</option>
-            {models.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name ?? m.id}
-                {m.provider ? ` (${m.provider})` : ''}
-              </option>
-            ))}
-          </select>
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentAvatar')}</label>
+            <button
+              type="button"
+              className={cn(
+                'relative w-12 h-12 rounded-lg border border-[var(--border)] bg-[var(--bg-tertiary)]',
+                'flex items-center justify-center overflow-hidden group transition-colors',
+                'hover:border-[var(--accent)]',
+              )}
+              onClick={() => avatarInputRef.current?.click()}
+              aria-label={t('settings.agentAvatarChange')}
+            >
+              {form.avatar ? (
+                <>
+                  <img src={form.avatar} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-[var(--overlay-scrim)] opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                    <button
+                      type="button"
+                      className="text-[var(--danger)]"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setForm((f) => ({ ...f, avatar: '' }));
+                      }}
+                      aria-label={t('settings.agentAvatarRemove')}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <ImagePlus size={18} className="text-[var(--text-muted)]" />
+              )}
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept={AVATAR_ACCEPT}
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                e.target.value = '';
+                const error = validateAvatarFile(file, t);
+                if (error) {
+                  toast.error(error);
+                  return;
+                }
+                const dataUrl = await readFileAsDataUrl(file);
+                setForm((f) => ({ ...f, avatar: dataUrl }));
+              }}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentModel')}</label>
+            <select
+              value={form.model}
+              onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
+              className={cn(inputClass, 'w-full')}
+            >
+              <option value="">{t('settings.agentModelPlaceholder')}</option>
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name ?? m.id}
+                  {m.provider ? ` (${m.provider})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 pt-1">
@@ -698,6 +758,7 @@ export default function AgentsSection() {
       setForm({
         name: agent.name ?? agent.id,
         workspace: agentWorkspaceMap[agent.id] ?? '',
+        avatar: agent.identity?.avatarUrl ?? agent.identity?.avatar ?? '',
         model: '',
       });
       setShowForm(true);
@@ -737,6 +798,7 @@ export default function AgentsSection() {
         agentId: editingAgentId,
         name: form.name.trim() || undefined,
         workspace: form.workspace.trim() || undefined,
+        avatar: form.avatar || undefined,
         model: form.model.trim() || undefined,
       });
       if (res.ok) {
@@ -750,6 +812,7 @@ export default function AgentsSection() {
       const res = await window.clawwork.createAgent(selectedGatewayId, {
         name: form.name.trim(),
         workspace: form.workspace.trim(),
+        avatar: form.avatar || undefined,
       });
       if (res.ok) {
         const created = res.result as Record<string, unknown> | undefined;
