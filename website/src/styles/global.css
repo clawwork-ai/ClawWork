@@ -270,3 +270,40 @@ body {
 .doc-content a:hover {
   border-bottom-color: var(--color-accent);
 }
+
+.mermaid-block {
+  margin: 0 0 16px 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-code);
+  overflow-x: auto;
+}
+
+.mermaid-block svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.mermaid-block-loading,
+.mermaid-block-error {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.mermaid-error-title {
+  margin-bottom: 12px;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.mermaid-block-error p {
+  margin: 12px 0 0 0;
+}
+
+.mermaid-block-error pre {
+  margin: 0;
+}

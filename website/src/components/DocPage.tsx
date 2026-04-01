@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useI18n } from '../i18n/context';
 import { getDoc } from '../docs/registry';
+import { MarkdownCode } from './MarkdownCode';
 
 interface DocPageProps {
   slug: string;
@@ -25,7 +26,9 @@ export function DocPage({ slug }: DocPageProps) {
           {t.docs.noTranslation}
         </div>
       )}
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{doc.content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ code: MarkdownCode }}>
+        {doc.content}
+      </ReactMarkdown>
     </article>
   );
 }
