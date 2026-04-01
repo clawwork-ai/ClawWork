@@ -133,7 +133,10 @@ export function createSessionSync(deps: SessionSyncDeps) {
             }
           } catch {}
         }
-      })();
+      })().catch((err) => {
+        hydrationPromise = null;
+        throw err;
+      });
     }
     await hydrationPromise;
   }
