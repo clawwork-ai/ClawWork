@@ -30,11 +30,10 @@ type AgentDetailSection = 'files' | 'skills';
 interface AgentFormData {
   name: string;
   workspace: string;
-  emoji: string;
   model: string;
 }
 
-const EMPTY_FORM: AgentFormData = { name: '', workspace: '', emoji: '', model: '' };
+const EMPTY_FORM: AgentFormData = { name: '', workspace: '', model: '' };
 
 const inputClass = cn(
   'flex-1 h-[var(--density-control-height-lg)] px-3 py-2 rounded-md',
@@ -439,34 +438,21 @@ function AgentForm({
           )}
         </div>
 
-        <div className="flex gap-3">
-          <div className="w-24 flex-shrink-0">
-            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentEmoji')}</label>
-            <input
-              type="text"
-              value={form.emoji}
-              onChange={(e) => setForm((f) => ({ ...f, emoji: e.target.value }))}
-              placeholder={t('settings.agentEmojiPlaceholder')}
-              className={cn(inputClass, 'w-full')}
-              maxLength={4}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentModel')}</label>
-            <select
-              value={form.model}
-              onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-              className={cn(inputClass, 'w-full')}
-            >
-              <option value="">{t('settings.agentModelPlaceholder')}</option>
-              {models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name ?? m.id}
-                  {m.provider ? ` (${m.provider})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="type-label mb-1.5 block text-[var(--text-secondary)]">{t('settings.agentModel')}</label>
+          <select
+            value={form.model}
+            onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
+            className={cn(inputClass, 'w-full')}
+          >
+            <option value="">{t('settings.agentModelPlaceholder')}</option>
+            {models.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name ?? m.id}
+                {m.provider ? ` (${m.provider})` : ''}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-2 pt-1">
@@ -620,7 +606,6 @@ export default function AgentsSection() {
       setForm({
         name: agent.name ?? agent.id,
         workspace: agentWorkspaceMap[agent.id] ?? '',
-        emoji: agent.identity?.emoji ?? '',
         model: '',
       });
       setShowForm(true);
@@ -660,7 +645,6 @@ export default function AgentsSection() {
         agentId: editingAgentId,
         name: form.name.trim() || undefined,
         workspace: form.workspace.trim() || undefined,
-        emoji: form.emoji.trim() || undefined,
         model: form.model.trim() || undefined,
       });
       if (res.ok) {
@@ -674,7 +658,6 @@ export default function AgentsSection() {
       const res = await window.clawwork.createAgent(selectedGatewayId, {
         name: form.name.trim(),
         workspace: form.workspace.trim(),
-        emoji: form.emoji.trim() || undefined,
       });
       if (res.ok) {
         const created = res.result as Record<string, unknown> | undefined;

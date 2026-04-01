@@ -138,10 +138,16 @@ export interface AgentIdentity {
   avatarUrl?: string;
 }
 
+export interface AgentModelInfo {
+  primary?: string;
+  fallbacks?: string[];
+}
+
 export interface AgentInfo {
   id: string;
   name?: string;
   identity?: AgentIdentity;
+  model?: AgentModelInfo;
 }
 
 export interface AgentListResponse {
@@ -170,7 +176,6 @@ export interface AgentUpdateParams {
   workspace?: string;
   model?: string;
   avatar?: string;
-  emoji?: string;
 }
 
 export interface AgentDeleteParams {
@@ -194,6 +199,19 @@ export interface AgentFilesListResponse {
 
 export interface AgentFileContentResponse {
   agentId: string;
+  file: AgentFileEntry & { content?: string };
+}
+
+export interface AgentFileSetParams {
+  agentId: string;
+  name: string;
+  content: string;
+}
+
+export interface AgentFileSetResponse {
+  ok: true;
+  agentId: string;
+  workspace: string;
   file: AgentFileEntry & { content?: string };
 }
 

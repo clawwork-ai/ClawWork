@@ -411,7 +411,6 @@ export function registerWsHandlers(): void {
         workspace?: string;
         model?: string;
         avatar?: string;
-        emoji?: string;
       },
     ) =>
       gatewayRpc(payload.gatewayId, (gw) =>
@@ -421,7 +420,6 @@ export function registerWsHandlers(): void {
           workspace: payload.workspace,
           model: payload.model,
           avatar: payload.avatar,
-          emoji: payload.emoji,
         }),
       ),
   );
@@ -440,6 +438,12 @@ export function registerWsHandlers(): void {
 
   ipcMain.handle('ws:agents-files-get', async (_event, payload: { gatewayId: string; agentId: string; name: string }) =>
     gatewayRpc(payload.gatewayId, (gw) => gw.getAgentFile(payload.agentId, payload.name)),
+  );
+
+  ipcMain.handle(
+    'ws:agents-files-set',
+    async (_event, payload: { gatewayId: string; agentId: string; name: string; content: string }) =>
+      gatewayRpc(payload.gatewayId, (gw) => gw.setAgentFile(payload.agentId, payload.name, payload.content)),
   );
 
   ipcMain.handle(

@@ -578,7 +578,6 @@ export class GatewayClient {
     workspace?: string;
     model?: string;
     avatar?: string;
-    emoji?: string;
   }): Promise<Record<string, unknown>> {
     return this.sendReq('agents.update', params);
   }
@@ -593,6 +592,10 @@ export class GatewayClient {
 
   async getAgentFile(agentId: string, name: string): Promise<Record<string, unknown>> {
     return this.sendReq('agents.files.get', { agentId, name });
+  }
+
+  async setAgentFile(agentId: string, name: string, content: string): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.files.set', { agentId, name, content });
   }
 
   async patchSession(params: Record<string, unknown>): Promise<Record<string, unknown>> {
