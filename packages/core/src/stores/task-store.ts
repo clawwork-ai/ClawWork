@@ -166,7 +166,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
       });
       if (task?.gatewayId && task?.sessionKey) {
         deps.patchSession(task.gatewayId, task.sessionKey, { label: title }).catch((err) => {
-          console.error('[persist:task]', err);
+          console.error('[patch:session]', err);
         });
       }
     },
