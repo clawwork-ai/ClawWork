@@ -147,7 +147,9 @@ export function createTaskStore(deps: TaskStoreDeps) {
         agentId: resolvedAgentId,
       };
       set((s) => ({ tasks: [task, ...s.tasks], activeTaskId: id }));
-      deps.persistTask(task).catch(() => {});
+      deps.persistTask(task).catch((err) => {
+        console.error('[persist:task]', err);
+      });
       return task;
     },
 
@@ -159,9 +161,13 @@ export function createTaskStore(deps: TaskStoreDeps) {
       set((s) => ({
         tasks: s.tasks.map((t) => (t.id === id ? { ...t, title, updatedAt: now } : t)),
       }));
-      deps.persistTaskUpdate({ id, title, updatedAt: now }).catch(() => {});
+      deps.persistTaskUpdate({ id, title, updatedAt: now }).catch((err) => {
+        console.error('[persist:task]', err);
+      });
       if (task?.gatewayId && task?.sessionKey) {
-        deps.patchSession(task.gatewayId, task.sessionKey, { label: title }).catch(() => {});
+        deps.patchSession(task.gatewayId, task.sessionKey, { label: title }).catch((err) => {
+          console.error('[persist:task]', err);
+        });
       }
     },
 
@@ -170,7 +176,9 @@ export function createTaskStore(deps: TaskStoreDeps) {
       set((s) => ({
         tasks: s.tasks.map((t) => (t.id === id ? { ...t, status, updatedAt: now } : t)),
       }));
-      deps.persistTaskUpdate({ id, status, updatedAt: now }).catch(() => {});
+      deps.persistTaskUpdate({ id, status, updatedAt: now }).catch((err) => {
+        console.error('[persist:task]', err);
+      });
     },
 
     updateTaskMetadata: (id, meta) => {
@@ -189,7 +197,9 @@ export function createTaskStore(deps: TaskStoreDeps) {
           contextTokens: meta.contextTokens,
           updatedAt,
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.error('[persist:task]', err);
+        });
     },
 
     removeTask: (id) => {
@@ -200,7 +210,9 @@ export function createTaskStore(deps: TaskStoreDeps) {
           activeTaskId: nextActiveId,
         };
       });
-      deps.deleteTask(id).catch(() => {});
+      deps.deleteTask(id).catch((err) => {
+        console.error('[persist:task]', err);
+      });
     },
 
     hydrate: async () => {
@@ -255,7 +267,9 @@ export function createTaskStore(deps: TaskStoreDeps) {
         return { tasks: [...newTasks, ...s.tasks] };
       });
       for (const task of toPersist) {
-        deps.persistTask(task).catch(() => {});
+        deps.persistTask(task).catch((err) => {
+          console.error('[persist:task]', err);
+        });
       }
     },
   }));

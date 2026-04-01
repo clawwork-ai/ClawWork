@@ -148,7 +148,9 @@ function persistMessageUpdate(deps: MessageStoreDeps, msg: Message): void {
       imageAttachments: msg.imageAttachments as unknown[] | undefined,
       toolCalls: msg.toolCalls,
     })
-    .catch(() => {});
+    .catch((err) => {
+      console.error('[persist:message]', err);
+    });
 }
 
 export { EMPTY_MESSAGES };
