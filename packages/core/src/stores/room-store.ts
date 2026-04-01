@@ -142,8 +142,8 @@ export function createRoomStore(deps: RoomStoreDeps) {
           rooms: { ...s.rooms, [taskId]: room },
           subagentKeyMap: { ...s.subagentKeyMap, ...keyMap },
         }));
-      } catch {
-        console.warn('[room-store] hydrateRoom failed for', taskId);
+      } catch (err) {
+        console.warn('[room-store] hydrateRoom failed for', taskId, err);
       }
     },
 

@@ -217,8 +217,8 @@ export function createTaskStore(deps: TaskStoreDeps) {
             hydrated: true,
           });
         }
-      } catch {
-        console.warn('[taskStore] hydrate failed');
+      } catch (err) {
+        console.warn('[taskStore] hydrate failed:', err);
       }
     },
 

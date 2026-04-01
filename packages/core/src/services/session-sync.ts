@@ -131,7 +131,9 @@ export function createSessionSync(deps: SessionSyncDeps) {
               }));
               messageStore.bulkLoad(t.id, msgs);
             }
-          } catch {}
+          } catch (err) {
+            console.warn('[sync] hydrateFromLocal failed for task', t.id, err);
+          }
         }
       })();
     }
