@@ -443,6 +443,12 @@ export function registerWsHandlers(): void {
   );
 
   ipcMain.handle(
+    'ws:agents-files-set',
+    async (_event, payload: { gatewayId: string; agentId: string; name: string; content: string }) =>
+      gatewayRpc(payload.gatewayId, (gw) => gw.setAgentFile(payload.agentId, payload.name, payload.content)),
+  );
+
+  ipcMain.handle(
     'ws:session-patch',
     async (
       _event,

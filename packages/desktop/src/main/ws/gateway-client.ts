@@ -595,6 +595,10 @@ export class GatewayClient {
     return this.sendReq('agents.files.get', { agentId, name });
   }
 
+  async setAgentFile(agentId: string, name: string, content: string): Promise<Record<string, unknown>> {
+    return this.sendReq('agents.files.set', { agentId, name, content });
+  }
+
   async patchSession(params: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.sendReq('sessions.patch', params);
   }

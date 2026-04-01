@@ -46,6 +46,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:agents-files-list', { gatewayId, agentId }),
     getAgentFile: (gatewayId: string, agentId: string, name: string) =>
       ipcRenderer.invoke('ws:agents-files-get', { gatewayId, agentId, name }),
+    setAgentFile: (gatewayId: string, agentId: string, name: string, content: string) =>
+      ipcRenderer.invoke('ws:agents-files-set', { gatewayId, agentId, name, content }),
     patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) =>
       ipcRenderer.invoke('ws:session-patch', { gatewayId, sessionKey, patch }),
     getToolsCatalog: (gatewayId: string, agentId?: string) =>

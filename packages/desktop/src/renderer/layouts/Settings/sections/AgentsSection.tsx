@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Pencil, Bot, Crown, Loader2, FileText, X, Server, Wrench, ChevronDown } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  Bot,
+  Crown,
+  Loader2,
+  FileText,
+  X,
+  Server,
+  Wrench,
+  ChevronDown,
+  Save,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -57,11 +70,17 @@ function AgentCard({
   selectedFile,
   fileContent,
   loadingFileContent,
+  editingFileContent,
+  savingFile,
   onEdit,
   onDelete,
   onToggleExpand,
   onSelectSection,
   onSelectFile,
+  onEditFile,
+  onSaveFile,
+  onCancelEdit,
+  onEditFileContentChange,
 }: {
   agent: AgentInfo;
   isDefault: boolean;
@@ -76,11 +95,17 @@ function AgentCard({
   selectedFile: string | null;
   fileContent: string | null;
   loadingFileContent: boolean;
+  editingFileContent: string | null;
+  savingFile: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onToggleExpand: () => void;
   onSelectSection: (section: AgentDetailSection) => void;
   onSelectFile: (name: string) => void;
+  onEditFile: () => void;
+  onSaveFile: () => void;
+  onCancelEdit: () => void;
+  onEditFileContentChange: (content: string) => void;
 }) {
   const { t } = useTranslation();
   const emoji = agent.identity?.emoji;
@@ -266,7 +291,7 @@ function AgentCard({
                             </button>
                           ))}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex flex-col">
                           {!selectedFile ? (
                             <div className="type-support flex h-full items-center justify-center text-[var(--text-muted)]">
                               {t('settings.agentFilePreview')}
@@ -276,9 +301,73 @@ function AgentCard({
                               <Loader2 size={16} className="animate-spin text-[var(--text-muted)]" />
                             </div>
                           ) : (
-                            <pre className="type-code-block h-full overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)]">
-                              {fileContent ?? ''}
-                            </pre>
+                            <>
+                              <div className="flex items-center gap-1.5 mb-1.5 flex-shrink-0">
+                                <span className="type-code-inline flex-1 truncate text-[var(--text-muted)]">
+                                  {selectedFile}
+                                </span>
+                                {editingFileContent !== null ? (
+                                  <>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={onCancelEdit}
+                                          aria-label={t('settings.agentFileCancel')}
+                                        >
+                                          <X size={14} />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{t('settings.agentFileCancel')}</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon-sm"
+                                          onClick={onSaveFile}
+                                          disabled={savingFile}
+                                          aria-label={t('settings.agentFileSave')}
+                                        >
+                                          {savingFile ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                          ) : (
+                                            <Save size={14} />
+                                          )}
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{t('settings.agentFileSave')}</TooltipContent>
+                                    </Tooltip>
+                                  </>
+                                ) : (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        onClick={onEditFile}
+                                        aria-label={t('settings.agentFileEdit')}
+                                      >
+                                        <Pencil size={14} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{t('settings.agentFileEdit')}</TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </div>
+                              {editingFileContent !== null ? (
+                                <textarea
+                                  value={editingFileContent}
+                                  onChange={(e) => onEditFileContentChange(e.target.value)}
+                                  className="type-mono-data min-h-0 flex-1 w-full resize-none overflow-auto whitespace-pre-wrap break-words rounded-lg border border-[var(--border)] bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)] outline-none ring-accent-focus"
+                                />
+                              ) : (
+                                <pre className="type-code-block flex-1 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-[var(--bg-tertiary)] p-3 text-[var(--text-secondary)]">
+                                  {fileContent ?? ''}
+                                </pre>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
@@ -517,6 +606,8 @@ export default function AgentsSection() {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [loadingFileContent, setLoadingFileContent] = useState(false);
+  const [editingFileContent, setEditingFileContent] = useState<string | null>(null);
+  const [savingFile, setSavingFile] = useState(false);
 
   useEffect(() => {
     if (selectedGatewayId && connectedGatewayIds.includes(selectedGatewayId)) return;
@@ -600,6 +691,7 @@ export default function AgentsSection() {
     setExpandedFilesAgentId(null);
     setSelectedFileName(null);
     setFileContent(null);
+    setEditingFileContent(null);
   }, [selectedGatewayId]);
 
   useEffect(() => {
@@ -712,6 +804,7 @@ export default function AgentsSection() {
         });
         setSelectedFileName(null);
         setFileContent(null);
+        setEditingFileContent(null);
       }
       setAgentFilesMap((prev) => {
         const next = { ...prev };
@@ -742,12 +835,14 @@ export default function AgentsSection() {
         setExpandedFilesAgentId(null);
         setSelectedFileName(null);
         setFileContent(null);
+        setEditingFileContent(null);
         return;
       }
       setExpandedFilesAgentId(agentId);
       setActiveSectionByAgentId((prev) => ({ ...prev, [agentId]: prev[agentId] ?? 'files' }));
       setSelectedFileName(null);
       setFileContent(null);
+      setEditingFileContent(null);
       fetchAgentMeta(agentId);
       fetchAgentSkills(agentId);
     },
@@ -759,11 +854,13 @@ export default function AgentsSection() {
       if (selectedFileName === name) {
         setSelectedFileName(null);
         setFileContent(null);
+        setEditingFileContent(null);
         return;
       }
       if (!selectedGatewayId) return;
       setSelectedFileName(name);
       setFileContent(null);
+      setEditingFileContent(null);
       setLoadingFileContent(true);
       const res = await window.clawwork.getAgentFile(selectedGatewayId, agentId, name);
       setLoadingFileContent(false);
@@ -774,6 +871,25 @@ export default function AgentsSection() {
     },
     [selectedGatewayId, selectedFileName],
   );
+
+  const handleSaveFile = useCallback(async () => {
+    if (!selectedGatewayId || !expandedFilesAgentId || !selectedFileName || editingFileContent === null) return;
+    setSavingFile(true);
+    const res = await window.clawwork.setAgentFile(
+      selectedGatewayId,
+      expandedFilesAgentId,
+      selectedFileName,
+      editingFileContent,
+    );
+    setSavingFile(false);
+    if (res.ok) {
+      toast.success(t('settings.agentFileSaved'));
+      setFileContent(editingFileContent);
+      setEditingFileContent(null);
+    } else {
+      toast.error(res.error ?? t('settings.agentFileSaveFailed'));
+    }
+  }, [selectedGatewayId, expandedFilesAgentId, selectedFileName, editingFileContent, t]);
 
   if (connectedGatewayIds.length === 0) {
     return (
@@ -805,6 +921,7 @@ export default function AgentsSection() {
                   setExpandedFilesAgentId(null);
                   setSelectedFileName(null);
                   setFileContent(null);
+                  setEditingFileContent(null);
                   setAgentFilesMap({});
                   setAgentWorkspaceMap({});
                   closeForm();
@@ -848,6 +965,8 @@ export default function AgentsSection() {
                   selectedFile={expandedFilesAgentId === agent.id ? selectedFileName : null}
                   fileContent={expandedFilesAgentId === agent.id ? fileContent : null}
                   loadingFileContent={loadingFileContent}
+                  editingFileContent={expandedFilesAgentId === agent.id ? editingFileContent : null}
+                  savingFile={savingFile}
                   onEdit={() => openEditForm(agent)}
                   onDelete={() => {
                     if (agent.id === 'main') {
@@ -864,6 +983,10 @@ export default function AgentsSection() {
                     }))
                   }
                   onSelectFile={(name) => handleSelectFile(agent.id, name)}
+                  onEditFile={() => setEditingFileContent(fileContent ?? '')}
+                  onSaveFile={handleSaveFile}
+                  onCancelEdit={() => setEditingFileContent(null)}
+                  onEditFileContentChange={setEditingFileContent}
                 />
                 <AnimatePresence>
                   {editingAgentId === agent.id && showForm && (
