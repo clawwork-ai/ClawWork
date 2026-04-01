@@ -27,6 +27,19 @@ exportFilename: clawwork-keynote
 
 ---
 
+<div class="cw-grid"></div>
+<div class="glow-orb glow-purple cw-pulse" style="top:-80px; right:30%;"></div>
+<div class="glow-orb glow-cyan cw-pulse" style="bottom:-60px; left:25%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'Why?', zh: '为什么？', ja: 'なぜ？', ko: '왜?', fr: 'Pourquoi ?', de: 'Warum?', es: '¿Por qué?', pt: 'Por quê?' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'The problem with the current workflow.', zh: '当前工作流的问题。', ja: '現在のワークフローの問題。', ko: '현재 워크플로의 문제.', fr: 'Le problème du workflow actuel.', de: 'Das Problem mit dem aktuellen Workflow.', es: 'El problema con el flujo actual.', pt: 'O problema com o fluxo atual.' }) }}</p>
+</div>
+
+---
+
 # 😤 {{ $t({ en: 'Pain Points of Using OpenClaw', zh: '养虾的痛点', ja: 'OpenClaw の課題', ko: 'OpenClaw 사용 시 문제점', fr: "Points faibles d'OpenClaw", de: 'Schwachstellen von OpenClaw', es: 'Problemas de OpenClaw', pt: 'Problemas do OpenClaw' }) }}
 
 <div class="cw-kicker">{{ $t({ en: '"One window, one task, one context."', zh: '"一个窗口，一个任务，一个上下文。"', ja: '「1つのウィンドウ、1つのタスク、1つのコンテキスト」', ko: '"하나의 창, 하나의 태스크, 하나의 컨텍스트."', fr: '"Une fenêtre, une tâche, un contexte."', de: '"Ein Fenster, eine Aufgabe, ein Kontext."', es: '"Una ventana, una tarea, un contexto."', pt: '"Uma janela, uma tarefa, um contexto."' }) }}</div>
@@ -60,6 +73,19 @@ exportFilename: clawwork-keynote
     :title="{ en: 'Text-Only Control', zh: '纯文字控制', ja: 'テキストのみの操作', ko: '텍스트 전용 제어', fr: 'Contrôle texte uniquement', de: 'Nur-Text-Steuerung', es: 'Control solo texto', pt: 'Controle apenas texto' }"
     :body="{ en: 'Replying \'yes\' for approvals is ambiguous. No direct tool-call binding.', zh: '靠回复 yes 审批工具调用过于模糊，也没有直接的工具调用绑定。', ja: 'yes と返信して承認するのは曖昧。ツール呼び出しへの直接バインディングがない。', ko: 'yes로 답변하는 승인은 모호함. 직접적인 도구 호출 바인딩 없음.', fr: 'Répondre oui pour approuver est ambigu. Pas de liaison directe aux appels d’outils.', de: 'Mit yes genehmigen ist mehrdeutig. Keine direkte Tool-Call-Bindung.', es: 'Responder sí para aprobar es ambiguo. Sin vinculación directa a llamadas de herramientas.', pt: 'Responder yes para aprovar é ambíguo. Sem vinculação direta a chamadas de ferramentas.' }"
   />
+</div>
+
+---
+
+<div class="cw-grid"></div>
+<div class="glow-orb glow-green cw-pulse" style="top:-80px; right:20%;"></div>
+<div class="glow-orb glow-cyan cw-pulse" style="bottom:-60px; left:35%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'The Answer', zh: '答案', ja: '答え', ko: '해답', fr: 'La Réponse', de: 'Die Antwort', es: 'La Respuesta', pt: 'A Resposta' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'Meet ClawWork.', zh: 'ClawWork 登场。', ja: 'ClawWork の登場。', ko: 'ClawWork 등장.', fr: 'Voici ClawWork.', de: 'Hier kommt ClawWork.', es: 'Presentamos ClawWork.', pt: 'Apresentando ClawWork.' }) }}</p>
 </div>
 
 ---
@@ -153,6 +179,19 @@ exportFilename: clawwork-keynote
     <div class="cw-version-num">v0.0.13</div>
     <div class="cw-version-desc">{{ $t({ en: 'PWA + Linux + hardening', zh: 'PWA + Linux + 安全加固', ja: 'PWA + Linux + セキュリティ強化', ko: 'PWA + Linux + 보안 강화', fr: 'PWA + Linux + durcissement', de: 'PWA + Linux + Härtung', es: 'PWA + Linux + refuerzo', pt: 'PWA + Linux + reforço' }) }}</div>
   </div>
+</div>
+
+---
+
+<div class="cw-grid"></div>
+<div class="glow-orb glow-cyan cw-pulse" style="top:-80px; left:35%;"></div>
+<div class="glow-orb glow-purple cw-pulse" style="bottom:-60px; right:20%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'Product Tour', zh: '产品之旅', ja: 'プロダクトツアー', ko: '제품 투어', fr: 'Visite du produit', de: 'Produkt-Tour', es: 'Tour del producto', pt: 'Tour do produto' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'What it looks like inside.', zh: '看看里面长什么样。', ja: '中身を見てみよう。', ko: '내부를 살펴봅시다.', fr: 'À quoi ça ressemble à l\'intérieur.', de: 'Wie es von innen aussieht.', es: 'Cómo se ve por dentro.', pt: 'Como é por dentro.' }) }}</p>
 </div>
 
 ---
@@ -287,6 +326,39 @@ gap: mt-6
 <DeckFeatureMatrixSlide />
 
 ---
+layout: split-media
+---
+
+# 🎭 {{ $t({ en: 'Multi-Session Orchestration', zh: '多 Session 编排', ja: 'マルチセッション編排', ko: '멀티 세션 오케스트레이션', fr: 'Orchestration multi-session', de: 'Multi-Session-Orchestrierung', es: 'Orquestación multisesión', pt: 'Orquestração multissessão' }) }}
+
+<div class="cw-kicker">{{ $t({ en: 'One Conductor. N Performers. Pure session primitives.', zh: '一个 Conductor，N 个 Performer。纯 session 原语编排。', ja: '1 Conductor、N Performer。純粋なセッションプリミティブ。', ko: '1 Conductor, N Performer. 순수 세션 프리미티브.', fr: 'Un Conductor. N Performers. Primitives de session pures.', de: 'Ein Conductor. N Performer. Reine Session-Primitive.', es: 'Un Conductor. N Performers. Primitivas de sesión puras.', pt: 'Um Conductor. N Performers. Primitivas de sessão puras.' }) }}</div>
+
+::left::
+
+<img src="/images/multi-agents-managent.png" class="cw-shot cw-shot--panel" alt="TaskRoom multi-agent orchestration" />
+
+::right::
+
+<DeckMiniPanel tone="purple" :title="{ en: 'Ensemble Task', zh: 'Ensemble Task', ja: 'Ensemble Task', ko: 'Ensemble Task', fr: 'Ensemble Task', de: 'Ensemble Task', es: 'Ensemble Task', pt: 'Ensemble Task' }" :body="{ en: '1 Conductor + N Performers. Extends 1 Task = 1 Session to multi-agent.', zh: '1 Conductor + N Performer。把 1 Task = 1 Session 扩展为多 Agent 协作。', ja: '1 Conductor + N Performer。1 Task = 1 Session をマルチエージェントに拡張。', ko: '1 Conductor + N Performer. 1 Task = 1 Session을 멀티 에이전트로 확장.', fr: '1 Conductor + N Performers. Étend 1 Task = 1 Session au multi-agent.', de: '1 Conductor + N Performer. Erweitert 1 Task = 1 Session zu Multi-Agent.', es: '1 Conductor + N Performers. Extiende 1 Task = 1 Session a multi-agente.', pt: '1 Conductor + N Performers. Estende 1 Task = 1 Session para multi-agente.' }" />
+
+<DeckMiniPanel tone="green" :title="{ en: 'Serial & Parallel', zh: '串行与并行', ja: 'シリアル＆パラレル', ko: '직렬 & 병렬', fr: 'Série & parallèle', de: 'Seriell & Parallel', es: 'Serie & paralelo', pt: 'Série & paralelo' }" :body="{ en: 'timeout:30 for serial handoff. timeout:0 for parallel fan-out. No external workers.', zh: 'timeout:30 串行交接，timeout:0 并行扇出。无外部 worker。', ja: 'timeout:30 で直列ハンドオフ。timeout:0 で並列ファンアウト。外部ワーカーなし。', ko: 'timeout:30 직렬 핸드오프. timeout:0 병렬 팬아웃. 외부 워커 없음.', fr: 'timeout:30 pour le relais série. timeout:0 pour le fan-out parallèle. Pas de workers externes.', de: 'timeout:30 für serielle Übergabe. timeout:0 für parallelen Fan-out. Keine externen Worker.', es: 'timeout:30 para relevo serial. timeout:0 para fan-out paralelo. Sin workers externos.', pt: 'timeout:30 para handoff serial. timeout:0 para fan-out paralelo. Sem workers externos.' }" />
+
+<DeckMiniPanel tone="cyan" :title="{ en: 'Isolated by Design', zh: '隔离即设计', ja: '設計による分離', ko: '설계에 의한 격리', fr: 'Isolé par conception', de: 'Isolation by Design', es: 'Aislado por diseño', pt: 'Isolado por design' }" :body="{ en: 'Write isolated by sessionKey. Read aggregated by taskId. Zero cross-talk.', zh: '写入按 sessionKey 隔离，展示按 taskId 聚合。零串扰。', ja: 'sessionKey で書込分離。taskId で読取集約。クロストークゼロ。', ko: 'sessionKey로 쓰기 격리. taskId로 읽기 집계. 제로 크로스토크.', fr: 'Écriture isolée par sessionKey. Lecture agrégée par taskId. Zéro interférence.', de: 'Schreiben isoliert nach sessionKey. Lesen aggregiert nach taskId. Kein Übersprechen.', es: 'Escritura aislada por sessionKey. Lectura agregada por taskId. Cero interferencia.', pt: 'Escrita isolada por sessionKey. Leitura agregada por taskId. Zero interferência.' }" />
+
+---
+
+<div class="cw-grid"></div>
+<div class="glow-orb glow-purple cw-pulse" style="top:-80px; right:25%;"></div>
+<div class="glow-orb glow-green cw-pulse" style="bottom:-60px; left:30%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'How It\'s Built', zh: '如何构建', ja: 'どう構築したか', ko: '어떻게 만들었나', fr: 'Comment c\'est construit', de: 'Wie es gebaut ist', es: 'Cómo se construyó', pt: 'Como foi construído' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'Architecture decisions and engineering practices.', zh: '架构决策与工程实践。', ja: 'アーキテクチャの決定とエンジニアリングの実践。', ko: '아키텍처 결정과 엔지니어링 실천.', fr: 'Décisions d\'architecture et pratiques d\'ingénierie.', de: 'Architektur-Entscheidungen und Engineering-Praktiken.', es: 'Decisiones de arquitectura y prácticas de ingeniería.', pt: 'Decisões de arquitetura e práticas de engenharia.' }) }}</p>
+</div>
+
+---
 
 # 🔧 {{ $t({ en: 'Tech Stack', zh: '技术栈', ja: '技術スタック', ko: '기술 스택', fr: 'Stack technique', de: 'Tech-Stack', es: 'Stack tecnológico', pt: 'Stack técnico' }) }}
 
@@ -354,6 +426,19 @@ gap: mt-6
 
 ---
 
+<div class="cw-grid"></div>
+<div class="glow-orb glow-green cw-pulse" style="top:-80px; left:30%;"></div>
+<div class="glow-orb glow-cyan cw-pulse" style="bottom:-60px; right:25%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'By the Numbers', zh: '数据说话', ja: '数字で語る', ko: '숫자로 말하다', fr: 'En chiffres', de: 'In Zahlen', es: 'En números', pt: 'Em números' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'What 15 days of vibe coding looks like.', zh: '15 天 Vibe Coding 的成果。', ja: '15日間の Vibe Coding の成果。', ko: '15일간의 Vibe Coding 결과.', fr: 'Ce que 15 jours de vibe coding donnent.', de: 'Was 15 Tage Vibe Coding ergeben.', es: 'Lo que 15 días de vibe coding producen.', pt: 'O que 15 dias de vibe coding produzem.' }) }}</p>
+</div>
+
+---
+
 # 📈 {{ $t({ en: 'Sprint Breakdown', zh: '冲刺全景', ja: 'スプリント内訳', ko: '스프린트 분석', fr: 'Bilan du sprint', de: 'Sprint-Aufschlüsselung', es: 'Desglose del sprint', pt: 'Detalhamento do sprint' }) }}
 
 <div class="cw-kicker">{{ $t({ en: '15 Days · 161 PRs · 13 Releases', zh: '15 天 · 161 个 PR · 13 个版本', ja: '15日間 · 161 PR · 13リリース', ko: '15일 · 161 PR · 13개 릴리스', fr: '15 jours · 161 PR · 13 releases', de: '15 Tage · 161 PRs · 13 Releases', es: '15 días · 161 PRs · 13 releases', pt: '15 dias · 161 PRs · 13 releases' }) }}</div>
@@ -376,6 +461,83 @@ gap: mt-6
   <DeckSignalCard tone="green" :title="{ en: 'Star History', ja: 'Star 推移', ko: 'Star 히스토리', fr: 'Historique des Stars', de: 'Star-Verlauf', es: 'Historial de Stars', pt: 'Histórico de Stars' }">
     <img src="https://api.star-history.com/svg?repos=clawwork-ai/ClawWork&type=Date" class="cw-shot cw-shot--signal-full" alt="Star History Chart" />
   </DeckSignalCard>
+</div>
+
+---
+
+<div class="cw-grid"></div>
+<div class="glow-orb glow-purple cw-pulse" style="top:-80px; right:25%;"></div>
+<div class="glow-orb glow-cyan cw-pulse" style="bottom:-60px; left:30%;"></div>
+
+<div class="cw-thanks-shell">
+  <h1 class="cw-display-title">
+    <span class="cw-shimmer">{{ $t({ en: 'One More Thing...', zh: 'One More Thing...', ja: 'One More Thing...', ko: 'One More Thing...', fr: 'One More Thing...', de: 'One More Thing...', es: 'One More Thing...', pt: 'One More Thing...' }) }}</span>
+  </h1>
+  <p class="cw-thanks-copy">{{ $t({ en: 'ClawWork Teams.', zh: 'ClawWork Teams.', ja: 'ClawWork Teams.', ko: 'ClawWork Teams.', fr: 'ClawWork Teams.', de: 'ClawWork Teams.', es: 'ClawWork Teams.', pt: 'ClawWork Teams.' }) }}</p>
+</div>
+
+---
+layout: split-media
+---
+
+# 🧬 {{ $t({ en: 'ClawWork Teams', zh: 'ClawWork Teams', ja: 'ClawWork Teams', ko: 'ClawWork Teams', fr: 'ClawWork Teams', de: 'ClawWork Teams', es: 'ClawWork Teams', pt: 'ClawWork Teams' }) }}
+
+<div class="cw-kicker" v-html="$t({ en: 'Create a Task. Assign it to a Team. <strong>Done.</strong>', zh: '创建 Task，指派给 Team。<strong>完了。</strong>', ja: 'Task を作成。Team に割り当て。<strong>以上。</strong>', ko: 'Task 생성. Team에 할당. <strong>끝.</strong>', fr: 'Créer une Task. L\'assigner à une Team. <strong>C\'est tout.</strong>', de: 'Task erstellen. Dem Team zuweisen. <strong>Fertig.</strong>', es: 'Crear una Task. Asignarla a un Team. <strong>Listo.</strong>', pt: 'Criar uma Task. Atribuir a um Team. <strong>Pronto.</strong>' })"></div>
+
+::left::
+
+<div class="cw-nest" data-tone="purple">
+  <div class="cw-nest-label">👥 Software Dev Team — TEAM.md</div>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div class="cw-nest" data-tone="yellow">
+      <div class="cw-nest-label">👑 Manager → Conductor</div>
+      <div class="cw-nest-items">
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="yellow"></span>task-planning</span>
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="green"></span>delegation</span>
+      </div>
+    </div>
+    <div class="cw-nest" data-tone="green">
+      <div class="cw-nest-label">🏗️ Architect — AGENT.md + SOUL.md</div>
+      <div class="cw-nest-items">
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="cyan"></span>system-design</span>
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="purple"></span>code-review</span>
+      </div>
+    </div>
+    <div class="cw-nest" data-tone="green">
+      <div class="cw-nest-label">💻 Developer — AGENT.md + SOUL.md</div>
+      <div class="cw-nest-items">
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="green"></span>coding</span>
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="red"></span>debugging</span>
+      </div>
+    </div>
+    <div class="cw-nest" data-tone="green">
+      <div class="cw-nest-label">🔍 Reviewer — AGENT.md + SOUL.md</div>
+      <div class="cw-nest-items">
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="purple"></span>code-review</span>
+        <span class="cw-nest-skill"><span class="cw-nest-dot" data-color="cyan"></span>testing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cw-badge-row mt-4">
+  <span class="cw-badge" data-tone="purple">{{ $t({ en: 'INSTALLABLE', zh: '可安装', ja: 'インストール可能', ko: '설치 가능', fr: 'INSTALLABLE', de: 'INSTALLIERBAR', es: 'INSTALABLE', pt: 'INSTALÁVEL' }) }}</span>
+  <span class="cw-badge" data-tone="green">{{ $t({ en: 'SHAREABLE', zh: '可分享', ja: '共有可能', ko: '공유 가능', fr: 'PARTAGEABLE', de: 'TEILBAR', es: 'COMPARTIBLE', pt: 'COMPARTILHÁVEL' }) }}</span>
+  <span class="cw-badge-copy">{{ $t({ en: 'TeamsHub: one-click install', zh: 'TeamsHub：一键安装', ja: 'TeamsHub：ワンクリック導入', ko: 'TeamsHub: 원클릭 설치', fr: 'TeamsHub : un clic', de: 'TeamsHub: Ein Klick', es: 'TeamsHub: un clic', pt: 'TeamsHub: um clique' }) }}</span>
+</div>
+
+::right::
+
+<p class="cw-text-lead" v-html="$t({ en: 'A <strong>Team</strong> is a self-contained multi-agent unit — roles, personalities, skills, tools, and workflow, all packaged together.', zh: '<strong>Team</strong> 是一个自包含的多 Agent 单元——角色、性格、技能、工具和工作流，全部打包在一起。', ja: '<strong>Team</strong> は自己完結型のマルチエージェントユニット——ロール、性格、スキル、ツール、ワークフローをすべてパッケージ化。', ko: '<strong>Team</strong>은 자체 완결 멀티 에이전트 단위 — 역할, 성격, 스킬, 도구, 워크플로를 모두 패키지화.', fr: 'Un <strong>Team</strong> est une unité multi-agent autonome — rôles, personnalités, compétences, outils et workflow, tout empaqueté.', de: 'Ein <strong>Team</strong> ist eine eigenständige Multi-Agent-Einheit — Rollen, Persönlichkeiten, Skills, Tools und Workflow, alles verpackt.', es: 'Un <strong>Team</strong> es una unidad multi-agente autónoma — roles, personalidades, habilidades, herramientas y flujo, todo empaquetado.', pt: 'Um <strong>Team</strong> é uma unidade multi-agente autossuficiente — papéis, personalidades, habilidades, ferramentas e workflow, tudo empacotado.' })"></p>
+
+<ul class="cw-bullets mt-4">
+  <li v-html="$t({ en: '<code>TEAM.md</code> — team goals and orchestration workflow', zh: '<code>TEAM.md</code> — 团队目标与编排工作流', ja: '<code>TEAM.md</code> — チーム目標と編排ワークフロー', ko: '<code>TEAM.md</code> — 팀 목표와 오케스트레이션 워크플로', fr: '<code>TEAM.md</code> — objectifs et workflow d\'orchestration', de: '<code>TEAM.md</code> — Teamziele und Orchestrierungs-Workflow', es: '<code>TEAM.md</code> — objetivos y flujo de orquestación', pt: '<code>TEAM.md</code> — objetivos e workflow de orquestração' })"></li>
+  <li v-html="$t({ en: '<code>AGENT.md</code> — role, skills, and tools per agent', zh: '<code>AGENT.md</code> — 每个 Agent 的角色、技能与工具', ja: '<code>AGENT.md</code> — エージェントごとのロール、スキル、ツール', ko: '<code>AGENT.md</code> — 에이전트별 역할, 스킬, 도구', fr: '<code>AGENT.md</code> — rôle, compétences et outils par agent', de: '<code>AGENT.md</code> — Rolle, Skills und Tools pro Agent', es: '<code>AGENT.md</code> — rol, habilidades y herramientas por agente', pt: '<code>AGENT.md</code> — papel, habilidades e ferramentas por agente' })"></li>
+  <li v-html="$t({ en: '<code>SOUL.md</code> — personality and communication style', zh: '<code>SOUL.md</code> — 性格与沟通风格', ja: '<code>SOUL.md</code> — 性格とコミュニケーションスタイル', ko: '<code>SOUL.md</code> — 성격과 커뮤니케이션 스타일', fr: '<code>SOUL.md</code> — personnalité et style de communication', de: '<code>SOUL.md</code> — Persönlichkeit und Kommunikationsstil', es: '<code>SOUL.md</code> — personalidad y estilo de comunicación', pt: '<code>SOUL.md</code> — personalidade e estilo de comunicação' })"></li>
+</ul>
+
+<div class="cw-note-panel mt-4" data-tone="green">
+  <p class="cw-note-copy" v-html="$t({ en: '<strong>No manual setup.</strong> ClawWork handles agent creation, skill installation, and model assignment for you.', zh: '<strong>无需手动配置。</strong>ClawWork 替你完成 Agent 创建、Skill 安装和模型分配。', ja: '<strong>手動セットアップ不要。</strong>ClawWork がエージェント作成、スキルインストール、モデル割当を処理。', ko: '<strong>수동 설정 불필요.</strong> ClawWork가 에이전트 생성, 스킬 설치, 모델 할당을 처리합니다.', fr: '<strong>Aucune configuration manuelle.</strong> ClawWork gère la création d\'agents, l\'installation de compétences et l\'attribution de modèles.', de: '<strong>Kein manuelles Setup.</strong> ClawWork übernimmt Agent-Erstellung, Skill-Installation und Modellzuweisung.', es: '<strong>Sin configuración manual.</strong> ClawWork gestiona la creación de agentes, instalación de habilidades y asignación de modelos.', pt: '<strong>Sem configuração manual.</strong> ClawWork cuida da criação de agentes, instalação de habilidades e atribuição de modelos.' })"></p>
 </div>
 
 ---

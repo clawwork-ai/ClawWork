@@ -1248,6 +1248,61 @@ html:not(.dark) .slidev-layout {
   flex-shrink: 0;
 }
 
+.cw-nest {
+  border-radius: var(--cw-radius-md);
+  padding: 14px 16px;
+  border: 1px solid var(--cw-tone-border);
+  background: var(--cw-tone-soft);
+}
+.cw-nest-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cw-tone-accent);
+  margin-bottom: 8px;
+}
+.cw-nest-items {
+  display: flex;
+  gap: 8px;
+}
+.cw-nest-tag {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--cw-tone-soft);
+  border: 1px solid var(--cw-tone-border);
+  color: var(--cw-text-secondary);
+}
+.cw-nest-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cw-nest-dot[data-color='green'] {
+  background: var(--cw-green);
+}
+.cw-nest-dot[data-color='cyan'] {
+  background: var(--cw-cyan);
+}
+.cw-nest-dot[data-color='purple'] {
+  background: var(--cw-purple-bright);
+}
+.cw-nest-dot[data-color='yellow'] {
+  background: var(--cw-yellow);
+}
+.cw-nest-dot[data-color='red'] {
+  background: var(--cw-red);
+}
+.cw-nest-skill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6rem;
+  color: var(--cw-text-secondary);
+}
+
 .cw-infra-grid-full {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
