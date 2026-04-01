@@ -1,4 +1,4 @@
-# Message Persistence — Single Writer per Role
+# Message Persistence — Single Writer per Role [CRITICAL]
 
 Violating this WILL cause message duplication.
 
@@ -8,9 +8,9 @@ Violating this WILL cause message duplication.
 | `assistant` | `syncSessionMessages` / `syncFromGateway` | `packages/core/src/services/session-sync.ts`                      |
 | `system`    | `addMessage` (client-generated)           | `packages/core/src/stores/message-store.ts`                       |
 
-Any new DB write path for messages requires full review.
+Any new DB write path for messages must block merge for full architectural review.
 
-## PROHIBITED patterns (each caused regressions)
+## PROHIBITED patterns [CRITICAL] (each caused production regressions)
 
 - `finalizeStream` calling `persistMessage`
 - Content-based dedup (`role:content` matching)

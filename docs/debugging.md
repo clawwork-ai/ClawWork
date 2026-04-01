@@ -18,7 +18,7 @@ sqlite3 clawwork.db "SELECT task_id, role, substr(content,1,50), COUNT(*) as cnt
 
 ## Renderer Debug Events
 
-`useGatewayDispatcher.ts` emits structured events via `debugEvent()`. Open DevTools Console and filter by `[debug]` to see the message lifecycle:
+`useGatewayBootstrap.ts` emits structured events via `debugEvent()`. Open DevTools Console and filter by `[debug]` to see the message lifecycle:
 
 - `renderer.gateway.event.received` — raw Gateway event arrived
 - `renderer.chat.delta.applied` — streaming delta appended

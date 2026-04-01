@@ -17,9 +17,11 @@ pnpm check            # full verification gate
 
 ## Rules
 
+- Architecture: `.claude/rules/architecture.md`
 - Coding: `.claude/rules/frontend.md`
 - Message persistence: `.claude/rules/message-persistence.md` (CRITICAL)
 - Main process: `.claude/rules/main-process.md`
+- Git conventions: `.claude/rules/git-conventions.md`
 
 ## Verification
 

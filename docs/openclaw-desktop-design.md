@@ -576,7 +576,7 @@ Only visible in the conversation flow view (hidden in the file browser view). Ke
 
 #### 3.5.5 Cleanup + Verification
 
-- [x] **T3.5-5** Remove dead code: `useAgentMessages.ts` (superseded by `useGatewayDispatcher.ts`)
+- [x] **T3.5-5** Remove dead code: `useAgentMessages.ts` (superseded by `useGatewayBootstrap.ts`)
 - [x] **T3.5-6** Verification passed: tsc --noEmit zero errors, dev server starts normally, UI screenshots confirm correct rendering
 
 #### 3.5.6 Visual Polish — Font/Size Bump
@@ -707,7 +707,7 @@ clawwork/
 │               ├── lib/         # utils.ts, session-sync.ts
 │               ├── components/  # ChatMessage, ChatInput, StreamingMessage, ToolCallCard, FileCard, FilePreview
 │               │   └── ui/      # shadcn/ui base components
-│               ├── hooks/       # useGatewayDispatcher, useTheme
+│               ├── hooks/       # useGatewayBootstrap, useResizePanel, useTraySync
 │               └── layouts/     # LeftNav/, MainArea/, RightPanel/, FileBrowser/, Settings/, Setup/
 ```
 

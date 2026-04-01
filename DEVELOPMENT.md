@@ -63,10 +63,11 @@ OpenClaw Gateway (:18789)
               |- workspace/   config + workspace bootstrap
               |- context/     file context scan/read/classify
               |- debug/       ring buffer + NDJSON export
+              |- net/         safe-fetch, SSRF guard
               |- tray.ts      tray integration
               `- quick-launch.ts
                     <- @clawwork/core ->
-                    |- stores/    message, task, ui (shared between desktop & pwa)
+                    |- stores/    message, task, room, ui (shared between desktop & pwa)
                     |- services/  dispatcher, session-sync, composer
                     |- ports/     platform abstraction interfaces
                     `- protocol/  message parsing, history normalization
@@ -99,6 +100,7 @@ packages/
         message-store.ts   message lifecycle, streaming, finalization
         task-store.ts      task CRUD, session adoption, selection
         ui-store.ts        panels, modals, preferences
+        room-store.ts      ensemble task rooms, conductor/performer orchestration
       services/            business logic
         gateway-dispatcher.ts  sole event router for all Gateway messages
         session-sync.ts    reconcile local state with Gateway sessions
@@ -126,6 +128,7 @@ packages/
       workspace/           app config and workspace init
       context/             @ file context indexing and bounded reads
       debug/               observability and export bundle
+      net/                 safe-fetch, SSRF guard
 
     src/preload/
       index.ts             `window.clawwork`
@@ -136,9 +139,9 @@ packages/
       stores/              Zustand domain stores
       layouts/             app regions
       components/          task/chat/artifact widgets
-      hooks/               gateway dispatch, theme, tray, voice
+      hooks/               gateway bootstrap, resize, tray, update, voice
       lib/                 session sync, slash commands, clipboard, voice
-      styles/              theme.css + design-tokens.ts
+      styles/              theme.css + typography.css + design-tokens.ts
       i18n/                locale resources
 ```
 
@@ -171,6 +174,7 @@ Task is the product primitive, not chat thread cosmetics.
 
 - `taskStore`: task lifecycle, selection, session adoption
 - `messageStore`: append, stream, finalize, map events to task
+- `roomStore`: ensemble task rooms, conductor/performer orchestration
 - session sync reconstructs local tasks from Gateway sessions and histories
 - every bug here is usually a routing bug, session-key bug, or optimistic UI bug
 
@@ -198,7 +202,7 @@ Renderer is a structured operator UI, not a generic chat page.
 - three-panel layout is fundamental
 - use one Zustand store per domain
 - keep selectors narrow; avoid broad subscriptions
-- `useGatewayDispatcher` is the event-routing choke point
+- `useGatewayBootstrap` is the event-routing choke point
 - reusable UI belongs in `components/`; page/region composition belongs in `layouts/`
 
 ### 6. File context and developer workflows
@@ -435,6 +439,6 @@ For a new engineer or AI agent, read in this order:
 9. `packages/desktop/src/main/index.ts`
 10. `packages/desktop/src/main/ws/gateway-client.ts`
 11. `packages/desktop/src/renderer/App.tsx`
-12. `packages/desktop/src/renderer/hooks/useGatewayDispatcher.ts`
+12. `packages/desktop/src/renderer/hooks/useGatewayBootstrap.ts`
 
 That is enough context to stop being dangerous.
