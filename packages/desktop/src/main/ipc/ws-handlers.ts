@@ -378,8 +378,7 @@ export function registerWsHandlers(): void {
       const result = await gw.listModels();
       return { ok: true, result };
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'unknown error';
-      return { ok: false, error: msg };
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
     }
   });
 

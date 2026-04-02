@@ -102,10 +102,10 @@ export function useChatSend(opts: UseChatSendOpts) {
   });
 
   const taskGwId = activeTask?.gatewayId ?? pendingNewTask?.gatewayId;
-  const modelCatalog = useUiStore(
-    (s) => (taskGwId ? s.modelCatalogByGateway[taskGwId] : undefined) ?? EMPTY_MODELS_CATALOG,
-  );
-  const toolsCatalog = useUiStore((s) => (taskGwId ? s.toolsCatalogByGateway[taskGwId] : undefined));
+  const modelCatalogByGateway = useUiStore((s) => s.modelCatalogByGateway);
+  const modelCatalog = (taskGwId ? modelCatalogByGateway[taskGwId] : undefined) ?? EMPTY_MODELS_CATALOG;
+  const toolsCatalogByGateway = useUiStore((s) => s.toolsCatalogByGateway);
+  const toolsCatalog = taskGwId ? toolsCatalogByGateway[taskGwId] : undefined;
   const currentModel = activeTask
     ? activeTask.model === GATEWAY_INJECTED_MODEL
       ? undefined
