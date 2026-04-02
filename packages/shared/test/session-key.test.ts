@@ -21,7 +21,7 @@ test('parseTaskIdFromSessionKey keeps accepting legacy task session keys', () =>
 describe('system session keys', () => {
   test('buildSystemSessionKey produces valid format', () => {
     const key = buildSystemSessionKey('agent-scaffold');
-    expect(key).toMatch(/^clawwork:system:agent-scaffold:[a-f0-9-]+$/);
+    expect(key).toMatch(/^agent:main:clawwork:system:agent-scaffold:[a-f0-9-]+$/);
   });
 
   test('buildSystemSessionKey generates unique keys', () => {

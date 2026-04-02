@@ -52,10 +52,10 @@ export function isClawWorkSession(sessionKey: string, deviceId?: string): boolea
   return CLAWWORK_DEVICE_SESSION_RE.test(sessionKey) || CLAWWORK_SESSION_RE.test(sessionKey);
 }
 
-const SYSTEM_SESSION_RE = /^clawwork:system:[^:]+:[a-f0-9-]+$/;
+const SYSTEM_SESSION_RE = /^agent:[^:]+:clawwork:system:[^:]+:[a-f0-9-]+$/;
 
-export function buildSystemSessionKey(purpose: string): string {
-  return `clawwork:system:${purpose}:${crypto.randomUUID()}`;
+export function buildSystemSessionKey(purpose: string, agentId: string = 'main'): string {
+  return `agent:${agentId}:clawwork:system:${purpose}:${crypto.randomUUID()}`;
 }
 
 export function isSystemSession(sessionKey: string): boolean {
