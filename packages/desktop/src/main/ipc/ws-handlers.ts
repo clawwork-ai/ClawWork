@@ -3,7 +3,15 @@ import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/
 import { readConfig, ensureDeviceId } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
 import { parseToolArgs } from '@clawwork/core';
-import type { ApprovalDecision, ChatAttachment, ExecApprovalResolveParams } from '@clawwork/shared';
+import type {
+  ApprovalDecision,
+  ChatAttachment,
+  ConfigPatchParams,
+  ConfigSetParams,
+  ExecApprovalResolveParams,
+  SkillInstallParams,
+  SkillUpdateParams,
+} from '@clawwork/shared';
 import { getDebugLogger } from '../debug/index.js';
 import type { GatewayClient } from '../ws/gateway-client.js';
 
@@ -508,6 +516,42 @@ export function registerWsHandlers(): void {
         agentId?: string;
       },
     ) => gatewayRpc(payload.gatewayId, (gw) => gw.getSkillsStatus(payload.agentId)),
+  );
+
+  ipcMain.handle('ws:skills-install', async (_event, payload: { gatewayId: string } & SkillInstallParams) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.installSkill(params));
+  });
+
+  ipcMain.handle('ws:skills-update', async (_event, payload: { gatewayId: string } & SkillUpdateParams) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.updateSkill(params));
+  });
+
+  ipcMain.handle('ws:skills-bins', async (_event, payload: { gatewayId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getSkillBins()),
+  );
+
+  ipcMain.handle('ws:config-get', async (_event, payload: { gatewayId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getConfig()),
+  );
+
+  ipcMain.handle('ws:config-set', async (_event, payload: { gatewayId: string } & ConfigSetParams) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.setConfig(params));
+  });
+
+  ipcMain.handle('ws:config-patch', async (_event, payload: { gatewayId: string } & ConfigPatchParams) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.patchConfig(params));
+  });
+
+  ipcMain.handle('ws:config-schema', async (_event, payload: { gatewayId: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getConfigSchema()),
+  );
+
+  ipcMain.handle('ws:config-schema-lookup', async (_event, payload: { gatewayId: string; path: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.lookupConfigSchema(payload.path)),
   );
 
   ipcMain.handle('ws:usage-status', async (_event, payload: { gatewayId: string }) =>

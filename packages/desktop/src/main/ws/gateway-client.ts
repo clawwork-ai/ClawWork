@@ -628,6 +628,52 @@ export class GatewayClient {
     return this.sendReq('skills.status', params);
   }
 
+  async installSkill(
+    params:
+      | { name: string; installId: string; dangerouslyForceUnsafeInstall?: boolean; timeoutMs?: number }
+      | { source: 'clawhub'; slug: string; version?: string; force?: boolean; timeoutMs?: number },
+  ): Promise<Record<string, unknown>> {
+    return this.sendReq('skills.install', params);
+  }
+
+  async updateSkill(
+    params:
+      | { skillKey: string; enabled?: boolean; apiKey?: string; env?: Record<string, string> }
+      | { source: 'clawhub'; slug?: string; all?: boolean },
+  ): Promise<Record<string, unknown>> {
+    return this.sendReq('skills.update', params);
+  }
+
+  async getSkillBins(): Promise<Record<string, unknown>> {
+    return this.sendReq('skills.bins', {});
+  }
+
+  async getConfig(): Promise<Record<string, unknown>> {
+    return this.sendReq('config.get', {});
+  }
+
+  async setConfig(params: { raw: string; baseHash?: string }): Promise<Record<string, unknown>> {
+    return this.sendReq('config.set', params);
+  }
+
+  async patchConfig(params: {
+    raw: string;
+    baseHash?: string;
+    sessionKey?: string;
+    note?: string;
+    restartDelayMs?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.sendReq('config.patch', params);
+  }
+
+  async getConfigSchema(): Promise<Record<string, unknown>> {
+    return this.sendReq('config.schema', {});
+  }
+
+  async lookupConfigSchema(path: string): Promise<Record<string, unknown>> {
+    return this.sendReq('config.schema.lookup', { path });
+  }
+
   async getUsageStatus(): Promise<Record<string, unknown>> {
     return this.sendReq('usage.status', {});
   }

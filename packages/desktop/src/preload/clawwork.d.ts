@@ -10,6 +10,18 @@ import type {
   CronRunResult,
   CronRunsParams,
   CronStatusResult,
+  SkillInstallParams,
+  SkillInstallResult,
+  SkillUpdateParams,
+  SkillUpdateResult,
+  SkillBinsResult,
+  ConfigSnapshot,
+  ConfigSetParams,
+  ConfigPatchParams,
+  ConfigSetResult,
+  ConfigPatchResult,
+  ConfigSchemaResult,
+  ConfigSchemaLookupResult,
 } from '@clawwork/shared';
 
 type IpcResult<T = Record<string, unknown>> = SharedIpcResult<T>;
@@ -244,6 +256,14 @@ export interface ClawWorkAPI {
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
   getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
+  installSkill: (gatewayId: string, params: SkillInstallParams) => Promise<IpcResult<SkillInstallResult>>;
+  updateSkill: (gatewayId: string, params: SkillUpdateParams) => Promise<IpcResult<SkillUpdateResult>>;
+  getSkillBins: (gatewayId: string) => Promise<IpcResult<SkillBinsResult>>;
+  getConfig: (gatewayId: string) => Promise<IpcResult<ConfigSnapshot>>;
+  setConfig: (gatewayId: string, params: ConfigSetParams) => Promise<IpcResult<ConfigSetResult>>;
+  patchConfig: (gatewayId: string, params: ConfigPatchParams) => Promise<IpcResult<ConfigPatchResult>>;
+  getConfigSchema: (gatewayId: string) => Promise<IpcResult<ConfigSchemaResult>>;
+  lookupConfigSchema: (gatewayId: string, path: string) => Promise<IpcResult<ConfigSchemaLookupResult>>;
 
   gatewayStatus: () => Promise<GatewayStatusMap>;
   syncSessions: () => Promise<SyncResult>;

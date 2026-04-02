@@ -299,6 +299,83 @@ export interface SkillStatusReport {
   skills: SkillStatusEntry[];
 }
 
+export type SkillInstallParams =
+  | { name: string; installId: string; dangerouslyForceUnsafeInstall?: boolean; timeoutMs?: number }
+  | { source: 'clawhub'; slug: string; version?: string; force?: boolean; timeoutMs?: number };
+
+export interface SkillInstallResult {
+  ok: boolean;
+  message: string;
+  stdout: string;
+  stderr: string;
+  code: number;
+  slug?: string;
+  version?: string;
+  targetDir?: string;
+}
+
+export type SkillUpdateParams =
+  | { skillKey: string; enabled?: boolean; apiKey?: string; env?: Record<string, string> }
+  | { source: 'clawhub'; slug?: string; all?: boolean };
+
+export interface SkillUpdateResult {
+  ok: boolean;
+  skillKey?: string;
+  config?: Record<string, unknown>;
+}
+
+export interface SkillBinsResult {
+  bins: string[];
+}
+
+export interface ConfigSnapshot {
+  raw: string;
+  hash: string;
+  config: Record<string, unknown>;
+  path: string;
+}
+
+export interface ConfigSetParams {
+  raw: string;
+  baseHash?: string;
+}
+
+export interface ConfigPatchParams {
+  raw: string;
+  baseHash?: string;
+  sessionKey?: string;
+  note?: string;
+  restartDelayMs?: number;
+}
+
+export interface ConfigSetResult {
+  ok: boolean;
+  path: string;
+  config: Record<string, unknown>;
+}
+
+export interface ConfigPatchResult {
+  ok: boolean;
+  noop?: boolean;
+  path: string;
+  config: Record<string, unknown>;
+}
+
+export interface ConfigSchemaResult {
+  schema: unknown;
+  uiHints: Record<string, unknown>;
+  version: string;
+  generatedAt: string;
+}
+
+export interface ConfigSchemaLookupResult {
+  path: string;
+  schema: unknown;
+  hint?: unknown;
+  hintPath?: string;
+  children: Array<{ path: string; schema: unknown; hint?: unknown }>;
+}
+
 export interface SessionPatchParams {
   sessionKey: string;
   thinkingLevel?: string | null;

@@ -6,6 +6,10 @@ import type {
   CronListParams,
   CronRunParams,
   CronRunsParams,
+  SkillInstallParams,
+  SkillUpdateParams,
+  ConfigSetParams,
+  ConfigPatchParams,
 } from '@clawwork/shared';
 import type { ClawWorkAPI, GatewayServerConfig } from './clawwork';
 
@@ -53,6 +57,19 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:tools-catalog', { gatewayId, agentId }),
     getSkillsStatus: (gatewayId: string, agentId?: string) =>
       ipcRenderer.invoke('ws:skills-status', { gatewayId, agentId }),
+    installSkill: (gatewayId: string, params: SkillInstallParams) =>
+      ipcRenderer.invoke('ws:skills-install', { gatewayId, ...params }),
+    updateSkill: (gatewayId: string, params: SkillUpdateParams) =>
+      ipcRenderer.invoke('ws:skills-update', { gatewayId, ...params }),
+    getSkillBins: (gatewayId: string) => ipcRenderer.invoke('ws:skills-bins', { gatewayId }),
+    getConfig: (gatewayId: string) => ipcRenderer.invoke('ws:config-get', { gatewayId }),
+    setConfig: (gatewayId: string, params: ConfigSetParams) =>
+      ipcRenderer.invoke('ws:config-set', { gatewayId, ...params }),
+    patchConfig: (gatewayId: string, params: ConfigPatchParams) =>
+      ipcRenderer.invoke('ws:config-patch', { gatewayId, ...params }),
+    getConfigSchema: (gatewayId: string) => ipcRenderer.invoke('ws:config-schema', { gatewayId }),
+    lookupConfigSchema: (gatewayId: string, path: string) =>
+      ipcRenderer.invoke('ws:config-schema-lookup', { gatewayId, path }),
 
     onGatewayEvent: (callback) => {
       const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {
