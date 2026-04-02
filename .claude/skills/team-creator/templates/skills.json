@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "{skill-id}": {
+      "source": "{owner/repo}",
+      "sourceType": "github",
+      "skillPath": "skills/{skill-id}/SKILL.md"
+    }
+  }
+}
