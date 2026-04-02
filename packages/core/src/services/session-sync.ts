@@ -249,6 +249,40 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
   }
 
+  function loadAndPersistMessages(params: {
+    taskId: string;
+    messages: Message[];
+    sessionKey: string;
+    agentId?: string;
+    existingMessages?: Message[];
+  }): void {
+    const mapped: Message[] = params.messages.map((message) => ({
+      ...message,
+      id: crypto.randomUUID(),
+      sessionKey: message.role === 'assistant' ? params.sessionKey : undefined,
+      agentId: message.role === 'assistant' ? params.agentId : undefined,
+    }));
+    const nextMessages = params.existingMessages
+      ? [...params.existingMessages, ...mapped].sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+      : mapped;
+
+    deps.getMessageStore().bulkLoad(params.taskId, nextMessages);
+
+    for (const msg of mapped) {
+      deps.persistence
+        .persistMessage({
+          id: msg.id,
+          taskId: msg.taskId,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp,
+          sessionKey: params.sessionKey,
+          toolCalls: msg.toolCalls,
+        })
+        .catch(() => {});
+    }
+  }
+
   async function syncFromGateway(): Promise<void> {
     try {
       await hydrateFromLocal();
@@ -290,48 +324,20 @@ export function createSessionSync(deps: SessionSyncDeps) {
           );
           if (newAssistantMsgs.length === 0) continue;
 
-          const mapped: Message[] = newAssistantMsgs.map((message) => ({
-            ...message,
-            id: crypto.randomUUID(),
+          loadAndPersistMessages({
+            taskId: d.taskId,
+            messages: newAssistantMsgs,
             sessionKey: d.sessionKey,
             agentId: d.agentId,
-          }));
-          const merged = [...local, ...mapped].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-          messageStore.bulkLoad(d.taskId, merged);
-          for (const msg of mapped) {
-            deps.persistence
-              .persistMessage({
-                id: msg.id,
-                taskId: msg.taskId,
-                role: msg.role,
-                content: msg.content,
-                timestamp: msg.timestamp,
-                sessionKey: d.sessionKey,
-                toolCalls: msg.toolCalls,
-              })
-              .catch(() => {});
-          }
+            existingMessages: local,
+          });
         } else {
-          const mapped: Message[] = collapsedMessages.map((message) => ({
-            ...message,
-            id: crypto.randomUUID(),
-            sessionKey: message.role === 'assistant' ? d.sessionKey : undefined,
-            agentId: message.role === 'assistant' ? d.agentId : undefined,
-          }));
-          messageStore.bulkLoad(d.taskId, mapped);
-          for (const msg of mapped) {
-            deps.persistence
-              .persistMessage({
-                id: msg.id,
-                taskId: msg.taskId,
-                role: msg.role,
-                content: msg.content,
-                timestamp: msg.timestamp,
-                sessionKey: d.sessionKey,
-                toolCalls: msg.toolCalls,
-              })
-              .catch(() => {});
-          }
+          loadAndPersistMessages({
+            taskId: d.taskId,
+            messages: collapsedMessages,
+            sessionKey: d.sessionKey,
+            agentId: d.agentId,
+          });
         }
       }
     } catch {
