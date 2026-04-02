@@ -38,6 +38,7 @@ import ChatInput from '@/components/ChatInput';
 import AgentIcon from '@/components/AgentIcon';
 import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
+import EnsembleAgentBar from '@/components/EnsembleAgentBar';
 import FileBrowser from '../FileBrowser';
 import CronPanel from '@/layouts/CronPanel';
 import TeamsPanel from '@/layouts/TeamsPanel';
@@ -962,12 +963,13 @@ export default function MainArea({ onTogglePanel }: MainAreaProps) {
           <TeamsPanel />
         </div>
       ) : (
-        <div key={`chat-${activeTaskId ?? 'welcome'}`} className="flex flex-col flex-1 min-h-0">
+        <div key={`chat-${activeTaskId ?? 'welcome'}`} className="relative flex flex-col flex-1 min-h-0">
           <ChatHeader
             onTogglePanel={onTogglePanel}
             messageLayout={messageLayout}
             onToggleMessageLayout={toggleMessageLayout}
           />
+          {activeTaskId && <EnsembleAgentBar taskId={activeTaskId} />}
           <ChatContent />
         </div>
       )}
