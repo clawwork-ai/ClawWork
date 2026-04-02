@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import type { MainView } from '@clawwork/core';
 import {
   insertTranscriptAtCaret,
   resolveVoicePressAction,
@@ -17,7 +18,7 @@ interface UseVoiceInputOptions {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   hasActiveTask: boolean;
   activeTaskKey?: string | null;
-  mainView: 'chat' | 'files' | 'archived' | 'cron';
+  mainView: MainView;
   settingsOpen: boolean;
   loadIntroSeen: () => Promise<boolean>;
   markIntroSeen: () => Promise<void>;

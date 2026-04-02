@@ -579,6 +579,20 @@
     "deleteFailed": "Job konnte nicht geloescht werden",
     "loadingCatalogs": "Kataloge werden geladen…"
   },
+  "teams": {
+    "title": "Teams",
+    "createTeam": "Team erstellen",
+    "teamName": "Teamname",
+    "description": "Beschreibung",
+    "memberCount": "{{count}} Mitglieder",
+    "emptyTitle": "Noch keine Teams",
+    "emptyDesc": "Erstellen Sie ein Team, um loszulegen",
+    "namePlaceholder": "Teamname eingeben",
+    "descPlaceholder": "Was macht dieses Team?",
+    "startChat": "Chat starten",
+    "editTeam": "Bearbeiten",
+    "deleteTeam": "Löschen"
+  },
   "commandPalette": {
     "placeholder": "Befehl eingeben oder suchen…",
     "recentTasks": "Letzte Aufgaben",

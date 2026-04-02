@@ -579,6 +579,20 @@
     "deleteFailed": "删除任务失败",
     "loadingCatalogs": "正在加载目录..."
   },
+  "teams": {
+    "title": "团队",
+    "createTeam": "创建团队",
+    "teamName": "团队名称",
+    "description": "描述",
+    "memberCount": "{{count}} 位成员",
+    "emptyTitle": "还没有团队",
+    "emptyDesc": "创建一个团队以开始",
+    "namePlaceholder": "输入团队名称",
+    "descPlaceholder": "这个团队做什么？",
+    "startChat": "发起对话",
+    "editTeam": "编辑",
+    "deleteTeam": "删除"
+  },
   "commandPalette": {
     "placeholder": "输入命令或搜索…",
     "recentTasks": "最近任务",

@@ -40,6 +40,7 @@ import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
 import FileBrowser from '../FileBrowser';
 import CronPanel from '@/layouts/CronPanel';
+import TeamsPanel from '@/layouts/TeamsPanel';
 import logo from '@/assets/logo.png';
 import { useUsageStore } from '@/stores/usageStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
@@ -930,6 +931,10 @@ export default function MainArea({ onTogglePanel }: MainAreaProps) {
       ) : mainView === 'cron' ? (
         <div className="flex-1 min-h-0">
           <CronPanel />
+        </div>
+      ) : mainView === 'teams' ? (
+        <div className="flex-1 min-h-0">
+          <TeamsPanel />
         </div>
       ) : (
         <div key={`chat-${activeTaskId ?? 'welcome'}`} className="flex flex-col flex-1 min-h-0">

@@ -579,6 +579,20 @@
     "deleteFailed": "刪除工作失敗",
     "loadingCatalogs": "載入目錄中…"
   },
+  "teams": {
+    "title": "團隊",
+    "createTeam": "建立團隊",
+    "teamName": "團隊名稱",
+    "description": "描述",
+    "memberCount": "{{count}} 位成員",
+    "emptyTitle": "還沒有團隊",
+    "emptyDesc": "建立一個團隊以開始",
+    "namePlaceholder": "輸入團隊名稱",
+    "descPlaceholder": "這個團隊做什麼？",
+    "startChat": "發起對話",
+    "editTeam": "編輯",
+    "deleteTeam": "刪除"
+  },
   "commandPalette": {
     "placeholder": "輸入命令或搜尋…",
     "recentTasks": "最近任務",

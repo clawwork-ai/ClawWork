@@ -579,6 +579,20 @@
     "deleteFailed": "Error al eliminar el trabajo",
     "loadingCatalogs": "Cargando catálogos..."
   },
+  "teams": {
+    "title": "Equipos",
+    "createTeam": "Crear equipo",
+    "teamName": "Nombre del equipo",
+    "description": "Descripción",
+    "memberCount": "{{count}} miembros",
+    "emptyTitle": "Aún no hay equipos",
+    "emptyDesc": "Crea un equipo para comenzar",
+    "namePlaceholder": "Nombre del equipo",
+    "descPlaceholder": "¿Qué hace este equipo?",
+    "startChat": "Iniciar chat",
+    "editTeam": "Editar",
+    "deleteTeam": "Eliminar"
+  },
   "commandPalette": {
     "placeholder": "Escribe un comando o busca…",
     "recentTasks": "Tareas recientes",

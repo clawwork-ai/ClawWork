@@ -1,4 +1,4 @@
-type MainView = 'chat' | 'files' | 'archived' | 'cron';
+import type { MainView } from '@clawwork/core';
 
 interface InsertTranscriptParams {
   value: string;

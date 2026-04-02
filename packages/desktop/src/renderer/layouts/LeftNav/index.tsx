@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Search, FolderOpen, Settings, Archive, PanelLeftClose, PanelLeftOpen, Clock } from 'lucide-react';
+import { Plus, Search, FolderOpen, Settings, Archive, PanelLeftClose, PanelLeftOpen, Clock, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
@@ -318,6 +318,16 @@ export default function LeftNav() {
             className="text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
           />
           <IconButton
+            icon={Users}
+            tooltip={t('teams.title')}
+            onClick={() => setMainView('teams')}
+            className={
+              mainView === 'teams'
+                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+            }
+          />
+          <IconButton
             icon={FolderOpen}
             tooltip={t('common.fileManager')}
             onClick={() => setMainView('files')}
@@ -452,7 +462,13 @@ export default function LeftNav() {
         </AnimatePresence>
 
         <div className="flex flex-col h-full">
-          <div className="px-3 pb-1 flex-shrink-0">
+          <div className="px-3 pb-1 flex-shrink-0 space-y-0.5">
+            <NavButton
+              icon={Users}
+              label={t('teams.title')}
+              active={mainView === 'teams'}
+              onClick={() => setMainView('teams')}
+            />
             <NavButton
               icon={FolderOpen}
               label={t('common.fileManager')}

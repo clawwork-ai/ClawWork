@@ -579,6 +579,20 @@
     "deleteFailed": "작업 삭제에 실패했습니다",
     "loadingCatalogs": "카탈로그 로딩 중..."
   },
+  "teams": {
+    "title": "팀",
+    "createTeam": "팀 만들기",
+    "teamName": "팀 이름",
+    "description": "설명",
+    "memberCount": "{{count}}명",
+    "emptyTitle": "아직 팀이 없습니다",
+    "emptyDesc": "팀을 만들어 시작하세요",
+    "namePlaceholder": "팀 이름 입력",
+    "descPlaceholder": "이 팀은 무엇을 하나요?",
+    "startChat": "대화 시작",
+    "editTeam": "편집",
+    "deleteTeam": "삭제"
+  },
   "commandPalette": {
     "placeholder": "명령어 입력 또는 검색…",
     "recentTasks": "최근 작업",
