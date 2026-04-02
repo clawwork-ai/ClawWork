@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
 
 export const tasks = sqliteTable('tasks', {
   id: text('id').primaryKey(),
@@ -53,6 +53,31 @@ export const taskRoomSessions = sqliteTable('task_room_sessions', {
   emoji: text('emoji'),
   verifiedAt: text('verified_at').notNull(),
 });
+
+export const teams = sqliteTable('teams', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  emoji: text('emoji').default(''),
+  description: text('description').default(''),
+  gatewayId: text('gateway_id').notNull(),
+  source: text('source').default('local'),
+  version: text('version').default(''),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const teamAgents = sqliteTable(
+  'team_agents',
+  {
+    teamId: text('team_id')
+      .notNull()
+      .references(() => teams.id),
+    agentId: text('agent_id').notNull(),
+    role: text('role').default(''),
+    isManager: integer('is_manager', { mode: 'boolean' }).default(false),
+  },
+  (table) => [primaryKey({ columns: [table.teamId, table.agentId] })],
+);
 
 export const artifacts = sqliteTable('artifacts', {
   id: text('id').primaryKey(),

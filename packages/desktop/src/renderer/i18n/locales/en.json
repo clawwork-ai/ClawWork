@@ -11,6 +11,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "close": "Close",
+    "loading": "Loading...",
     "gateway": "Gateway",
     "dark": "Dark",
     "light": "Light",
@@ -591,7 +592,10 @@
     "descPlaceholder": "What does this team do?",
     "startChat": "Start Chat",
     "editTeam": "Edit",
-    "deleteTeam": "Delete"
+    "deleteTeam": "Delete",
+    "gateway": "Gateway",
+    "selectAgents": "Agents",
+    "noAgents": "No agents available"
   },
   "commandPalette": {
     "placeholder": "Type a command or search…",

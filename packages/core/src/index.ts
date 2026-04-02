@@ -61,6 +61,9 @@ export type { TaskState, TaskStoreDeps, PendingNewTask } from './stores/task-sto
 export { createRoomStore } from './stores/room-store.js';
 export type { RoomState, RoomStoreDeps, PerformerAgent } from './stores/room-store.js';
 
+export { createTeamStore } from './stores/team-store.js';
+export type { TeamState, TeamStoreDeps } from './stores/team-store.js';
+
 export { createSystemSessionStore } from './stores/system-session-store.js';
 export type { SystemSessionState, SystemSessionMessage, SystemSessionStatus } from './stores/system-session-store.js';
 

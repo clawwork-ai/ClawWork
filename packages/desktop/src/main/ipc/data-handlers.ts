@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { eq, desc } from 'drizzle-orm';
 import { getDb, isDbReady } from '../db/index.js';
-import { tasks, messages, artifacts, taskRooms, taskRoomSessions } from '../db/schema.js';
+import { tasks, messages, artifacts, taskRooms, taskRoomSessions, teams, teamAgents } from '../db/schema.js';
 import { autoExtractArtifacts } from '../artifact/auto-extract.js';
 import { getWorkspacePath } from '../workspace/config.js';
 
@@ -340,6 +340,141 @@ export function registerDataHandlers(): void {
       return { ok: true };
     } catch (err) {
       console.error('[data] delete-room failed:', err);
+      return ipcError(err);
+    }
+  });
+
+  ipcMain.handle('data:teams-list', () => {
+    if (!isDbReady()) return { ok: true, result: [] };
+    try {
+      const db = getDb();
+      const rows = db.select().from(teams).orderBy(desc(teams.createdAt)).all();
+      const agentRows = db.select().from(teamAgents).all();
+      const agentsByTeam = new Map<
+        string,
+        Array<{ agentId: string; role: string | null; isManager: boolean | null }>
+      >();
+      for (const a of agentRows) {
+        let list = agentsByTeam.get(a.teamId);
+        if (!list) {
+          list = [];
+          agentsByTeam.set(a.teamId, list);
+        }
+        list.push({ agentId: a.agentId, role: a.role, isManager: a.isManager });
+      }
+      return {
+        ok: true,
+        result: rows.map((r) => ({
+          ...r,
+          agents: (agentsByTeam.get(r.id) ?? []).map((a) => ({
+            agentId: a.agentId,
+            role: a.role ?? '',
+            isManager: a.isManager ?? false,
+          })),
+        })),
+      };
+    } catch (err) {
+      console.error('[data] teams-list failed:', err);
+      return ipcError(err);
+    }
+  });
+
+  ipcMain.handle('data:team-get', (_event, params: { id: string }) => {
+    if (!isDbReady()) return ipcError(new Error('database not ready'));
+    try {
+      const db = getDb();
+      const row = db.select().from(teams).where(eq(teams.id, params.id)).get();
+      if (!row) return { ok: true, result: null };
+      const agents = db
+        .select()
+        .from(teamAgents)
+        .where(eq(teamAgents.teamId, params.id))
+        .all()
+        .map((a) => ({ agentId: a.agentId, role: a.role ?? '', isManager: a.isManager ?? false }));
+      return { ok: true, result: { ...row, agents } };
+    } catch (err) {
+      console.error('[data] team-get failed:', err);
+      return ipcError(err);
+    }
+  });
+
+  ipcMain.handle(
+    'data:team-persist',
+    (
+      _event,
+      params: {
+        id: string;
+        name: string;
+        emoji?: string;
+        description?: string;
+        gatewayId: string;
+        source?: string;
+        version?: string;
+        agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
+        createdAt: string;
+        updatedAt: string;
+      },
+    ) => {
+      if (!isDbReady()) return ipcError(new Error('database not ready'));
+      try {
+        const db = getDb();
+        db.transaction((tx) => {
+          tx.insert(teams)
+            .values({
+              id: params.id,
+              name: params.name,
+              emoji: params.emoji ?? '',
+              description: params.description ?? '',
+              gatewayId: params.gatewayId,
+              source: params.source ?? 'local',
+              version: params.version ?? '',
+              createdAt: params.createdAt,
+              updatedAt: params.updatedAt,
+            })
+            .onConflictDoUpdate({
+              target: [teams.id],
+              set: {
+                name: params.name,
+                emoji: params.emoji ?? '',
+                description: params.description ?? '',
+                gatewayId: params.gatewayId,
+                source: params.source ?? 'local',
+                version: params.version ?? '',
+                updatedAt: params.updatedAt,
+              },
+            })
+            .run();
+          tx.delete(teamAgents).where(eq(teamAgents.teamId, params.id)).run();
+          for (const agent of params.agents) {
+            tx.insert(teamAgents)
+              .values({
+                teamId: params.id,
+                agentId: agent.agentId,
+                role: agent.role ?? '',
+                isManager: agent.isManager ?? false,
+              })
+              .run();
+          }
+        });
+        return { ok: true };
+      } catch (err) {
+        console.error('[data] team-persist failed:', err);
+        return ipcError(err);
+      }
+    },
+  );
+
+  ipcMain.handle('data:team-delete', (_event, params: { id: string }) => {
+    if (!isDbReady()) return ipcError(new Error('database not ready'));
+    try {
+      const db = getDb();
+      db.transaction((tx) => {
+        tx.delete(teamAgents).where(eq(teamAgents.teamId, params.id)).run();
+        tx.delete(teams).where(eq(teams.id, params.id)).run();
+      });
+      return { ok: true };
+    } catch (err) {
+      console.error('[data] team-delete failed:', err);
       return ipcError(err);
     }
   });

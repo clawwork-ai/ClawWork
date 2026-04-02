@@ -11,6 +11,7 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "close": "Schliessen",
+    "loading": "Laden...",
     "gateway": "Gateway",
     "dark": "Dunkel",
     "light": "Hell",
@@ -591,7 +592,10 @@
     "descPlaceholder": "Was macht dieses Team?",
     "startChat": "Chat starten",
     "editTeam": "Bearbeiten",
-    "deleteTeam": "Löschen"
+    "deleteTeam": "Löschen",
+    "gateway": "Gateway",
+    "selectAgents": "Agenten",
+    "noAgents": "Keine Agenten verfügbar"
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben oder suchen…",

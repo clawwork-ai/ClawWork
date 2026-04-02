@@ -136,6 +136,30 @@ function openDatabaseAt(workspacePath: string): void {
     sqlite.exec("ALTER TABLE artifacts ADD COLUMN content_text TEXT NOT NULL DEFAULT ''");
   } catch {}
 
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS teams (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      emoji TEXT DEFAULT '',
+      description TEXT DEFAULT '',
+      gateway_id TEXT NOT NULL,
+      source TEXT DEFAULT 'local',
+      version TEXT DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `);
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS team_agents (
+      team_id TEXT NOT NULL REFERENCES teams(id),
+      agent_id TEXT NOT NULL,
+      role TEXT DEFAULT '',
+      is_manager INTEGER DEFAULT 0,
+      PRIMARY KEY (team_id, agent_id)
+    )
+  `);
+
   initFTS(sqlite);
 
   db = drizzle(sqlite, { schema });

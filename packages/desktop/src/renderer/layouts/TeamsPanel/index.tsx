@@ -1,37 +1,61 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Users, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import EmptyState from '@/components/semantic/EmptyState';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTeamStore } from '@/stores/teamStore';
+import { useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
 import CreateTeamDialog from './CreateTeamDialog';
-import type { Team } from './TeamCard';
 
 export default function TeamsPanel() {
   const { t } = useTranslation();
-  const [teams, setTeams] = useState<Team[]>([]);
+  const teamsMap = useTeamStore((s) => s.teams);
+  const loadTeams = useTeamStore((s) => s.loadTeams);
+  const createTeam = useTeamStore((s) => s.createTeam);
+  const deleteTeamAction = useTeamStore((s) => s.deleteTeam);
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const handleCreate = useCallback((data: { name: string; emoji: string; description: string }) => {
-    const newTeam: Team = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      emoji: data.emoji,
-      description: data.description,
-      memberCount: 1,
-    };
-    setTeams((prev) => [...prev, newTeam]);
-  }, []);
+  const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
+
+  useEffect(() => {
+    loadTeams();
+  }, [loadTeams]);
+
+  const handleCreate = useCallback(
+    (data: {
+      name: string;
+      emoji: string;
+      description: string;
+      gatewayId: string;
+      agents: Array<{ agentId: string; role: string; isManager: boolean }>;
+    }) => {
+      createTeam({
+        name: data.name,
+        emoji: data.emoji,
+        description: data.description,
+        gatewayId: data.gatewayId,
+        source: 'local',
+        version: '',
+        agents: data.agents,
+      });
+    },
+    [createTeam],
+  );
 
   const handleStartChat = useCallback((_teamId: string) => {}, []);
 
   const handleEdit = useCallback((_teamId: string) => {}, []);
 
-  const handleDelete = useCallback((teamId: string) => {
-    setTeams((prev) => prev.filter((t) => t.id !== teamId));
-  }, []);
+  const handleDelete = useCallback(
+    (teamId: string) => {
+      deleteTeamAction(teamId);
+    },
+    [deleteTeamAction],
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -81,7 +105,12 @@ export default function TeamsPanel() {
         )}
       </ScrollArea>
 
-      <CreateTeamDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={handleCreate} />
+      <CreateTeamDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        defaultGatewayId={defaultGatewayId ?? ''}
+        onCreate={handleCreate}
+      />
     </div>
   );
 }

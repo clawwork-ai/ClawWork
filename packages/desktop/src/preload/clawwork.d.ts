@@ -1,6 +1,7 @@
 import type {
   IpcResult as SharedIpcResult,
   ChatAttachment as SharedChatAttachment,
+  Team,
   ApprovalDecision,
   CronJob,
   CronJobCreate,
@@ -477,6 +478,22 @@ export interface ClawWorkAPI {
   removeCronJob: (gatewayId: string, jobId: string) => Promise<IpcResult>;
   runCronJob: (gatewayId: string, jobId: string, mode?: 'due' | 'force') => Promise<IpcResult<CronRunResult>>;
   listCronRuns: (gatewayId: string, params?: CronRunsParams) => Promise<IpcResult>;
+
+  listTeams: () => Promise<IpcResult<Team[]>>;
+  getTeam: (id: string) => Promise<IpcResult<Team | null>>;
+  persistTeam: (team: {
+    id: string;
+    name: string;
+    emoji?: string;
+    description?: string;
+    gatewayId: string;
+    source?: string;
+    version?: string;
+    agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
+    createdAt: string;
+    updatedAt: string;
+  }) => Promise<IpcResult>;
+  deleteTeam: (id: string) => Promise<IpcResult>;
 
   saveAgentAvatar: (gatewayId: string, agentId: string, dataUrl: string) => Promise<IpcResult>;
   deleteAgentAvatar: (gatewayId: string, agentId: string) => Promise<IpcResult>;

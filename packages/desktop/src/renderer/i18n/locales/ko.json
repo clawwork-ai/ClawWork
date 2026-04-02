@@ -11,6 +11,7 @@
     "cancel": "취소",
     "save": "저장",
     "close": "닫기",
+    "loading": "로딩 중...",
     "gateway": "게이트웨이",
     "dark": "다크",
     "light": "라이트",
@@ -591,7 +592,10 @@
     "descPlaceholder": "이 팀은 무엇을 하나요?",
     "startChat": "대화 시작",
     "editTeam": "편집",
-    "deleteTeam": "삭제"
+    "deleteTeam": "삭제",
+    "gateway": "게이트웨이",
+    "selectAgents": "에이전트",
+    "noAgents": "사용 가능한 에이전트가 없습니다"
   },
   "commandPalette": {
     "placeholder": "명령어 입력 또는 검색…",

@@ -58,6 +58,25 @@ export interface TaskRoom {
   performers: RoomPerformer[];
 }
 
+export interface TeamAgent {
+  agentId: string;
+  role: string;
+  isManager: boolean;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  gatewayId: string;
+  source: 'local' | 'hub';
+  version: string;
+  agents: TeamAgent[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MessageImageAttachment {
   fileName: string;
   dataUrl: string;

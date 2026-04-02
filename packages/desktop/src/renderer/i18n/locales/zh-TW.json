@@ -11,6 +11,7 @@
     "cancel": "取消",
     "save": "儲存",
     "close": "關閉",
+    "loading": "載入中...",
     "gateway": "Gateway",
     "dark": "深色",
     "light": "淺色",
@@ -591,7 +592,10 @@
     "descPlaceholder": "這個團隊做什麼？",
     "startChat": "發起對話",
     "editTeam": "編輯",
-    "deleteTeam": "刪除"
+    "deleteTeam": "刪除",
+    "gateway": "閘道器",
+    "selectAgents": "選擇 Agent",
+    "noAgents": "暫無可用 Agent"
   },
   "commandPalette": {
     "placeholder": "輸入命令或搜尋…",

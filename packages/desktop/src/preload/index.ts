@@ -367,6 +367,22 @@ function buildApi(): ClawWorkAPI {
     listCronRuns: (gatewayId: string, params?: CronRunsParams) =>
       ipcRenderer.invoke('ws:cron-runs', { gatewayId, ...params }),
 
+    listTeams: () => ipcRenderer.invoke('data:teams-list'),
+    getTeam: (id: string) => ipcRenderer.invoke('data:team-get', { id }),
+    persistTeam: (team: {
+      id: string;
+      name: string;
+      emoji?: string;
+      description?: string;
+      gatewayId: string;
+      source?: string;
+      version?: string;
+      agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
+      createdAt: string;
+      updatedAt: string;
+    }) => ipcRenderer.invoke('data:team-persist', team),
+    deleteTeam: (id: string) => ipcRenderer.invoke('data:team-delete', { id }),
+
     saveAgentAvatar: (gatewayId: string, agentId: string, dataUrl: string) =>
       ipcRenderer.invoke('avatar:save', { gatewayId, agentId, dataUrl }),
     deleteAgentAvatar: (gatewayId: string, agentId: string) =>

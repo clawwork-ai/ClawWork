@@ -1,0 +1,1 @@
+export { useTeamStore } from '../platform';

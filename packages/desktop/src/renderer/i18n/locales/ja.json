@@ -11,6 +11,7 @@
     "cancel": "キャンセル",
     "save": "保存",
     "close": "閉じる",
+    "loading": "読み込み中...",
     "gateway": "ゲートウェイ",
     "dark": "ダーク",
     "light": "ライト",
@@ -591,7 +592,10 @@
     "descPlaceholder": "このチームは何をしますか？",
     "startChat": "チャットを開始",
     "editTeam": "編集",
-    "deleteTeam": "削除"
+    "deleteTeam": "削除",
+    "gateway": "ゲートウェイ",
+    "selectAgents": "エージェント",
+    "noAgents": "利用可能なエージェントがありません"
   },
   "commandPalette": {
     "placeholder": "コマンドを入力または検索…",

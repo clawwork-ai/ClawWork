@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { MessageSquare, MoreHorizontal, Pencil, Trash2, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import type { Team } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
@@ -11,22 +12,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface Team {
-  id: string;
-  name: string;
-  emoji: string;
-  description: string;
-  memberCount: number;
-}
-
 interface TeamCardProps {
   team: Team;
   onStartChat: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
-
-export type { Team };
 
 export default function TeamCard({ team, onStartChat, onEdit, onDelete }: TeamCardProps) {
   const { t } = useTranslation();
@@ -69,7 +60,7 @@ export default function TeamCard({ team, onStartChat, onEdit, onDelete }: TeamCa
       <div className="flex w-full items-center justify-between">
         <div className="type-meta flex items-center gap-1.5 text-[var(--text-muted)]">
           <Users size={13} className="opacity-60" />
-          <span>{t('teams.memberCount', { count: team.memberCount })}</span>
+          <span>{t('teams.memberCount', { count: team.agents.length })}</span>
         </div>
         <Button size="sm" onClick={onStartChat}>
           <MessageSquare size={14} />

@@ -11,6 +11,7 @@
     "cancel": "取消",
     "save": "保存",
     "close": "关闭",
+    "loading": "加载中...",
     "gateway": "网关",
     "dark": "深色",
     "light": "浅色",
@@ -591,7 +592,10 @@
     "descPlaceholder": "这个团队做什么？",
     "startChat": "发起对话",
     "editTeam": "编辑",
-    "deleteTeam": "删除"
+    "deleteTeam": "删除",
+    "gateway": "网关",
+    "selectAgents": "选择 Agent",
+    "noAgents": "暂无可用 Agent"
   },
   "commandPalette": {
     "placeholder": "输入命令或搜索…",

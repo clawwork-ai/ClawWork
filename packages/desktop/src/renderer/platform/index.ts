@@ -4,9 +4,18 @@ import {
   createTaskStore,
   createUiStore,
   createRoomStore,
+  createTeamStore,
   createChatComposer,
 } from '@clawwork/core';
-import type { MessageState, TaskState, UiState, RoomState, PlatformPorts, ChatComposer } from '@clawwork/core';
+import type {
+  MessageState,
+  TaskState,
+  UiState,
+  RoomState,
+  TeamState,
+  PlatformPorts,
+  ChatComposer,
+} from '@clawwork/core';
 import { toast } from 'sonner';
 import { createElectronPorts } from './electron-adapter';
 import i18n from '../i18n';
@@ -65,6 +74,13 @@ const taskStoreApi = createTaskStore({
     return entry ? { agents: entry.agents, defaultId: entry.defaultId } : { agents: [], defaultId: null };
   },
   onTaskCreated: () => uiStoreApi.getState().setMainView('chat'),
+});
+
+const teamStoreApi = createTeamStore({
+  listTeams: () => window.clawwork.listTeams(),
+  getTeam: (id) => window.clawwork.getTeam(id),
+  persistTeam: (team) => window.clawwork.persistTeam(team),
+  deleteTeam: (id) => window.clawwork.deleteTeam(id),
 });
 
 const roomStoreApi = createRoomStore({
@@ -146,3 +162,12 @@ export function useRoomStore<T>(selector?: (state: RoomState) => T) {
 useRoomStore.getState = roomStoreApi.getState;
 useRoomStore.setState = roomStoreApi.setState;
 useRoomStore.subscribe = roomStoreApi.subscribe;
+
+export function useTeamStore(): TeamState;
+export function useTeamStore<T>(selector: (state: TeamState) => T): T;
+export function useTeamStore<T>(selector?: (state: TeamState) => T) {
+  return useStore(teamStoreApi, selector!);
+}
+useTeamStore.getState = teamStoreApi.getState;
+useTeamStore.setState = teamStoreApi.setState;
+useTeamStore.subscribe = teamStoreApi.subscribe;

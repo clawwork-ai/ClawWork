@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
+import type { AgentInfo } from '@clawwork/shared';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { useUiStore } from '@/platform';
 
 const EMOJI_OPTIONS = [
   '🤖',
@@ -41,28 +44,82 @@ const EMOJI_OPTIONS = [
 interface CreateTeamDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (data: { name: string; emoji: string; description: string }) => void;
+  defaultGatewayId: string;
+  onCreate: (data: {
+    name: string;
+    emoji: string;
+    description: string;
+    gatewayId: string;
+    agents: Array<{ agentId: string; role: string; isManager: boolean }>;
+  }) => void;
 }
 
-export default function CreateTeamDialog({ open, onOpenChange, onCreate }: CreateTeamDialogProps) {
+export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId, onCreate }: CreateTeamDialogProps) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🤖');
   const [description, setDescription] = useState('');
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [gatewayId, setGatewayId] = useState(defaultGatewayId);
+  const [selectedAgentIds, setSelectedAgentIds] = useState<Set<string>>(new Set());
+  const [agentCatalog, setAgentCatalog] = useState<AgentInfo[]>([]);
+  const [loadingAgents, setLoadingAgents] = useState(false);
+
+  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
+  const gateways = useMemo(() => Object.entries(gatewayInfoMap), [gatewayInfoMap]);
+
+  useEffect(() => {
+    if (!open) return;
+    setGatewayId(defaultGatewayId);
+  }, [open, defaultGatewayId]);
+
+  useEffect(() => {
+    if (!open || !gatewayId) return;
+    setLoadingAgents(true);
+    setSelectedAgentIds(new Set());
+    window.clawwork
+      .listAgents(gatewayId)
+      .then((res) => {
+        if (res.ok && res.result) {
+          const payload = res.result as { agents?: AgentInfo[] };
+          setAgentCatalog(payload.agents ?? []);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingAgents(false));
+  }, [open, gatewayId]);
 
   const resetForm = useCallback(() => {
     setName('');
     setEmoji('🤖');
     setDescription('');
+    setSelectedAgentIds(new Set());
+    setAgentCatalog([]);
+  }, []);
+
+  const toggleAgent = useCallback((agentId: string) => {
+    setSelectedAgentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(agentId)) {
+        next.delete(agentId);
+      } else {
+        next.add(agentId);
+      }
+      return next;
+    });
   }, []);
 
   const handleCreate = useCallback(() => {
-    if (!name.trim()) return;
-    onCreate({ name: name.trim(), emoji, description: description.trim() });
+    if (!name.trim() || selectedAgentIds.size === 0) return;
+    const agents = Array.from(selectedAgentIds).map((agentId) => ({
+      agentId,
+      role: '',
+      isManager: false,
+    }));
+    onCreate({ name: name.trim(), emoji, description: description.trim(), gatewayId, agents });
     resetForm();
     onOpenChange(false);
-  }, [name, emoji, description, onCreate, resetForm, onOpenChange]);
+  }, [name, emoji, description, gatewayId, selectedAgentIds, onCreate, resetForm, onOpenChange]);
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
@@ -131,13 +188,60 @@ export default function CreateTeamDialog({ open, onOpenChange, onCreate }: Creat
               className="w-full px-3 py-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] glow-focus focus:border-transparent transition-all resize-none"
             />
           </div>
+
+          {gateways.length > 1 && (
+            <div className="space-y-1">
+              <label className="type-label text-[var(--text-secondary)]">{t('teams.gateway')}</label>
+              <select
+                value={gatewayId}
+                onChange={(e) => setGatewayId(e.target.value)}
+                className="w-full h-[var(--density-control-height)] px-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-primary)] glow-focus focus:border-transparent transition-all"
+              >
+                {gateways.map(([id, info]) => (
+                  <option key={id} value={id}>
+                    {info.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label className="type-label text-[var(--text-secondary)]">
+              {t('teams.selectAgents')} {selectedAgentIds.size > 0 && `(${selectedAgentIds.size})`}
+            </label>
+            {loadingAgents ? (
+              <div className="py-4 text-center type-body text-[var(--text-muted)]">{t('common.loading')}</div>
+            ) : agentCatalog.length === 0 ? (
+              <div className="py-4 text-center type-body text-[var(--text-muted)]">{t('teams.noAgents')}</div>
+            ) : (
+              <div className="max-h-48 overflow-y-auto rounded-md border border-[var(--border)]">
+                {agentCatalog.map((agent) => {
+                  const selected = selectedAgentIds.has(agent.id);
+                  return (
+                    <button
+                      key={agent.id}
+                      onClick={() => toggleAgent(agent.id)}
+                      className="flex w-full items-center gap-3 px-3 py-2 transition-colors hover:bg-[var(--bg-hover)] cursor-pointer border-b border-[var(--border)] last:border-b-0"
+                    >
+                      <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border border-[var(--border)] bg-[var(--bg-primary)]">
+                        {selected && <Check size={12} className="text-[var(--text-primary)]" />}
+                      </div>
+                      {agent.identity?.emoji && <span className="emoji-sm">{agent.identity.emoji}</span>}
+                      <span className="type-body text-[var(--text-primary)] truncate">{agent.name ?? agent.id}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleCreate} disabled={!name.trim()}>
+          <Button onClick={handleCreate} disabled={!name.trim() || selectedAgentIds.size === 0}>
             {t('teams.createTeam')}
           </Button>
         </DialogFooter>
