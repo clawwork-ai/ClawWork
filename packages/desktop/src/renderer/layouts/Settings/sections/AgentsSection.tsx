@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Save,
   ImagePlus,
+  Sparkles,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ import type {
   SkillStatusEntry,
   SkillStatusReport,
 } from '@clawwork/shared';
+import AgentBuilderDialog from '@/components/AgentBuilderDialog';
 import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
 import SettingGroup from '@/components/semantic/SettingGroup';
@@ -665,6 +667,7 @@ export default function AgentsSection() {
   const [loadingFileContent, setLoadingFileContent] = useState(false);
   const [editingFileContent, setEditingFileContent] = useState<string | null>(null);
   const [savingFile, setSavingFile] = useState(false);
+  const [showBuilder, setShowBuilder] = useState(false);
 
   useEffect(() => {
     if (selectedGatewayId && connectedGatewayIds.includes(selectedGatewayId)) return;
@@ -1007,9 +1010,19 @@ export default function AgentsSection() {
               </select>
             )}
             {!showForm && (
-              <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
-                {t('settings.addAgent')}
-              </ToolbarButton>
+              <>
+                <ToolbarButton
+                  variant="soft"
+                  size="sm"
+                  onClick={() => setShowBuilder(true)}
+                  icon={<Sparkles size={14} />}
+                >
+                  {t('settings.agentBuilderTitle')}
+                </ToolbarButton>
+                <ToolbarButton variant="soft" size="sm" onClick={openAddForm} icon={<Plus size={14} />}>
+                  {t('settings.addAgent')}
+                </ToolbarButton>
+              </>
             )}
           </div>
         </div>
@@ -1146,6 +1159,15 @@ export default function AgentsSection() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {selectedGatewayId && (
+        <AgentBuilderDialog
+          open={showBuilder}
+          onOpenChange={setShowBuilder}
+          gatewayId={selectedGatewayId}
+          onCreated={refreshAgents}
+        />
+      )}
     </>
   );
 }

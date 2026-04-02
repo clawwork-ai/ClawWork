@@ -45,7 +45,7 @@ describe('system session service', () => {
     expect(gateway.createSession).toHaveBeenCalledOnce();
     const createArgs = gateway.createSession.mock.calls[0];
     expect(createArgs[0]).toBe('gw-1');
-    expect(createArgs[1].key).toMatch(/^clawwork:system:test:/);
+    expect(createArgs[1].key).toMatch(/^agent:main:clawwork:system:test:/);
     expect(createArgs[1].agentId).toBe('main');
     expect(listeners.size).toBe(1);
 

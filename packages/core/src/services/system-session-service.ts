@@ -1,6 +1,8 @@
 import type { IpcResult } from '@clawwork/shared';
 import { buildSystemSessionKey, mergeGatewayStreamText } from '@clawwork/shared';
 import type { GatewayEvent } from '../ports/gateway-transport.js';
+import { extractText } from '../protocol/parse-content.js';
+import type { ChatEventPayload } from '../protocol/types.js';
 import type { SystemSessionState } from '../stores/system-session-store.js';
 
 interface SystemSessionGateway {
@@ -22,14 +24,6 @@ export interface SystemSessionService {
   end(): Promise<void>;
 }
 
-interface ChatEventPayload {
-  sessionKey: string;
-  state?: 'delta' | 'final' | 'aborted' | 'error';
-  text?: string;
-  errorMessage?: string;
-  error?: { message?: string };
-}
-
 export function createSystemSessionService(deps: SystemSessionServiceDeps): SystemSessionService {
   let removeListener: (() => void) | null = null;
 
@@ -39,7 +33,7 @@ export function createSystemSessionService(deps: SystemSessionServiceDeps): Syst
     const payload = data.payload as unknown as ChatEventPayload;
     if (!store.sessionKey || payload.sessionKey !== store.sessionKey) return;
 
-    const text = payload.text ?? '';
+    const text = extractText(payload);
 
     switch (payload.state) {
       case 'delta': {
@@ -80,7 +74,7 @@ export function createSystemSessionService(deps: SystemSessionServiceDeps): Syst
         return { ok: false, error: 'system session already active' };
       }
 
-      const sessionKey = buildSystemSessionKey(opts.purpose);
+      const sessionKey = buildSystemSessionKey(opts.purpose, opts.agentId);
       store.open({
         sessionKey,
         gatewayId: opts.gatewayId,

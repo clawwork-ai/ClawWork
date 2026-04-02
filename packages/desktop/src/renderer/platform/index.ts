@@ -6,6 +6,8 @@ import {
   createRoomStore,
   createTeamStore,
   createChatComposer,
+  createSystemSessionStore,
+  createSystemSessionService,
 } from '@clawwork/core';
 import type {
   MessageState,
@@ -15,6 +17,8 @@ import type {
   TeamState,
   PlatformPorts,
   ChatComposer,
+  SystemSessionState,
+  SystemSessionService,
 } from '@clawwork/core';
 import { toast } from 'sonner';
 import { createElectronPorts } from './electron-adapter';
@@ -171,3 +175,29 @@ export function useTeamStore<T>(selector?: (state: TeamState) => T) {
 useTeamStore.getState = teamStoreApi.getState;
 useTeamStore.setState = teamStoreApi.setState;
 useTeamStore.subscribe = teamStoreApi.subscribe;
+
+const systemSessionStoreApi = createSystemSessionStore();
+
+let _systemSessionService: SystemSessionService | null = null;
+
+function getSystemSessionService(): SystemSessionService {
+  if (!_systemSessionService) {
+    _systemSessionService = createSystemSessionService({
+      gateway: getPorts().gateway,
+      getStore: () => systemSessionStoreApi.getState(),
+    });
+  }
+  return _systemSessionService;
+}
+
+export const systemSessionService = new Proxy({} as SystemSessionService, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getSystemSessionService(), prop, receiver);
+  },
+});
+
+export function useSystemSessionStore(): SystemSessionState;
+export function useSystemSessionStore<T>(selector: (state: SystemSessionState) => T): T;
+export function useSystemSessionStore<T>(selector?: (state: SystemSessionState) => T) {
+  return useStore(systemSessionStoreApi, selector!);
+}
