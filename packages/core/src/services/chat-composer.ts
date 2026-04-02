@@ -180,11 +180,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
         if (failed) {
           store.setProcessing(task.sessionKey, false);
           const reason =
-            failed.status === 'rejected'
-              ? String(failed.reason)
-              : 'value' in failed
-                ? failed.value?.error ?? ''
-                : '';
+            failed.status === 'rejected' ? String(failed.reason) : 'value' in failed ? (failed.value?.error ?? '') : '';
           emitError(task.id, 'gateway', 'send', reason || deps.translate('errors.sendFailed'));
           return { ok: false, taskId: task.id };
         }
