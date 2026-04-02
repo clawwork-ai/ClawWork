@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
+import AgentIcon from './AgentIcon';
 import { MENTION_ALL_AGENT_ID } from './ChatInput/constants';
 
 export type MentionTab = 'local' | 'tasks' | 'files' | 'agents';
@@ -13,6 +14,7 @@ export interface AgentMentionEntry {
   agentName: string;
   emoji?: string;
   avatarUrl?: string;
+  gatewayId?: string;
   sessionKey: string;
 }
 
@@ -198,12 +200,17 @@ export default function MentionPicker({
               >
                 {a.agentId === MENTION_ALL_AGENT_ID ? (
                   <Users size={14} className="text-[var(--accent)] flex-shrink-0" />
-                ) : a.avatarUrl ? (
-                  <img src={a.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover flex-shrink-0" />
-                ) : a.emoji ? (
-                  <span className="emoji-sm flex-shrink-0">{a.emoji}</span>
                 ) : (
-                  <Bot size={14} className="text-[var(--accent)] flex-shrink-0" />
+                  <span className="flex-shrink-0">
+                    <AgentIcon
+                      gatewayId={a.gatewayId}
+                      agentId={a.agentId}
+                      gatewayAvatarUrl={a.avatarUrl}
+                      emoji={a.emoji}
+                      imgClass="w-4 h-4 rounded-full object-cover"
+                      iconClass="text-[var(--accent)]"
+                    />
+                  </span>
                 )}
                 <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.agentName}</span>
                 <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{a.agentId}</span>

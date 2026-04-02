@@ -457,6 +457,10 @@ export interface ClawWorkAPI {
   removeCronJob: (gatewayId: string, jobId: string) => Promise<IpcResult>;
   runCronJob: (gatewayId: string, jobId: string, mode?: 'due' | 'force') => Promise<IpcResult<CronRunResult>>;
   listCronRuns: (gatewayId: string, params?: CronRunsParams) => Promise<IpcResult>;
+
+  saveAgentAvatar: (gatewayId: string, agentId: string, dataUrl: string) => Promise<IpcResult>;
+  deleteAgentAvatar: (gatewayId: string, agentId: string) => Promise<IpcResult>;
+  listLocalAvatars: (gatewayId: string) => Promise<IpcResult<{ result: string[] }>>;
 }
 
 declare global {

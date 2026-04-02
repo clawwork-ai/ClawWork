@@ -18,6 +18,8 @@ interface ChatMessageProps {
   message: Message;
   agentName?: string;
   agentEmoji?: string;
+  localAvatarUrl?: string;
+  gatewayAvatarUrl?: string;
   agentRoleLabel?: string;
   highlighted?: boolean;
   onHighlightDone?: () => void;
@@ -154,6 +156,8 @@ const ChatMessage = memo(function ChatMessage({
   message,
   agentName,
   agentEmoji,
+  localAvatarUrl,
+  gatewayAvatarUrl,
   agentRoleLabel,
   highlighted,
   onHighlightDone,
@@ -237,7 +241,12 @@ const ChatMessage = memo(function ChatMessage({
         highlighted && 'animate-highlight rounded-lg',
       )}
     >
-      <MessageAvatar role={isUser ? 'user' : 'assistant'} agentEmoji={agentEmoji} />
+      <MessageAvatar
+        role={isUser ? 'user' : 'assistant'}
+        agentEmoji={agentEmoji}
+        localAvatarUrl={localAvatarUrl}
+        gatewayAvatarUrl={gatewayAvatarUrl}
+      />
 
       <div className={cn('min-w-0 flex-1', isUser && 'text-right')}>
         {!isUser && (agentName || agentRoleLabel) && (

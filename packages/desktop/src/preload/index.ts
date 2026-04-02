@@ -349,6 +349,12 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:cron-run', { gatewayId, jobId, mode }),
     listCronRuns: (gatewayId: string, params?: CronRunsParams) =>
       ipcRenderer.invoke('ws:cron-runs', { gatewayId, ...params }),
+
+    saveAgentAvatar: (gatewayId: string, agentId: string, dataUrl: string) =>
+      ipcRenderer.invoke('avatar:save', { gatewayId, agentId, dataUrl }),
+    deleteAgentAvatar: (gatewayId: string, agentId: string) =>
+      ipcRenderer.invoke('avatar:delete', { gatewayId, agentId }),
+    listLocalAvatars: (gatewayId: string) => ipcRenderer.invoke('avatar:list-local', { gatewayId }),
   };
 }
 

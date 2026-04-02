@@ -2,7 +2,6 @@ import { useRef, useCallback, useState, useEffect, useMemo, type KeyboardEvent }
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
-  Bot,
   Send,
   Square,
   X,
@@ -20,6 +19,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
+import AgentIcon from '@/components/AgentIcon';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -84,11 +84,12 @@ export default function ChatInput() {
         agentName: p.agentName,
         emoji: p.emoji,
         avatarUrl: catalogEntry?.identity?.avatarUrl,
+        gatewayId: activeTaskGatewayId,
         sessionKey: p.sessionKey,
       });
     }
     return [...byAgent.values()];
-  }, [performers, agentCatalog]);
+  }, [performers, agentCatalog, activeTaskGatewayId]);
 
   const {
     slashMenuVisible,
@@ -537,10 +538,16 @@ export default function ChatInput() {
                       >
                         {a.agentId === MENTION_ALL_AGENT_ID ? (
                           <Users size={14} className="flex-shrink-0" />
-                        ) : a.emoji ? (
-                          <span className="emoji-sm">{a.emoji}</span>
                         ) : (
-                          <Bot size={14} className="flex-shrink-0" />
+                          <span className="flex-shrink-0">
+                            <AgentIcon
+                              gatewayId={a.gatewayId}
+                              agentId={a.agentId}
+                              gatewayAvatarUrl={a.avatarUrl}
+                              emoji={a.emoji}
+                              imgClass="w-3.5 h-3.5 rounded-full object-cover"
+                            />
+                          </span>
                         )}
                         {a.agentName}
                         <button

@@ -12,6 +12,8 @@ interface StreamingMessageProps {
   thinkingContent?: string;
   toolCalls?: ToolCall[];
   agentEmoji?: string;
+  localAvatarUrl?: string;
+  gatewayAvatarUrl?: string;
   agentName?: string;
   agentRoleLabel?: string;
 }
@@ -21,6 +23,8 @@ const StreamingMessage = memo(function StreamingMessage({
   thinkingContent,
   toolCalls,
   agentEmoji,
+  localAvatarUrl,
+  gatewayAvatarUrl,
   agentName,
   agentRoleLabel,
 }: StreamingMessageProps) {
@@ -39,7 +43,12 @@ const StreamingMessage = memo(function StreamingMessage({
       transition={motionPresets.fadeIn.transition}
       className="flex gap-3.5 py-4"
     >
-      <MessageAvatar role="assistant" agentEmoji={agentEmoji} />
+      <MessageAvatar
+        role="assistant"
+        agentEmoji={agentEmoji}
+        localAvatarUrl={localAvatarUrl}
+        gatewayAvatarUrl={gatewayAvatarUrl}
+      />
       <div className="min-w-0 flex-1">
         {(agentName || agentRoleLabel) && (
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-2 text-[var(--text-muted)]">

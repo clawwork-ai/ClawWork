@@ -60,6 +60,7 @@ const inputClass = cn(
 
 function AgentCard({
   agent,
+  gatewayId,
   isDefault,
   isEditing,
   workspace,
@@ -85,6 +86,7 @@ function AgentCard({
   onEditFileContentChange,
 }: {
   agent: AgentInfo;
+  gatewayId: string | null;
   isDefault: boolean;
   isEditing: boolean;
   workspace: string | null;
@@ -111,6 +113,10 @@ function AgentCard({
 }) {
   const { t } = useTranslation();
   const emoji = agent.identity?.emoji;
+  const localAvatarUrl = gatewayId ? `clawwork-avatar://${gatewayId}/${agent.id}` : undefined;
+  const [avatarFails, setAvatarFails] = useState(0);
+  const avatarUrls = [localAvatarUrl, agent.identity?.avatarUrl].filter(Boolean) as string[];
+  const resolvedAvatar = avatarUrls[avatarFails];
   const availableSkills = skills.filter((skill) => skill.eligible);
   const unavailableSkills = skills.filter((skill) => !skill.eligible);
   const [collapsedSections, setCollapsedSections] = useState<Record<'available' | 'unavailable', boolean>>({
@@ -162,8 +168,13 @@ function AgentCard({
             isDefault ? 'bg-[var(--accent-soft)]' : 'bg-[var(--bg-tertiary)]',
           )}
         >
-          {agent.identity?.avatarUrl ? (
-            <img src={agent.identity.avatarUrl} alt="" className="w-9 h-9 rounded-lg object-cover" />
+          {resolvedAvatar ? (
+            <img
+              src={resolvedAvatar}
+              alt=""
+              className="w-9 h-9 rounded-lg object-cover"
+              onError={() => setAvatarFails((c) => c + 1)}
+            />
           ) : emoji ? (
             <span className="emoji-lg">{emoji}</span>
           ) : (
@@ -755,16 +766,18 @@ export default function AgentsSection() {
   const openEditForm = useCallback(
     (agent: AgentInfo) => {
       setEditingAgentId(agent.id);
+      const gatewayAvatar = agent.identity?.avatarUrl ?? agent.identity?.avatar ?? '';
+      const localAvatar = selectedGatewayId ? `clawwork-avatar://${selectedGatewayId}/${agent.id}` : '';
       setForm({
         name: agent.name ?? agent.id,
         workspace: agentWorkspaceMap[agent.id] ?? '',
-        avatar: agent.identity?.avatarUrl ?? agent.identity?.avatar ?? '',
+        avatar: gatewayAvatar || localAvatar,
         model: '',
       });
       setShowForm(true);
       fetchAgentMeta(agent.id);
     },
-    [agentWorkspaceMap, fetchAgentMeta],
+    [agentWorkspaceMap, selectedGatewayId, fetchAgentMeta],
   );
 
   useEffect(() => {
@@ -792,16 +805,20 @@ export default function AgentsSection() {
       return;
     }
 
+    const isNewUpload = form.avatar.startsWith('data:');
     setSaving(true);
     if (editingAgentId) {
       const res = await window.clawwork.updateAgent(selectedGatewayId, {
         agentId: editingAgentId,
         name: form.name.trim() || undefined,
         workspace: form.workspace.trim() || undefined,
-        avatar: form.avatar || undefined,
+        avatar: isNewUpload ? form.avatar : undefined,
         model: form.model.trim() || undefined,
       });
       if (res.ok) {
+        if (isNewUpload) {
+          window.clawwork.saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar).catch(() => {});
+        }
         toast.success(t('settings.agentUpdated'));
         closeForm();
         await refreshAgents();
@@ -812,7 +829,7 @@ export default function AgentsSection() {
       const res = await window.clawwork.createAgent(selectedGatewayId, {
         name: form.name.trim(),
         workspace: form.workspace.trim(),
-        avatar: form.avatar || undefined,
+        avatar: isNewUpload ? form.avatar : undefined,
       });
       if (res.ok) {
         const created = res.result as Record<string, unknown> | undefined;
@@ -822,6 +839,9 @@ export default function AgentsSection() {
             agentId: newAgentId,
             model: form.model.trim(),
           });
+        }
+        if (isNewUpload && newAgentId) {
+          window.clawwork.saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar).catch(() => {});
         }
         toast.success(t('settings.agentCreated'));
         closeForm();
@@ -840,6 +860,7 @@ export default function AgentsSection() {
       deleteFiles,
     });
     if (res.ok) {
+      window.clawwork.deleteAgentAvatar(selectedGatewayId, deletingAgentId).catch(() => {});
       toast.success(t('settings.agentDeleted'));
       if (expandedFilesAgentId === deletingAgentId) {
         setExpandedFilesAgentId(null);
@@ -999,6 +1020,7 @@ export default function AgentsSection() {
               <Fragment key={agent.id}>
                 <AgentCard
                   agent={agent}
+                  gatewayId={selectedGatewayId}
                   isDefault={agent.id === defaultAgentId}
                   isEditing={editingAgentId === agent.id && showForm}
                   workspace={agentWorkspaceMap[agent.id] ?? null}

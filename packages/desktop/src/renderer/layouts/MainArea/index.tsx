@@ -9,7 +9,6 @@ import {
   Search,
   MessageSquare,
   Server,
-  Bot,
   ArrowUp,
   ArrowDown,
   ChevronRight,
@@ -36,6 +35,7 @@ import ChatMessage from '@/components/ChatMessage';
 import StreamingMessage from '@/components/StreamingMessage';
 import ThinkingIndicator from '@/components/ThinkingIndicator';
 import ChatInput from '@/components/ChatInput';
+import AgentIcon from '@/components/AgentIcon';
 import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
 import FileBrowser from '../FileBrowser';
@@ -64,13 +64,21 @@ interface ArchivedTaskRow {
 interface AssistantIdentity {
   agentName?: string;
   agentEmoji?: string;
+  localAvatarUrl?: string;
+  gatewayAvatarUrl?: string;
   agentRoleLabel?: string;
+}
+
+function buildLocalAvatarUrl(gatewayId: string | undefined, agentId: string | undefined): string | undefined {
+  if (!gatewayId || !agentId) return undefined;
+  return `clawwork-avatar://${gatewayId}/${agentId}`;
 }
 
 function resolveAssistantIdentity({
   task,
   sessionKey,
   agentId,
+  gatewayId,
   performerBySessionKey,
   performerByAgentId,
   catalogAgentById,
@@ -79,9 +87,10 @@ function resolveAssistantIdentity({
   task?: { sessionKey: string; agentId?: string; ensemble?: boolean };
   sessionKey?: string;
   agentId?: string;
+  gatewayId?: string;
   performerBySessionKey: Map<string, { sessionKey: string; agentId: string; agentName: string; emoji?: string }>;
   performerByAgentId: Map<string, { sessionKey: string; agentId: string; agentName: string; emoji?: string }>;
-  catalogAgentById: Map<string, { id: string; name?: string; identity?: { emoji?: string } }>;
+  catalogAgentById: Map<string, { id: string; name?: string; identity?: { emoji?: string; avatarUrl?: string } }>;
   conductorLabel: string;
 }): AssistantIdentity {
   const resolvedAgentId = agentId ?? (sessionKey ? parseAgentIdFromSessionKey(sessionKey) : undefined);
@@ -99,10 +108,13 @@ function resolveAssistantIdentity({
   );
 
   if (isConductor) {
+    const targetId = conductorAgentId ?? resolvedAgentId;
     const agentName = conductorCatalogEntry?.name ?? catalogEntry?.name ?? conductorAgentId ?? conductorLabel;
     return {
       agentName,
       agentEmoji: conductorCatalogEntry?.identity?.emoji ?? catalogEntry?.identity?.emoji,
+      localAvatarUrl: buildLocalAvatarUrl(gatewayId, targetId),
+      gatewayAvatarUrl: conductorCatalogEntry?.identity?.avatarUrl ?? catalogEntry?.identity?.avatarUrl,
       agentRoleLabel: agentName === conductorLabel ? undefined : conductorLabel,
     };
   }
@@ -110,6 +122,8 @@ function resolveAssistantIdentity({
   return {
     agentName: performer?.agentName ?? catalogEntry?.name ?? resolvedAgentId,
     agentEmoji: performer?.emoji ?? catalogEntry?.identity?.emoji,
+    localAvatarUrl: buildLocalAvatarUrl(gatewayId, resolvedAgentId),
+    gatewayAvatarUrl: catalogEntry?.identity?.avatarUrl,
   };
 }
 
@@ -238,13 +252,15 @@ function WelcomeScreen() {
                   : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]',
               )}
             >
-              {agent.identity?.avatarUrl ? (
-                <img src={agent.identity.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
-              ) : agent.identity?.emoji ? (
-                <span className="emoji-sm">{agent.identity.emoji}</span>
-              ) : (
-                <Bot size={12} />
-              )}
+              <AgentIcon
+                gatewayId={selectedGwId}
+                agentId={agent.id}
+                gatewayAvatarUrl={agent.identity?.avatarUrl}
+                emoji={agent.identity?.emoji}
+                imgClass="w-3.5 h-3.5 rounded-full object-cover"
+                emojiClass="emoji-sm"
+                iconSize={12}
+              />
               <span className="max-w-24 truncate">{agent.name ?? agent.id}</span>
             </button>
           ))}
@@ -692,6 +708,7 @@ function ChatContent() {
                       task: activeTask,
                       sessionKey: item.message.sessionKey,
                       agentId: item.message.agentId,
+                      gatewayId: activeTask?.gatewayId,
                       performerBySessionKey,
                       performerByAgentId,
                       catalogAgentById,
@@ -707,6 +724,8 @@ function ChatContent() {
                     message={item.message}
                     agentName={identity?.agentName}
                     agentEmoji={identity?.agentEmoji}
+                    localAvatarUrl={identity?.localAvatarUrl}
+                    gatewayAvatarUrl={identity?.gatewayAvatarUrl}
                     agentRoleLabel={identity?.agentRoleLabel}
                     highlighted={item.message.id === highlightedId}
                     onHighlightDone={handleHighlightDone}
@@ -722,6 +741,7 @@ function ChatContent() {
                 task: activeTask,
                 sessionKey: item.sessionKey,
                 agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                gatewayId: activeTask?.gatewayId,
                 performerBySessionKey,
                 performerByAgentId,
                 catalogAgentById,
@@ -733,6 +753,8 @@ function ChatContent() {
                   message={activeTurnToMessage(item.turn, activeTaskId!, item.sessionKey)}
                   agentName={identity.agentName}
                   agentEmoji={identity.agentEmoji}
+                  localAvatarUrl={identity.localAvatarUrl}
+                  gatewayAvatarUrl={identity.gatewayAvatarUrl}
                   agentRoleLabel={identity.agentRoleLabel}
                   highlighted={false}
                   onHighlightDone={handleHighlightDone}
@@ -747,6 +769,7 @@ function ChatContent() {
                 task: activeTask,
                 sessionKey: item.sessionKey,
                 agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                gatewayId: activeTask?.gatewayId,
                 performerBySessionKey,
                 performerByAgentId,
                 catalogAgentById,
@@ -759,6 +782,8 @@ function ChatContent() {
                   thinkingContent={item.turn.streamingThinking || undefined}
                   toolCalls={item.turn.toolCalls}
                   agentEmoji={identity.agentEmoji}
+                  localAvatarUrl={identity.localAvatarUrl}
+                  gatewayAvatarUrl={identity.gatewayAvatarUrl}
                   agentName={identity.agentName}
                   agentRoleLabel={identity.agentRoleLabel}
                 />

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } from 'electron';
+import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog, protocol } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { nativeTheme } from 'electron';
@@ -18,12 +18,17 @@ import { registerTrayHandlers } from './ipc/tray-handlers.js';
 import { registerQuickLaunchHandlers } from './ipc/quick-launch-handlers.js';
 import { registerContextHandlers } from './ipc/context-handlers.js';
 import { registerNotificationHandlers } from './ipc/notification-handlers.js';
+import { registerAvatarHandlers, registerAvatarProtocol } from './ipc/avatar-handlers.js';
 import { unwatchAll } from './context/file-watcher.js';
 import { isInstallingUpdate } from './auto-updater.js';
 import { initTray, destroyTray } from './tray.js';
 import { initQuickLaunch, destroyQuickLaunch } from './quick-launch.js';
 import { getWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
 import { initDatabase, closeDatabase } from './db/index.js';
+
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'clawwork-avatar', privileges: { secure: true, supportFetchAPI: true } },
+]);
 
 let isQuitting = false;
 
@@ -184,6 +189,8 @@ app.whenReady().then(() => {
   registerQuickLaunchHandlers();
   registerContextHandlers();
   registerNotificationHandlers();
+  registerAvatarHandlers();
+  registerAvatarProtocol();
 
   ipcMain.handle('app:rebuild-menu', () => {
     const dm = readConfig()?.devMode === true;
