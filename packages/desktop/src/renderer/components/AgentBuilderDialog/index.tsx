@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Sparkles, Send, Loader2, Bot, User } from 'lucide-react';
+import { Sparkles, Send, Loader2, Bot, User, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -31,6 +31,7 @@ Your job:
 Rules:
 - Ask ONE question at a time
 - Be proactive: extract name and identity from the user's first description
+- The name MUST be in English (ASCII only, e.g. "Story Crafter" not "故事匠") — it is used as a system identifier
 - Keep identity concise but specific (2-4 sentences)
 - Always end your response with the current config as a JSON block
 - Only include fields whose values have been determined. Do NOT include fields with placeholder values like "..."
@@ -133,7 +134,7 @@ export default function AgentBuilderDialog({ open, onOpenChange, gatewayId, onCr
   }, [open, gatewayId, defaultAgentId, models, start, i18n.language]);
 
   useEffect(() => {
-    if (prevStatusRef.current === 'streaming' && status === 'active') {
+    if (status === 'streaming' || (prevStatusRef.current === 'streaming' && status === 'active')) {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === 'assistant') {
         const parsed = parseAgentConfig(lastMsg.content);
@@ -195,73 +196,85 @@ export default function AgentBuilderDialog({ open, onOpenChange, gatewayId, onCr
     if (!config.name.trim()) return;
     setCreating(true);
 
-    const slug = deriveWorkspace(config.name) || config.name.trim().toLowerCase();
-    const wsBase = await window.clawwork.getWorkspacePath();
-    const workspace = wsBase ? `${wsBase}/${slug}` : slug;
+    try {
+      const slug = deriveWorkspace(config.name) || 'new-agent';
+      const wsBase = await window.clawwork.getWorkspacePath();
+      const workspace = wsBase ? `${wsBase}/${slug}` : slug;
 
-    const createRes = await window.clawwork.createAgent(gatewayId, {
-      name: config.name.trim(),
-      workspace,
-    });
-    if (!createRes.ok) {
-      toast.error(createRes.error ?? t('errors.failed'));
-      setCreating(false);
-      return;
-    }
-
-    const created = createRes.result as Record<string, unknown> | undefined;
-    const agentId = (created?.agentId as string) ?? '';
-
-    if (config.model.trim() && agentId) {
-      const updateRes = await window.clawwork.updateAgent(gatewayId, {
-        agentId,
-        model: config.model.trim(),
+      const createRes = await window.clawwork.createAgent(gatewayId, {
+        name: config.name.trim(),
+        workspace,
       });
-      if (!updateRes.ok) {
-        toast.error(updateRes.error ?? t('errors.failed'));
-        setCreating(false);
+      if (!createRes.ok) {
+        toast.error(createRes.error ?? t('errors.failed'));
         return;
       }
-    }
 
-    if (config.identity.trim() && agentId) {
-      const fileRes = await window.clawwork.setAgentFile(gatewayId, agentId, 'instructions.md', config.identity.trim());
-      if (!fileRes.ok) {
-        toast.error(fileRes.error ?? t('errors.failed'));
-        setCreating(false);
-        return;
+      const created = createRes.result as Record<string, unknown> | undefined;
+      const agentId = (created?.agentId as string) ?? '';
+
+      if (config.model.trim() && agentId) {
+        const updateRes = await window.clawwork.updateAgent(gatewayId, {
+          agentId,
+          model: config.model.trim(),
+        });
+        if (!updateRes.ok) {
+          toast.error(updateRes.error ?? t('errors.failed'));
+          return;
+        }
       }
-    }
 
-    await end();
-    toast.success(t('settings.agentCreated'));
-    onCreated?.();
-    onOpenChange(false);
-    setCreating(false);
+      if (config.identity.trim() && agentId) {
+        const fileRes = await window.clawwork.setAgentFile(gatewayId, agentId, 'IDENTITY.md', config.identity.trim());
+        if (!fileRes.ok) {
+          toast.error(fileRes.error ?? t('errors.failed'));
+          return;
+        }
+      }
+
+      await end();
+      toast.success(t('settings.agentCreated'));
+      onCreated?.();
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('errors.failed'));
+    } finally {
+      setCreating(false);
+    }
   }, [config, gatewayId, end, onCreated, onOpenChange, t]);
 
-  const handleClose = useCallback(
-    (nextOpen: boolean) => {
-      if (!nextOpen && !creating) {
-        end();
-        onOpenChange(false);
-      }
-    },
-    [creating, end, onOpenChange],
-  );
+  const requestClose = useCallback(() => {
+    if (creating) return;
+    const hasConversation = messages.length > 1;
+    if (hasConversation && !window.confirm(t('settings.agentBuilderCloseConfirm'))) return;
+    end();
+    onOpenChange(false);
+  }, [creating, messages.length, end, onOpenChange, t]);
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-5 pb-0">
+    <Dialog open={open} onOpenChange={() => {}}>
+      <DialogContent
+        className="max-w-5xl p-0 overflow-hidden [&>button:last-child]:hidden"
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="relative px-6 pt-5 pb-0">
           <DialogTitle className="flex items-center gap-2">
             <Sparkles size={18} className="text-[var(--accent)]" />
             {t('settings.agentBuilderTitle')}
           </DialogTitle>
           <DialogDescription>{t('settings.agentBuilderDesc')}</DialogDescription>
+          <button
+            type="button"
+            onClick={requestClose}
+            disabled={creating}
+            className="absolute right-4 top-4 rounded-md p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+          >
+            <X size={16} />
+          </button>
         </DialogHeader>
 
-        <div className="flex h-128 border-t border-[var(--border-subtle)]">
+        <div className="flex h-144 border-t border-[var(--border-subtle)]">
           <div className="flex flex-1 flex-col border-r border-[var(--border-subtle)]">
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
               {visibleMessages.map((msg, i) => (

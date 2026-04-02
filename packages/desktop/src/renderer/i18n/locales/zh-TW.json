@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "身分設定",
     "agentBuilderIdentityPlaceholder": "定義代理行為的系統提示詞...",
     "agentBuilderCreate": "建立代理",
+    "agentBuilderCloseConfirm": "放棄目前對話並關閉？",
     "notifications": "通知",
     "notificationsDesc": "背景事件的桌面通知",
     "notifyTaskComplete": "任務完成",

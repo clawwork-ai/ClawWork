@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "아이덴티티",
     "agentBuilderIdentityPlaceholder": "에이전트 동작을 정의하는 시스템 프롬프트...",
     "agentBuilderCreate": "에이전트 생성",
+    "agentBuilderCloseConfirm": "대화를 취소하고 닫으시겠습니까?",
     "notifications": "알림",
     "notificationsDesc": "백그라운드 이벤트에 대한 데스크톱 알림",
     "notifyTaskComplete": "작업 완료",

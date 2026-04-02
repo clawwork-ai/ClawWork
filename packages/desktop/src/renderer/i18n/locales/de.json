@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "Identitaet",
     "agentBuilderIdentityPlaceholder": "System-Prompt zur Definition des Agentenverhaltens...",
     "agentBuilderCreate": "Agent erstellen",
+    "agentBuilderCloseConfirm": "Gespraech verwerfen und schliessen?",
     "notifications": "Benachrichtigungen",
     "notificationsDesc": "Desktop-Benachrichtigungen fuer Hintergrundereignisse",
     "notifyTaskComplete": "Aufgabenabschluss",

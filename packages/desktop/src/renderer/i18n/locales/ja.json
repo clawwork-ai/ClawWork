@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "アイデンティティ",
     "agentBuilderIdentityPlaceholder": "エージェントの動作を定義するシステムプロンプト...",
     "agentBuilderCreate": "エージェントを作成",
+    "agentBuilderCloseConfirm": "この会話を破棄して閉じますか？",
     "notifications": "通知",
     "notificationsDesc": "バックグラウンドイベントのデスクトップ通知",
     "notifyTaskComplete": "タスク完了",

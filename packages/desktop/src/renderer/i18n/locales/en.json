@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "Identity",
     "agentBuilderIdentityPlaceholder": "System prompt that defines the agent's behavior...",
     "agentBuilderCreate": "Create Agent",
+    "agentBuilderCloseConfirm": "Discard this conversation and close?",
     "notifications": "Notifications",
     "notificationsDesc": "Desktop notifications for background events",
     "notifyTaskComplete": "Task completion",

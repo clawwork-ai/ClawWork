@@ -221,6 +221,7 @@
     "agentBuilderIdentity": "身份设定",
     "agentBuilderIdentityPlaceholder": "定义智能体行为的系统提示词...",
     "agentBuilderCreate": "创建智能体",
+    "agentBuilderCloseConfirm": "放弃当前对话并关闭？",
     "notifications": "通知",
     "notificationsDesc": "后台事件的桌面通知",
     "notifyTaskComplete": "任务完成通知",
