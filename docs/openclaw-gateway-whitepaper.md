@@ -1,12 +1,14 @@
 # OpenClaw Gateway Protocol Whitepaper
 
-> Source of truth: reverse-engineered from `~/git/openclaw` (version 2026.3.14)
-> Date: 2026-03-16
+> Source of truth: reverse-engineered from `~/git/openclaw` (version 2026.4.2)
+> Date: 2026-04-02
 > Maintenance note: this whitepaper was originally organized from the 2026.3.12-era Gateway implementation and should be refreshed periodically as OpenClaw evolves.
 
 ---
 
 ## 1. Architecture Overview
+
+> Source: `src/gateway/server.impl.ts`, `src/gateway/server-broadcast.ts`, `src/gateway/server-http.ts`
 
 Gateway is a WebSocket-first server (default port `:18789`) sitting between clients and the OpenClaw Agent Engine. All client communication goes through a **single persistent WebSocket connection**.
 
@@ -19,10 +21,10 @@ Gateway is a WebSocket-first server (default port `:18789`) sitting between clie
 │                     │           │ │ (AJV/TypeBox schemas)  │ │
 │                     │           │ ├────────────────────────┤ │
 │                     │           │ │ RPC Dispatcher         │ │
-│                     │           │ │ (60+ methods)          │ │
+│                     │           │ │ (110+ methods)          │ │
 │                     │           │ ├────────────────────────┤ │
 │                     │           │ │ Broadcast Engine       │ │
-│                     │           │ │ (19 event types)       │ │
+│                     │           │ │ (24 event types)       │ │
 │                     │           │ ├────────────────────────┤ │
 │                     │           │ │ Agent Engine           │ │
 │                     │           │ │ Session Store          │ │
@@ -44,6 +46,8 @@ Key design decisions:
 ---
 
 ## 2. Frame Protocol
+
+> Source: `src/gateway/protocol/schema/frames.ts` (RequestFrame, ResponseFrame, EventFrame, GatewayFrame discriminated union)
 
 All communication uses JSON frames over WebSocket. Three frame types form a discriminated union on the `type` field.
 
@@ -76,15 +80,16 @@ All communication uses JSON frames over WebSocket. Three frame types form a disc
 }
 ```
 
-**Error Codes:**
+**Error Codes:** (source: `src/gateway/protocol/schema/error-codes.ts`)
 
-| Code              | Meaning                              |
-| ----------------- | ------------------------------------ |
-| `NOT_LINKED`      | Channel/account not linked           |
-| `NOT_PAIRED`      | Device not paired                    |
-| `AGENT_TIMEOUT`   | Agent execution timed out            |
-| `INVALID_REQUEST` | Bad parameters or validation failure |
-| `UNAVAILABLE`     | Service temporarily unavailable      |
+| Code                 | Meaning                              |
+| -------------------- | ------------------------------------ |
+| `NOT_LINKED`         | Channel/account not linked           |
+| `NOT_PAIRED`         | Device not paired                    |
+| `AGENT_TIMEOUT`      | Agent execution timed out            |
+| `INVALID_REQUEST`    | Bad parameters or validation failure |
+| `APPROVAL_NOT_FOUND` | Approval ID not found                |
+| `UNAVAILABLE`        | Service temporarily unavailable      |
 
 ### 2.3 Event Frame (Server → Client, broadcast)
 
@@ -103,6 +108,8 @@ All communication uses JSON frames over WebSocket. Three frame types form a disc
 
 ### 2.4 Constants
 
+> Source: `src/gateway/server-constants.ts`, `src/gateway/handshake-timeouts.ts`
+
 | Constant                     | Value                  |
 | ---------------------------- | ---------------------- |
 | `MAX_PAYLOAD_BYTES`          | 25 MB                  |
@@ -110,7 +117,7 @@ All communication uses JSON frames over WebSocket. Three frame types form a disc
 | `MAX_PREAUTH_PAYLOAD_BYTES`  | 64 KB                  |
 | `TICK_INTERVAL_MS`           | 30,000 ms              |
 | `HEALTH_REFRESH_INTERVAL_MS` | 60,000 ms              |
-| `HANDSHAKE_TIMEOUT_MS`       | 3,000 ms               |
+| `HANDSHAKE_TIMEOUT_MS`       | 10,000 ms              |
 | `DEDUPE_TTL_MS`              | 5 minutes              |
 | `DEDUPE_MAX`                 | 1,000 entries          |
 
@@ -144,10 +151,12 @@ Client                          Gateway
 
 ### 3.2 ConnectParams
 
+> Source: `src/gateway/protocol/schema/frames.ts` → `ConnectParamsSchema`
+
 ```typescript
 {
-  minProtocol: 1,
-  maxProtocol: 1,
+  minProtocol: 3,
+  maxProtocol: 3,
   client: {
     id: GatewayClientId,           // see §3.3
     displayName?: string,
@@ -184,12 +193,16 @@ Client                          Gateway
 
 ### 3.3 Client Identity
 
+> Source: `src/gateway/protocol/client-info.ts` → `GATEWAY_CLIENT_IDS`, `GATEWAY_CLIENT_MODES`, `GATEWAY_CLIENT_CAPS`
+
 **Client IDs** (for ClawWork, use `openclaw-macos`):
 
 | ID                    | Purpose               |
 | --------------------- | --------------------- |
 | `webchat-ui`          | Browser WebChat UI    |
+| `webchat`             | WebChat client        |
 | `openclaw-control-ui` | Admin Control UI      |
+| `openclaw-tui`        | Terminal UI client    |
 | `openclaw-macos`      | macOS desktop app     |
 | `openclaw-ios`        | iOS app               |
 | `openclaw-android`    | Android app           |
@@ -222,12 +235,14 @@ Capabilities are requested in `ConnectParams.caps` and gate access to specific e
 
 ### 3.5 HelloOk Response
 
+> Source: `src/gateway/protocol/schema/frames.ts` → `HelloOkSchema`, `src/gateway/protocol/schema/snapshot.ts` → `SnapshotSchema`
+
 ```typescript
 {
   type: "hello-ok",
-  protocol: 1,
+  protocol: 3,
   server: {
-    version: string,     // e.g. "2026.3.14"
+    version: string,     // e.g. "2026.4.2"
     connId: string       // UUID for this connection
   },
   features: {
@@ -276,39 +291,50 @@ Capabilities are requested in `ConnectParams.caps` and gate access to specific e
 
 ## 4. Events (Server → Client)
 
-Gateway broadcasts 19 event types. All events use the Event Frame format.
+Gateway broadcasts 24 event types. All events use the Event Frame format.
 
 ### 4.1 Event Types
 
-| Event                     | Payload                                      | `dropIfSlow`          | Scope Guard          | Purpose                   |
-| ------------------------- | -------------------------------------------- | --------------------- | -------------------- | ------------------------- |
-| `connect.challenge`       | `{ nonce, ts }`                              | No                    | —                    | Auth handshake            |
-| `chat`                    | ChatEvent                                    | delta: Yes, final: No | —                    | Message streaming         |
-| `agent`                   | AgentEvent                                   | Tool: Yes             | —                    | Agent execution events    |
-| `presence`                | PresenceEntry[]                              | No                    | —                    | Client connect/disconnect |
-| `tick`                    | `{ ts }`                                     | Yes                   | —                    | Heartbeat (30s)           |
-| `health`                  | HealthSnapshot                               | Yes                   | —                    | System health (60s)       |
-| `heartbeat`               | varies                                       | Yes                   | —                    | Agent heartbeat ACK       |
-| `shutdown`                | `{ reason, restartExpectedMs? }`             | No                    | —                    | Graceful shutdown         |
-| `talk.mode`               | varies                                       | No                    | —                    | Voice mode change         |
-| `cron`                    | CronEvent                                    | No                    | —                    | Cron job events           |
-| `node.pair.requested`     | varies                                       | No                    | `operator.pairing`   | Node pairing request      |
-| `node.pair.resolved`      | varies                                       | No                    | `operator.pairing`   | Node pairing result       |
-| `node.invoke.request`     | varies                                       | No                    | —                    | Node task dispatch        |
-| `device.pair.requested`   | varies                                       | No                    | `operator.pairing`   | Device pairing request    |
-| `device.pair.resolved`    | varies                                       | No                    | `operator.pairing`   | Device pairing result     |
-| `voicewake.changed`       | varies                                       | No                    | —                    | Voice wake config         |
-| `exec.approval.requested` | varies                                       | No                    | `operator.approvals` | Execution approval        |
-| `exec.approval.resolved`  | varies                                       | No                    | `operator.approvals` | Approval resolution       |
-| `update-available`        | `{ currentVersion, latestVersion, channel }` | No                    | —                    | Software update           |
+> Source: `src/gateway/server-methods-list.ts` → `GATEWAY_EVENTS`, `src/gateway/server-broadcast.ts` → `EVENT_SCOPE_GUARDS`
+
+| Event                       | Payload                                      | `dropIfSlow`          | Scope Guard          | Purpose                    |
+| --------------------------- | -------------------------------------------- | --------------------- | -------------------- | -------------------------- |
+| `connect.challenge`         | `{ nonce, ts }`                              | No                    | —                    | Auth handshake             |
+| `chat`                      | ChatEvent                                    | delta: Yes, final: No | —                    | Message streaming          |
+| `agent`                     | AgentEvent                                   | Tool: Yes             | —                    | Agent execution events     |
+| `session.message`           | varies                                       | No                    | `operator.read`      | Per-session message events |
+| `session.tool`              | varies                                       | No                    | `operator.read`      | Per-session tool events    |
+| `sessions.changed`          | varies                                       | No                    | `operator.read`      | Session list changed       |
+| `presence`                  | PresenceEntry[]                              | No                    | —                    | Client connect/disconnect  |
+| `tick`                      | `{ ts }`                                     | Yes                   | —                    | Heartbeat (30s)            |
+| `health`                    | HealthSnapshot                               | Yes                   | —                    | System health (60s)        |
+| `heartbeat`                 | varies                                       | Yes                   | —                    | Agent heartbeat ACK        |
+| `shutdown`                  | `{ reason, restartExpectedMs? }`             | No                    | —                    | Graceful shutdown          |
+| `talk.mode`                 | varies                                       | No                    | —                    | Voice mode change          |
+| `cron`                      | CronEvent                                    | No                    | —                    | Cron job events            |
+| `node.pair.requested`       | varies                                       | No                    | `operator.pairing`   | Node pairing request       |
+| `node.pair.resolved`        | varies                                       | No                    | `operator.pairing`   | Node pairing result        |
+| `node.invoke.request`       | varies                                       | No                    | —                    | Node task dispatch         |
+| `device.pair.requested`     | varies                                       | No                    | `operator.pairing`   | Device pairing request     |
+| `device.pair.resolved`      | varies                                       | No                    | `operator.pairing`   | Device pairing result      |
+| `voicewake.changed`         | varies                                       | No                    | —                    | Voice wake config          |
+| `exec.approval.requested`   | varies                                       | No                    | `operator.approvals` | Execution approval         |
+| `exec.approval.resolved`    | varies                                       | No                    | `operator.approvals` | Approval resolution        |
+| `plugin.approval.requested` | varies                                       | No                    | `operator.approvals` | Plugin install approval    |
+| `plugin.approval.resolved`  | varies                                       | No                    | `operator.approvals` | Plugin approval resolution |
+| `update.available`          | `{ currentVersion, latestVersion, channel }` | No                    | —                    | Software update            |
 
 **Scope Guards:**
 
 - `operator.admin` — has access to all scoped events
-- `operator.approvals` — exec approval events
+- `operator.read` — session message/tool/changed events
+- `operator.write` — write methods (implied by `operator.read` check)
+- `operator.approvals` — exec and plugin approval events
 - `operator.pairing` — device/node pairing events
 
 ### 4.2 Chat Event (event: `chat`)
+
+> Source: `src/gateway/protocol/schema/logs-chat.ts` → `ChatEventSchema`
 
 The primary event for receiving AI responses. Streams incrementally.
 
@@ -349,6 +375,8 @@ The primary event for receiving AI responses. Streams incrementally.
 - **error**: Execution failure. `errorMessage` contains details.
 
 ### 4.3 Agent Event (event: `agent`)
+
+> Source: `src/gateway/protocol/schema/agent.ts` → `AgentEventSchema`
 
 Requires `caps: ["tool-events"]` capability. Provides granular agent execution visibility.
 
@@ -393,6 +421,8 @@ receive tool events. Registration happens automatically when a client sends `cha
 
 ### 4.4 Broadcast Behavior
 
+> Source: `src/gateway/server-broadcast.ts` → `createGatewayBroadcaster`
+
 - Events broadcast to **all connected clients** (except targeted tool events)
 - **No server-side session filtering** — client must route by `sessionKey`
 - Slow consumers (bufferedAmount > 50MB) are disconnected with code `1008`
@@ -405,6 +435,8 @@ receive tool events. Registration happens automatically when a client sends `cha
 
 ### 5.1 Complete Method List
 
+> Source: `src/gateway/server-methods-list.ts` → `BASE_METHODS`, `listGatewayMethods()`
+
 ```
 health                    doctor.memory.status      logs.tail
 channels.status           channels.logout
@@ -416,10 +448,12 @@ config.patch              config.schema             config.schema.lookup
 exec.approvals.get        exec.approvals.set        exec.approvals.node.get
 exec.approvals.node.set   exec.approval.request     exec.approval.waitDecision
 exec.approval.resolve
+plugin.approval.request   plugin.approval.waitDecision
+plugin.approval.resolve
 wizard.start              wizard.next               wizard.cancel
 wizard.status
-talk.config               talk.mode
-models.list               tools.catalog
+talk.config               talk.speak                talk.mode
+models.list               tools.catalog             tools.effective
 agents.list               agents.create             agents.update
 agents.delete             agents.files.list         agents.files.get
 agents.files.set
@@ -428,8 +462,12 @@ skills.update
 update.run
 voicewake.get             voicewake.set
 secrets.reload            secrets.resolve
-sessions.list             sessions.preview          sessions.patch
+sessions.list             sessions.create           sessions.send
+sessions.subscribe        sessions.unsubscribe
+sessions.messages.subscribe                          sessions.messages.unsubscribe
+sessions.abort            sessions.preview          sessions.patch
 sessions.reset            sessions.delete           sessions.compact
+sessions.usage
 last-heartbeat            set-heartbeats            wake
 node.pair.request         node.pair.list            node.pair.approve
 node.pair.reject          node.pair.verify
@@ -443,14 +481,16 @@ cron.list                 cron.status               cron.add
 cron.update               cron.remove               cron.run
 cron.runs
 gateway.identity.get      system-presence           system-event
-send                      agent                     agent.identity.get
-agent.wait                browser.request
+send                      poll                      push.test
+agent                     agent.identity.get        agent.wait
 chat.history              chat.abort                chat.send
 ```
 
 Channel plugins may register additional methods.
 
 ### 5.2 Chat Methods (Core for ClawWork)
+
+> Source: schema `src/gateway/protocol/schema/logs-chat.ts`, impl `src/gateway/server-methods/chat.ts`
 
 #### `chat.send`
 
@@ -459,15 +499,22 @@ Send a user message to a session. Triggers agent execution and streaming respons
 ```typescript
 // Request
 {
-  sessionKey: string,               // e.g. "agent:main:clawwork:task:<taskId>"
+  sessionKey: string,               // e.g. "agent:main:clawwork:task:<taskId>" (max 512 chars)
   message: string,                  // user message text
   thinking?: string,                // thinking/reasoning prompt level
   deliver?: boolean,                // false = no external channel delivery (use false)
+  originatingChannel?: string,      // source channel (for cross-channel routing)
+  originatingTo?: string,           // originating recipient
+  originatingAccountId?: string,    // originating account
+  originatingThreadId?: string,     // originating thread
   attachments?: unknown[],          // file attachments
   timeoutMs?: number,               // request timeout
   systemInputProvenance?: {         // input source tracking
-    source: string,
-    channel?: string
+    kind: string,                   // provenance kind
+    originSessionId?: string,
+    sourceSessionKey?: string,
+    sourceChannel?: string,
+    sourceTool?: string
   },
   systemProvenanceReceipt?: string,
   idempotencyKey: string            // UUID for deduplication (REQUIRED)
@@ -493,7 +540,8 @@ Fetch session message history.
 // Request
 {
   sessionKey: string,
-  limit?: number                    // 1-1000, default 200
+  limit?: number,                   // 1-1000, default 200
+  maxChars?: number                 // 1-500,000 — cap total character count in response
 }
 
 // Response
@@ -539,6 +587,85 @@ Inject a system message into a session (admin/testing).
 ```
 
 ### 5.3 Session Methods
+
+> Source: schema `src/gateway/protocol/schema/sessions.ts`, impl `src/gateway/server-methods/sessions.ts`
+
+#### `sessions.create`
+
+Create a new session explicitly.
+
+```typescript
+// Request
+{
+  key?: string,                     // explicit session key (auto-generated if omitted)
+  agentId?: string,                 // bind to specific agent
+  label?: string,                   // session label (max 64 chars)
+  model?: string,                   // override model
+  parentSessionKey?: string,        // parent session (for sub-agents)
+  task?: string,                    // task description
+  message?: string                  // initial message
+}
+```
+
+#### `sessions.send`
+
+Send a message to a session (higher-level than `chat.send`).
+
+```typescript
+// Request
+{
+  key: string,
+  message: string,
+  thinking?: string,
+  attachments?: unknown[],
+  timeoutMs?: number,
+  idempotencyKey?: string
+}
+```
+
+#### `sessions.abort`
+
+Abort a running session.
+
+```typescript
+// Request
+{
+  key: string,
+  runId?: string                    // specific run to abort
+}
+```
+
+#### `sessions.subscribe` / `sessions.unsubscribe`
+
+Subscribe to or unsubscribe from session list change events (`sessions.changed`).
+
+#### `sessions.messages.subscribe` / `sessions.messages.unsubscribe`
+
+Subscribe to or unsubscribe from per-session message events (`session.message`, `session.tool`).
+
+```typescript
+// Request
+{
+  key: string; // session key to subscribe/unsubscribe
+}
+```
+
+#### `sessions.usage`
+
+Analyze token usage with date filtering and context weight breakdown.
+
+```typescript
+// Request
+{
+  key?: string,                     // specific session (omit for all)
+  startDate?: string,               // "YYYY-MM-DD"
+  endDate?: string,                 // "YYYY-MM-DD"
+  mode?: "utc" | "gateway" | "specific",
+  utcOffset?: string,               // e.g. "UTC-4" or "UTC+5:30"
+  limit?: number,                   // max sessions to return (default 50)
+  includeContextWeight?: boolean    // include systemPromptReport
+}
+```
 
 #### `sessions.list`
 
@@ -622,7 +749,8 @@ Modify session metadata.
 ```typescript
 {
   key: string,
-  deleteTranscript?: boolean        // also remove transcript files
+  deleteTranscript?: boolean,       // also remove transcript files
+  emitLifecycleHooks?: boolean      // emit lifecycle hooks (default true)
 }
 ```
 
@@ -639,6 +767,8 @@ Compress session transcript.
 
 ### 5.4 Agent Methods
 
+> Source: `src/gateway/protocol/schema/agent.ts` → `AgentParamsSchema`, `AgentIdentityParamsSchema`, `AgentWaitParamsSchema`
+
 #### `agent`
 
 Full-featured agent invocation (superset of `chat.send`).
@@ -647,6 +777,8 @@ Full-featured agent invocation (superset of `chat.send`).
 {
   message: string,                  // REQUIRED
   agentId?: string,                 // specific agent
+  provider?: string,                // override provider
+  model?: string,                   // override model
   to?: string,                      // delivery target
   replyTo?: string,                 // reply to message
   sessionId?: string,
@@ -698,6 +830,8 @@ Wait for an agent run to complete.
 ```
 
 ### 5.5 Agent & Model Management
+
+> Source: `src/gateway/protocol/schema/agents-models-skills.ts`
 
 #### `agents.list`
 
@@ -820,6 +954,8 @@ Manage agent configuration files (system prompt, etc).
 
 ### 5.6 External Messaging
 
+> Source: `src/gateway/protocol/schema/agent.ts` → `SendParamsSchema`, `PollParamsSchema`
+
 #### `send`
 
 Send a message to an external channel (Telegram, Discord, etc).
@@ -840,7 +976,30 @@ Send a message to an external channel (Telegram, Discord, etc).
 }
 ```
 
+#### `poll`
+
+Create a poll in an external channel.
+
+```typescript
+{
+  to: string,
+  question: string,
+  options: string[],                // 2-12 options
+  maxSelections?: number,           // 1-12
+  durationSeconds?: number,         // 1-604,800 (7 days)
+  durationHours?: number,
+  silent?: boolean,                 // no notification
+  isAnonymous?: boolean,
+  threadId?: string,
+  channel?: string,
+  accountId?: string,
+  idempotencyKey: string
+}
+```
+
 ### 5.7 Configuration Methods
+
+> Source: `src/gateway/protocol/schema/config.ts`
 
 #### `config.get` / `config.set` / `config.patch` / `config.apply`
 
@@ -851,6 +1010,8 @@ Read and modify server configuration at runtime.
 Get JSON Schema for configuration validation.
 
 ### 5.8 Cron Methods
+
+> Source: `src/gateway/protocol/schema/cron.ts`
 
 Scheduled task management.
 
@@ -947,7 +1108,36 @@ Get execution history.
 }
 ```
 
+#### `tools.effective`
+
+> Source: `src/gateway/protocol/schema/agents-models-skills.ts` → `ToolsEffectiveParamsSchema`, `ToolsEffectiveResultSchema`
+
+Get session-effective tool inventory (what tools are actually available for a session at runtime).
+
+```typescript
+// Request
+{ agentId?: string, sessionKey?: string }
+
+// Response
+{
+  groups: Array<{
+    id: string,
+    label: string,
+    tools: Array<{
+      id: string,
+      label: string,
+      description: string,
+      enabled: boolean,
+      source: "core" | "plugin",
+      pluginId?: string
+    }>
+  }>
+}
+```
+
 ### 5.9 Skills Methods
+
+> Source: `src/gateway/protocol/schema/agents-models-skills.ts` → `SkillsStatusParamsSchema`, `SkillsInstallParamsSchema`, `SkillsUpdateParamsSchema`
 
 #### `skills.status`
 
@@ -968,6 +1158,8 @@ Get execution history.
 ```
 
 ### 5.10 Node Methods
+
+> Source: `src/gateway/protocol/schema/nodes.ts`
 
 Remote compute node management.
 
@@ -991,6 +1183,8 @@ Remote compute node management.
 
 ### 5.11 Device Methods
 
+> Source: `src/gateway/protocol/schema/devices.ts`
+
 Device authentication lifecycle.
 
 | Method                | Purpose                      |
@@ -1004,6 +1198,8 @@ Device authentication lifecycle.
 
 ### 5.12 Execution Approval
 
+> Source: `src/gateway/protocol/schema/exec-approvals.ts`
+
 Interactive approval workflow for agent actions.
 
 | Method                       | Purpose                        |
@@ -1016,7 +1212,87 @@ Interactive approval workflow for agent actions.
 | `exec.approvals.node.get`    | Get node approval settings     |
 | `exec.approvals.node.set`    | Set node approval settings     |
 
-### 5.13 Other Methods
+### 5.13 Plugin Approval
+
+> Source: `src/gateway/protocol/schema/plugin-approvals.ts`
+
+Interactive approval workflow for plugin installations.
+
+| Method                         | Purpose                       |
+| ------------------------------ | ----------------------------- |
+| `plugin.approval.request`      | Request approval for a plugin |
+| `plugin.approval.waitDecision` | Wait for approval decision    |
+| `plugin.approval.resolve`      | Approve or reject             |
+
+### 5.14 Talk (Voice/TTS) Methods
+
+> Source: `src/gateway/protocol/schema/channels.ts` → `TalkSpeakParamsSchema`, `TalkSpeakResultSchema`, `TalkModeParamsSchema`, `TalkConfigResultSchema`
+
+#### `talk.speak`
+
+Text-to-speech synthesis.
+
+```typescript
+// Request
+{
+  text: string,                     // REQUIRED
+  voiceId?: string,
+  modelId?: string,
+  outputFormat?: string,
+  speed?: number,
+  stability?: number,
+  similarity?: number,
+  style?: number,
+  speakerBoost?: boolean,
+  seed?: number,
+  normalize?: string,
+  language?: string
+}
+
+// Response
+{
+  audioBase64: string,              // base64-encoded audio
+  provider: string,
+  outputFormat?: string,
+  voiceCompatible?: boolean,
+  mimeType?: string,
+  fileExtension?: string
+}
+```
+
+### 5.15 Push Notification Testing
+
+> Source: `src/gateway/protocol/schema/push.ts` → `PushTestParamsSchema`, `PushTestResultSchema`
+
+#### `push.test`
+
+Test push notification delivery.
+
+### 5.16 Web Login
+
+> Source: `src/gateway/protocol/schema/channels.ts` → `WebLoginStartParamsSchema`, `WebLoginWaitParamsSchema`
+
+#### `web.login.start` / `web.login.wait`
+
+Web-based login flow (e.g. WhatsApp QR scan).
+
+```typescript
+// web.login.start
+{
+  force?: boolean,
+  timeoutMs?: number,
+  verbose?: boolean,
+  accountId?: string
+}
+
+// web.login.wait
+{
+  timeoutMs?: number,
+  accountId?: string
+}
+```
+
+### 5.17 Other Methods
 
 | Method                            | Purpose                                             |
 | --------------------------------- | --------------------------------------------------- |
@@ -1029,9 +1305,8 @@ Interactive approval workflow for agent actions.
 | `system-presence`                 | Current presence snapshot                           |
 | `system-event`                    | Emit system event                                   |
 | `wake`                            | `{ mode: "now" \| "next-heartbeat", text: string }` |
-| `browser.request`                 | Browser integration                                 |
 | `wizard.start/next/cancel/status` | Onboarding wizard                                   |
-| `channels.status`                 | Channel connection status                           |
+| `channels.status`                 | Channel connection status (with optional probe)     |
 | `channels.logout`                 | Disconnect channel                                  |
 | `update.run`                      | Trigger software update                             |
 | `doctor.memory.status`            | Memory diagnostics                                  |
@@ -1039,6 +1314,8 @@ Interactive approval workflow for agent actions.
 ---
 
 ## 6. HTTP Endpoints
+
+> Source: `src/gateway/server-http.ts`, `src/gateway/openai-http.ts`
 
 In addition to WebSocket, Gateway exposes HTTP endpoints:
 
@@ -1060,6 +1337,8 @@ The `/v1/chat/completions` endpoint allows OpenAI-compatible integration, but fo
 
 ### 7.1 Auth Modes
 
+> Source: `src/gateway/protocol/schema/snapshot.ts` → `SnapshotSchema.authMode`
+
 Gateway supports four authentication modes (configured server-side):
 
 | Mode            | ConnectParams field | Description                 |
@@ -1073,6 +1352,8 @@ Device-based auth (`auth.deviceToken` or `device.*` fields) is an additional lay
 
 ### 7.2 Rate Limiting
 
+> Source: `src/gateway/auth-rate-limit.ts` → `RateLimitConfig`, defaults: `DEFAULT_MAX_ATTEMPTS=10`, `DEFAULT_WINDOW_MS=60_000`, `DEFAULT_LOCKOUT_MS=300_000`
+
 | Scope           | Max Attempts | Window | Lockout |
 | --------------- | ------------ | ------ | ------- |
 | `shared-secret` | 10           | 60s    | 300s    |
@@ -1084,6 +1365,8 @@ Loopback addresses (`127.0.0.1`, `::1`) are exempt by default.
 
 ### 7.3 Roles & Scopes
 
+> Source: `src/gateway/method-scopes.ts` → `ADMIN_SCOPE`, `READ_SCOPE`, `WRITE_SCOPE`, `APPROVALS_SCOPE`, `PAIRING_SCOPE`, `METHOD_SCOPE_GROUPS`, `NODE_ROLE_METHODS`
+
 Roles control method and event access:
 
 - `operator` — default role for human users
@@ -1091,13 +1374,17 @@ Roles control method and event access:
 
 Scopes (carried in `ConnectParams.scopes`):
 
-- `operator.admin` — full access to all scoped events
-- `operator.approvals` — exec approval events
-- `operator.pairing` — device/node pairing events
+- `operator.admin` — full access; supersedes all other scopes
+- `operator.read` — read-only access (status, list, history, usage, config.get)
+- `operator.write` — write access (send, chat.send, agent, sessions.create, talk, node.invoke, etc.); implies read
+- `operator.approvals` — exec and plugin approval events and methods
+- `operator.pairing` — device/node pairing events and methods
 
 ---
 
 ## 8. Session Key Format
+
+> Source: `src/gateway/protocol/schema/primitives.ts` → `ChatSendSessionKeyString` (regex: max 512 chars), `src/gateway/protocol/schema/sessions.ts` → `SessionsCreateParamsSchema`
 
 Session keys uniquely identify conversation contexts:
 
@@ -1120,6 +1407,8 @@ agent:main:clawwork:task:<taskId>
 
 ## 9. Message Format
 
+> Source: `src/gateway/protocol/schema/logs-chat.ts` → `ChatEventSchema.message`, `src/gateway/protocol/schema/agent.ts` → content block types
+
 Messages in `chat` events and `chat.history` responses follow this structure:
 
 ```typescript
@@ -1137,6 +1426,8 @@ Messages in `chat` events and `chat.history` responses follow this structure:
 ---
 
 ## 10. ClawWork Integration Guide
+
+> Source: composite — see inline references in §2–§9; connection flow from `src/gateway/protocol/schema/frames.ts` → `ConnectParamsSchema`, `HelloOkSchema`
 
 ### 10.1 Connection Setup
 
@@ -1179,22 +1470,26 @@ ws.send(
 
 ### 10.3 Capabilities ClawWork Can Leverage
 
-| Capability          | Gateway Support                        | ClawWork Feature             |
-| ------------------- | -------------------------------------- | ---------------------------- |
-| Multi-session       | `sessions.list`, unique sessionKeys    | Parallel task execution      |
-| Streaming responses | `chat` events with delta/final         | Real-time response rendering |
-| Tool visibility     | `agent` events with tool-events cap    | Tool-call progress UI        |
-| Session management  | `sessions.patch`, `sessions.reset`     | Task configuration           |
-| Model selection     | `models.list`, `sessions.patch(model)` | Per-task model override      |
-| Agent management    | `agents.*` methods                     | Multi-agent workflows        |
-| Cron scheduling     | `cron.*` methods                       | Automated recurring tasks    |
-| Message history     | `chat.history`                         | Session restoration          |
-| Abort               | `chat.abort`                           | Cancel running tasks         |
-| Usage tracking      | `usage.status`, `usage.cost`           | Token/cost dashboard         |
-| Skills              | `skills.*` methods                     | Skill management UI          |
-| Exec approval       | `exec.approval.*` events/methods       | Interactive approval gates   |
-| Health monitoring   | `health` events                        | Server status indicator      |
-| Thinking/reasoning  | `sessions.patch(thinkingLevel)`        | Thinking mode toggle         |
+| Capability            | Gateway Support                                | ClawWork Feature             |
+| --------------------- | ---------------------------------------------- | ---------------------------- |
+| Multi-session         | `sessions.list`, `sessions.create`             | Parallel task execution      |
+| Streaming responses   | `chat` events with delta/final                 | Real-time response rendering |
+| Tool visibility       | `agent` events with tool-events cap            | Tool-call progress UI        |
+| Session management    | `sessions.patch`, `sessions.reset`             | Task configuration           |
+| Session subscriptions | `sessions.subscribe`, `sessions.messages.*`    | Real-time session updates    |
+| Model selection       | `models.list`, `sessions.patch(model)`         | Per-task model override      |
+| Agent management      | `agents.*` methods                             | Multi-agent workflows        |
+| Cron scheduling       | `cron.*` methods                               | Automated recurring tasks    |
+| Message history       | `chat.history`                                 | Session restoration          |
+| Abort                 | `chat.abort`, `sessions.abort`                 | Cancel running tasks         |
+| Usage tracking        | `usage.status`, `usage.cost`, `sessions.usage` | Token/cost dashboard         |
+| Skills                | `skills.*` methods                             | Skill management UI          |
+| Exec approval         | `exec.approval.*` events/methods               | Interactive approval gates   |
+| Plugin approval       | `plugin.approval.*` events/methods             | Plugin install gates         |
+| Health monitoring     | `health` events                                | Server status indicator      |
+| Thinking/reasoning    | `sessions.patch(thinkingLevel)`                | Thinking mode toggle         |
+| TTS                   | `talk.speak`                                   | Text-to-speech playback      |
+| Tools inventory       | `tools.catalog`, `tools.effective`             | Tool management UI           |
 
 ### 10.4 What ClawWork Should NOT Do
 
@@ -1206,25 +1501,28 @@ ws.send(
 
 ---
 
-## 11. Source File Reference
+## 11. Quick Source Index
 
-| Domain                    | Key File                                              | Lines |
-| ------------------------- | ----------------------------------------------------- | ----- |
-| Frame types               | `src/gateway/protocol/schema/frames.ts`               | 165   |
-| Client identity           | `src/gateway/protocol/client-info.ts`                 | 87    |
-| Method registry           | `src/gateway/server-methods-list.ts`                  | 134   |
-| Chat schemas              | `src/gateway/protocol/schema/logs-chat.ts`            | 84    |
-| Agent schemas             | `src/gateway/protocol/schema/agent.ts`                | 138   |
-| Session schemas           | `src/gateway/protocol/schema/sessions.ts`             | 140   |
-| Snapshot schema           | `src/gateway/protocol/schema/snapshot.ts`             | 73    |
-| Agent/model/skill schemas | `src/gateway/protocol/schema/agents-models-skills.ts` | 271   |
-| Cron schemas              | `src/gateway/protocol/schema/cron.ts`                 | 376   |
-| Error codes               | `src/gateway/protocol/schema/error-codes.ts`          | 24    |
-| Chat streaming            | `src/gateway/server-chat.ts`                          | 643   |
-| Broadcast engine          | `src/gateway/server-broadcast.ts`                     | 132   |
-| Constants                 | `src/gateway/server-constants.ts`                     | 34    |
-| Server startup            | `src/gateway/server.impl.ts`                          | ~1500 |
-| WS message handler        | `src/gateway/server/ws-connection/message-handler.ts` | ~1300 |
-| Chat RPC impl             | `src/gateway/server-methods/chat.ts`                  | ~1500 |
-| Session RPC impl          | `src/gateway/server-methods/sessions.ts`              | —     |
-| Command registry          | `src/auto-reply/commands-registry.data.ts`            | ~600  |
+All sources are annotated inline at each section. This condensed index maps domain → primary schema file for fast lookup:
+
+| Domain           | Schema File                                           | Implementation                           |
+| ---------------- | ----------------------------------------------------- | ---------------------------------------- |
+| Frames           | `src/gateway/protocol/schema/frames.ts`               | `src/gateway/server.impl.ts`             |
+| Chat             | `src/gateway/protocol/schema/logs-chat.ts`            | `src/gateway/server-methods/chat.ts`     |
+| Sessions         | `src/gateway/protocol/schema/sessions.ts`             | `src/gateway/server-methods/sessions.ts` |
+| Agent            | `src/gateway/protocol/schema/agent.ts`                | —                                        |
+| Agents/Models    | `src/gateway/protocol/schema/agents-models-skills.ts` | —                                        |
+| Cron             | `src/gateway/protocol/schema/cron.ts`                 | —                                        |
+| Nodes            | `src/gateway/protocol/schema/nodes.ts`                | —                                        |
+| Devices          | `src/gateway/protocol/schema/devices.ts`              | —                                        |
+| Config           | `src/gateway/protocol/schema/config.ts`               | —                                        |
+| Exec Approvals   | `src/gateway/protocol/schema/exec-approvals.ts`       | —                                        |
+| Plugin Approvals | `src/gateway/protocol/schema/plugin-approvals.ts`     | —                                        |
+| Methods list     | `src/gateway/server-methods-list.ts`                  | —                                        |
+| Method scopes    | `src/gateway/method-scopes.ts`                        | —                                        |
+| Broadcast        | `src/gateway/server-broadcast.ts`                     | —                                        |
+| Constants        | `src/gateway/server-constants.ts`                     | —                                        |
+| Rate limit       | `src/gateway/auth-rate-limit.ts`                      | —                                        |
+| Error codes      | `src/gateway/protocol/schema/error-codes.ts`          | —                                        |
+| Client IDs       | `src/gateway/protocol/client-info.ts`                 | —                                        |
+| Primitives       | `src/gateway/protocol/schema/primitives.ts`           | —                                        |
