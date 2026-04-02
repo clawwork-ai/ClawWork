@@ -356,6 +356,32 @@ export function createBrowserGatewayTransport(
       }
     },
 
+    async createSession(gatewayId, params) {
+      const client = getClient(gatewayId);
+      if (!client?.isConnected)
+        return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
+      try {
+        await client.createSession(params);
+        return { ok: true };
+      } catch (err) {
+        const typed = err as Error & { code?: string };
+        return { ok: false, error: typed.message, errorCode: typed.code };
+      }
+    },
+
+    async deleteSession(gatewayId, sessionKey) {
+      const client = getClient(gatewayId);
+      if (!client?.isConnected)
+        return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
+      try {
+        await client.deleteSession(sessionKey);
+        return { ok: true };
+      } catch (err) {
+        const typed = err as Error & { code?: string };
+        return { ok: false, error: typed.message, errorCode: typed.code };
+      }
+    },
+
     onGatewayEvent(callback) {
       eventListeners.add(callback);
       return () => {

@@ -87,6 +87,8 @@ export interface GatewayTransportPort {
   listAgents: (gatewayId: string) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
   getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
+  createSession: (gatewayId: string, params: { key: string; agentId: string; message?: string }) => Promise<IpcResult>;
+  deleteSession: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
   onGatewayEvent: (callback: (data: GatewayEvent) => void) => () => void;
   onGatewayStatus: (callback: (status: GatewayStatusEvent) => void) => () => void;
 }

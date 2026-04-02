@@ -61,6 +61,9 @@ export type { TaskState, TaskStoreDeps, PendingNewTask } from './stores/task-sto
 export { createRoomStore } from './stores/room-store.js';
 export type { RoomState, RoomStoreDeps, PerformerAgent } from './stores/room-store.js';
 
+export { createSystemSessionStore } from './stores/system-session-store.js';
+export type { SystemSessionState, SystemSessionMessage, SystemSessionStatus } from './stores/system-session-store.js';
+
 export { createUiStore } from './stores/ui-store.js';
 export type {
   UiState,
@@ -89,3 +92,6 @@ export type { GatewayDispatcherDeps } from './services/gateway-dispatcher.js';
 
 export { createChatComposer } from './services/chat-composer.js';
 export type { ChatComposerDeps, ChatComposer, SendOptions } from './services/chat-composer.js';
+
+export { createSystemSessionService } from './services/system-session-service.js';
+export type { SystemSessionServiceDeps, SystemSessionService } from './services/system-session-service.js';

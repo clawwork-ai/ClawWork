@@ -1,4 +1,4 @@
-import { parseTaskIdFromSessionKey, isSubagentSession } from '@clawwork/shared';
+import { parseTaskIdFromSessionKey, isSubagentSession, isSystemSession } from '@clawwork/shared';
 import type {
   ToolCall,
   ToolCallStatus,
@@ -217,6 +217,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
       return;
     }
 
+    if (isSystemSession(sessionKey)) return;
+
     const taskId = resolveTaskId(sessionKey);
     if (!taskId) {
       if (isSubagentSession(sessionKey)) {
@@ -354,6 +356,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
       });
       return;
     }
+
+    if (isSystemSession(sessionKey)) return;
 
     const taskId = resolveTaskId(sessionKey);
     if (!taskId) {

@@ -253,6 +253,14 @@ export class BrowserGatewayClient {
     return this.sendReq('chat.history', { sessionKey, limit }, this.sessionMeta(sessionKey));
   }
 
+  async createSession(params: { key: string; agentId: string; message?: string }): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.create', params, { requestId: this.nextReqId() });
+  }
+
+  async deleteSession(sessionKey: string, deleteTranscript = true): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.delete', { key: sessionKey, deleteTranscript }, this.sessionMeta(sessionKey));
+  }
+
   async listSessions(): Promise<Record<string, unknown>> {
     return this.sendReq('sessions.list', {}, { requestId: this.nextReqId() });
   }

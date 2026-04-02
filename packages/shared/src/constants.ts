@@ -52,6 +52,16 @@ export function isClawWorkSession(sessionKey: string, deviceId?: string): boolea
   return CLAWWORK_DEVICE_SESSION_RE.test(sessionKey) || CLAWWORK_SESSION_RE.test(sessionKey);
 }
 
+const SYSTEM_SESSION_RE = /^clawwork:system:[^:]+:[a-f0-9-]+$/;
+
+export function buildSystemSessionKey(purpose: string): string {
+  return `clawwork:system:${purpose}:${crypto.randomUUID()}`;
+}
+
+export function isSystemSession(sessionKey: string): boolean {
+  return SYSTEM_SESSION_RE.test(sessionKey);
+}
+
 export const HEARTBEAT_INTERVAL_MS = 30_000;
 
 export const RECONNECT_DELAY_MS = 3_000;
