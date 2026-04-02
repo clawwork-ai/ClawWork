@@ -276,7 +276,10 @@ export function createSessionSync(deps: SessionSyncDeps) {
           role: msg.role,
           content: msg.content,
           timestamp: msg.timestamp,
-          sessionKey: params.sessionKey,
+          sessionKey: msg.sessionKey,
+          agentId: msg.agentId,
+          runId: msg.runId,
+          imageAttachments: msg.imageAttachments as unknown[] | undefined,
           toolCalls: msg.toolCalls,
         })
         .catch(() => {});

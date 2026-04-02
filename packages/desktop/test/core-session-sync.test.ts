@@ -31,6 +31,9 @@ function createHarness(params: {
     content: string;
     timestamp: string;
     sessionKey?: string;
+    agentId?: string;
+    runId?: string;
+    imageAttachments?: unknown[];
     toolCalls?: unknown[];
   }> = [];
 
@@ -155,7 +158,21 @@ describe('core session sync startup flow', () => {
           agentId: 'main',
           messages: [
             { role: 'user', content: 'Draft me a note', timestamp: '2026-03-16T10:00:00.000Z' },
-            { role: 'assistant', content: 'Sure', timestamp: '2026-03-16T10:00:01.000Z' },
+            {
+              role: 'assistant',
+              content: 'Sure',
+              timestamp: '2026-03-16T10:00:01.000Z',
+              toolCalls: [
+                {
+                  id: 'exec-1',
+                  name: 'exec',
+                  status: 'done',
+                  startedAt: '2026-03-16T10:00:00.500Z',
+                  completedAt: '2026-03-16T10:00:01.000Z',
+                  result: 'ok',
+                },
+              ],
+            },
           ],
         },
       ],
@@ -180,8 +197,19 @@ describe('core session sync startup flow', () => {
         sessionKey: message.sessionKey,
       })),
     ).toEqual([
-      { role: 'user', content: 'Draft me a note', sessionKey: 'agent:main:clawwork:task:task-fresh' },
-      { role: 'assistant', content: 'Sure', sessionKey: 'agent:main:clawwork:task:task-fresh' },
+      { role: 'user', content: 'Draft me a note', sessionKey: undefined },
+      {
+        role: 'assistant',
+        content: 'Sure',
+        sessionKey: 'agent:main:clawwork:task:task-fresh',
+      },
     ]);
+    expect(harness.persisted[1]).toEqual(
+      expect.objectContaining({
+        role: 'assistant',
+        agentId: 'main',
+        toolCalls: [expect.objectContaining({ id: 'exec-1', name: 'exec', status: 'done', result: 'ok' })],
+      }),
+    );
   });
 });
