@@ -38,6 +38,7 @@ import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
+import { createAgentWithRollback } from '@/lib/agent-builder';
 import { AVATAR_ACCEPT, readFileAsDataUrl, validateAvatarFile } from '@/lib/avatar-utils';
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
@@ -829,20 +830,16 @@ export default function AgentsSection() {
         toast.error(res.error ?? t('errors.failed'));
       }
     } else {
-      const res = await window.clawwork.createAgent(selectedGatewayId, {
+      const res = await createAgentWithRollback(window.clawwork, {
+        gatewayId: selectedGatewayId,
         name: form.name.trim(),
         workspace: form.workspace.trim(),
         avatar: isNewUpload ? form.avatar : undefined,
+        model: form.model.trim() || undefined,
       });
       if (res.ok) {
         const created = res.result as Record<string, unknown> | undefined;
         const newAgentId = (created?.agentId as string) ?? '';
-        if (form.model.trim() && newAgentId) {
-          await window.clawwork.updateAgent(selectedGatewayId, {
-            agentId: newAgentId,
-            model: form.model.trim(),
-          });
-        }
         if (isNewUpload && newAgentId) {
           window.clawwork.saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar).catch(() => {});
         }
@@ -850,6 +847,7 @@ export default function AgentsSection() {
         closeForm();
         await refreshAgents();
       } else {
+        await refreshAgents();
         toast.error(res.error ?? t('errors.failed'));
       }
     }
