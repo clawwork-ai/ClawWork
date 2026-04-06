@@ -1,44 +1,62 @@
 {
-  "app": {
-    "name": "ClawWork",
-    "loading": "載入中...",
-    "error": "發生錯誤",
-    "reload": "重新載入",
-    "paired": "行動裝置已配對"
+  "agents": {
+    "empty": "暫無可用智能體",
+    "selectTitle": "選擇智能體"
   },
-  "pairing": {
-    "subtitle": "掃描桌面應用程式上顯示的 QR Code 以開始",
-    "instruction": "掃碼後，請在桌面端批准此裝置，然後手機端即可連線。",
-    "loadingCamera": "正在啟動相機...",
-    "scanButton": "掃描 QR Code",
-    "cancelButton": "取消",
-    "invalidQr": "無效的 QR Code",
-    "cameraError": "相機權限被拒絕",
-    "videoError": "無法啟動相機",
-    "scannerUnsupported": "此瀏覽器不支援 QR Code 掃描"
+  "app": {
+    "error": "發生錯誤",
+    "loading": "載入中...",
+    "name": "ClawWork",
+    "paired": "行動裝置已配對",
+    "reload": "重新載入"
   },
   "chat": {
-    "emptyState": "選擇一個任務或建立新任務",
-    "thinking": "思考中...",
-    "inputPlaceholder": "輸入訊息...",
-    "sendButton": "傳送",
     "abortButton": "停止",
-    "authorizationPending": "等待授權中...",
-    "systemMessage": "系統訊息",
-    "userMessage": "你的訊息",
-    "assistantMessage": "助手訊息",
     "assistant": "助手",
+    "assistantMessage": "助手訊息",
+    "authorizationPending": "等待授權中...",
+    "emptyState": "選擇一個任務或建立新任務",
+    "inputPlaceholder": "輸入訊息...",
     "mainArea": "聊天",
+    "sendButton": "傳送",
+    "systemMessage": "系統訊息",
+    "thinking": "思考中...",
+    "userMessage": "你的訊息",
     "virtualizedList": "聊天記錄"
   },
-  "tasks": {
-    "newTask": "新任務",
-    "today": "今天",
-    "yesterday": "昨天",
-    "thisWeek": "本週",
-    "older": "更早",
-    "empty": "尚無任務",
-    "navigationLabel": "任務列表"
+  "debugLog": {
+    "clearLog": "清除日誌",
+    "close": "關閉",
+    "copyLog": "複製日誌",
+    "empty": "尚無事件",
+    "reconnect": "重新連線",
+    "title": "閘道日誌"
+  },
+  "drawer": {
+    "closeButton": "關閉選單",
+    "menuButton": "開啟選單",
+    "newTaskButton": "新建任務",
+    "search": "搜尋",
+    "settings": "設定",
+    "signOut": "登出",
+    "signOutConfirm": "確定登出？所有本地資料將被清除。",
+    "title": "導航選單"
+  },
+  "errors": {
+    "agentNotResponding": "Agent 未回應 — 可能不可用或伺服器配置有誤，請嘗試其他 Agent",
+    "failed": "失敗",
+    "requestFailed": "請求出錯",
+    "sendFailed": "傳送失敗",
+    "serverAborted": "任務被伺服器中止",
+    "stage": {
+      "final": "完成",
+      "lifecycle": "Agent",
+      "persist": "持久化",
+      "send": "傳送",
+      "stream": "串流",
+      "sync": "同步"
+    },
+    "unknown": "未知錯誤"
   },
   "gateway": {
     "connected": "已連線",
@@ -46,64 +64,46 @@
     "disconnected": "未連線",
     "statusLabel": "閘道連線狀態"
   },
-  "agents": {
-    "selectTitle": "選擇智能體",
-    "empty": "暫無可用智能體"
+  "pairing": {
+    "cameraError": "相機權限被拒絕",
+    "cancelButton": "取消",
+    "instruction": "掃碼後，請在桌面端批准此裝置，然後手機端即可連線。",
+    "invalidQr": "無效的 QR Code",
+    "loadingCamera": "正在啟動相機...",
+    "scanButton": "掃描 QR Code",
+    "scannerUnsupported": "此瀏覽器不支援 QR Code 掃描",
+    "subtitle": "掃描桌面應用程式上顯示的 QR Code 以開始",
+    "videoError": "無法啟動相機"
   },
-  "drawer": {
-    "title": "導航選單",
-    "settings": "設定",
-    "signOut": "登出",
-    "signOutConfirm": "確定登出？所有本地資料將被清除。",
-    "menuButton": "開啟選單",
-    "closeButton": "關閉選單",
-    "newTaskButton": "新建任務",
-    "search": "搜尋"
+  "qrScanner": {
+    "scanFrameLabel": "QR Code 掃描區域",
+    "videoLabel": "QR Code 掃描取景框"
   },
-  "tools": {
-    "emptyDetails": "暫無詳情"
+  "settings": {
+    "applyUpdate": "有可用更新 — 點擊安裝",
+    "checking": "檢查中...",
+    "checkUpdate": "檢查更新",
+    "darkMode": "深色模式",
+    "language": "語言",
+    "lightMode": "淺色模式",
+    "updateFailed": "檢查更新失敗",
+    "updateUnavailable": "暫不支援更新",
+    "upToDate": "已是最新版本",
+    "version": "版本 {{version}}"
   },
   "shell": {
     "reconnect": "重新連線"
   },
-  "errors": {
-    "requestFailed": "請求出錯",
-    "sendFailed": "傳送失敗",
-    "serverAborted": "任務被伺服器中止",
-    "unknown": "未知錯誤",
-    "failed": "失敗",
-    "agentNotResponding": "Agent 未回應 — 可能不可用或伺服器配置有誤，請嘗試其他 Agent",
-    "stage": {
-      "send": "傳送",
-      "stream": "串流",
-      "final": "完成",
-      "lifecycle": "Agent",
-      "sync": "同步",
-      "persist": "持久化"
-    }
+  "tasks": {
+    "empty": "尚無任務",
+    "navigationLabel": "任務列表",
+    "newTask": "新任務",
+    "older": "更早",
+    "thisWeek": "本週",
+    "today": "今天",
+    "yesterday": "昨天"
   },
-  "qrScanner": {
-    "videoLabel": "QR Code 掃描取景框",
-    "scanFrameLabel": "QR Code 掃描區域"
-  },
-  "settings": {
-    "darkMode": "深色模式",
-    "lightMode": "淺色模式",
-    "language": "語言",
-    "version": "版本 {{version}}",
-    "checkUpdate": "檢查更新",
-    "checking": "檢查中...",
-    "applyUpdate": "有可用更新 — 點擊安裝",
-    "upToDate": "已是最新版本",
-    "updateFailed": "檢查更新失敗",
-    "updateUnavailable": "暫不支援更新"
-  },
-  "debugLog": {
-    "title": "閘道日誌",
-    "reconnect": "重新連線",
-    "copyLog": "複製日誌",
-    "clearLog": "清除日誌",
-    "close": "關閉",
-    "empty": "尚無事件"
+  "tools": {
+    "emptyDetails": "暫無詳情"
   }
 }

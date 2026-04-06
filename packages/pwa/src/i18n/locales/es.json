@@ -1,44 +1,62 @@
 {
-  "app": {
-    "name": "ClawWork",
-    "loading": "Cargando...",
-    "error": "Algo salió mal",
-    "reload": "Recargar",
-    "paired": "Dispositivo móvil emparejado"
+  "agents": {
+    "empty": "No hay agentes disponibles",
+    "selectTitle": "Seleccionar agente"
   },
-  "pairing": {
-    "subtitle": "Escanea el código QR que aparece en tu app de escritorio",
-    "instruction": "Después de escanear, aprueba este dispositivo en el escritorio.",
-    "loadingCamera": "Iniciando cámara...",
-    "scanButton": "Escanear código QR",
-    "cancelButton": "Cancelar",
-    "invalidQr": "Código QR no válido",
-    "cameraError": "Acceso a la cámara denegado",
-    "videoError": "No se pudo iniciar la cámara",
-    "scannerUnsupported": "Escáner QR no soportado en este navegador"
+  "app": {
+    "error": "Algo salió mal",
+    "loading": "Cargando...",
+    "name": "ClawWork",
+    "paired": "Dispositivo móvil emparejado",
+    "reload": "Recargar"
   },
   "chat": {
-    "emptyState": "Selecciona una tarea o crea una nueva",
-    "thinking": "Pensando...",
-    "inputPlaceholder": "Escribe un mensaje...",
-    "sendButton": "Enviar",
     "abortButton": "Detener",
-    "authorizationPending": "Esperando autorización...",
-    "systemMessage": "Mensaje del sistema",
-    "userMessage": "Tu mensaje",
-    "assistantMessage": "Mensaje del asistente",
     "assistant": "Asistente",
+    "assistantMessage": "Mensaje del asistente",
+    "authorizationPending": "Esperando autorización...",
+    "emptyState": "Selecciona una tarea o crea una nueva",
+    "inputPlaceholder": "Escribe un mensaje...",
     "mainArea": "Chat",
+    "sendButton": "Enviar",
+    "systemMessage": "Mensaje del sistema",
+    "thinking": "Pensando...",
+    "userMessage": "Tu mensaje",
     "virtualizedList": "Historial de chat"
   },
-  "tasks": {
-    "newTask": "Nueva tarea",
-    "today": "Hoy",
-    "yesterday": "Ayer",
-    "thisWeek": "Esta semana",
-    "older": "Anterior",
-    "empty": "Sin tareas aún",
-    "navigationLabel": "Lista de tareas"
+  "debugLog": {
+    "clearLog": "Borrar registro",
+    "close": "Cerrar",
+    "copyLog": "Copiar registro",
+    "empty": "Sin eventos aún",
+    "reconnect": "Reconectar",
+    "title": "Registro del gateway"
+  },
+  "drawer": {
+    "closeButton": "Cerrar menú",
+    "menuButton": "Abrir menú",
+    "newTaskButton": "Nueva tarea",
+    "search": "Buscar",
+    "settings": "Configuración",
+    "signOut": "Cerrar sesión",
+    "signOutConfirm": "¿Cerrar sesión? Se eliminarán todos los datos locales.",
+    "title": "Panel de navegación"
+  },
+  "errors": {
+    "agentNotResponding": "El agente no responde",
+    "failed": "Fallido",
+    "requestFailed": "Solicitud fallida",
+    "sendFailed": "Envío fallido",
+    "serverAborted": "Tarea interrumpida por el servidor",
+    "stage": {
+      "final": "Finalizar",
+      "lifecycle": "Agente",
+      "persist": "Persistir",
+      "send": "Enviar",
+      "stream": "Stream",
+      "sync": "Sincronizar"
+    },
+    "unknown": "Error desconocido"
   },
   "gateway": {
     "connected": "Conectado",
@@ -46,54 +64,46 @@
     "disconnected": "Desconectado",
     "statusLabel": "Estado de conexión del gateway"
   },
-  "agents": { "selectTitle": "Seleccionar agente", "empty": "No hay agentes disponibles" },
-  "drawer": {
-    "title": "Panel de navegación",
-    "settings": "Configuración",
-    "signOut": "Cerrar sesión",
-    "signOutConfirm": "¿Cerrar sesión? Se eliminarán todos los datos locales.",
-    "menuButton": "Abrir menú",
-    "closeButton": "Cerrar menú",
-    "newTaskButton": "Nueva tarea",
-    "search": "Buscar"
+  "pairing": {
+    "cameraError": "Acceso a la cámara denegado",
+    "cancelButton": "Cancelar",
+    "instruction": "Después de escanear, aprueba este dispositivo en el escritorio.",
+    "invalidQr": "Código QR no válido",
+    "loadingCamera": "Iniciando cámara...",
+    "scanButton": "Escanear código QR",
+    "scannerUnsupported": "Escáner QR no soportado en este navegador",
+    "subtitle": "Escanea el código QR que aparece en tu app de escritorio",
+    "videoError": "No se pudo iniciar la cámara"
   },
-  "tools": { "emptyDetails": "Sin detalles disponibles" },
-  "shell": { "reconnect": "Reconectar" },
-  "errors": {
-    "requestFailed": "Solicitud fallida",
-    "sendFailed": "Envío fallido",
-    "serverAborted": "Tarea interrumpida por el servidor",
-    "unknown": "Error desconocido",
-    "failed": "Fallido",
-    "agentNotResponding": "El agente no responde",
-    "stage": {
-      "send": "Enviar",
-      "stream": "Stream",
-      "final": "Finalizar",
-      "lifecycle": "Agente",
-      "sync": "Sincronizar",
-      "persist": "Persistir"
-    }
+  "qrScanner": {
+    "scanFrameLabel": "Área de escaneo QR",
+    "videoLabel": "Visor de cámara para escaneo QR"
   },
-  "qrScanner": { "videoLabel": "Visor de cámara para escaneo QR", "scanFrameLabel": "Área de escaneo QR" },
   "settings": {
-    "darkMode": "Modo oscuro",
-    "lightMode": "Modo claro",
-    "language": "Idioma",
-    "version": "Versión {{version}}",
-    "checkUpdate": "Buscar actualizaciones",
-    "checking": "Comprobando...",
     "applyUpdate": "Actualización disponible — toca para instalar",
-    "upToDate": "Ya está actualizado",
+    "checking": "Comprobando...",
+    "checkUpdate": "Buscar actualizaciones",
+    "darkMode": "Modo oscuro",
+    "language": "Idioma",
+    "lightMode": "Modo claro",
     "updateFailed": "Error al buscar actualizaciones",
-    "updateUnavailable": "Actualizaciones no disponibles"
+    "updateUnavailable": "Actualizaciones no disponibles",
+    "upToDate": "Ya está actualizado",
+    "version": "Versión {{version}}"
   },
-  "debugLog": {
-    "title": "Registro del gateway",
-    "reconnect": "Reconectar",
-    "copyLog": "Copiar registro",
-    "clearLog": "Borrar registro",
-    "close": "Cerrar",
-    "empty": "Sin eventos aún"
+  "shell": {
+    "reconnect": "Reconectar"
+  },
+  "tasks": {
+    "empty": "Sin tareas aún",
+    "navigationLabel": "Lista de tareas",
+    "newTask": "Nueva tarea",
+    "older": "Anterior",
+    "thisWeek": "Esta semana",
+    "today": "Hoy",
+    "yesterday": "Ayer"
+  },
+  "tools": {
+    "emptyDetails": "Sin detalles disponibles"
   }
 }

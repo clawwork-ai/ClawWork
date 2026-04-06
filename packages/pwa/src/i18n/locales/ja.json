@@ -1,44 +1,62 @@
 {
-  "app": {
-    "name": "ClawWork",
-    "loading": "読み込み中...",
-    "error": "エラーが発生しました",
-    "reload": "再読み込み",
-    "paired": "モバイルデバイスがペアリングされました"
+  "agents": {
+    "empty": "利用可能なエージェントがありません",
+    "selectTitle": "エージェントを選択"
   },
-  "pairing": {
-    "subtitle": "デスクトップアプリに表示されたQRコードをスキャンしてください",
-    "instruction": "スキャン後、デスクトップでこのデバイスを承認してください。",
-    "loadingCamera": "カメラを起動中...",
-    "scanButton": "QRコードをスキャン",
-    "cancelButton": "キャンセル",
-    "invalidQr": "無効なQRコード",
-    "cameraError": "カメラの権限が拒否されました",
-    "videoError": "カメラを起動できません",
-    "scannerUnsupported": "このブラウザではQRスキャンがサポートされていません"
+  "app": {
+    "error": "エラーが発生しました",
+    "loading": "読み込み中...",
+    "name": "ClawWork",
+    "paired": "モバイルデバイスがペアリングされました",
+    "reload": "再読み込み"
   },
   "chat": {
-    "emptyState": "タスクを選択するか、新しいタスクを作成してください",
-    "thinking": "考え中...",
-    "inputPlaceholder": "メッセージを入力...",
-    "sendButton": "送信",
     "abortButton": "停止",
-    "authorizationPending": "認証待ち...",
-    "systemMessage": "システムメッセージ",
-    "userMessage": "あなたのメッセージ",
-    "assistantMessage": "アシスタントメッセージ",
     "assistant": "アシスタント",
+    "assistantMessage": "アシスタントメッセージ",
+    "authorizationPending": "認証待ち...",
+    "emptyState": "タスクを選択するか、新しいタスクを作成してください",
+    "inputPlaceholder": "メッセージを入力...",
     "mainArea": "チャット",
+    "sendButton": "送信",
+    "systemMessage": "システムメッセージ",
+    "thinking": "考え中...",
+    "userMessage": "あなたのメッセージ",
     "virtualizedList": "チャット履歴"
   },
-  "tasks": {
-    "newTask": "新しいタスク",
-    "today": "今日",
-    "yesterday": "昨日",
-    "thisWeek": "今週",
-    "older": "それ以前",
-    "empty": "タスクはまだありません",
-    "navigationLabel": "タスクリスト"
+  "debugLog": {
+    "clearLog": "ログをクリア",
+    "close": "閉じる",
+    "copyLog": "ログをコピー",
+    "empty": "イベントはまだありません",
+    "reconnect": "再接続",
+    "title": "ゲートウェイログ"
+  },
+  "drawer": {
+    "closeButton": "メニューを閉じる",
+    "menuButton": "メニューを開く",
+    "newTaskButton": "新しいタスク",
+    "search": "検索",
+    "settings": "設定",
+    "signOut": "サインアウト",
+    "signOutConfirm": "サインアウトしますか？ローカルデータはすべて削除されます。",
+    "title": "ナビゲーションメニュー"
+  },
+  "errors": {
+    "agentNotResponding": "Agentが応答しません — 利用不可またはサーバー設定に問題がある可能性があります",
+    "failed": "失敗",
+    "requestFailed": "リクエスト失敗",
+    "sendFailed": "送信失敗",
+    "serverAborted": "タスクがサーバーにより中断されました",
+    "stage": {
+      "final": "完了",
+      "lifecycle": "Agent",
+      "persist": "永続化",
+      "send": "送信",
+      "stream": "ストリーム",
+      "sync": "同期"
+    },
+    "unknown": "不明なエラー"
   },
   "gateway": {
     "connected": "接続済み",
@@ -46,64 +64,46 @@
     "disconnected": "切断",
     "statusLabel": "ゲートウェイ接続状態"
   },
-  "agents": {
-    "selectTitle": "エージェントを選択",
-    "empty": "利用可能なエージェントがありません"
+  "pairing": {
+    "cameraError": "カメラの権限が拒否されました",
+    "cancelButton": "キャンセル",
+    "instruction": "スキャン後、デスクトップでこのデバイスを承認してください。",
+    "invalidQr": "無効なQRコード",
+    "loadingCamera": "カメラを起動中...",
+    "scanButton": "QRコードをスキャン",
+    "scannerUnsupported": "このブラウザではQRスキャンがサポートされていません",
+    "subtitle": "デスクトップアプリに表示されたQRコードをスキャンしてください",
+    "videoError": "カメラを起動できません"
   },
-  "drawer": {
-    "title": "ナビゲーションメニュー",
-    "settings": "設定",
-    "signOut": "サインアウト",
-    "signOutConfirm": "サインアウトしますか？ローカルデータはすべて削除されます。",
-    "menuButton": "メニューを開く",
-    "closeButton": "メニューを閉じる",
-    "newTaskButton": "新しいタスク",
-    "search": "検索"
+  "qrScanner": {
+    "scanFrameLabel": "QRコードスキャンエリア",
+    "videoLabel": "QRコードスキャン用カメラビューファインダー"
   },
-  "tools": {
-    "emptyDetails": "詳細情報なし"
+  "settings": {
+    "applyUpdate": "アップデートあり — タップしてインストール",
+    "checking": "確認中...",
+    "checkUpdate": "アップデートを確認",
+    "darkMode": "ダークモード",
+    "language": "言語",
+    "lightMode": "ライトモード",
+    "updateFailed": "アップデート確認に失敗",
+    "updateUnavailable": "アップデートは利用できません",
+    "upToDate": "最新バージョンです",
+    "version": "バージョン {{version}}"
   },
   "shell": {
     "reconnect": "再接続"
   },
-  "errors": {
-    "requestFailed": "リクエスト失敗",
-    "sendFailed": "送信失敗",
-    "serverAborted": "タスクがサーバーにより中断されました",
-    "unknown": "不明なエラー",
-    "failed": "失敗",
-    "agentNotResponding": "Agentが応答しません — 利用不可またはサーバー設定に問題がある可能性があります",
-    "stage": {
-      "send": "送信",
-      "stream": "ストリーム",
-      "final": "完了",
-      "lifecycle": "Agent",
-      "sync": "同期",
-      "persist": "永続化"
-    }
+  "tasks": {
+    "empty": "タスクはまだありません",
+    "navigationLabel": "タスクリスト",
+    "newTask": "新しいタスク",
+    "older": "それ以前",
+    "thisWeek": "今週",
+    "today": "今日",
+    "yesterday": "昨日"
   },
-  "qrScanner": {
-    "videoLabel": "QRコードスキャン用カメラビューファインダー",
-    "scanFrameLabel": "QRコードスキャンエリア"
-  },
-  "settings": {
-    "darkMode": "ダークモード",
-    "lightMode": "ライトモード",
-    "language": "言語",
-    "version": "バージョン {{version}}",
-    "checkUpdate": "アップデートを確認",
-    "checking": "確認中...",
-    "applyUpdate": "アップデートあり — タップしてインストール",
-    "upToDate": "最新バージョンです",
-    "updateFailed": "アップデート確認に失敗",
-    "updateUnavailable": "アップデートは利用できません"
-  },
-  "debugLog": {
-    "title": "ゲートウェイログ",
-    "reconnect": "再接続",
-    "copyLog": "ログをコピー",
-    "clearLog": "ログをクリア",
-    "close": "閉じる",
-    "empty": "イベントはまだありません"
+  "tools": {
+    "emptyDetails": "詳細情報なし"
   }
 }

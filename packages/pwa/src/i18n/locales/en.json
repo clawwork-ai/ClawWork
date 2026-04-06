@@ -1,44 +1,62 @@
 {
-  "app": {
-    "name": "ClawWork",
-    "loading": "Loading...",
-    "error": "Something went wrong",
-    "reload": "Reload",
-    "paired": "Mobile device paired"
+  "agents": {
+    "empty": "No agents available",
+    "selectTitle": "Select Agent"
   },
-  "pairing": {
-    "subtitle": "Scan the QR code shown on your desktop app to get started",
-    "instruction": "After scanning, approve this device on your desktop before the mobile app can connect.",
-    "loadingCamera": "Loading camera...",
-    "scanButton": "Scan QR Code",
-    "cancelButton": "Cancel",
-    "invalidQr": "Invalid QR code",
-    "cameraError": "Camera access denied",
-    "videoError": "Failed to start camera",
-    "scannerUnsupported": "QR scanner not supported on this browser"
+  "app": {
+    "error": "Something went wrong",
+    "loading": "Loading...",
+    "name": "ClawWork",
+    "paired": "Mobile device paired",
+    "reload": "Reload"
   },
   "chat": {
-    "emptyState": "Select a task or create a new one",
-    "thinking": "Thinking...",
-    "inputPlaceholder": "Type a message...",
-    "sendButton": "Send",
     "abortButton": "Stop",
-    "authorizationPending": "Waiting for authorization...",
-    "systemMessage": "System message",
-    "userMessage": "Your message",
-    "assistantMessage": "Assistant message",
     "assistant": "Assistant",
+    "assistantMessage": "Assistant message",
+    "authorizationPending": "Waiting for authorization...",
+    "emptyState": "Select a task or create a new one",
+    "inputPlaceholder": "Type a message...",
     "mainArea": "Chat",
+    "sendButton": "Send",
+    "systemMessage": "System message",
+    "thinking": "Thinking...",
+    "userMessage": "Your message",
     "virtualizedList": "Chat transcript"
   },
-  "tasks": {
-    "newTask": "New Task",
-    "today": "Today",
-    "yesterday": "Yesterday",
-    "thisWeek": "This Week",
-    "older": "Older",
-    "empty": "No tasks yet",
-    "navigationLabel": "Task list"
+  "debugLog": {
+    "clearLog": "Clear log",
+    "close": "Close",
+    "copyLog": "Copy log",
+    "empty": "No events yet",
+    "reconnect": "Reconnect",
+    "title": "Gateway Log"
+  },
+  "drawer": {
+    "closeButton": "Close menu",
+    "menuButton": "Open menu",
+    "newTaskButton": "New task",
+    "search": "Search",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "signOutConfirm": "Sign out? All local data will be cleared.",
+    "title": "Navigation drawer"
+  },
+  "errors": {
+    "agentNotResponding": "Agent is not responding - it may be unavailable or misconfigured on the server. Try a different agent.",
+    "failed": "failed",
+    "requestFailed": "Request failed",
+    "sendFailed": "Send failed",
+    "serverAborted": "Task interrupted by server",
+    "stage": {
+      "final": "Finalize",
+      "lifecycle": "Agent",
+      "persist": "Persist",
+      "send": "Send",
+      "stream": "Stream",
+      "sync": "Sync"
+    },
+    "unknown": "Unknown error"
   },
   "gateway": {
     "connected": "Connected",
@@ -46,64 +64,46 @@
     "disconnected": "Disconnected",
     "statusLabel": "Gateway connection status"
   },
-  "agents": {
-    "selectTitle": "Select Agent",
-    "empty": "No agents available"
+  "pairing": {
+    "cameraError": "Camera access denied",
+    "cancelButton": "Cancel",
+    "instruction": "After scanning, approve this device on your desktop before the mobile app can connect.",
+    "invalidQr": "Invalid QR code",
+    "loadingCamera": "Loading camera...",
+    "scanButton": "Scan QR Code",
+    "scannerUnsupported": "QR scanner not supported on this browser",
+    "subtitle": "Scan the QR code shown on your desktop app to get started",
+    "videoError": "Failed to start camera"
   },
-  "drawer": {
-    "title": "Navigation drawer",
-    "settings": "Settings",
-    "signOut": "Sign out",
-    "signOutConfirm": "Sign out? All local data will be cleared.",
-    "menuButton": "Open menu",
-    "closeButton": "Close menu",
-    "newTaskButton": "New task",
-    "search": "Search"
+  "qrScanner": {
+    "scanFrameLabel": "QR code scan area",
+    "videoLabel": "Camera viewfinder for QR code scanning"
   },
-  "tools": {
-    "emptyDetails": "No details available"
+  "settings": {
+    "applyUpdate": "Update Available — Tap to Install",
+    "checking": "Checking...",
+    "checkUpdate": "Check for Updates",
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "lightMode": "Light Mode",
+    "updateFailed": "Update Check Failed",
+    "updateUnavailable": "Updates Not Available",
+    "upToDate": "Already Up to Date",
+    "version": "Version {{version}}"
   },
   "shell": {
     "reconnect": "Reconnect"
   },
-  "errors": {
-    "requestFailed": "Request failed",
-    "sendFailed": "Send failed",
-    "serverAborted": "Task interrupted by server",
-    "unknown": "Unknown error",
-    "failed": "failed",
-    "agentNotResponding": "Agent is not responding - it may be unavailable or misconfigured on the server. Try a different agent.",
-    "stage": {
-      "send": "Send",
-      "stream": "Stream",
-      "final": "Finalize",
-      "lifecycle": "Agent",
-      "sync": "Sync",
-      "persist": "Persist"
-    }
+  "tasks": {
+    "empty": "No tasks yet",
+    "navigationLabel": "Task list",
+    "newTask": "New Task",
+    "older": "Older",
+    "thisWeek": "This Week",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
-  "qrScanner": {
-    "videoLabel": "Camera viewfinder for QR code scanning",
-    "scanFrameLabel": "QR code scan area"
-  },
-  "settings": {
-    "darkMode": "Dark Mode",
-    "lightMode": "Light Mode",
-    "language": "Language",
-    "version": "Version {{version}}",
-    "checkUpdate": "Check for Updates",
-    "checking": "Checking...",
-    "applyUpdate": "Update Available — Tap to Install",
-    "upToDate": "Already Up to Date",
-    "updateFailed": "Update Check Failed",
-    "updateUnavailable": "Updates Not Available"
-  },
-  "debugLog": {
-    "title": "Gateway Log",
-    "reconnect": "Reconnect",
-    "copyLog": "Copy log",
-    "clearLog": "Clear log",
-    "close": "Close",
-    "empty": "No events yet"
+  "tools": {
+    "emptyDetails": "No details available"
   }
 }

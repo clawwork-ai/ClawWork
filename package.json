@@ -33,6 +33,10 @@
       "eslint --fix",
       "prettier --write"
     ],
+    "**/i18n/locales/*.json": [
+      "node scripts/sort-i18n.mjs",
+      "prettier --write"
+    ],
     "*.{json,yaml,yml,md,css,html}": [
       "prettier --write"
     ]
