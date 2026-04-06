@@ -41,22 +41,34 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
   const [discardTarget, setDiscardTarget] = useState<TreeFile | null>(null);
   const fetchedFiles = useRef(new Set<string>());
   const fetchedSkills = useRef(new Set<string>());
+  const loadSeq = useRef(0);
 
   useEffect(() => {
     setSelectedFile({ id: 'team-md', label: 'TEAM.md', kind: 'team-md' });
     setFileContent(team.description || '');
+    setEditingContent(null);
     fetchedFiles.current.clear();
     fetchedSkills.current.clear();
-  }, [team.id, team.description]);
+  }, [team.id]);
+
+  useEffect(() => {
+    if (selectedFile?.kind === 'team-md') {
+      setFileContent(team.description || '');
+    }
+  }, [team.description, selectedFile?.kind]);
 
   useEffect(() => {
     for (const agent of team.agents) {
       if (fetchedFiles.current.has(agent.agentId)) continue;
       fetchedFiles.current.add(agent.agentId);
-      window.clawwork.listAgentFiles(team.gatewayId, agent.agentId).then((res) => {
-        if (!res.ok || !res.result) return;
+      const agentId = agent.agentId;
+      window.clawwork.listAgentFiles(team.gatewayId, agentId).then((res) => {
+        if (!res.ok || !res.result) {
+          fetchedFiles.current.delete(agentId);
+          return;
+        }
         const data = res.result as { files: { name: string }[] };
-        setAgentFilesMap((prev) => ({ ...prev, [agent.agentId]: data.files ?? [] }));
+        setAgentFilesMap((prev) => ({ ...prev, [agentId]: data.files ?? [] }));
       });
     }
   }, [team.agents, team.gatewayId]);
@@ -65,10 +77,14 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
     for (const agent of team.agents) {
       if (fetchedSkills.current.has(agent.agentId)) continue;
       fetchedSkills.current.add(agent.agentId);
-      window.clawwork.getSkillsStatus(team.gatewayId, agent.agentId).then((res) => {
-        if (!res.ok || !res.result) return;
+      const agentId = agent.agentId;
+      window.clawwork.getSkillsStatus(team.gatewayId, agentId).then((res) => {
+        if (!res.ok || !res.result) {
+          fetchedSkills.current.delete(agentId);
+          return;
+        }
         const data = res.result as { skills?: SkillStatusEntry[] };
-        setSkillsMap((prev) => ({ ...prev, [agent.agentId]: data.skills ?? [] }));
+        setSkillsMap((prev) => ({ ...prev, [agentId]: data.skills ?? [] }));
       });
     }
   }, [team.agents, team.gatewayId]);
@@ -119,8 +135,10 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
         return;
       }
       if (file.kind === 'agent-file' && file.agentId) {
+        const seq = ++loadSeq.current;
         setLoadingContent(true);
         const res = await window.clawwork.getAgentFile(team.gatewayId, file.agentId, file.label);
+        if (seq !== loadSeq.current) return;
         setLoadingContent(false);
         const data = res.ok ? (res.result as { file?: { content?: string } }) : null;
         setFileContent(data?.file?.content ?? '');
@@ -154,19 +172,22 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
   const handleSave = useCallback(async () => {
     if (!selectedFile?.agentId || selectedFile.kind !== 'agent-file' || editingContent === null) return;
     setSaving(true);
-    const res = await window.clawwork.setAgentFile(
-      team.gatewayId,
-      selectedFile.agentId,
-      selectedFile.label,
-      editingContent,
-    );
-    setSaving(false);
-    if (res.ok) {
-      toast.success(t('teams.detail.fileSaved'));
-      setFileContent(editingContent);
-      setEditingContent(null);
-    } else {
-      toast.error(res.error ?? t('teams.detail.fileSaveFailed'));
+    try {
+      const res = await window.clawwork.setAgentFile(
+        team.gatewayId,
+        selectedFile.agentId,
+        selectedFile.label,
+        editingContent,
+      );
+      if (res.ok) {
+        toast.success(t('teams.detail.fileSaved'));
+        setFileContent(editingContent);
+        setEditingContent(null);
+      } else {
+        toast.error(res.error ?? t('teams.detail.fileSaveFailed'));
+      }
+    } finally {
+      setSaving(false);
     }
   }, [selectedFile, editingContent, team.gatewayId, t]);
 
@@ -259,7 +280,7 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
                 value={editingContent ?? ''}
                 onChange={(e) => setEditingContent(e.target.value)}
                 className={cn(
-                  'type-mono-data min-h-64 w-full resize-none overflow-auto whitespace-pre-wrap break-words',
+                  'type-mono-data h-full w-full resize-none overflow-auto whitespace-pre-wrap break-words',
                   'rounded-lg border border-[var(--border)] bg-[var(--bg-tertiary)] p-3',
                   'text-[var(--text-secondary)] outline-none ring-accent-focus',
                 )}
