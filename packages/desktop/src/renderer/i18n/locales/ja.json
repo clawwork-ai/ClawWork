@@ -603,7 +603,9 @@
     "deleteTeam": "削除",
     "gateway": "ゲートウェイ",
     "selectAgents": "エージェント",
-    "noAgents": "利用可能なエージェントがありません"
+    "noAgents": "利用可能なエージェントがありません",
+    "editTeam": "チームを編集",
+    "saveTeam": "保存"
   },
   "commandPalette": {
     "placeholder": "コマンドを入力または検索…",

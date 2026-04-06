@@ -38,6 +38,7 @@ export interface Task {
   inputTokens?: number;
   outputTokens?: number;
   contextTokens?: number;
+  teamId?: string;
 }
 
 export type RoomStatus = 'active' | 'stopping' | 'stopped';

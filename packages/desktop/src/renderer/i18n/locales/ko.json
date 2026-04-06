@@ -603,7 +603,9 @@
     "deleteTeam": "삭제",
     "gateway": "게이트웨이",
     "selectAgents": "에이전트",
-    "noAgents": "사용 가능한 에이전트가 없습니다"
+    "noAgents": "사용 가능한 에이전트가 없습니다",
+    "editTeam": "팀 편집",
+    "saveTeam": "저장"
   },
   "commandPalette": {
     "placeholder": "명령어 입력 또는 검색…",

@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
-import type { AgentInfo } from '@clawwork/shared';
+import type { AgentInfo, Team } from '@clawwork/shared';
 import {
   Dialog,
   DialogContent,
@@ -52,9 +52,17 @@ interface CreateTeamDialogProps {
     gatewayId: string;
     agents: Array<{ agentId: string; role: string; isManager: boolean }>;
   }) => void;
+  team?: Team;
 }
 
-export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId, onCreate }: CreateTeamDialogProps) {
+export default function CreateTeamDialog({
+  open,
+  onOpenChange,
+  defaultGatewayId,
+  onCreate,
+  team,
+}: CreateTeamDialogProps) {
+  const isEdit = !!team;
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🤖');
@@ -64,19 +72,32 @@ export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId,
   const [selectedAgentIds, setSelectedAgentIds] = useState<Set<string>>(new Set());
   const [agentCatalog, setAgentCatalog] = useState<AgentInfo[]>([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
+  const prevGatewayIdRef = useRef<string | null>(null);
 
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const gateways = useMemo(() => Object.entries(gatewayInfoMap), [gatewayInfoMap]);
 
   useEffect(() => {
     if (!open) return;
-    setGatewayId(defaultGatewayId);
-  }, [open, defaultGatewayId]);
+    if (team) {
+      setName(team.name);
+      setEmoji(team.emoji || '🤖');
+      setDescription(team.description);
+      setGatewayId(team.gatewayId);
+      setSelectedAgentIds(new Set(team.agents.map((a) => a.agentId)));
+    } else {
+      setGatewayId(defaultGatewayId);
+    }
+  }, [open, defaultGatewayId, team]);
 
   useEffect(() => {
     if (!open || !gatewayId) return;
+    const gatewayChanged = prevGatewayIdRef.current !== null && prevGatewayIdRef.current !== gatewayId;
+    prevGatewayIdRef.current = gatewayId;
+    if (gatewayChanged) {
+      setSelectedAgentIds(new Set());
+    }
     setLoadingAgents(true);
-    setSelectedAgentIds(new Set());
     window.clawwork
       .listAgents(gatewayId)
       .then((res) => {
@@ -95,6 +116,7 @@ export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId,
     setDescription('');
     setSelectedAgentIds(new Set());
     setAgentCatalog([]);
+    prevGatewayIdRef.current = null;
   }, []);
 
   const toggleAgent = useCallback((agentId: string) => {
@@ -111,15 +133,16 @@ export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId,
 
   const handleCreate = useCallback(() => {
     if (!name.trim() || selectedAgentIds.size === 0) return;
+    const existingAgentMap = new Map(team?.agents.map((a) => [a.agentId, a]));
     const agents = Array.from(selectedAgentIds).map((agentId) => ({
       agentId,
-      role: '',
-      isManager: false,
+      role: existingAgentMap.get(agentId)?.role ?? '',
+      isManager: existingAgentMap.get(agentId)?.isManager ?? false,
     }));
     onCreate({ name: name.trim(), emoji, description: description.trim(), gatewayId, agents });
     resetForm();
     onOpenChange(false);
-  }, [name, emoji, description, gatewayId, selectedAgentIds, onCreate, resetForm, onOpenChange]);
+  }, [name, emoji, description, gatewayId, selectedAgentIds, team, onCreate, resetForm, onOpenChange]);
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
@@ -133,7 +156,7 @@ export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId,
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t('teams.createTeam')}</DialogTitle>
+          <DialogTitle>{isEdit ? t('teams.editTeam') : t('teams.createTeam')}</DialogTitle>
           <DialogDescription>{t('teams.emptyDesc')}</DialogDescription>
         </DialogHeader>
 
@@ -242,7 +265,7 @@ export default function CreateTeamDialog({ open, onOpenChange, defaultGatewayId,
             {t('common.cancel')}
           </Button>
           <Button onClick={handleCreate} disabled={!name.trim() || selectedAgentIds.size === 0}>
-            {t('teams.createTeam')}
+            {isEdit ? t('teams.saveTeam') : t('teams.createTeam')}
           </Button>
         </DialogFooter>
       </DialogContent>

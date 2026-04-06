@@ -603,7 +603,9 @@
     "deleteTeam": "删除",
     "gateway": "网关",
     "selectAgents": "选择 Agent",
-    "noAgents": "暂无可用 Agent"
+    "noAgents": "暂无可用 Agent",
+    "editTeam": "编辑团队",
+    "saveTeam": "保存"
   },
   "commandPalette": {
     "placeholder": "输入命令或搜索…",

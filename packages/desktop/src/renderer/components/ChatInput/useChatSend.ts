@@ -24,6 +24,7 @@ import { useTaskStore } from '../../stores/taskStore';
 import { useMessageStore } from '../../stores/messageStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useRoomStore } from '../../stores/roomStore';
+import { useTeamStore } from '../../stores/teamStore';
 import { composer } from '../../platform';
 import type { PendingImage } from './types';
 import type { ThinkingLevel } from './constants';
@@ -172,17 +173,39 @@ export function useChatSend(opts: UseChatSendOpts) {
     if (task.ensemble) {
       const room = useRoomStore.getState().rooms[task.id];
       if (!room || !room.conductorReady) {
-        const catalogEntry = useUiStore.getState().agentCatalogByGateway[task.gatewayId];
-        const agents = (catalogEntry?.agents ?? []).filter((a) => a.id !== 'main');
-        if (agents.length === 0) {
-          toast.error(t('errors.conductorInitFailed'));
-          return;
+        let agentCatalogStr: string;
+        if (task.teamId) {
+          const team = useTeamStore.getState().teams[task.teamId];
+          const catalogEntry = useUiStore.getState().agentCatalogByGateway[task.gatewayId];
+          const allAgents = catalogEntry?.agents ?? [];
+          const teamAgentIds = new Set(team?.agents.map((a) => a.agentId) ?? []);
+          const teamAgentMap = new Map(team?.agents.map((a) => [a.agentId, a]));
+          const agents = allAgents.filter((a) => teamAgentIds.has(a.id) && a.id !== task.agentId);
+          if (agents.length === 0) {
+            toast.error(t('errors.conductorInitFailed'));
+            return;
+          }
+          agentCatalogStr = agents
+            .map((a) => {
+              const ta = teamAgentMap.get(a.id);
+              const rolePart = ta?.role ? `, role: "${ta.role}"` : '';
+              return `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}${rolePart}`;
+            })
+            .join('\n');
+        } else {
+          const catalogEntry = useUiStore.getState().agentCatalogByGateway[task.gatewayId];
+          const agents = (catalogEntry?.agents ?? []).filter((a) => a.id !== 'main');
+          if (agents.length === 0) {
+            toast.error(t('errors.conductorInitFailed'));
+            return;
+          }
+          agentCatalogStr = agents
+            .map(
+              (a) =>
+                `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}`,
+            )
+            .join('\n');
         }
-        const agentCatalogStr = agents
-          .map(
-            (a) => `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}`,
-          )
-          .join('\n');
         const ok = await useRoomStore
           .getState()
           .initConductor(task.id, task.gatewayId, task.sessionKey, agentCatalogStr, content);

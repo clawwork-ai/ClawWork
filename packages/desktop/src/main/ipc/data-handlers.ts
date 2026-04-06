@@ -27,6 +27,7 @@ export function registerDataHandlers(): void {
         inputTokens?: number;
         outputTokens?: number;
         contextTokens?: number;
+        teamId?: string;
         createdAt: string;
         updatedAt: string;
         tags: string[];
@@ -51,6 +52,7 @@ export function registerDataHandlers(): void {
             inputTokens: task.inputTokens,
             outputTokens: task.outputTokens,
             contextTokens: task.contextTokens,
+            teamId: task.teamId ?? null,
             createdAt: task.createdAt,
             updatedAt: task.updatedAt,
             tags: JSON.stringify(task.tags),

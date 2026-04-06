@@ -8,6 +8,7 @@ export interface PendingNewTask {
   model?: string;
   thinkingLevel?: string;
   ensemble?: boolean;
+  teamId?: string;
 }
 
 export interface TaskState {
@@ -19,7 +20,7 @@ export interface TaskState {
   startNewTask: (gatewayId?: string, agentId?: string) => void;
   commitPendingTask: () => Task;
   clearPending: () => void;
-  createTask: (gatewayId?: string, agentId?: string, ensemble?: boolean) => Task;
+  createTask: (opts?: { gatewayId?: string; agentId?: string; ensemble?: boolean; teamId?: string }) => Task;
   setActiveTask: (id: string | null) => void;
   updateTaskTitle: (id: string, title: string) => void;
   updateTaskStatus: (id: string, status: TaskStatus) => void;
@@ -78,6 +79,14 @@ export interface TaskStoreDeps {
       sessionId: string;
       title: string;
       status: string;
+      ensemble?: boolean | null;
+      model?: string | null;
+      modelProvider?: string | null;
+      thinkingLevel?: string | null;
+      inputTokens?: number | null;
+      outputTokens?: number | null;
+      contextTokens?: number | null;
+      teamId?: string | null;
       createdAt: string;
       updatedAt: string;
       tags: string[];
@@ -118,17 +127,22 @@ export function createTaskStore(deps: TaskStoreDeps) {
       const catalog = deps.getAgentCatalog(gwId);
       const agId = pending?.agentId || catalog.defaultId;
       if (!agId) throw new Error('no agent available — gateway catalog not loaded');
-      const task = get().createTask(gwId, agId, pending?.ensemble);
+      const task = get().createTask({
+        gatewayId: gwId,
+        agentId: agId,
+        ensemble: pending?.ensemble,
+        teamId: pending?.teamId,
+      });
       set({ pendingNewTask: null });
       return task;
     },
 
     clearPending: () => set({ pendingNewTask: null }),
 
-    createTask: (gatewayId?, agentId?, ensemble?) => {
-      const resolvedGatewayId = gatewayId ?? deps.getDefaultGatewayId() ?? '';
+    createTask: (opts) => {
+      const resolvedGatewayId = opts?.gatewayId ?? deps.getDefaultGatewayId() ?? '';
       const catalog = deps.getAgentCatalog(resolvedGatewayId);
-      const resolvedAgentId = agentId || catalog.defaultId;
+      const resolvedAgentId = opts?.agentId || catalog.defaultId;
       if (!resolvedAgentId) throw new Error('no agent available — gateway catalog not loaded');
       const id = crypto.randomUUID();
       const now = new Date().toISOString();
@@ -138,13 +152,14 @@ export function createTaskStore(deps: TaskStoreDeps) {
         sessionId: '',
         title: '',
         status: 'active',
-        ensemble: ensemble ?? undefined,
+        ensemble: opts?.ensemble ?? undefined,
         createdAt: now,
         updatedAt: now,
         tags: [],
         artifactDir: '',
         gatewayId: resolvedGatewayId,
         agentId: resolvedAgentId,
+        teamId: opts?.teamId,
       };
       set((s) => ({ tasks: [task, ...s.tasks], activeTaskId: id }));
       deps.persistTask(task).catch((err) => {
@@ -223,8 +238,24 @@ export function createTaskStore(deps: TaskStoreDeps) {
         if (res.ok && res.rows) {
           set({
             tasks: res.rows.map((r) => ({
-              ...r,
+              id: r.id,
+              sessionKey: r.sessionKey,
+              sessionId: r.sessionId,
+              title: r.title,
               status: r.status as TaskStatus,
+              ensemble: r.ensemble ?? undefined,
+              model: r.model ?? undefined,
+              modelProvider: r.modelProvider ?? undefined,
+              thinkingLevel: r.thinkingLevel ?? undefined,
+              inputTokens: r.inputTokens ?? undefined,
+              outputTokens: r.outputTokens ?? undefined,
+              contextTokens: r.contextTokens ?? undefined,
+              teamId: r.teamId ?? undefined,
+              createdAt: r.createdAt,
+              updatedAt: r.updatedAt,
+              tags: r.tags,
+              artifactDir: r.artifactDir,
+              gatewayId: r.gatewayId,
             })),
             hydrated: true,
           });

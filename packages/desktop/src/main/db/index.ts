@@ -96,6 +96,10 @@ function openDatabaseAt(workspacePath: string): void {
     sqlite.exec('ALTER TABLE tasks ADD COLUMN ensemble INTEGER NOT NULL DEFAULT 0');
   } catch {}
 
+  try {
+    sqlite.exec('ALTER TABLE tasks ADD COLUMN team_id TEXT');
+  } catch {}
+
   sqlite.exec(`
     UPDATE messages SET session_key = (
       SELECT t.session_key FROM tasks t WHERE t.id = messages.task_id

@@ -603,7 +603,9 @@
     "deleteTeam": "刪除",
     "gateway": "閘道器",
     "selectAgents": "選擇 Agent",
-    "noAgents": "暫無可用 Agent"
+    "noAgents": "暫無可用 Agent",
+    "editTeam": "編輯團隊",
+    "saveTeam": "儲存"
   },
   "commandPalette": {
     "placeholder": "輸入命令或搜尋…",

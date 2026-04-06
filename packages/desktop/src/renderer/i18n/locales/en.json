@@ -603,7 +603,9 @@
     "deleteTeam": "Delete",
     "gateway": "Gateway",
     "selectAgents": "Agents",
-    "noAgents": "No agents available"
+    "noAgents": "No agents available",
+    "editTeam": "Edit Team",
+    "saveTeam": "Save"
   },
   "commandPalette": {
     "placeholder": "Type a command or search…",

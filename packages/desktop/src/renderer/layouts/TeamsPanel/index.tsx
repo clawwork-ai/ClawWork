@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Users, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import type { Team } from '@clawwork/shared';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import EmptyState from '@/components/semantic/EmptyState';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTeamStore } from '@/stores/teamStore';
-import { useUiStore } from '@/platform';
+import { useTaskStore, useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
 import CreateTeamDialog from './CreateTeamDialog';
 
@@ -15,9 +17,14 @@ export default function TeamsPanel() {
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
   const createTeam = useTeamStore((s) => s.createTeam);
+  const updateTeam = useTeamStore((s) => s.updateTeam);
   const deleteTeamAction = useTeamStore((s) => s.deleteTeam);
+  const createTask = useTaskStore((s) => s.createTask);
+  const setActiveTask = useTaskStore((s) => s.setActiveTask);
+  const setMainView = useUiStore((s) => s.setMainView);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
 
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
 
@@ -46,9 +53,52 @@ export default function TeamsPanel() {
     [createTeam],
   );
 
-  const handleStartChat = useCallback((_teamId: string) => {}, []);
+  const handleStartChat = useCallback(
+    (teamId: string) => {
+      const team = teamsMap[teamId];
+      if (!team || team.agents.length === 0) {
+        toast.error(t('teams.noAgents'));
+        return;
+      }
+      const manager = team.agents.find((a) => a.isManager);
+      const agentId = manager?.agentId ?? team.agents[0].agentId;
+      const needsEnsemble = team.agents.length >= 2;
+      const task = createTask({ gatewayId: team.gatewayId, agentId, ensemble: needsEnsemble, teamId });
+      setActiveTask(task.id);
+      setMainView('chat');
+    },
+    [teamsMap, createTask, setActiveTask, setMainView, t],
+  );
 
-  const handleEdit = useCallback((_teamId: string) => {}, []);
+  const handleEdit = useCallback(
+    (teamId: string) => {
+      const team = teamsMap[teamId];
+      if (!team) return;
+      setEditingTeam(team);
+    },
+    [teamsMap],
+  );
+
+  const handleUpdate = useCallback(
+    (data: {
+      name: string;
+      emoji: string;
+      description: string;
+      gatewayId: string;
+      agents: Array<{ agentId: string; role: string; isManager: boolean }>;
+    }) => {
+      if (!editingTeam) return;
+      updateTeam(editingTeam.id, {
+        name: data.name,
+        emoji: data.emoji,
+        description: data.description,
+        gatewayId: data.gatewayId,
+        agents: data.agents,
+      });
+      setEditingTeam(null);
+    },
+    [editingTeam, updateTeam],
+  );
 
   const handleDelete = useCallback(
     (teamId: string) => {
@@ -110,6 +160,16 @@ export default function TeamsPanel() {
         onOpenChange={setCreateOpen}
         defaultGatewayId={defaultGatewayId ?? ''}
         onCreate={handleCreate}
+      />
+
+      <CreateTeamDialog
+        open={!!editingTeam}
+        onOpenChange={(open) => {
+          if (!open) setEditingTeam(null);
+        }}
+        defaultGatewayId={editingTeam?.gatewayId ?? defaultGatewayId ?? ''}
+        onCreate={handleUpdate}
+        team={editingTeam ?? undefined}
       />
     </div>
   );

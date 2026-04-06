@@ -13,6 +13,7 @@ export const tasks = sqliteTable('tasks', {
   inputTokens: integer('input_tokens'),
   outputTokens: integer('output_tokens'),
   contextTokens: integer('context_tokens'),
+  teamId: text('team_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   tags: text('tags').notNull().default('[]'),
