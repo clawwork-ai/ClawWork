@@ -104,7 +104,7 @@ export function serializeIdentityMd(description: string | undefined, body: strin
     const descLine = `description: "${escaped}"`;
     if (existingFm) {
       fmBlock = FM_DESC_LINE_RE.test(existingFm)
-        ? existingFm.replace(FM_DESC_LINE_RE, descLine)
+        ? existingFm.replace(FM_DESC_LINE_RE, () => descLine)
         : `${descLine}\n${existingFm}`;
     } else {
       fmBlock = descLine;

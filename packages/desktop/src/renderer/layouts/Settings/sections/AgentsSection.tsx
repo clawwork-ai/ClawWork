@@ -824,6 +824,7 @@ export default function AgentsSection() {
   }, [editingAgentId, agentWorkspaceMap]);
 
   const closeForm = useCallback(() => {
+    ++editSeqRef.current;
     setShowForm(false);
     setEditingAgentId(null);
     setForm(EMPTY_FORM);
@@ -859,7 +860,17 @@ export default function AgentsSection() {
         const parsed = parseIdentityMd(form.identityRaw);
         const newContent = serializeIdentityMd(form.description.trim() || undefined, parsed.body, form.identityRaw);
         if (newContent !== form.identityRaw) {
-          await window.clawwork.setAgentFile(selectedGatewayId, editingAgentId, 'IDENTITY.md', newContent);
+          const fileRes = await window.clawwork.setAgentFile(
+            selectedGatewayId,
+            editingAgentId,
+            'IDENTITY.md',
+            newContent,
+          );
+          if (!fileRes.ok) {
+            toast.error(fileRes.error ?? t('errors.failed'));
+            setSaving(false);
+            return;
+          }
         }
         toast.success(t('settings.agentUpdated'));
         closeForm();
@@ -883,7 +894,12 @@ export default function AgentsSection() {
         }
         if (newAgentId && form.description.trim()) {
           const content = serializeIdentityMd(form.description.trim(), '');
-          await window.clawwork.setAgentFile(selectedGatewayId, newAgentId, 'IDENTITY.md', content);
+          const fileRes = await window.clawwork.setAgentFile(selectedGatewayId, newAgentId, 'IDENTITY.md', content);
+          if (!fileRes.ok) {
+            toast.error(fileRes.error ?? t('errors.failed'));
+            setSaving(false);
+            return;
+          }
         }
         toast.success(t('settings.agentCreated'));
         closeForm();

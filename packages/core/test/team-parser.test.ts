@@ -256,6 +256,12 @@ describe('serializeIdentityMd', () => {
     expect(extractIdentityBody(result)).toBe('Body text');
   });
 
+  it('handles dollar signs in description without replace pattern bugs', () => {
+    const existing = `---\ndescription: "old"\n---\n\nBody`;
+    const result = serializeIdentityMd('costs $100 per agent', 'Body', existing);
+    expect(extractDescription(result)).toBe('costs $100 per agent');
+  });
+
   it('adds description to existing frontmatter that lacks it', () => {
     const existing = `---\nversion: 2\n---\n\nBody`;
     const result = serializeIdentityMd('new desc', 'Body', existing);
