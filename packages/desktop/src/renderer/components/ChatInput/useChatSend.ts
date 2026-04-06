@@ -188,8 +188,9 @@ export function useChatSend(opts: UseChatSendOpts) {
           agentCatalogStr = agents
             .map((a) => {
               const ta = teamAgentMap.get(a.id);
-              const rolePart = ta?.role ? `, role: "${ta.role}"` : '';
-              return `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}${rolePart}`;
+              const name = (a.name ?? a.id).replaceAll('"', '\\"');
+              const rolePart = ta?.role ? `, role: "${ta.role.replaceAll('"', '\\"')}"` : '';
+              return `- id: ${a.id}, name: "${name}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}${rolePart}`;
             })
             .join('\n');
         } else {
@@ -202,7 +203,7 @@ export function useChatSend(opts: UseChatSendOpts) {
           agentCatalogStr = agents
             .map(
               (a) =>
-                `- id: ${a.id}, name: "${a.name ?? a.id}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}`,
+                `- id: ${a.id}, name: "${(a.name ?? a.id).replaceAll('"', '\\"')}"${a.identity?.emoji ? `, emoji: ${a.identity.emoji}` : ''}`,
             )
             .join('\n');
         }
