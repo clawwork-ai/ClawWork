@@ -77,6 +77,55 @@ export interface Team {
   updatedAt: string;
 }
 
+export interface ParsedTeamAgent {
+  id: string;
+  name: string;
+  role: 'coordinator' | 'worker';
+}
+
+export interface AgentFileSet {
+  agentMd?: string;
+  soulMd?: string;
+  skillsJson?: string;
+}
+
+export interface ParsedTeam {
+  name: string;
+  description: string;
+  version: string;
+  agents: ParsedTeamAgent[];
+  body: string;
+}
+
+export interface SkillRef {
+  id: string;
+  source: string;
+  sourceType: 'github' | 'clawhub' | 'local';
+}
+
+export type InstallEventType =
+  | 'agent_creating'
+  | 'agent_created'
+  | 'file_setting'
+  | 'file_set'
+  | 'skill_installing'
+  | 'skill_installed'
+  | 'team_persisting'
+  | 'team_persisted'
+  | 'warning'
+  | 'error'
+  | 'done';
+
+export interface InstallEvent {
+  type: InstallEventType;
+  agentSlug?: string;
+  agentId?: string;
+  skillId?: string;
+  fileName?: string;
+  message?: string;
+  progress?: { current: number; total: number };
+}
+
 export interface MessageImageAttachment {
   fileName: string;
   dataUrl: string;

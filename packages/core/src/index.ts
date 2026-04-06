@@ -98,3 +98,7 @@ export type { ChatComposerDeps, ChatComposer, SendOptions } from './services/cha
 
 export { createSystemSessionService } from './services/system-session-service.js';
 export type { SystemSessionServiceDeps, SystemSessionService } from './services/system-session-service.js';
+
+export { parseTeamMd, parseSkillsJson, extractSkillSlugs } from './services/team-parser.js';
+export { installTeam } from './services/team-installer.js';
+export type { InstallerDeps } from './services/team-installer.js';
