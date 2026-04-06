@@ -319,7 +319,7 @@ export default function LeftNav() {
           />
           <IconButton
             icon={Users}
-            tooltip={t('teams.title')}
+            tooltip={`${t('teams.title')} (Beta)`}
             onClick={() => setMainView('teams')}
             className={
               mainView === 'teams'
@@ -468,6 +468,11 @@ export default function LeftNav() {
               label={t('teams.title')}
               active={mainView === 'teams'}
               onClick={() => setMainView('teams')}
+              badge={
+                <span className="ml-auto type-support rounded-full bg-[var(--accent-dim)] px-1.5 py-0.5 text-[var(--accent)]">
+                  Beta
+                </span>
+              }
             />
             <NavButton
               icon={FolderOpen}

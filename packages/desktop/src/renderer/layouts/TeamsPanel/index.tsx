@@ -5,53 +5,32 @@ import { toast } from 'sonner';
 import type { Team } from '@clawwork/shared';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import EmptyState from '@/components/semantic/EmptyState';
+import ConfirmDialog from '@/components/semantic/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTeamStore } from '@/stores/teamStore';
 import { useTaskStore, useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
-import CreateTeamDialog from './CreateTeamDialog';
+import CreateTeamWizard from './CreateTeamWizard';
 
 export default function TeamsPanel() {
   const { t } = useTranslation();
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
-  const createTeam = useTeamStore((s) => s.createTeam);
-  const updateTeam = useTeamStore((s) => s.updateTeam);
   const deleteTeamAction = useTeamStore((s) => s.deleteTeam);
   const createTask = useTaskStore((s) => s.createTask);
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const setMainView = useUiStore((s) => s.setMainView);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editTeam, setEditTeam] = useState<Team | null>(null);
+  const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
 
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
 
   useEffect(() => {
     loadTeams();
   }, [loadTeams]);
-
-  const handleCreate = useCallback(
-    (data: {
-      name: string;
-      emoji: string;
-      description: string;
-      gatewayId: string;
-      agents: Array<{ agentId: string; role: string; isManager: boolean }>;
-    }) => {
-      createTeam({
-        name: data.name,
-        emoji: data.emoji,
-        description: data.description,
-        gatewayId: data.gatewayId,
-        source: 'local',
-        version: '',
-        agents: data.agents,
-      });
-    },
-    [createTeam],
-  );
 
   const handleStartChat = useCallback(
     (teamId: string) => {
@@ -74,38 +53,27 @@ export default function TeamsPanel() {
     (teamId: string) => {
       const team = teamsMap[teamId];
       if (!team) return;
-      setEditingTeam(team);
+      setEditTeam(team);
+      setWizardOpen(true);
     },
     [teamsMap],
   );
 
-  const handleUpdate = useCallback(
-    (data: {
-      name: string;
-      emoji: string;
-      description: string;
-      gatewayId: string;
-      agents: Array<{ agentId: string; role: string; isManager: boolean }>;
-    }) => {
-      if (!editingTeam) return;
-      updateTeam(editingTeam.id, {
-        name: data.name,
-        emoji: data.emoji,
-        description: data.description,
-        gatewayId: data.gatewayId,
-        agents: data.agents,
-      });
-      setEditingTeam(null);
-    },
-    [editingTeam, updateTeam],
-  );
+  const handleDelete = useCallback((teamId: string) => {
+    setDeletingTeamId(teamId);
+  }, []);
 
-  const handleDelete = useCallback(
-    (teamId: string) => {
-      deleteTeamAction(teamId);
-    },
-    [deleteTeamAction],
-  );
+  const confirmDelete = useCallback(() => {
+    if (deletingTeamId) deleteTeamAction(deletingTeamId);
+    setDeletingTeamId(null);
+  }, [deletingTeamId, deleteTeamAction]);
+
+  const handleWizardClose = useCallback((open: boolean) => {
+    if (!open) setEditTeam(null);
+    setWizardOpen(open);
+  }, []);
+
+  const deletingTeam = deletingTeamId ? teamsMap[deletingTeamId] : null;
 
   return (
     <div className="flex flex-col h-full">
@@ -119,7 +87,13 @@ export default function TeamsPanel() {
         }
         right={
           teams.length > 0 ? (
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditTeam(null);
+                setWizardOpen(true);
+              }}
+            >
               <Plus size={14} />
               {t('teams.createTeam')}
             </Button>
@@ -134,14 +108,20 @@ export default function TeamsPanel() {
             title={t('teams.emptyTitle')}
             description={t('teams.emptyDesc')}
             action={
-              <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditTeam(null);
+                  setWizardOpen(true);
+                }}
+              >
                 <Plus size={14} />
                 {t('teams.createTeam')}
               </Button>
             }
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-[var(--content-max-width)]">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--content-card-min),1fr))] gap-4">
             {teams.map((team) => (
               <TeamCard
                 key={team.id}
@@ -155,21 +135,20 @@ export default function TeamsPanel() {
         )}
       </ScrollArea>
 
-      <CreateTeamDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
+      <CreateTeamWizard
+        open={wizardOpen}
+        onOpenChange={handleWizardClose}
         defaultGatewayId={defaultGatewayId ?? ''}
-        onCreate={handleCreate}
+        editTeam={editTeam}
       />
 
-      <CreateTeamDialog
-        open={!!editingTeam}
-        onOpenChange={(open) => {
-          if (!open) setEditingTeam(null);
-        }}
-        defaultGatewayId={editingTeam?.gatewayId ?? defaultGatewayId ?? ''}
-        onCreate={handleUpdate}
-        team={editingTeam ?? undefined}
+      <ConfirmDialog
+        open={!!deletingTeam}
+        variant="danger"
+        title={t('teams.confirmDeleteTitle')}
+        description={t('teams.confirmDeleteDesc', { name: deletingTeam?.name ?? '' })}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingTeamId(null)}
       />
     </div>
   );

@@ -3,6 +3,8 @@
 
 @theme {
   --content-max-width: 48rem;
+  --content-card-min: 260px;
+  --dialog-max-width: 56rem;
 }
 
 @layer base {

@@ -96,16 +96,16 @@ export async function* installTeam(
 
     const files = agentFiles[agent.id];
     if (files?.agentMd) {
-      yield { type: 'file_setting', agentSlug: agent.id, agentId, fileName: 'AGENT.md' };
-      const r = await deps.setAgentFile(agentId, 'AGENT.md', files.agentMd);
+      yield { type: 'file_setting', agentSlug: agent.id, agentId, fileName: 'IDENTITY.md' };
+      const r = await deps.setAgentFile(agentId, 'IDENTITY.md', files.agentMd);
       step++;
-      if (!r.ok) yield { type: 'warning', agentSlug: agent.id, message: `Failed to set AGENT.md: ${r.error}` };
+      if (!r.ok) yield { type: 'warning', agentSlug: agent.id, message: `Failed to set IDENTITY.md: ${r.error}` };
       else
         yield {
           type: 'file_set',
           agentSlug: agent.id,
           agentId,
-          fileName: 'AGENT.md',
+          fileName: 'IDENTITY.md',
           progress: { current: step, total: totalSteps },
         };
     }

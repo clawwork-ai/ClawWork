@@ -102,7 +102,7 @@ function getLineAndColumn(content, index) {
 }
 
 function isAllowed(filePath, matchText, category) {
-  if (category === 'layout-escape' && /var\(--(?:density|content)-/.test(matchText)) {
+  if (category === 'layout-escape' && /var\(--(?:density|content|dialog)-/.test(matchText)) {
     return true;
   }
 

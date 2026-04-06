@@ -69,7 +69,7 @@ describe('installTeam', () => {
     const events = await collect(installTeam(parsed, files, 'gw-1', '/w', deps));
 
     expect(deps.setAgentFile).toHaveBeenCalledTimes(2);
-    expect(deps.setAgentFile).toHaveBeenCalledWith('agent-1', 'AGENT.md', '# Manager');
+    expect(deps.setAgentFile).toHaveBeenCalledWith('agent-1', 'IDENTITY.md', '# Manager');
     expect(deps.setAgentFile).toHaveBeenCalledWith('agent-1', 'SOUL.md', '# Soul');
 
     const types = events.map((e) => e.type);

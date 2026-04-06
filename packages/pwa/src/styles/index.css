@@ -4,6 +4,7 @@
 
 @theme {
   --content-max-width: 48rem;
+  --dialog-max-width: 56rem;
   --font-family-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono Variable', 'SF Mono', 'Fira Code', monospace;
   --font-size-2xs: 11px;
