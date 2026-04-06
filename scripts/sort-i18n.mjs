@@ -1,7 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 function sortDeep(obj) {
-  if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) return obj;
+  if (Array.isArray(obj)) return obj.map(sortDeep);
+  if (typeof obj !== 'object' || obj === null) return obj;
   return Object.fromEntries(
     Object.entries(obj)
       .sort(([a], [b]) => a.localeCompare(b))
@@ -17,12 +18,15 @@ if (!files.length) {
 
 let changed = false;
 for (const file of files) {
-  const raw = readFileSync(file, 'utf8');
-  const sorted = JSON.stringify(sortDeep(JSON.parse(raw)), null, 2) + '\n';
-  if (raw !== sorted) {
-    writeFileSync(file, sorted);
-    changed = true;
+  try {
+    const raw = readFileSync(file, 'utf8');
+    const sorted = JSON.stringify(sortDeep(JSON.parse(raw)), null, 2) + '\n';
+    if (raw !== sorted) {
+      writeFileSync(file, sorted);
+      changed = true;
+    }
+  } catch (error) {
+    console.error(`sort-i18n: ${file}: ${error.message}`);
+    process.exit(1);
   }
 }
-
-if (changed) process.exit(0);
