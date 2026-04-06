@@ -82,12 +82,12 @@ export function registerSettingsHandlers(): void {
         return { ok: false, error: 'pairing-code test is not supported' };
       }
       const testAuth: GatewayAuth = auth.token
-        ? { token: auth.token }
+        ? { token: auth.token.trim() }
         : auth.password
-          ? { password: auth.password }
+          ? { password: auth.password.trim() }
           : { token: '' };
       const testClient = new GatewayClient(
-        { id: `test-${Date.now()}`, name: 'test', url, auth: testAuth },
+        { id: `test-${Date.now()}`, name: 'test', url: url.trim(), auth: testAuth },
         { noReconnect: true },
       );
       try {
