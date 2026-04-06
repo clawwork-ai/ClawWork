@@ -704,13 +704,13 @@ export default function ChatInput() {
                             <ChevronDown size={14} className="opacity-50" />
                           </ToolbarButton>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
+                        <DropdownMenuContent align="start" className="max-h-96 overflow-y-auto">
                           {Object.entries(modelsByProvider).map(([provider, models]) => (
                             <DropdownMenuSub key={provider}>
                               <DropdownMenuSubTrigger>
                                 <span>{provider}</span>
                               </DropdownMenuSubTrigger>
-                              <DropdownMenuSubContent>
+                              <DropdownMenuSubContent className="max-h-96 overflow-y-auto">
                                 {models.map((m) => (
                                   <DropdownMenuItem
                                     key={m.id}
