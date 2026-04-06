@@ -583,6 +583,17 @@
     "createTeam": "Team erstellen",
     "deleteTeam": "Löschen",
     "description": "Beschreibung",
+    "detail": {
+      "agents": "Agenten",
+      "fileSaved": "Datei gespeichert",
+      "fileSaveFailed": "Datei konnte nicht gespeichert werden",
+      "noDescription": "Keine Beschreibung",
+      "noSkills": "Keine Skills",
+      "selectFile": "Datei zum Anzeigen auswählen",
+      "skills": "Skills",
+      "unsavedDesc": "Es gibt ungespeicherte Änderungen. Verwerfen?",
+      "unsavedTitle": "Ungespeicherte Änderungen"
+    },
     "editTeam": "Team bearbeiten",
     "emptyDesc": "Erstellen Sie ein Team, um loszulegen",
     "emptyTitle": "Noch keine Teams",

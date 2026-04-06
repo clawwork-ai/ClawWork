@@ -583,6 +583,17 @@
     "createTeam": "创建团队",
     "deleteTeam": "删除",
     "description": "描述",
+    "detail": {
+      "agents": "智能体",
+      "fileSaved": "文件已保存",
+      "fileSaveFailed": "文件保存失败",
+      "noDescription": "暂无描述",
+      "noSkills": "暂无技能",
+      "selectFile": "选择文件以查看",
+      "skills": "技能",
+      "unsavedDesc": "你有未保存的更改。是否丢弃？",
+      "unsavedTitle": "未保存的更改"
+    },
     "editTeam": "编辑团队",
     "emptyDesc": "创建一个团队以开始",
     "emptyTitle": "还没有团队",

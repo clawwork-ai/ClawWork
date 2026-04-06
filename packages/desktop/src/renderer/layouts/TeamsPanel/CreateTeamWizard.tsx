@@ -182,6 +182,7 @@ export default function CreateTeamWizard({ open, onOpenChange, defaultGatewayId,
                   info={teamInfo}
                   onChange={handleTeamInfoChange}
                   gateways={Object.entries(gatewayInfoMap)}
+                  nameLocked={isEdit}
                   gatewayLocked={isEdit}
                 />
               )}

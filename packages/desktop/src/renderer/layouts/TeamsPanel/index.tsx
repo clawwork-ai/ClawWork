@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTeamStore } from '@/stores/teamStore';
 import { useTaskStore, useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
+import TeamDetailView from './TeamDetailView';
 import CreateTeamWizard from './CreateTeamWizard';
 
 export default function TeamsPanel() {
@@ -22,6 +23,7 @@ export default function TeamsPanel() {
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const setMainView = useUiStore((s) => s.setMainView);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
@@ -74,66 +76,79 @@ export default function TeamsPanel() {
   }, []);
 
   const deletingTeam = deletingTeamId ? teamsMap[deletingTeamId] : null;
+  const selectedTeam = selectedTeamId ? teamsMap[selectedTeamId] : null;
 
   return (
-    <div className="flex flex-col h-full">
-      <WindowTitlebar
-        left={
-          <div className="flex items-center gap-2.5">
-            <Users size={18} className="text-[var(--text-muted)]" />
-            <h2 className="type-section-title text-[var(--text-primary)]">{t('teams.title')}</h2>
-            {teams.length > 0 && <span className="type-support text-[var(--text-muted)]">({teams.length})</span>}
-          </div>
-        }
-        right={
-          teams.length > 0 ? (
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditTeam(null);
-                setWizardOpen(true);
-              }}
-            >
-              <Plus size={14} />
-              {t('teams.createTeam')}
-            </Button>
-          ) : undefined
-        }
-      />
-
-      <ScrollArea className="flex-1 px-5 py-4">
-        {teams.length === 0 ? (
-          <EmptyState
-            icon={<Users size={24} className="text-[var(--text-muted)]" />}
-            title={t('teams.emptyTitle')}
-            description={t('teams.emptyDesc')}
-            action={
-              <Button
-                size="sm"
-                onClick={() => {
-                  setEditTeam(null);
-                  setWizardOpen(true);
-                }}
-              >
-                <Plus size={14} />
-                {t('teams.createTeam')}
-              </Button>
+    <>
+      {selectedTeam ? (
+        <TeamDetailView
+          team={selectedTeam}
+          onBack={() => setSelectedTeamId(null)}
+          onStartChat={() => handleStartChat(selectedTeam.id)}
+          onEdit={() => handleEdit(selectedTeam.id)}
+        />
+      ) : (
+        <div className="flex flex-col h-full">
+          <WindowTitlebar
+            left={
+              <div className="flex items-center gap-2.5">
+                <Users size={18} className="text-[var(--text-muted)]" />
+                <h2 className="type-section-title text-[var(--text-primary)]">{t('teams.title')}</h2>
+                {teams.length > 0 && <span className="type-support text-[var(--text-muted)]">({teams.length})</span>}
+              </div>
+            }
+            right={
+              teams.length > 0 ? (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setEditTeam(null);
+                    setWizardOpen(true);
+                  }}
+                >
+                  <Plus size={14} />
+                  {t('teams.createTeam')}
+                </Button>
+              ) : undefined
             }
           />
-        ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--content-card-min),1fr))] gap-4">
-            {teams.map((team) => (
-              <TeamCard
-                key={team.id}
-                team={team}
-                onStartChat={() => handleStartChat(team.id)}
-                onEdit={() => handleEdit(team.id)}
-                onDelete={() => handleDelete(team.id)}
+
+          <ScrollArea className="flex-1 px-5 py-4">
+            {teams.length === 0 ? (
+              <EmptyState
+                icon={<Users size={24} className="text-[var(--text-muted)]" />}
+                title={t('teams.emptyTitle')}
+                description={t('teams.emptyDesc')}
+                action={
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setEditTeam(null);
+                      setWizardOpen(true);
+                    }}
+                  >
+                    <Plus size={14} />
+                    {t('teams.createTeam')}
+                  </Button>
+                }
               />
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--content-card-min),1fr))] gap-4">
+                {teams.map((team) => (
+                  <TeamCard
+                    key={team.id}
+                    team={team}
+                    onSelect={() => setSelectedTeamId(team.id)}
+                    onStartChat={() => handleStartChat(team.id)}
+                    onEdit={() => handleEdit(team.id)}
+                    onDelete={() => handleDelete(team.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+      )}
 
       <CreateTeamWizard
         open={wizardOpen}
@@ -150,6 +165,6 @@ export default function TeamsPanel() {
         onConfirm={confirmDelete}
         onCancel={() => setDeletingTeamId(null)}
       />
-    </div>
+    </>
   );
 }

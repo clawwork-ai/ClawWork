@@ -583,6 +583,17 @@
     "createTeam": "Criar equipe",
     "deleteTeam": "Excluir",
     "description": "Descrição",
+    "detail": {
+      "agents": "Agentes",
+      "fileSaved": "Arquivo salvo",
+      "fileSaveFailed": "Falha ao salvar o arquivo",
+      "noDescription": "Sem descrição",
+      "noSkills": "Sem habilidades",
+      "selectFile": "Selecione um arquivo para visualizar",
+      "skills": "Habilidades",
+      "unsavedDesc": "Você tem alterações não salvas. Descartar?",
+      "unsavedTitle": "Alterações não salvas"
+    },
     "editTeam": "Editar equipe",
     "emptyDesc": "Crie uma equipe para começar",
     "emptyTitle": "Nenhuma equipe ainda",

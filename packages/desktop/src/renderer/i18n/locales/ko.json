@@ -583,6 +583,17 @@
     "createTeam": "팀 만들기",
     "deleteTeam": "삭제",
     "description": "설명",
+    "detail": {
+      "agents": "에이전트",
+      "fileSaved": "파일이 저장되었습니다",
+      "fileSaveFailed": "파일 저장에 실패했습니다",
+      "noDescription": "설명 없음",
+      "noSkills": "스킬 없음",
+      "selectFile": "파일을 선택하여 보기",
+      "skills": "스킬",
+      "unsavedDesc": "저장되지 않은 변경사항이 있습니다. 삭제하시겠습니까?",
+      "unsavedTitle": "저장되지 않은 변경사항"
+    },
     "editTeam": "팀 편집",
     "emptyDesc": "팀을 만들어 시작하세요",
     "emptyTitle": "아직 팀이 없습니다",

@@ -14,19 +14,21 @@ import {
 
 interface TeamCardProps {
   team: Team;
+  onSelect: () => void;
   onStartChat: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export default function TeamCard({ team, onStartChat, onEdit, onDelete }: TeamCardProps) {
+export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete }: TeamCardProps) {
   const { t } = useTranslation();
 
   return (
     <motion.div
       {...motionPresets.listItem}
+      onClick={onSelect}
       className={cn(
-        'surface-card flex w-full flex-col items-start gap-3 rounded-xl p-5',
+        'surface-card flex w-full cursor-pointer flex-col items-start gap-3 rounded-xl p-5',
         'border border-[var(--border)] transition-colors',
         'hover:border-[var(--border-hover)] hover:bg-[var(--bg-hover)]',
       )}
@@ -40,7 +42,10 @@ export default function TeamCard({ team, onStartChat, onEdit, onDelete }: TeamCa
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] cursor-pointer focus-visible:outline-none glow-focus">
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] cursor-pointer focus-visible:outline-none glow-focus"
+            >
               <MoreHorizontal size={15} />
             </button>
           </DropdownMenuTrigger>
@@ -62,7 +67,13 @@ export default function TeamCard({ team, onStartChat, onEdit, onDelete }: TeamCa
           <Users size={13} className="opacity-60" />
           <span>{t('teams.memberCount', { count: team.agents.length })}</span>
         </div>
-        <Button size="sm" onClick={onStartChat}>
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onStartChat();
+          }}
+        >
           <MessageSquare size={14} />
           {t('teams.startChat')}
         </Button>

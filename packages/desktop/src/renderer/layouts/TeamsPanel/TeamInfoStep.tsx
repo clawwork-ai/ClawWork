@@ -36,10 +36,11 @@ interface TeamInfoStepProps {
   info: TeamInfo;
   onChange: (info: TeamInfo) => void;
   gateways: Array<[string, { name: string }]>;
+  nameLocked?: boolean;
   gatewayLocked?: boolean;
 }
 
-export default function TeamInfoStep({ info, onChange, gateways, gatewayLocked }: TeamInfoStepProps) {
+export default function TeamInfoStep({ info, onChange, gateways, nameLocked, gatewayLocked }: TeamInfoStepProps) {
   const { t } = useTranslation();
   const [emojiOpen, setEmojiOpen] = useState(false);
 
@@ -80,8 +81,9 @@ export default function TeamInfoStep({ info, onChange, gateways, gatewayLocked }
             onChange={(e) => update({ name: e.target.value.slice(0, 50) })}
             placeholder={t('teams.namePlaceholder')}
             maxLength={50}
-            autoFocus
-            className={inputClass}
+            autoFocus={!nameLocked}
+            disabled={nameLocked}
+            className={cn(inputClass, nameLocked && 'opacity-60 cursor-not-allowed')}
           />
         </div>
       </div>
