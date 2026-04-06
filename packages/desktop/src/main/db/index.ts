@@ -9,6 +9,17 @@ import { initFTS } from './fts.js';
 let db: ReturnType<typeof drizzle> | null = null;
 let sqlite: Database.Database | null = null;
 
+function migrateAddColumn(database: Database.Database, sql: string): void {
+  try {
+    database.exec(sql);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes('duplicate column')) {
+      console.error('[db:migration]', msg);
+    }
+  }
+}
+
 const CREATE_TABLES_SQL = `
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
@@ -61,9 +72,7 @@ function openDatabaseAt(workspacePath: string): void {
   sqlite.pragma('foreign_keys = ON');
   sqlite.exec(CREATE_TABLES_SQL);
 
-  try {
-    sqlite.exec("ALTER TABLE tasks ADD COLUMN gateway_id TEXT NOT NULL DEFAULT ''");
-  } catch {}
+  migrateAddColumn(sqlite, "ALTER TABLE tasks ADD COLUMN gateway_id TEXT NOT NULL DEFAULT ''");
 
   for (const sql of [
     'ALTER TABLE tasks ADD COLUMN model TEXT',
@@ -73,32 +82,18 @@ function openDatabaseAt(workspacePath: string): void {
     'ALTER TABLE tasks ADD COLUMN output_tokens INTEGER',
     'ALTER TABLE tasks ADD COLUMN context_tokens INTEGER',
   ]) {
-    try {
-      sqlite.exec(sql);
-    } catch {}
+    migrateAddColumn(sqlite, sql);
   }
 
-  try {
-    sqlite.exec('ALTER TABLE messages ADD COLUMN image_attachments TEXT');
-  } catch {}
-
-  try {
-    sqlite.exec('ALTER TABLE messages ADD COLUMN tool_calls TEXT');
-  } catch {}
+  migrateAddColumn(sqlite, 'ALTER TABLE messages ADD COLUMN image_attachments TEXT');
+  migrateAddColumn(sqlite, 'ALTER TABLE messages ADD COLUMN tool_calls TEXT');
 
   for (const col of ['session_key TEXT', 'agent_id TEXT', 'run_id TEXT']) {
-    try {
-      sqlite.exec(`ALTER TABLE messages ADD COLUMN ${col}`);
-    } catch {}
+    migrateAddColumn(sqlite, `ALTER TABLE messages ADD COLUMN ${col}`);
   }
 
-  try {
-    sqlite.exec('ALTER TABLE tasks ADD COLUMN ensemble INTEGER NOT NULL DEFAULT 0');
-  } catch {}
-
-  try {
-    sqlite.exec('ALTER TABLE tasks ADD COLUMN team_id TEXT');
-  } catch {}
+  migrateAddColumn(sqlite, 'ALTER TABLE tasks ADD COLUMN ensemble INTEGER NOT NULL DEFAULT 0');
+  migrateAddColumn(sqlite, 'ALTER TABLE tasks ADD COLUMN team_id TEXT');
 
   sqlite.exec(`
     UPDATE messages SET session_key = (
@@ -136,9 +131,7 @@ function openDatabaseAt(workspacePath: string): void {
 
   sqlite.exec("DELETE FROM messages WHERE role = 'assistant' AND (content = '' OR TRIM(content) = 'NO_REPLY')");
 
-  try {
-    sqlite.exec("ALTER TABLE artifacts ADD COLUMN content_text TEXT NOT NULL DEFAULT ''");
-  } catch {}
+  migrateAddColumn(sqlite, "ALTER TABLE artifacts ADD COLUMN content_text TEXT NOT NULL DEFAULT ''");
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS teams (
