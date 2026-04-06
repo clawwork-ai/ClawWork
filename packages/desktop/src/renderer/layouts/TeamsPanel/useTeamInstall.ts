@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { InstallEvent, AgentCreateResponse, SkillInstallResult, IpcResult } from '@clawwork/shared';
 import type { InstallerDeps } from '@clawwork/core';
-import { installTeam } from '@clawwork/core';
+import { installTeam, serializeIdentityMd } from '@clawwork/core';
 import { toSlug } from './utils';
 import type { TeamInfo, AgentDraft } from './types';
 
@@ -47,7 +47,8 @@ export function useTeamInstall(onDone?: () => void) {
         const slug = toSlug(a.name);
         const files: { agentMd?: string; soulMd?: string; skillsJson?: string } = {};
         if (!a.existingAgentId) {
-          if (a.agentMd.trim()) files.agentMd = a.agentMd.trim();
+          const identity = serializeIdentityMd(a.description, a.agentMd.trim());
+          if (identity) files.agentMd = identity;
           if (a.soulMd.trim()) files.soulMd = a.soulMd.trim();
         }
         if (a.skills.length > 0) {

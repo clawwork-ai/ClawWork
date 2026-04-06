@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Trash2, Plus, X, Crown, Loader2 } from 'lucide-react';
 import type { AgentInfo } from '@clawwork/shared';
+import { parseIdentityMd } from '@clawwork/core';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -53,7 +54,7 @@ export default function AgentDraftCard({
   const isExisting = !!agent.existingAgentId;
 
   const switchToNew = () => {
-    onUpdate({ existingAgentId: undefined, name: '', model: '', agentMd: '', soulMd: '', skills: [] });
+    onUpdate({ existingAgentId: undefined, name: '', description: '', model: '', agentMd: '', soulMd: '', skills: [] });
     setExistingSkillNames([]);
     setDetailsLoadedFor(null);
     setActiveTab('agent-md');
@@ -63,6 +64,7 @@ export default function AgentDraftCard({
     onUpdate({
       existingAgentId: info.id,
       name: info.name ?? info.id,
+      description: '',
       model: info.model?.primary ?? '',
       agentMd: '',
       soulMd: '',
@@ -90,7 +92,11 @@ export default function AgentDraftCard({
       const patch: Partial<AgentDraft> = {};
       if (identityRes.status === 'fulfilled' && identityRes.value.ok && identityRes.value.result) {
         const data = identityRes.value.result as Record<string, unknown>;
-        if (typeof data.content === 'string') patch.agentMd = data.content;
+        if (typeof data.content === 'string') {
+          const parsed = parseIdentityMd(data.content);
+          patch.description = parsed.description ?? '';
+          patch.agentMd = parsed.body;
+        }
       }
       if (soulRes.status === 'fulfilled' && soulRes.value.ok && soulRes.value.result) {
         const data = soulRes.value.result as Record<string, unknown>;
@@ -206,45 +212,68 @@ export default function AgentDraftCard({
           </div>
 
           {isExisting ? (
-            <div className="flex items-center gap-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2">
-              <span className="type-body text-[var(--text-primary)] flex-1">{agent.name}</span>
-              {displayModel && <span className="type-meta text-[var(--text-muted)]">{displayModel}</span>}
-              {loadingDetails && <Loader2 size={12} className="animate-spin text-[var(--text-muted)]" />}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2">
+                <span className="type-body text-[var(--text-primary)] flex-1">{agent.name}</span>
+                {displayModel && <span className="type-meta text-[var(--text-muted)]">{displayModel}</span>}
+                {loadingDetails && <Loader2 size={12} className="animate-spin text-[var(--text-muted)]" />}
+              </div>
+              {agent.description && (
+                <div className="space-y-1">
+                  <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.description')}</label>
+                  <p className="type-body rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2 text-[var(--text-secondary)]">
+                    {agent.description}
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.agentName')}</label>
-                <input
-                  type="text"
-                  value={agent.name}
-                  onChange={(e) => onUpdate({ name: e.target.value.slice(0, 50) })}
-                  placeholder={t('teams.wizard.agentNamePlaceholder')}
-                  maxLength={50}
-                  className={inputClass}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.role')}</label>
-                <div className={cn(inputClass, 'flex items-center opacity-60 cursor-default')}>
-                  {isFirst ? t('teams.wizard.coordinator') : t('teams.wizard.worker')}
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.agentName')}</label>
+                  <input
+                    type="text"
+                    value={agent.name}
+                    onChange={(e) => onUpdate({ name: e.target.value.slice(0, 50) })}
+                    placeholder={t('teams.wizard.agentNamePlaceholder')}
+                    maxLength={50}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.role')}</label>
+                  <div className={cn(inputClass, 'flex items-center opacity-60 cursor-default')}>
+                    {isFirst ? t('teams.wizard.coordinator') : t('teams.wizard.worker')}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.model')}</label>
+                  <select
+                    value={agent.model}
+                    onChange={(e) => onUpdate({ model: e.target.value })}
+                    className={inputClass}
+                  >
+                    <option value="">{t('teams.wizard.modelDefault')}</option>
+                    {models.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name ?? m.id}
+                        {m.provider ? ` (${m.provider})` : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.model')}</label>
-                <select
-                  value={agent.model}
-                  onChange={(e) => onUpdate({ model: e.target.value })}
+                <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.description')}</label>
+                <input
+                  type="text"
+                  value={agent.description}
+                  onChange={(e) => onUpdate({ description: e.target.value.slice(0, 200) })}
+                  placeholder={t('teams.wizard.descriptionPlaceholder')}
+                  maxLength={200}
                   className={inputClass}
-                >
-                  <option value="">{t('teams.wizard.modelDefault')}</option>
-                  {models.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name ?? m.id}
-                      {m.provider ? ` (${m.provider})` : ''}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
           )}

@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { parseTeamMd, parseSkillsJson, extractSkillSlugs } from '../src/services/team-parser';
+import {
+  parseTeamMd,
+  parseSkillsJson,
+  extractSkillSlugs,
+  parseIdentityMd,
+  extractDescription,
+  extractIdentityBody,
+  serializeIdentityMd,
+} from '../src/services/team-parser';
 
 const VALID_TEAM_MD = `---
 name: code-team
@@ -151,5 +159,139 @@ describe('extractSkillSlugs', () => {
 
   it('returns empty for malformed skillsJson', () => {
     expect(extractSkillSlugs({ skillsJson: '{bad' })).toEqual([]);
+  });
+});
+
+describe('parseIdentityMd', () => {
+  it('parses description and body from frontmatter', () => {
+    const md = `---\ndescription: "React/TS specialist"\n---\n\nYou are a frontend dev.`;
+    const result = parseIdentityMd(md);
+    expect(result.description).toBe('React/TS specialist');
+    expect(result.body).toBe('You are a frontend dev.');
+    expect(result.rawFrontmatter).toBe('description: "React/TS specialist"');
+  });
+
+  it('returns body only when no frontmatter', () => {
+    const result = parseIdentityMd('Just a prompt.');
+    expect(result.description).toBeUndefined();
+    expect(result.body).toBe('Just a prompt.');
+    expect(result.rawFrontmatter).toBeUndefined();
+  });
+
+  it('preserves rawFrontmatter with multiple fields', () => {
+    const md = `---\ndescription: "test"\nversion: 2\ncustom: foo\n---\n\nBody`;
+    const result = parseIdentityMd(md);
+    expect(result.description).toBe('test');
+    expect(result.rawFrontmatter).toContain('version: 2');
+    expect(result.rawFrontmatter).toContain('custom: foo');
+  });
+
+  it('returns undefined description when frontmatter lacks it', () => {
+    const md = `---\nname: test\n---\n\nBody text.`;
+    expect(parseIdentityMd(md).description).toBeUndefined();
+  });
+});
+
+describe('extractDescription', () => {
+  it('extracts description from frontmatter', () => {
+    const md = `---\ndescription: "React/TS specialist"\n---\n\nYou are a frontend dev.`;
+    expect(extractDescription(md)).toBe('React/TS specialist');
+  });
+
+  it('returns undefined when no frontmatter', () => {
+    expect(extractDescription('Just a prompt.')).toBeUndefined();
+  });
+
+  it('handles unquoted description', () => {
+    const md = `---\ndescription: Backend API expert\n---\n\nBody`;
+    expect(extractDescription(md)).toBe('Backend API expert');
+  });
+});
+
+describe('extractIdentityBody', () => {
+  it('extracts body after frontmatter', () => {
+    const md = `---\ndescription: "test"\n---\n\nYou are a specialist.`;
+    expect(extractIdentityBody(md)).toBe('You are a specialist.');
+  });
+
+  it('returns full content when no frontmatter', () => {
+    expect(extractIdentityBody('Just a prompt.')).toBe('Just a prompt.');
+  });
+});
+
+describe('serializeIdentityMd', () => {
+  it('serializes description and body', () => {
+    const result = serializeIdentityMd('React specialist', 'You are a frontend dev.');
+    expect(result).toBe('---\ndescription: "React specialist"\n---\n\nYou are a frontend dev.');
+  });
+
+  it('returns body only when description is empty', () => {
+    expect(serializeIdentityMd('', 'body')).toBe('body');
+    expect(serializeIdentityMd(undefined, 'body')).toBe('body');
+    expect(serializeIdentityMd('  ', 'body')).toBe('body');
+  });
+
+  it('escapes quotes in description', () => {
+    const result = serializeIdentityMd('Expert in "React"', 'body');
+    expect(result).toContain('description: "Expert in \\"React\\""');
+  });
+
+  it('strips newlines from description', () => {
+    const result = serializeIdentityMd('line1\nline2', 'body');
+    expect(result).toContain('description: "line1 line2"');
+  });
+
+  it('produces no trailing whitespace with empty body', () => {
+    const result = serializeIdentityMd('desc', '');
+    expect(result).toBe('---\ndescription: "desc"\n---');
+    expect(result.endsWith('---')).toBe(true);
+  });
+
+  it('preserves existing frontmatter fields when existingRaw is provided', () => {
+    const existing = `---\ndescription: "old"\nversion: 2\ncustom: foo\n---\n\nBody text`;
+    const result = serializeIdentityMd('new desc', 'Body text', existing);
+    expect(extractDescription(result)).toBe('new desc');
+    expect(result).toContain('version: 2');
+    expect(result).toContain('custom: foo');
+    expect(extractIdentityBody(result)).toBe('Body text');
+  });
+
+  it('adds description to existing frontmatter that lacks it', () => {
+    const existing = `---\nversion: 2\n---\n\nBody`;
+    const result = serializeIdentityMd('new desc', 'Body', existing);
+    expect(extractDescription(result)).toBe('new desc');
+    expect(result).toContain('version: 2');
+  });
+
+  it('removes description from frontmatter when cleared', () => {
+    const existing = `---\ndescription: "old"\nversion: 2\n---\n\nBody`;
+    const result = serializeIdentityMd(undefined, 'Body', existing);
+    expect(extractDescription(result)).toBeUndefined();
+    expect(result).toContain('version: 2');
+    expect(extractIdentityBody(result)).toBe('Body');
+  });
+
+  it('returns body only when clearing description and no other frontmatter', () => {
+    const existing = `---\ndescription: "old"\n---\n\nBody`;
+    const result = serializeIdentityMd(undefined, 'Body', existing);
+    expect(result).toBe('Body');
+  });
+
+  it('round-trips with parseIdentityMd', () => {
+    const desc = 'Full-stack Go/React engineer';
+    const body = 'You build APIs and UIs.';
+    const serialized = serializeIdentityMd(desc, body);
+    const parsed = parseIdentityMd(serialized);
+    expect(parsed.description).toBe(desc);
+    expect(parsed.body).toBe(body);
+  });
+
+  it('round-trips with extra fields preserved', () => {
+    const existing = `---\ndescription: "old"\nversion: 2\n---\n\nOriginal body`;
+    const result = serializeIdentityMd('updated', 'New body', existing);
+    const parsed = parseIdentityMd(result);
+    expect(parsed.description).toBe('updated');
+    expect(parsed.body).toBe('New body');
+    expect(parsed.rawFrontmatter).toContain('version: 2');
   });
 });

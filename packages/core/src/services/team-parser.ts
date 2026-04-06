@@ -61,6 +61,60 @@ export function extractSkillSlugs(agentFiles: AgentFileSet): SkillRef[] {
   }
 }
 
+interface ParsedIdentityMd {
+  description?: string;
+  body: string;
+  rawFrontmatter?: string;
+}
+
+export function parseIdentityMd(raw: string): ParsedIdentityMd {
+  const match = raw.trim().match(FRONTMATTER_RE);
+  if (!match) return { body: raw.trim() };
+  const fm = parseFrontmatter(match[1]);
+  const desc = typeof fm.description === 'string' && fm.description ? fm.description : undefined;
+  return { description: desc, body: match[2].trim(), rawFrontmatter: match[1] };
+}
+
+export function extractDescription(agentMd: string): string | undefined {
+  return parseIdentityMd(agentMd).description;
+}
+
+export function extractIdentityBody(agentMd: string): string {
+  return parseIdentityMd(agentMd).body;
+}
+
+const FM_DESC_LINE_RE = /^description:\s*.*/m;
+
+export function serializeIdentityMd(description: string | undefined, body: string, existingRaw?: string): string {
+  const trimmedDesc = description?.trim()?.replaceAll('\n', ' ');
+  const existingFm = existingRaw ? existingRaw.trim().match(FRONTMATTER_RE)?.[1] : undefined;
+
+  if (!trimmedDesc && !existingFm) return body;
+
+  let fmBlock: string;
+  if (!trimmedDesc) {
+    fmBlock = existingFm
+      ? existingFm
+          .replace(FM_DESC_LINE_RE, '')
+          .replace(/\n{2,}/g, '\n')
+          .trim()
+      : '';
+  } else {
+    const escaped = trimmedDesc.replaceAll('"', '\\"');
+    const descLine = `description: "${escaped}"`;
+    if (existingFm) {
+      fmBlock = FM_DESC_LINE_RE.test(existingFm)
+        ? existingFm.replace(FM_DESC_LINE_RE, descLine)
+        : `${descLine}\n${existingFm}`;
+    } else {
+      fmBlock = descLine;
+    }
+  }
+
+  if (!fmBlock) return body;
+  return body ? `---\n${fmBlock}\n---\n\n${body}` : `---\n${fmBlock}\n---`;
+}
+
 function unquote(s: string): string {
   const trimmed = s.trim();
   if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {

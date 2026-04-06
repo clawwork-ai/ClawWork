@@ -33,6 +33,7 @@ import type {
   SkillStatusEntry,
   SkillStatusReport,
 } from '@clawwork/shared';
+import { parseIdentityMd, serializeIdentityMd } from '@clawwork/core';
 import AgentBuilderDialog from '@/components/AgentBuilderDialog';
 import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
@@ -50,9 +51,11 @@ interface AgentFormData {
   workspace: string;
   avatar: string;
   model: string;
+  description: string;
+  identityRaw: string;
 }
 
-const EMPTY_FORM: AgentFormData = { name: '', workspace: '', avatar: '', model: '' };
+const EMPTY_FORM: AgentFormData = { name: '', workspace: '', avatar: '', model: '', description: '', identityRaw: '' };
 
 const inputClass = cn(
   'flex-1 h-[var(--density-control-height-lg)] px-3 py-2 rounded-md',
@@ -618,6 +621,20 @@ function AgentForm({
           </div>
         </div>
 
+        <div>
+          <label className="type-label mb-1.5 block text-[var(--text-secondary)]">
+            {t('settings.agentDescription')}
+          </label>
+          <input
+            type="text"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value.slice(0, 200) }))}
+            placeholder={t('settings.agentDescriptionPlaceholder')}
+            maxLength={200}
+            className={cn(inputClass, 'w-full')}
+          />
+        </div>
+
         <div className="flex items-center gap-2 pt-1">
           <div className="flex-1" />
           <Button variant="ghost" size="sm" onClick={onClose} className="titlebar-no-drag">
@@ -652,6 +669,7 @@ export default function AgentsSection() {
   const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingAgentId, setEditingAgentId] = useState<string | null>(null);
+  const editSeqRef = useRef(0);
   const [form, setForm] = useState<AgentFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deletingAgentId, setDeletingAgentId] = useState<string | null>(null);
@@ -769,6 +787,7 @@ export default function AgentsSection() {
 
   const openEditForm = useCallback(
     (agent: AgentInfo) => {
+      const seq = ++editSeqRef.current;
       setEditingAgentId(agent.id);
       const gatewayAvatar = agent.identity?.avatarUrl ?? agent.identity?.avatar ?? '';
       const localAvatar = selectedGatewayId ? `clawwork-avatar://${selectedGatewayId}/${agent.id}` : '';
@@ -777,9 +796,23 @@ export default function AgentsSection() {
         workspace: agentWorkspaceMap[agent.id] ?? '',
         avatar: gatewayAvatar || localAvatar,
         model: '',
+        description: '',
+        identityRaw: '',
       });
       setShowForm(true);
       fetchAgentMeta(agent.id);
+      if (selectedGatewayId) {
+        window.clawwork.getAgentFile(selectedGatewayId, agent.id, 'IDENTITY.md').then((res) => {
+          if (seq !== editSeqRef.current) return;
+          if (res.ok && res.result) {
+            const data = res.result as Record<string, unknown>;
+            if (typeof data.content === 'string') {
+              const parsed = parseIdentityMd(data.content);
+              setForm((f) => ({ ...f, description: parsed.description ?? '', identityRaw: data.content as string }));
+            }
+          }
+        });
+      }
     },
     [agentWorkspaceMap, selectedGatewayId, fetchAgentMeta],
   );
@@ -823,6 +856,11 @@ export default function AgentsSection() {
         if (isNewUpload) {
           window.clawwork.saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar).catch(() => {});
         }
+        const parsed = parseIdentityMd(form.identityRaw);
+        const newContent = serializeIdentityMd(form.description.trim() || undefined, parsed.body, form.identityRaw);
+        if (newContent !== form.identityRaw) {
+          await window.clawwork.setAgentFile(selectedGatewayId, editingAgentId, 'IDENTITY.md', newContent);
+        }
         toast.success(t('settings.agentUpdated'));
         closeForm();
         await refreshAgents();
@@ -842,6 +880,10 @@ export default function AgentsSection() {
         const newAgentId = (created?.agentId as string) ?? '';
         if (isNewUpload && newAgentId) {
           window.clawwork.saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar).catch(() => {});
+        }
+        if (newAgentId && form.description.trim()) {
+          const content = serializeIdentityMd(form.description.trim(), '');
+          await window.clawwork.setAgentFile(selectedGatewayId, newAgentId, 'IDENTITY.md', content);
         }
         toast.success(t('settings.agentCreated'));
         closeForm();

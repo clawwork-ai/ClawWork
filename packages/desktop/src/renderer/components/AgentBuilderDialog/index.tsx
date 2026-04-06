@@ -9,14 +9,16 @@ import MarkdownContent from '@/components/MarkdownContent';
 import { useUiStore } from '@/stores/uiStore';
 import { useSystemSession } from '@/hooks/useSystemSession';
 import type { ModelCatalogEntry } from '@clawwork/shared';
+import { serializeIdentityMd } from '@clawwork/core';
 
 interface AgentConfig {
   name: string;
+  description: string;
   model: string;
   identity: string;
 }
 
-const EMPTY_CONFIG: AgentConfig = { name: '', model: '', identity: '' };
+const EMPTY_CONFIG: AgentConfig = { name: '', description: '', model: '', identity: '' };
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
 
@@ -24,21 +26,22 @@ const SYSTEM_PROMPT_TEMPLATE = `You are an Agent creation assistant for ClawWork
 
 Your job:
 1. Ask what kind of Agent the user wants and what it should do
-2. Based on their description, suggest a name and draft an identity (system prompt that defines the Agent's role, expertise, and behavior)
+2. Based on their description, suggest a name, a short description (one-line summary of capabilities for multi-agent coordination), and draft an identity (system prompt that defines the Agent's role, expertise, and behavior)
 3. Recommend a model from the available list: {{modelList}}
 4. After each response, include a structured block with current config
 
 Rules:
 - Ask ONE question at a time
-- Be proactive: extract name and identity from the user's first description
+- Be proactive: extract name, description, and identity from the user's first description
 - The name MUST be in English (ASCII only, e.g. "Story Crafter" not "故事匠") — it is used as a system identifier
+- The description should be a brief capability summary (under 200 chars) used by conductor agents to understand what this agent can do
 - Keep identity concise but specific (2-4 sentences)
 - Always end your response with the current config as a JSON block
 - Only include fields whose values have been determined. Do NOT include fields with placeholder values like "..."
-- Example with two determined fields:
+- Example with three determined fields:
 
 \`\`\`agent-config
-{"name": "Code Review Helper", "identity": "A code review assistant that..."}
+{"name": "Code Review Helper", "description": "Expert in code review, security audit, and best practices enforcement", "identity": "A code review assistant that..."}
 \`\`\`
 
 Respond in {{language}}.
@@ -141,6 +144,7 @@ export default function AgentBuilderDialog({ open, onOpenChange, gatewayId, onCr
         if (parsed) {
           setConfig((prev) => ({
             name: userEdited.has('name') ? prev.name : (parsed.name ?? prev.name),
+            description: userEdited.has('description') ? prev.description : (parsed.description ?? prev.description),
             model: userEdited.has('model') ? prev.model : (parsed.model ?? prev.model),
             identity: userEdited.has('identity') ? prev.identity : (parsed.identity ?? prev.identity),
           }));
@@ -224,11 +228,14 @@ export default function AgentBuilderDialog({ open, onOpenChange, gatewayId, onCr
         }
       }
 
-      if (config.identity.trim() && agentId) {
-        const fileRes = await window.clawwork.setAgentFile(gatewayId, agentId, 'IDENTITY.md', config.identity.trim());
-        if (!fileRes.ok) {
-          toast.error(fileRes.error ?? t('errors.failed'));
-          return;
+      if ((config.identity.trim() || config.description.trim()) && agentId) {
+        const content = serializeIdentityMd(config.description.trim() || undefined, config.identity.trim());
+        if (content) {
+          const fileRes = await window.clawwork.setAgentFile(gatewayId, agentId, 'IDENTITY.md', content);
+          if (!fileRes.ok) {
+            toast.error(fileRes.error ?? t('errors.failed'));
+            return;
+          }
         }
       }
 
@@ -360,6 +367,20 @@ export default function AgentBuilderDialog({ open, onOpenChange, gatewayId, onCr
                   value={config.name}
                   onChange={(e) => updateConfigField('name', e.target.value)}
                   placeholder={t('settings.agentNamePlaceholder')}
+                  className={cn(inputClass, 'w-full')}
+                />
+              </div>
+
+              <div>
+                <label className="type-label mb-1.5 block text-[var(--text-secondary)]">
+                  {t('settings.agentDescription')}
+                </label>
+                <input
+                  type="text"
+                  value={config.description}
+                  onChange={(e) => updateConfigField('description', e.target.value.slice(0, 200))}
+                  placeholder={t('settings.agentDescriptionPlaceholder')}
+                  maxLength={200}
                   className={cn(inputClass, 'w-full')}
                 />
               </div>

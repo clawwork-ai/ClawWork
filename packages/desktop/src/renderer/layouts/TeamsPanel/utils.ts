@@ -18,5 +18,5 @@ export const inputClass = cn(
 );
 
 export function createAgentDraft(role: 'coordinator' | 'worker'): AgentDraft {
-  return { uid: crypto.randomUUID(), name: '', role, model: '', agentMd: '', soulMd: '', skills: [] };
+  return { uid: crypto.randomUUID(), name: '', description: '', role, model: '', agentMd: '', soulMd: '', skills: [] };
 }

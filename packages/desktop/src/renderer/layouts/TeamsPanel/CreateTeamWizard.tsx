@@ -80,6 +80,7 @@ export default function CreateTeamWizard({ open, onOpenChange, defaultGatewayId,
             return {
               uid: crypto.randomUUID(),
               name: info?.name ?? a.agentId,
+              description: '',
               role: a.isManager ? ('coordinator' as const) : ('worker' as const),
               model: info?.model?.primary ?? '',
               agentMd: '',
