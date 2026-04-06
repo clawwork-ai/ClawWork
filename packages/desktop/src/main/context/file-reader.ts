@@ -4,6 +4,7 @@ import type { FileReadResult } from '@clawwork/shared';
 import { classifyTier, getMimeType } from './file-types.js';
 
 const MAX_TEXT_SIZE = 100 * 1024;
+const MAX_BINARY_SIZE = 10 * 1024 * 1024;
 
 export function readContextFile(absolutePath: string, contextFolders: string[]): FileReadResult {
   const fd = openSync(absolutePath, 'r');
@@ -30,9 +31,16 @@ export function readContextFile(absolutePath: string, contextFolders: string[]):
       return { content, mimeType: getMimeType(ext), size, truncated, tier };
     }
 
-    const buf = Buffer.alloc(size);
-    readSync(fd, buf, 0, size, 0);
-    return { content: buf.toString('base64'), mimeType: getMimeType(ext), size, truncated: false, tier };
+    const readSize = Math.min(size, MAX_BINARY_SIZE);
+    const buf = Buffer.alloc(readSize);
+    readSync(fd, buf, 0, readSize, 0);
+    return {
+      content: buf.toString('base64'),
+      mimeType: getMimeType(ext),
+      size,
+      truncated: size > MAX_BINARY_SIZE,
+      tier,
+    };
   } finally {
     closeSync(fd);
   }
