@@ -22,8 +22,12 @@ export default function TeamsHubTab() {
 
   const loadRegistries = useCallback(async () => {
     const res = await window.clawwork.hubListRegistries();
-    if (res.ok && res.result) setRegistries(res.result);
-  }, []);
+    if (res.ok && res.result) {
+      setRegistries(res.result);
+    } else if (!res.ok) {
+      toast.error(res.error ?? t('errors.unknown'));
+    }
+  }, [t]);
 
   useEffect(() => {
     loadRegistries().finally(() => setLoading(false));
@@ -32,7 +36,7 @@ export default function TeamsHubTab() {
   const allEntries = useMemo(() => {
     const entries: (TeamHubEntry & { _registryId: string })[] = [];
     for (const reg of registries) {
-      for (const team of reg.teams) {
+      for (const team of reg.teams ?? []) {
         entries.push({ ...team, _registryId: reg.id });
       }
     }
@@ -57,8 +61,8 @@ export default function TeamsHubTab() {
       list = list.filter(
         (e) =>
           e.name.toLowerCase().includes(q) ||
-          e.description.toLowerCase().includes(q) ||
-          e.tags.some((tag) => tag.toLowerCase().includes(q)),
+          (e.description?.toLowerCase() ?? '').includes(q) ||
+          e.tags?.some((tag) => tag.toLowerCase().includes(q)),
       );
     }
     return list;

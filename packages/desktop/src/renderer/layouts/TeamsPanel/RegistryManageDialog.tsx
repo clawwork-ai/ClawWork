@@ -97,7 +97,7 @@ export default function RegistryManageDialog({
                 {reg.name || reg.url}
               </span>
               <span className="type-support flex-shrink-0 text-[var(--text-muted)]">
-                {reg.fetchedAt ? t('teamshub.teamCount', { count: reg.teams.length }) : t('teamshub.notFetched')}
+                {reg.fetchedAt ? t('teamshub.teamCount', { count: reg.teams?.length ?? 0 }) : t('teamshub.notFetched')}
               </span>
               <div className="flex items-center gap-1">
                 <button
