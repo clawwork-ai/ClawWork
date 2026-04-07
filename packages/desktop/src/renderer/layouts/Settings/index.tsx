@@ -8,6 +8,7 @@ import GeneralSection from './sections/GeneralSection';
 import SystemSection from './sections/SystemSection';
 import GatewaysSection from './sections/GatewaysSection';
 import AgentsSection from './sections/AgentsSection';
+import SkillsSection from './sections/SkillsSection';
 import AboutSection from './sections/AboutSection';
 
 const SECTION_COMPONENTS: Record<SettingsSection, ComponentType> = {
@@ -15,6 +16,7 @@ const SECTION_COMPONENTS: Record<SettingsSection, ComponentType> = {
   system: SystemSection,
   gateways: GatewaysSection,
   agents: AgentsSection,
+  skills: SkillsSection,
   about: AboutSection,
 };
 

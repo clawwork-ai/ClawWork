@@ -29,11 +29,11 @@ import type {
   AgentListResponse,
   AgentFileEntry,
   ModelCatalogEntry,
-  SkillRequirements,
   SkillStatusEntry,
   SkillStatusReport,
 } from '@clawwork/shared';
 import { parseIdentityMd, serializeIdentityMd } from '@clawwork/core';
+import { getSkillReason } from '@/lib/skill-utils';
 import AgentBuilderDialog from '@/components/AgentBuilderDialog';
 import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
@@ -132,32 +132,7 @@ function AgentCard({
   const toggleSection = (key: 'available' | 'unavailable') =>
     setCollapsedSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const summarizeMissing = (requirements: SkillRequirements): string | null => {
-    const missingParts: string[] = [];
-    if (requirements.bins.length > 0)
-      missingParts.push(t('settings.agentSkillMissingBins', { count: requirements.bins.length }));
-    if (requirements.anyBins.length > 0) {
-      missingParts.push(t('settings.agentSkillMissingAnyBins', { count: requirements.anyBins.length }));
-    }
-    if (requirements.env.length > 0)
-      missingParts.push(t('settings.agentSkillMissingEnv', { count: requirements.env.length }));
-    if (requirements.config.length > 0) {
-      missingParts.push(t('settings.agentSkillMissingConfig', { count: requirements.config.length }));
-    }
-    if (requirements.os.length > 0)
-      missingParts.push(t('settings.agentSkillMissingOs', { count: requirements.os.length }));
-    return missingParts.length > 0 ? missingParts.join(' • ') : null;
-  };
-
-  const getSkillReason = (skill: SkillStatusEntry): string | null => {
-    if (skill.disabled) return t('settings.agentSkillReasonDisabled');
-    if (skill.blockedByAllowlist) return t('settings.agentSkillReasonBlocked');
-    const failedConfigChecks = skill.configChecks.filter((check) => !check.satisfied).length;
-    if (failedConfigChecks > 0) {
-      return t('settings.agentSkillReasonConfig', { count: failedConfigChecks });
-    }
-    return summarizeMissing(skill.missing);
-  };
+  const AGENT_SKILL_PREFIX = 'settings.agentSkill';
 
   return (
     <motion.div
@@ -438,7 +413,7 @@ function AgentCard({
                                   <p className="type-support pl-5 text-[var(--text-muted)]">{section.emptyLabel}</p>
                                 ) : (
                                   section.items.map((skill) => {
-                                    const reason = skill.eligible ? null : getSkillReason(skill);
+                                    const reason = skill.eligible ? null : getSkillReason(skill, t, AGENT_SKILL_PREFIX);
                                     return (
                                       <div
                                         key={skill.skillKey}
