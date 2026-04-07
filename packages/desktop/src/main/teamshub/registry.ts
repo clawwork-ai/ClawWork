@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from '
 import { createHash } from 'crypto';
 import { TEAMSHUB_COMMUNITY_URL, TEAMSHUB_COMMUNITY_ID } from '@clawwork/shared';
 import type { TeamHubRegistry, TeamHubRegistryConfig, TeamHubEntry, ParsedTeam, AgentFileSet } from '@clawwork/shared';
-import { readConfig, writeConfig } from '../workspace/config.js';
+import { readConfig, updateConfig } from '../workspace/config.js';
 import { parseTeamMd } from '@clawwork/core';
 
 function cacheDir(): string {
@@ -59,24 +59,19 @@ export function listRegistryConfigs(): TeamHubRegistryConfig[] {
 export function addRegistryConfig(url: string): TeamHubRegistryConfig {
   validateGitHubUrl(url);
   const id = registryIdFromUrl(url);
-  const config = readConfig() ?? { workspacePath: '', gateways: [] };
-  const registries = config.teamHubRegistries ?? [];
-  if (registries.some((r) => r.id === id || r.url === url)) {
+  const existing = readConfig()?.teamHubRegistries ?? [];
+  if (existing.some((r) => r.id === id || r.url === url)) {
     throw new Error('Registry already exists');
   }
   const entry: TeamHubRegistryConfig = { id, url, isOfficial: false };
-  registries.push(entry);
-  config.teamHubRegistries = registries;
-  writeConfig(config);
+  updateConfig({ teamHubRegistries: [...existing, entry] });
   return entry;
 }
 
 export function removeRegistryConfig(id: string): void {
   if (id === TEAMSHUB_COMMUNITY_ID) throw new Error('Cannot remove community registry');
-  const config = readConfig();
-  if (!config) return;
-  config.teamHubRegistries = (config.teamHubRegistries ?? []).filter((r) => r.id !== id);
-  writeConfig(config);
+  const existing = readConfig()?.teamHubRegistries ?? [];
+  updateConfig({ teamHubRegistries: existing.filter((r) => r.id !== id) });
   const fp = cachePath(id);
   if (existsSync(fp)) unlinkSync(fp);
 }
