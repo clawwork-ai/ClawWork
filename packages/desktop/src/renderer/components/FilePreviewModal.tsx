@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FileCode, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -10,6 +11,7 @@ interface FilePreviewModalProps {
 }
 
 export default function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function FilePreviewModal({ file, onClose }: FilePreviewModalProp
                   )}
                 >
                   {copied ? <Check size={12} className="text-[var(--accent)]" /> : <Copy size={12} />}
-                  {copied ? 'Copied' : 'Copy'}
+                  {copied ? t('chatMessage.copied') : t('chatMessage.copyCode')}
                 </button>
                 <button
                   onClick={onClose}
