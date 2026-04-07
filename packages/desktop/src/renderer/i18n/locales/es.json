@@ -302,14 +302,17 @@
     "updateAvailable": "Actualización disponible"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "Explorar hub de equipos",
     "messageLayoutCentered": "Volver a centrar mensajes",
     "messageLayoutWide": "Expandir ancho de mensajes",
+    "orchestrateCount": "{{count}} agentes disponibles en esta pasarela",
+    "orchestrateDesc": "La IA seleccionará automáticamente los agentes adecuados, coordinará el trabajo y sintetizará los resultados.",
     "starOnGithub": "¿Te gusta ClawWork? Déjanos una estrella en GitHub",
-    "toggleContextPanel": "Alternar panel de contexto",
-    "welcomeDesc1": "Describe tu tarea y la IA la planificará y ejecutará.",
-    "welcomeDesc2": "Los archivos generados se archivan automáticamente.",
-    "welcomeSubtitle": "Ejecución de tareas con IA"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "Orquestación",
+    "tabTeam": "Equipo",
+    "teamEmpty": "Aún no hay equipos — cree o instale uno para empezar",
+    "toggleContextPanel": "Alternar panel de contexto"
   },
   "mentionPicker": {
     "agents": "Agents",

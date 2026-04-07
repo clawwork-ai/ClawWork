@@ -302,14 +302,17 @@
     "updateAvailable": "アップデートがあります"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "チームハブを見る",
     "messageLayoutCentered": "メッセージを中央寄せに戻す",
     "messageLayoutWide": "メッセージ幅を広げる",
+    "orchestrateCount": "このゲートウェイで {{count}} 個の Agent が利用可能",
+    "orchestrateDesc": "AI がタスクに応じて適切な Agent を自動選択し、分担・統合します。",
     "starOnGithub": "ClawWork を気に入っていただけましたか？GitHub でスターをお願いします",
-    "toggleContextPanel": "コンテキストパネルの切替",
-    "welcomeDesc1": "タスクを入力すると、AIが計画・実行します。",
-    "welcomeDesc2": "生成されたファイルは自動的にアーカイブされます。",
-    "welcomeSubtitle": "AIによるタスク実行"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "スマート編成",
+    "tabTeam": "チーム",
+    "teamEmpty": "チームがありません — 作成またはインストールして始めましょう",
+    "toggleContextPanel": "コンテキストパネルの切替"
   },
   "mentionPicker": {
     "agents": "Agents",

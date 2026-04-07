@@ -302,14 +302,17 @@
     "updateAvailable": "Update available"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "Browse Team Hub",
     "messageLayoutCentered": "Center message width",
     "messageLayoutWide": "Expand message width",
+    "orchestrateCount": "{{count}} agents available on this gateway",
+    "orchestrateDesc": "AI will automatically select the right agents, coordinate their work, and synthesize results.",
     "starOnGithub": "Enjoying ClawWork? Give us a star on GitHub",
-    "toggleContextPanel": "Toggle context panel",
-    "welcomeDesc1": "Describe your task and AI will plan and execute it.",
-    "welcomeDesc2": "Files produced along the way are auto-archived.",
-    "welcomeSubtitle": "AI-powered task execution"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "Orchestrate",
+    "tabTeam": "Team",
+    "teamEmpty": "No teams yet — create or install one to get started",
+    "toggleContextPanel": "Toggle context panel"
   },
   "mentionPicker": {
     "agents": "Agents",

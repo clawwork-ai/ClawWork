@@ -302,14 +302,17 @@
     "updateAvailable": "有可用更新"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "瀏覽團隊市場",
     "messageLayoutCentered": "切回置中訊息區域",
     "messageLayoutWide": "鋪開訊息區域",
+    "orchestrateCount": "當前網關共 {{count}} 個 Agent 可用",
+    "orchestrateDesc": "AI 將根據你的任務自動選擇合適的 Agent，協調分工並彙總結果。",
     "starOnGithub": "喜歡 ClawWork 嗎？在 GitHub 上給我們一顆星",
-    "toggleContextPanel": "切換上下文面板",
-    "welcomeDesc1": "描述你的任務，AI 將規劃並執行。",
-    "welcomeDesc2": "過程中產生的檔案會自動歸檔。",
-    "welcomeSubtitle": "AI 驅動的任務執行"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "智能編排",
+    "tabTeam": "團隊",
+    "teamEmpty": "還沒有團隊 — 建立或安裝一個開始使用",
+    "toggleContextPanel": "切換上下文面板"
   },
   "mentionPicker": {
     "agents": "Agents",

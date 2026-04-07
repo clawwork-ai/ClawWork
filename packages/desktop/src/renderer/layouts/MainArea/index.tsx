@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import ConnectionBanner from '@/components/ConnectionBanner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
   PanelRightOpen,
   PanelRightClose,
@@ -8,15 +8,12 @@ import {
   ArchiveRestore,
   Search,
   MessageSquare,
-  Server,
   ArrowUp,
   ArrowDown,
-  ChevronRight,
   DollarSign,
   RefreshCw,
   AlertTriangle,
   ArrowLeftRight,
-  Users,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { parseAgentIdFromSessionKey } from '@clawwork/shared';
@@ -25,7 +22,6 @@ import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/m
 import { useUiStore } from '@/stores/uiStore';
 import { useRoomStore } from '@/stores/roomStore';
 import { cn, formatRelativeTime, formatTokenCount, formatCost } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,19 +31,17 @@ import ChatMessage from '@/components/ChatMessage';
 import StreamingMessage from '@/components/StreamingMessage';
 import ThinkingIndicator from '@/components/ThinkingIndicator';
 import ChatInput from '@/components/ChatInput';
-import AgentIcon from '@/components/AgentIcon';
 import ImageLightbox from '@/components/ImageLightbox';
 import FilePreviewModal from '@/components/FilePreviewModal';
 import EnsembleAgentBar from '@/components/EnsembleAgentBar';
 import FileBrowser from '../FileBrowser';
 import CronPanel from '@/layouts/CronPanel';
 import TeamsPanel from '@/layouts/TeamsPanel';
-import logo from '@/assets/logo.png';
 import { useUsageStore } from '@/stores/usageStore';
-import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
 import DataTable, { type DataTableColumn } from '@/components/data-display/DataTable';
 import EmptyState from '@/components/semantic/EmptyState';
 import StatusTag from '@/components/semantic/StatusTag';
+import WelcomeScreen from './WelcomeScreen';
 
 const STICK_TO_BOTTOM_THRESHOLD_PX = 60;
 const MAX_HEADER_TITLE_LENGTH = 120;
@@ -127,184 +121,6 @@ function resolveAssistantIdentity({
     localAvatarUrl: buildLocalAvatarUrl(gatewayId, resolvedAgentId),
     gatewayAvatarUrl: catalogEntry?.identity?.avatarUrl,
   };
-}
-
-function WelcomeScreen() {
-  const { t } = useTranslation();
-  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
-  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
-  const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
-  const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
-  const gateways = useMemo(() => Object.values(gatewayInfoMap), [gatewayInfoMap]);
-  const hasMultipleGw = gateways.length > 1;
-
-  const [selectedGwId, setSelectedGwId] = useState(
-    pendingNewTask?.gatewayId ?? defaultGatewayId ?? gateways[0]?.id ?? '',
-  );
-  const initialAgentId =
-    pendingNewTask?.agentId ||
-    agentCatalogByGateway[pendingNewTask?.gatewayId ?? defaultGatewayId ?? '']?.defaultId ||
-    '';
-  const [selectedAgentId, setSelectedAgentId] = useState(initialAgentId);
-  const [ensemble, setEnsemble] = useState(pendingNewTask?.ensemble ?? false);
-  const [gwExpanded, setGwExpanded] = useState(false);
-  const [agentExpanded, setAgentExpanded] = useState(false);
-
-  const gwAgents = agentCatalogByGateway[selectedGwId];
-  const agentCatalog = gwAgents?.agents ?? [];
-  const hasAgents = agentCatalog.length > 0;
-  useEffect(() => {
-    if (!selectedGwId) {
-      const fallback = defaultGatewayId ?? gateways[0]?.id ?? '';
-      if (fallback) setSelectedGwId(fallback);
-    }
-  }, [defaultGatewayId, gateways, selectedGwId]);
-
-  useEffect(() => {
-    if (selectedGwId) {
-      fetchAgentsForGateway(selectedGwId);
-    }
-  }, [selectedGwId]);
-
-  useEffect(() => {
-    if (gwAgents?.defaultId) {
-      setSelectedAgentId(gwAgents.defaultId);
-    }
-  }, [gwAgents]);
-
-  useEffect(() => {
-    const prev = useTaskStore.getState().pendingNewTask;
-    if (prev?.gatewayId === selectedGwId && prev?.agentId === selectedAgentId && prev?.ensemble === ensemble) return;
-    useTaskStore.setState({
-      pendingNewTask: { gatewayId: selectedGwId, agentId: selectedAgentId, ensemble: ensemble || undefined },
-    });
-  }, [selectedGwId, selectedAgentId, ensemble]);
-
-  const MAX_VISIBLE = 3;
-
-  const visibleGateways = gwExpanded ? gateways : gateways.slice(0, MAX_VISIBLE);
-  const hiddenGwCount = gateways.length - MAX_VISIBLE;
-  const visibleAgents = agentExpanded ? agentCatalog : agentCatalog.slice(0, MAX_VISIBLE);
-  const hiddenAgentCount = agentCatalog.length - MAX_VISIBLE;
-
-  return (
-    <motion.div
-      {...motionPresets.fadeIn}
-      className="flex flex-col items-center justify-center h-full text-center py-20"
-    >
-      <div className="relative mb-6">
-        <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
-        <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
-      </div>
-      <h3 className="type-page-title mb-1.5 text-[var(--text-primary)]">ClawWork</h3>
-      <p className="type-body mb-6 text-[var(--text-muted)]">{t('mainArea.welcomeSubtitle')}</p>
-      <p className="type-body max-w-sm leading-relaxed text-[var(--text-secondary)]">
-        {t('mainArea.welcomeDesc1')}
-        <br />
-        {t('mainArea.welcomeDesc2')}
-      </p>
-
-      {hasMultipleGw && (
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {visibleGateways.map((gw) => (
-            <button
-              key={gw.id}
-              onClick={() => {
-                setSelectedGwId(gw.id);
-                setGwExpanded(false);
-              }}
-              className={cn(
-                'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer',
-                'border',
-                gw.id === selectedGwId
-                  ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
-                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]',
-              )}
-            >
-              <Server size={12} />
-              <span className="max-w-24 truncate">{gw.name}</span>
-            </button>
-          ))}
-          {!gwExpanded && hiddenGwCount > 0 && (
-            <button
-              onClick={() => setGwExpanded(true)}
-              className="type-support inline-flex items-center gap-0.5 rounded-full px-2.5 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
-            >
-              +{hiddenGwCount}
-              <ChevronRight size={10} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {hasAgents && (
-        <div className={cn('flex flex-wrap items-center justify-center gap-2', hasMultipleGw ? 'mt-3' : 'mt-6')}>
-          {visibleAgents.map((agent) => (
-            <button
-              key={agent.id}
-              onClick={() => {
-                setSelectedAgentId(agent.id);
-                setAgentExpanded(false);
-              }}
-              className={cn(
-                'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer',
-                'border',
-                agent.id === selectedAgentId
-                  ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
-                  : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)] hover:text-[var(--text-primary)]',
-              )}
-            >
-              <AgentIcon
-                gatewayId={selectedGwId}
-                agentId={agent.id}
-                gatewayAvatarUrl={agent.identity?.avatarUrl}
-                emoji={agent.identity?.emoji}
-                imgClass="w-3.5 h-3.5 rounded-full object-cover"
-                emojiClass="emoji-sm"
-                iconSize={12}
-              />
-              <span className="max-w-24 truncate">{agent.name ?? agent.id}</span>
-            </button>
-          ))}
-          {!agentExpanded && hiddenAgentCount > 0 && (
-            <button
-              onClick={() => setAgentExpanded(true)}
-              className="type-support inline-flex items-center gap-0.5 rounded-full px-2.5 py-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
-            >
-              +{hiddenAgentCount}
-              <ChevronRight size={10} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {hasAgents && agentCatalog.length > 1 && (
-        <div className="mt-3 flex items-center justify-center">
-          <button
-            onClick={() => setEnsemble((v) => !v)}
-            className={cn(
-              'type-label inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all cursor-pointer border',
-              ensemble
-                ? 'border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]'
-                : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-            )}
-          >
-            <Users size={12} />
-            <span>{t('mainArea.ensembleMode')}</span>
-          </button>
-        </div>
-      )}
-
-      <a
-        href="https://github.com/clawwork-ai/clawwork"
-        target="_blank"
-        rel="noreferrer"
-        className="type-support mt-6 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
-      >
-        {t('mainArea.starOnGithub')} ⭐
-      </a>
-    </motion.div>
-  );
 }
 
 function ChatHeader({

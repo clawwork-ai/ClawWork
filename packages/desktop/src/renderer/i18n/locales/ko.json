@@ -302,14 +302,17 @@
     "updateAvailable": "업데이트 가능"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "팀 허브 둘러보기",
     "messageLayoutCentered": "메시지 가운데 정렬로 복귀",
     "messageLayoutWide": "메시지 영역 펼치기",
+    "orchestrateCount": "현재 게이트웨이에 {{count}}개의 Agent 사용 가능",
+    "orchestrateDesc": "AI가 작업에 맞는 Agent를 자동으로 선택하고, 분업 및 결과를 종합합니다.",
     "starOnGithub": "ClawWork가 마음에 드셨나요? GitHub에서 별을 눌러주세요",
-    "toggleContextPanel": "컨텍스트 패널 전환",
-    "welcomeDesc1": "작업을 설명하면 AI가 계획하고 실행합니다.",
-    "welcomeDesc2": "생성된 파일은 자동으로 보관됩니다.",
-    "welcomeSubtitle": "AI 기반 작업 실행"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "스마트 편성",
+    "tabTeam": "팀",
+    "teamEmpty": "아직 팀이 없습니다 — 만들거나 설치하여 시작하세요",
+    "toggleContextPanel": "컨텍스트 패널 전환"
   },
   "mentionPicker": {
     "agents": "Agents",

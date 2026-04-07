@@ -302,14 +302,17 @@
     "updateAvailable": "Update verfuegbar"
   },
   "mainArea": {
-    "ensembleMode": "Ensemble",
+    "browseHub": "Team-Hub durchsuchen",
     "messageLayoutCentered": "Nachrichten wieder zentrieren",
     "messageLayoutWide": "Nachrichtenbereich verbreitern",
+    "orchestrateCount": "{{count}} Agents auf diesem Gateway verfügbar",
+    "orchestrateDesc": "Die KI wählt automatisch die passenden Agents aus, koordiniert die Arbeit und fasst die Ergebnisse zusammen.",
     "starOnGithub": "ClawWork gefaellt Ihnen? Geben Sie uns einen Stern auf GitHub",
-    "toggleContextPanel": "Kontextbereich ein-/ausblenden",
-    "welcomeDesc1": "Beschreiben Sie Ihre Aufgabe und die KI plant und fuehrt sie aus.",
-    "welcomeDesc2": "Dabei erzeugte Dateien werden automatisch archiviert.",
-    "welcomeSubtitle": "KI-gestuetzte Aufgabenausfuehrung"
+    "tabAgent": "Agent",
+    "tabOrchestrate": "Orchestrierung",
+    "tabTeam": "Team",
+    "teamEmpty": "Noch keine Teams — erstellen oder installieren Sie eines",
+    "toggleContextPanel": "Kontextbereich ein-/ausblenden"
   },
   "mentionPicker": {
     "agents": "Agents",
