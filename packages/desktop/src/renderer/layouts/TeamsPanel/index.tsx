@@ -22,8 +22,7 @@ export default function TeamsPanel() {
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
   const deleteTeamAction = useTeamStore((s) => s.deleteTeam);
-  const createTask = useTaskStore((s) => s.createTask);
-  const setActiveTask = useTaskStore((s) => s.setActiveTask);
+  const startNewTask = useTaskStore((s) => s.startNewTask);
   const setMainView = useUiStore((s) => s.setMainView);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
   const [activeTab, setActiveTab] = useState<'myTeams' | 'hub'>('myTeams');
@@ -49,11 +48,10 @@ export default function TeamsPanel() {
       const manager = team.agents.find((a) => a.isManager);
       const agentId = manager?.agentId ?? team.agents[0].agentId;
       const needsEnsemble = team.agents.length >= 2;
-      const task = createTask({ gatewayId: team.gatewayId, agentId, ensemble: needsEnsemble, teamId });
-      setActiveTask(task.id);
+      startNewTask({ gatewayId: team.gatewayId, agentId, ensemble: needsEnsemble, teamId });
       setMainView('chat');
     },
-    [teamsMap, createTask, setActiveTask, setMainView, t],
+    [teamsMap, startNewTask, setMainView, t],
   );
 
   const handleEdit = useCallback(

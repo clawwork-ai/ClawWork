@@ -59,7 +59,7 @@ export function DrawerLayout({ onSignedOut }: DrawerLayoutProps) {
   const handleAgentSelect = useCallback(async (agentId: string) => {
     await ensureHydrationReady();
     const gatewayId = useUiStore.getState().defaultGatewayId ?? undefined;
-    useTaskStore.getState().startNewTask(gatewayId, agentId);
+    useTaskStore.getState().startNewTask({ gatewayId, agentId });
     setAgentSelectorOpen(false);
   }, []);
 

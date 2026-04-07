@@ -17,7 +17,7 @@ export interface TaskState {
   hydrated: boolean;
   pendingNewTask: PendingNewTask | null;
 
-  startNewTask: (gatewayId?: string, agentId?: string) => void;
+  startNewTask: (opts?: Partial<PendingNewTask>) => void;
   commitPendingTask: () => Task;
   clearPending: () => void;
   createTask: (opts?: { gatewayId?: string; agentId?: string; ensemble?: boolean; teamId?: string }) => Task;
@@ -110,13 +110,13 @@ export function createTaskStore(deps: TaskStoreDeps) {
     hydrated: false,
     pendingNewTask: null,
 
-    startNewTask: (gatewayId?, agentId?) => {
-      const resolvedGatewayId = gatewayId ?? deps.getDefaultGatewayId() ?? '';
+    startNewTask: (opts?) => {
+      const resolvedGatewayId = opts?.gatewayId ?? deps.getDefaultGatewayId() ?? '';
       const catalog = deps.getAgentCatalog(resolvedGatewayId);
-      const resolvedAgentId = agentId || catalog.defaultId || '';
+      const resolvedAgentId = opts?.agentId || catalog.defaultId || '';
       set({
         activeTaskId: null,
-        pendingNewTask: { gatewayId: resolvedGatewayId, agentId: resolvedAgentId },
+        pendingNewTask: { ...opts, gatewayId: resolvedGatewayId, agentId: resolvedAgentId },
       });
       deps.onTaskCreated?.();
     },
