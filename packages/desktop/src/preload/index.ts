@@ -7,6 +7,7 @@ import type {
   CronRunParams,
   CronRunsParams,
   SkillInstallParams,
+  SkillSearchParams,
   SkillUpdateParams,
   ConfigSetParams,
   ConfigPatchParams,
@@ -57,6 +58,9 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:tools-catalog', { gatewayId, agentId }),
     getSkillsStatus: (gatewayId: string, agentId?: string) =>
       ipcRenderer.invoke('ws:skills-status', { gatewayId, agentId }),
+    searchSkills: (gatewayId: string, params: SkillSearchParams) =>
+      ipcRenderer.invoke('ws:skills-search', { gatewayId, ...params }),
+    getSkillDetail: (gatewayId: string, slug: string) => ipcRenderer.invoke('ws:skills-detail', { gatewayId, slug }),
     installSkill: (gatewayId: string, params: SkillInstallParams) =>
       ipcRenderer.invoke('ws:skills-install', { gatewayId, ...params }),
     updateSkill: (gatewayId: string, params: SkillUpdateParams) =>

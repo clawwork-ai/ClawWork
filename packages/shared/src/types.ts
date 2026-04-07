@@ -423,6 +423,53 @@ export interface SkillUpdateResult {
   config?: Record<string, unknown>;
 }
 
+export interface SkillSearchParams {
+  query?: string;
+  limit?: number;
+}
+
+export interface SkillSearchResultEntry {
+  score: number;
+  slug: string;
+  displayName: string;
+  summary?: string;
+  version?: string;
+  updatedAt?: number;
+}
+
+export interface SkillSearchResult {
+  results: SkillSearchResultEntry[];
+}
+
+export interface SkillDetailParams {
+  slug: string;
+}
+
+export interface SkillDetailResult {
+  skill: {
+    slug: string;
+    displayName: string;
+    summary?: string;
+    tags?: Record<string, string>;
+    createdAt: number;
+    updatedAt: number;
+  } | null;
+  latestVersion?: {
+    version: string;
+    createdAt: number;
+    changelog?: string;
+  } | null;
+  metadata?: {
+    os?: string[] | null;
+    systems?: string[] | null;
+  } | null;
+  owner?: {
+    handle?: string | null;
+    displayName?: string | null;
+    image?: string | null;
+  } | null;
+}
+
 export interface SkillBinsResult {
   bins: string[];
 }

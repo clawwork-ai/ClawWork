@@ -10,6 +10,7 @@ import type {
   ConfigSetParams,
   ExecApprovalResolveParams,
   SkillInstallParams,
+  SkillSearchParams,
   SkillUpdateParams,
 } from '@clawwork/shared';
 import { getDebugLogger } from '../debug/index.js';
@@ -516,6 +517,15 @@ export function registerWsHandlers(): void {
         agentId?: string;
       },
     ) => gatewayRpc(payload.gatewayId, (gw) => gw.getSkillsStatus(payload.agentId)),
+  );
+
+  ipcMain.handle('ws:skills-search', async (_event, payload: { gatewayId: string } & SkillSearchParams) => {
+    const { gatewayId, ...params } = payload;
+    return gatewayRpc(gatewayId, (gw) => gw.searchSkills(params));
+  });
+
+  ipcMain.handle('ws:skills-detail', async (_event, payload: { gatewayId: string; slug: string }) =>
+    gatewayRpc(payload.gatewayId, (gw) => gw.getSkillDetail(payload.slug)),
   );
 
   ipcMain.handle('ws:skills-install', async (_event, payload: { gatewayId: string } & SkillInstallParams) => {

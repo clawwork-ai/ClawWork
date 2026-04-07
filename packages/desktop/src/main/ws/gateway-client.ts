@@ -654,6 +654,14 @@ export class GatewayClient {
     return this.sendReq('skills.update', params);
   }
 
+  async searchSkills(params: { query?: string; limit?: number }): Promise<Record<string, unknown>> {
+    return this.sendReq('skills.search', params);
+  }
+
+  async getSkillDetail(slug: string): Promise<Record<string, unknown>> {
+    return this.sendReq('skills.detail', { slug });
+  }
+
   async getSkillBins(): Promise<Record<string, unknown>> {
     return this.sendReq('skills.bins', {});
   }

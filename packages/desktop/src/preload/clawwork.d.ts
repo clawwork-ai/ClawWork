@@ -14,6 +14,9 @@ import type {
   CronStatusResult,
   SkillInstallParams,
   SkillInstallResult,
+  SkillSearchParams,
+  SkillSearchResult,
+  SkillDetailResult,
   SkillUpdateParams,
   SkillUpdateResult,
   SkillBinsResult,
@@ -261,6 +264,8 @@ export interface ClawWorkAPI {
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
   getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
+  searchSkills: (gatewayId: string, params: SkillSearchParams) => Promise<IpcResult<SkillSearchResult>>;
+  getSkillDetail: (gatewayId: string, slug: string) => Promise<IpcResult<SkillDetailResult>>;
   installSkill: (gatewayId: string, params: SkillInstallParams) => Promise<IpcResult<SkillInstallResult>>;
   updateSkill: (gatewayId: string, params: SkillUpdateParams) => Promise<IpcResult<SkillUpdateResult>>;
   getSkillBins: (gatewayId: string) => Promise<IpcResult<SkillBinsResult>>;
