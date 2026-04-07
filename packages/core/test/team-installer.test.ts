@@ -191,6 +191,35 @@ describe('installTeam', () => {
     expect(errorEvent.message).toContain('db error');
   });
 
+  it('reinstall: reused agents still get files set', async () => {
+    const parsed = makeParsed();
+    const files: Record<string, AgentFileSet> = {
+      manager: { agentMd: '# Manager Identity', soulMd: '# Manager Soul' },
+      dev: { agentMd: '# Dev Identity' },
+    };
+    const deps = makeDeps({
+      createAgent: vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, result: { agentId: 'existing-1', name: 'Manager', workspace: '/w' } })
+        .mockResolvedValueOnce({ ok: true, result: { agentId: 'existing-2', name: 'Developer', workspace: '/w' } }),
+    });
+    const events = await collect(installTeam(parsed, files, 'gw-1', '/w', deps));
+
+    expect(deps.setAgentFile).toHaveBeenCalledWith('existing-1', 'IDENTITY.md', '# Manager Identity');
+    expect(deps.setAgentFile).toHaveBeenCalledWith('existing-1', 'SOUL.md', '# Manager Soul');
+    expect(deps.setAgentFile).toHaveBeenCalledWith('existing-2', 'IDENTITY.md', '# Dev Identity');
+    expect(deps.setAgentFile).toHaveBeenCalledTimes(3);
+
+    expect(deps.deleteAgent).not.toHaveBeenCalled();
+
+    const persistCall = (deps.persistTeam as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(persistCall.agents).toHaveLength(2);
+    expect(persistCall.agents[0].agentId).toBe('existing-1');
+    expect(persistCall.agents[1].agentId).toBe('existing-2');
+
+    expect(events.map((e) => e.type)).toContain('done');
+  });
+
   it('progress total includes file and skill operations', async () => {
     const parsed = makeParsed();
     const files: Record<string, AgentFileSet> = {

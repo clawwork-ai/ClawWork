@@ -580,7 +580,7 @@
     "tooltip": "Befehle"
   },
   "teams": {
-    "confirmDeleteDesc": "\"{{name}}\" löschen? Die Teamkonfiguration wird entfernt. Agenten werden nicht gelöscht.",
+    "confirmDeleteDesc": "\"{{name}}\" löschen? Die Teamkonfiguration wird entfernt. Agenten bleiben auf dem Gateway erhalten und können in den Einstellungen verwaltet werden.",
     "confirmDeleteTitle": "Team löschen",
     "createTeam": "Team erstellen",
     "deleteTeam": "Löschen",

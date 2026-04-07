@@ -580,7 +580,7 @@
     "tooltip": "コマンド"
   },
   "teams": {
-    "confirmDeleteDesc": "「{{name}}」を削除しますか？チーム設定が削除されますが、エージェントは削除されません。",
+    "confirmDeleteDesc": "「{{name}}」を削除しますか？チーム設定が削除されます。エージェントは Gateway に残り、設定から管理できます。",
     "confirmDeleteTitle": "チームを削除",
     "createTeam": "チームを作成",
     "deleteTeam": "削除",

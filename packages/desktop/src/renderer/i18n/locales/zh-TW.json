@@ -580,7 +580,7 @@
     "tooltip": "指令"
   },
   "teams": {
-    "confirmDeleteDesc": "確定刪除「{{name}}」？此操作將移除團隊配置，但不會刪除 Agent。",
+    "confirmDeleteDesc": "確定刪除「{{name}}」？此操作將移除團隊配置。Agent 將保留在 Gateway 上，可在設定中管理。",
     "confirmDeleteTitle": "刪除團隊",
     "createTeam": "建立團隊",
     "deleteTeam": "刪除",

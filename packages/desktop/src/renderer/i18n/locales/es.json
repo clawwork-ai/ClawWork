@@ -580,7 +580,7 @@
     "tooltip": "Comandos"
   },
   "teams": {
-    "confirmDeleteDesc": "¿Eliminar \"{{name}}\"? Se eliminará la configuración del equipo. Los agentes no se eliminarán.",
+    "confirmDeleteDesc": "¿Eliminar \"{{name}}\"? Se eliminará la configuración del equipo. Los agentes permanecerán en el Gateway y se pueden gestionar en Configuración.",
     "confirmDeleteTitle": "Eliminar equipo",
     "createTeam": "Crear equipo",
     "deleteTeam": "Eliminar",

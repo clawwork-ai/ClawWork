@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
-import type { InstallEvent, AgentCreateResponse, SkillInstallResult, IpcResult } from '@clawwork/shared';
+import type {
+  InstallEvent,
+  AgentCreateResponse,
+  AgentInfo,
+  AgentListResponse,
+  SkillInstallResult,
+  IpcResult,
+} from '@clawwork/shared';
 import type { InstallerDeps } from '@clawwork/core';
 import { installTeam, serializeIdentityMd } from '@clawwork/core';
 import { toSlug } from './utils';
@@ -40,6 +47,7 @@ export function useTeamInstall(onDone?: () => void) {
 
       const existingMap = new Map<string, string>();
       const existingAgentIds = new Set<string>();
+      const fallbackAgentIds = new Set<string>();
       for (const a of agents) {
         if (a.existingAgentId) {
           existingMap.set(toSlug(a.name), a.existingAgentId);
@@ -70,6 +78,7 @@ export function useTeamInstall(onDone?: () => void) {
       }
 
       const gwId = teamInfo.gatewayId;
+      let cachedGatewayAgents: AgentInfo[] | null = null;
       const deps: InstallerDeps = {
         createAgent: async (params) => {
           const slug = toSlug(params.name);
@@ -78,12 +87,31 @@ export function useTeamInstall(onDone?: () => void) {
             return { ok: true, result: { agentId: existingId, name: params.name, workspace: '' } };
           }
           const res = await window.clawwork.createAgent(gwId, params);
-          if (!res.ok || !res.result) return { ok: false, error: res.error } as IpcResult<AgentCreateResponse>;
+          if (!res.ok || !res.result) {
+            const errStr = String(res.error ?? '');
+            const idMatch = errStr.match(/agent "([^"]+)" already exists/i);
+            if (idMatch) {
+              if (!cachedGatewayAgents) {
+                const listRes = await window.clawwork.listAgents(gwId);
+                if (listRes.ok && listRes.result) {
+                  cachedGatewayAgents = (listRes.result as unknown as AgentListResponse).agents;
+                }
+              }
+              const existingAgentId = idMatch[1];
+              const match = cachedGatewayAgents?.find((a) => a.id === existingAgentId);
+              if (match) {
+                fallbackAgentIds.add(match.id);
+                return { ok: true, result: { agentId: match.id, name: match.name ?? params.name, workspace: '' } };
+              }
+            }
+            return { ok: false, error: res.error } as IpcResult<AgentCreateResponse>;
+          }
           const r = res.result as Record<string, unknown>;
           return { ok: true, result: r as unknown as AgentCreateResponse };
         },
         deleteAgent: (params) => {
-          if (existingAgentIds.has(params.agentId)) return Promise.resolve({ ok: true } as IpcResult);
+          if (existingAgentIds.has(params.agentId) || fallbackAgentIds.has(params.agentId))
+            return Promise.resolve({ ok: true } as IpcResult);
           return window.clawwork.deleteAgent(gwId, params);
         },
         setAgentFile: (agentId, name, content) => {
