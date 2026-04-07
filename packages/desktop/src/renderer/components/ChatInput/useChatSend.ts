@@ -130,6 +130,7 @@ export function useChatSend(opts: UseChatSendOpts) {
   }, [modelCatalog]);
 
   const responseTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const abortResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!activeTask) return;
@@ -147,6 +148,10 @@ export function useChatSend(opts: UseChatSendOpts) {
     return () => {
       for (const timer of timers.values()) clearTimeout(timer);
       timers.clear();
+      if (abortResetTimerRef.current) {
+        clearTimeout(abortResetTimerRef.current);
+        abortResetTimerRef.current = null;
+      }
     };
   }, []);
 
@@ -467,7 +472,11 @@ export function useChatSend(opts: UseChatSendOpts) {
     } catch {
       toast.error(t('chatInput.abortFailed'));
     } finally {
-      setTimeout(() => setAborting(false), 500);
+      if (abortResetTimerRef.current) clearTimeout(abortResetTimerRef.current);
+      abortResetTimerRef.current = setTimeout(() => {
+        setAborting(false);
+        abortResetTimerRef.current = null;
+      }, 500);
     }
   }, [activeTask, aborting, t]);
 
