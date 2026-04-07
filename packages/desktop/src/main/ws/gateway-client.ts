@@ -512,7 +512,7 @@ export class GatewayClient {
         this.pendingRequests.delete(id);
         clearTimeout(timer);
         const sendErr = new Error(
-          `failed to send request: ${err instanceof Error ? err.message : 'unknown'}`
+          `failed to send request: ${err instanceof Error ? err.message : 'unknown'}`,
         ) as Error & { code?: string };
         sendErr.code = 'SEND_FAILED';
         reject(sendErr);
