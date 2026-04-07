@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {},
     "packages/shared": {},
@@ -30,6 +30,6 @@
     },
     "website": {}
   },
-  "ignore": [".claude/**", "keynote/**"],
+  "ignore": ["keynote/**"],
   "exclude": ["unlisted"]
 }
