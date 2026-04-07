@@ -25,6 +25,7 @@ export interface InstallerDeps {
     gatewayId: string;
     source?: string;
     version?: string;
+    hubSlug?: string;
     agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
     createdAt: string;
     updatedAt: string;
@@ -52,6 +53,7 @@ export async function* installTeam(
   gatewayId: string,
   workspace: string,
   deps: InstallerDeps,
+  hubMeta?: { slug: string },
 ): AsyncGenerator<InstallEvent> {
   const createdAgentIds: string[] = [];
   const agentMap = new Map<string, string>();
@@ -191,8 +193,9 @@ export async function* installTeam(
     name: parsed.name,
     description: parsed.description,
     gatewayId,
-    source: 'local',
+    source: hubMeta ? 'hub' : 'local',
     version: parsed.version,
+    hubSlug: hubMeta?.slug,
     agents: teamAgents,
     createdAt: now,
     updatedAt: now,

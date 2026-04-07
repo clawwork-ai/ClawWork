@@ -655,6 +655,7 @@
     "emptyTitle": "No teams available",
     "install": "Install",
     "installed": "Installed",
+    "installSuccess": "Team installed successfully",
     "manageRegistries": "Registries",
     "notFetched": "Not synced yet — click refresh",
     "refreshed": "Registries refreshed",

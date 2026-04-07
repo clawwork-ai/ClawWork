@@ -655,6 +655,7 @@
     "emptyTitle": "No hay equipos disponibles",
     "install": "Instalar",
     "installed": "Instalado",
+    "installSuccess": "Equipo instalado correctamente",
     "manageRegistries": "Registros",
     "notFetched": "No sincronizado aún — haz clic en actualizar",
     "refreshed": "Registros actualizados",

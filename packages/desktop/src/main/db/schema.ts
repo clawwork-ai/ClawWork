@@ -63,6 +63,7 @@ export const teams = sqliteTable('teams', {
   gatewayId: text('gateway_id').notNull(),
   source: text('source').default('local'),
   version: text('version').default(''),
+  hubSlug: text('hub_slug').default(''),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });

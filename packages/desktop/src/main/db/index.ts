@@ -147,6 +147,8 @@ function openDatabaseAt(workspacePath: string): void {
     )
   `);
 
+  migrateAddColumn(sqlite, "ALTER TABLE teams ADD COLUMN hub_slug TEXT DEFAULT ''");
+
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS team_agents (
       team_id TEXT NOT NULL REFERENCES teams(id),

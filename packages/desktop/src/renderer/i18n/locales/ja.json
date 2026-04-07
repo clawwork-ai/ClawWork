@@ -655,6 +655,7 @@
     "emptyTitle": "利用可能なチームがありません",
     "install": "インストール",
     "installed": "インストール済み",
+    "installSuccess": "チームのインストールが完了しました",
     "manageRegistries": "レジストリ",
     "notFetched": "未同期 — 更新をクリック",
     "refreshed": "レジストリを更新しました",

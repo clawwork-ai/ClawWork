@@ -17,7 +17,12 @@ export function useTeamInstall(onDone?: () => void) {
   }, []);
 
   const runInstall = useCallback(
-    async (teamInfo: TeamInfo, agents: AgentDraft[], editContext?: { teamId: string; createdAt: string }) => {
+    async (
+      teamInfo: TeamInfo,
+      agents: AgentDraft[],
+      editContext?: { teamId: string; createdAt: string },
+      hubMeta?: { slug: string },
+    ) => {
       setInstallStatus('installing');
       setInstallEvents([]);
 
@@ -97,6 +102,7 @@ export function useTeamInstall(onDone?: () => void) {
                 id: editContext.teamId,
                 createdAt: editContext.createdAt,
                 emoji: teamInfo.emoji,
+                hubSlug: hubMeta?.slug,
               })
           : (team) => window.clawwork.persistTeam({ ...team, emoji: teamInfo.emoji }),
       };
@@ -104,7 +110,7 @@ export function useTeamInstall(onDone?: () => void) {
       try {
         const wsBase = await window.clawwork.getWorkspacePath();
         const workspace = wsBase ? `${wsBase}/${toSlug(teamInfo.name)}` : toSlug(teamInfo.name);
-        for await (const event of installTeam(parsed, agentFiles, teamInfo.gatewayId, workspace, deps)) {
+        for await (const event of installTeam(parsed, agentFiles, teamInfo.gatewayId, workspace, deps, hubMeta)) {
           setInstallEvents((prev) => [...prev, event]);
 
           if (event.type === 'agent_created' && event.agentSlug && event.agentId) {

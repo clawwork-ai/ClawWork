@@ -655,6 +655,7 @@
     "emptyTitle": "暫無可用團隊",
     "install": "安裝",
     "installed": "已安裝",
+    "installSuccess": "團隊安裝成功",
     "manageRegistries": "Registry",
     "notFetched": "尚未同步 — 點擊重新整理",
     "refreshed": "Registry 已重新整理",

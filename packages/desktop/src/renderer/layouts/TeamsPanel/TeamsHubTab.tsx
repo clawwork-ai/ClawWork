@@ -10,7 +10,11 @@ import { useTeamStore } from '@/stores/teamStore';
 import TeamHubCard from './TeamHubCard';
 import RegistryManageDialog from './RegistryManageDialog';
 
-export default function TeamsHubTab() {
+interface TeamsHubTabProps {
+  onSelectEntry: (entry: TeamHubEntry & { _registryId: string }) => void;
+}
+
+export default function TeamsHubTab({ onSelectEntry }: TeamsHubTabProps) {
   const { t } = useTranslation();
   const teamsMap = useTeamStore((s) => s.teams);
   const [registries, setRegistries] = useState<TeamHubRegistry[]>([]);
@@ -124,9 +128,12 @@ export default function TeamsHubTab() {
     [loadRegistries, t],
   );
 
-  const handleInstall = useCallback((entry: TeamHubEntry & { _registryId: string }) => {
-    console.warn('TODO: PR-3 install flow', entry.slug, entry._registryId);
-  }, []);
+  const handleSelect = useCallback(
+    (entry: TeamHubEntry & { _registryId: string }) => {
+      onSelectEntry(entry);
+    },
+    [onSelectEntry],
+  );
 
   const isEmpty = !loading && (registries.length === 0 || allEntries.length === 0);
 
@@ -209,8 +216,8 @@ export default function TeamsHubTab() {
                 key={`${entry._registryId}:${entry.slug}`}
                 entry={entry}
                 installed={installedSlugs.has(entry.slug)}
-                onSelect={() => handleInstall(entry)}
-                onInstall={() => handleInstall(entry)}
+                onSelect={() => handleSelect(entry)}
+                onInstall={() => handleSelect(entry)}
               />
             ))}
           </div>

@@ -45,7 +45,6 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
 
   useEffect(() => {
     setSelectedFile({ id: 'team-md', label: 'TEAM.md', kind: 'team-md' });
-    setFileContent(team.description || '');
     setEditingContent(null);
     fetchedFiles.current.clear();
     fetchedSkills.current.clear();
@@ -55,7 +54,7 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
     if (selectedFile?.kind === 'team-md') {
       setFileContent(team.description || '');
     }
-  }, [team.description, selectedFile?.kind]);
+  }, [team.id, team.description, selectedFile?.kind]);
 
   useEffect(() => {
     for (const agent of team.agents) {

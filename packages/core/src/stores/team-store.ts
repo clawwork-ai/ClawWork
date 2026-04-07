@@ -12,6 +12,7 @@ export interface TeamStoreDeps {
     gatewayId: string;
     source?: string;
     version?: string;
+    hubSlug?: string;
     agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
     createdAt: string;
     updatedAt: string;
@@ -72,6 +73,7 @@ export function createTeamStore(deps: TeamStoreDeps) {
         gatewayId: team.gatewayId,
         source: team.source,
         version: team.version,
+        hubSlug: team.hubSlug,
         agents: team.agents,
         createdAt: team.createdAt,
         updatedAt: team.updatedAt,
@@ -96,6 +98,7 @@ export function createTeamStore(deps: TeamStoreDeps) {
         gatewayId: updated.gatewayId,
         source: updated.source,
         version: updated.version,
+        hubSlug: updated.hubSlug,
         agents: updated.agents,
         createdAt: updated.createdAt,
         updatedAt: updated.updatedAt,

@@ -655,6 +655,7 @@
     "emptyTitle": "사용 가능한 팀이 없습니다",
     "install": "설치",
     "installed": "설치됨",
+    "installSuccess": "팀이 성공적으로 설치되었습니다",
     "manageRegistries": "레지스트리",
     "notFetched": "아직 동기화되지 않음 — 새로고침 클릭",
     "refreshed": "레지스트리가 새로고침되었습니다",

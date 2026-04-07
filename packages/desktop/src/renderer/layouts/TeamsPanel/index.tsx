@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Users, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import type { Team } from '@clawwork/shared';
+import type { Team, TeamHubEntry } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import EmptyState from '@/components/semantic/EmptyState';
@@ -13,6 +13,7 @@ import { useTeamStore } from '@/stores/teamStore';
 import { useTaskStore, useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
 import TeamDetailView from './TeamDetailView';
+import TeamHubDetailView from './TeamHubDetailView';
 import CreateTeamWizard from './CreateTeamWizard';
 import TeamsHubTab from './TeamsHubTab';
 
@@ -30,6 +31,7 @@ export default function TeamsPanel() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
+  const [selectedHubEntry, setSelectedHubEntry] = useState<(TeamHubEntry & { _registryId: string }) | null>(null);
 
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
 
@@ -90,6 +92,8 @@ export default function TeamsPanel() {
           onStartChat={() => handleStartChat(selectedTeam.id)}
           onEdit={() => handleEdit(selectedTeam.id)}
         />
+      ) : selectedHubEntry ? (
+        <TeamHubDetailView entry={selectedHubEntry} onBack={() => setSelectedHubEntry(null)} />
       ) : (
         <div className="flex flex-col h-full">
           <WindowTitlebar
@@ -162,7 +166,7 @@ export default function TeamsPanel() {
                 </div>
               )
             ) : (
-              <TeamsHubTab />
+              <TeamsHubTab onSelectEntry={setSelectedHubEntry} />
             )}
           </ScrollArea>
         </div>

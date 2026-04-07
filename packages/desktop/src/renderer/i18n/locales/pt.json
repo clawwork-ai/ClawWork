@@ -655,6 +655,7 @@
     "emptyTitle": "Nenhuma equipe disponível",
     "install": "Instalar",
     "installed": "Instalado",
+    "installSuccess": "Equipe instalada com sucesso",
     "manageRegistries": "Registros",
     "notFetched": "Ainda não sincronizado — clique em atualizar",
     "refreshed": "Registros atualizados",

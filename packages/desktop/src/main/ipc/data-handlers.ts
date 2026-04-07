@@ -412,6 +412,7 @@ export function registerDataHandlers(): void {
         gatewayId: string;
         source?: string;
         version?: string;
+        hubSlug?: string;
         agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
         createdAt: string;
         updatedAt: string;
@@ -430,6 +431,7 @@ export function registerDataHandlers(): void {
               gatewayId: params.gatewayId,
               source: params.source ?? 'local',
               version: params.version ?? '',
+              hubSlug: params.hubSlug ?? '',
               createdAt: params.createdAt,
               updatedAt: params.updatedAt,
             })
@@ -442,6 +444,7 @@ export function registerDataHandlers(): void {
                 gatewayId: params.gatewayId,
                 source: params.source ?? 'local',
                 version: params.version ?? '',
+                hubSlug: params.hubSlug ?? '',
                 updatedAt: params.updatedAt,
               },
             })

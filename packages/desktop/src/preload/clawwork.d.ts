@@ -493,6 +493,7 @@ export interface ClawWorkAPI {
     gatewayId: string;
     source?: string;
     version?: string;
+    hubSlug?: string;
     agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
     createdAt: string;
     updatedAt: string;
