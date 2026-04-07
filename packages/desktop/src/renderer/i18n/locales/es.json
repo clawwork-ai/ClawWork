@@ -646,6 +646,25 @@
       "worker": "Worker"
     }
   },
+  "teamshub": {
+    "addRegistry": "Agregar",
+    "addRegistryHint": "URL de repositorio GitHub con teamshub.json en la raíz",
+    "addRegistryPlaceholder": "URL del repositorio de GitHub",
+    "all": "Todos",
+    "emptyDesc": "Agrega un registro para explorar equipos de la comunidad",
+    "emptyTitle": "No hay equipos disponibles",
+    "install": "Instalar",
+    "installed": "Instalado",
+    "manageRegistries": "Registros",
+    "notFetched": "No sincronizado aún — haz clic en actualizar",
+    "refreshed": "Registros actualizados",
+    "registryAdded": "Registro agregado",
+    "registryRemoved": "Registro eliminado",
+    "search": "Buscar equipos…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "Mis equipos",
+    "teamCount": "{{count}} equipos"
+  },
   "toolCall": {
     "args": "Argumentos",
     "result": "Resultado"

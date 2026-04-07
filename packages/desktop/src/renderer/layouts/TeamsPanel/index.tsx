@@ -3,6 +3,7 @@ import { Users, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { Team } from '@clawwork/shared';
+import { cn } from '@/lib/utils';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 import EmptyState from '@/components/semantic/EmptyState';
 import ConfirmDialog from '@/components/semantic/ConfirmDialog';
@@ -13,6 +14,7 @@ import { useTaskStore, useUiStore } from '@/platform';
 import TeamCard from './TeamCard';
 import TeamDetailView from './TeamDetailView';
 import CreateTeamWizard from './CreateTeamWizard';
+import TeamsHubTab from './TeamsHubTab';
 
 export default function TeamsPanel() {
   const { t } = useTranslation();
@@ -23,6 +25,7 @@ export default function TeamsPanel() {
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const setMainView = useUiStore((s) => s.setMainView);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const [activeTab, setActiveTab] = useState<'myTeams' | 'hub'>('myTeams');
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
@@ -91,14 +94,25 @@ export default function TeamsPanel() {
         <div className="flex flex-col h-full">
           <WindowTitlebar
             left={
-              <div className="flex items-center gap-2.5">
-                <Users size={18} className="text-[var(--text-muted)]" />
-                <h2 className="type-section-title text-[var(--text-primary)]">{t('teams.title')}</h2>
-                {teams.length > 0 && <span className="type-support text-[var(--text-muted)]">({teams.length})</span>}
+              <div className="flex items-center gap-4">
+                {(['myTeams', 'hub'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={cn(
+                      'type-body transition-colors',
+                      activeTab === tab
+                        ? 'text-[var(--text-primary)]'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                    )}
+                  >
+                    {tab === 'myTeams' ? t('teamshub.tabMyTeams') : t('teamshub.tabHub')}
+                  </button>
+                ))}
               </div>
             }
             right={
-              teams.length > 0 ? (
+              activeTab === 'myTeams' && teams.length > 0 ? (
                 <Button
                   size="sm"
                   onClick={() => {
@@ -114,37 +128,41 @@ export default function TeamsPanel() {
           />
 
           <ScrollArea className="flex-1 px-5 py-4">
-            {teams.length === 0 ? (
-              <EmptyState
-                icon={<Users size={24} className="text-[var(--text-muted)]" />}
-                title={t('teams.emptyTitle')}
-                description={t('teams.emptyDesc')}
-                action={
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setEditTeam(null);
-                      setWizardOpen(true);
-                    }}
-                  >
-                    <Plus size={14} />
-                    {t('teams.createTeam')}
-                  </Button>
-                }
-              />
+            {activeTab === 'myTeams' ? (
+              teams.length === 0 ? (
+                <EmptyState
+                  icon={<Users size={24} className="text-[var(--text-muted)]" />}
+                  title={t('teams.emptyTitle')}
+                  description={t('teams.emptyDesc')}
+                  action={
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setEditTeam(null);
+                        setWizardOpen(true);
+                      }}
+                    >
+                      <Plus size={14} />
+                      {t('teams.createTeam')}
+                    </Button>
+                  }
+                />
+              ) : (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--content-card-min),1fr))] gap-4">
+                  {teams.map((team) => (
+                    <TeamCard
+                      key={team.id}
+                      team={team}
+                      onSelect={() => setSelectedTeamId(team.id)}
+                      onStartChat={() => handleStartChat(team.id)}
+                      onEdit={() => handleEdit(team.id)}
+                      onDelete={() => handleDelete(team.id)}
+                    />
+                  ))}
+                </div>
+              )
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--content-card-min),1fr))] gap-4">
-                {teams.map((team) => (
-                  <TeamCard
-                    key={team.id}
-                    team={team}
-                    onSelect={() => setSelectedTeamId(team.id)}
-                    onStartChat={() => handleStartChat(team.id)}
-                    onEdit={() => handleEdit(team.id)}
-                    onDelete={() => handleDelete(team.id)}
-                  />
-                ))}
-              </div>
+              <TeamsHubTab />
             )}
           </ScrollArea>
         </div>

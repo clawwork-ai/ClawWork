@@ -646,6 +646,25 @@
       "worker": "執行者"
     }
   },
+  "teamshub": {
+    "addRegistry": "新增",
+    "addRegistryHint": "GitHub 儲存庫網址，根目錄需包含 teamshub.json",
+    "addRegistryPlaceholder": "GitHub 儲存庫網址",
+    "all": "全部",
+    "emptyDesc": "新增 Registry 以瀏覽社群團隊",
+    "emptyTitle": "暫無可用團隊",
+    "install": "安裝",
+    "installed": "已安裝",
+    "manageRegistries": "Registry",
+    "notFetched": "尚未同步 — 點擊重新整理",
+    "refreshed": "Registry 已重新整理",
+    "registryAdded": "Registry 已新增",
+    "registryRemoved": "Registry 已移除",
+    "search": "搜尋團隊…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "我的團隊",
+    "teamCount": "{{count}} 個團隊"
+  },
   "toolCall": {
     "args": "參數",
     "result": "結果"

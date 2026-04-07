@@ -646,6 +646,25 @@
       "worker": "执行者"
     }
   },
+  "teamshub": {
+    "addRegistry": "添加",
+    "addRegistryHint": "GitHub 仓库地址，根目录需包含 teamshub.json",
+    "addRegistryPlaceholder": "GitHub 仓库地址",
+    "all": "全部",
+    "emptyDesc": "添加 Registry 以浏览社区团队",
+    "emptyTitle": "暂无可用团队",
+    "install": "安装",
+    "installed": "已安装",
+    "manageRegistries": "Registry",
+    "notFetched": "尚未同步 — 点击刷新",
+    "refreshed": "Registry 已刷新",
+    "registryAdded": "Registry 已添加",
+    "registryRemoved": "Registry 已移除",
+    "search": "搜索团队…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "我的团队",
+    "teamCount": "{{count}} 个团队"
+  },
   "toolCall": {
     "args": "参数",
     "result": "结果"

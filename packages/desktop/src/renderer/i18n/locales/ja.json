@@ -646,6 +646,25 @@
       "worker": "ワーカー"
     }
   },
+  "teamshub": {
+    "addRegistry": "追加",
+    "addRegistryHint": "ルートに teamshub.json を含む GitHub リポジトリ URL",
+    "addRegistryPlaceholder": "GitHub リポジトリ URL",
+    "all": "すべて",
+    "emptyDesc": "レジストリを追加してコミュニティチームを閲覧",
+    "emptyTitle": "利用可能なチームがありません",
+    "install": "インストール",
+    "installed": "インストール済み",
+    "manageRegistries": "レジストリ",
+    "notFetched": "未同期 — 更新をクリック",
+    "refreshed": "レジストリを更新しました",
+    "registryAdded": "レジストリを追加しました",
+    "registryRemoved": "レジストリを削除しました",
+    "search": "チームを検索…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "マイチーム",
+    "teamCount": "{{count}} チーム"
+  },
   "toolCall": {
     "args": "引数",
     "result": "結果"

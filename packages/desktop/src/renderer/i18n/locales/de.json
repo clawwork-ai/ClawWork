@@ -646,6 +646,25 @@
       "worker": "Worker"
     }
   },
+  "teamshub": {
+    "addRegistry": "Hinzufügen",
+    "addRegistryHint": "GitHub-Repository-URL mit teamshub.json im Stammverzeichnis",
+    "addRegistryPlaceholder": "GitHub-Repository-URL",
+    "all": "Alle",
+    "emptyDesc": "Fügen Sie eine Registry hinzu, um Community-Teams zu durchsuchen",
+    "emptyTitle": "Keine Teams verfügbar",
+    "install": "Installieren",
+    "installed": "Installiert",
+    "manageRegistries": "Registries",
+    "notFetched": "Noch nicht synchronisiert — klicken Sie auf Aktualisieren",
+    "refreshed": "Registries aktualisiert",
+    "registryAdded": "Registry hinzugefügt",
+    "registryRemoved": "Registry entfernt",
+    "search": "Teams suchen…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "Meine Teams",
+    "teamCount": "{{count}} Teams"
+  },
   "toolCall": {
     "args": "Argumente",
     "result": "Ergebnis"

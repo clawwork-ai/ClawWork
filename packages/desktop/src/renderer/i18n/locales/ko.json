@@ -646,6 +646,25 @@
       "worker": "워커"
     }
   },
+  "teamshub": {
+    "addRegistry": "추가",
+    "addRegistryHint": "루트에 teamshub.json이 있는 GitHub 저장소 URL",
+    "addRegistryPlaceholder": "GitHub 저장소 URL",
+    "all": "전체",
+    "emptyDesc": "레지스트리를 추가하여 커뮤니티 팀 탐색",
+    "emptyTitle": "사용 가능한 팀이 없습니다",
+    "install": "설치",
+    "installed": "설치됨",
+    "manageRegistries": "레지스트리",
+    "notFetched": "아직 동기화되지 않음 — 새로고침 클릭",
+    "refreshed": "레지스트리가 새로고침되었습니다",
+    "registryAdded": "레지스트리가 추가되었습니다",
+    "registryRemoved": "레지스트리가 제거되었습니다",
+    "search": "팀 검색…",
+    "tabHub": "TeamsHub",
+    "tabMyTeams": "내 팀",
+    "teamCount": "{{count}}개 팀"
+  },
   "toolCall": {
     "args": "인수",
     "result": "결과"
