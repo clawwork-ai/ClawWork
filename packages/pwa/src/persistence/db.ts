@@ -148,9 +148,15 @@ export async function saveTask(task: StoredTask): Promise<void> {
 
 export async function updateTask(id: string, updates: Partial<Omit<StoredTask, 'id'>>): Promise<void> {
   const db = await getDb();
-  const existing = await db.get('tasks', id);
-  if (!existing) return;
-  await db.put('tasks', { ...existing, ...updates });
+  const tx = db.transaction('tasks', 'readwrite');
+  const store = tx.objectStore('tasks');
+  const existing = await store.get(id);
+  if (!existing) {
+    await tx.done;
+    return;
+  }
+  await store.put({ ...existing, ...updates });
+  await tx.done;
 }
 
 export async function deleteTaskAndMessages(taskId: string): Promise<void> {
