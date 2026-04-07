@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { ArrowLeft, MessageSquare, Pencil, Check, X, Loader2, Puzzle } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Pencil, Check, X, Loader2, Puzzle, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { Team } from '@clawwork/shared';
@@ -206,27 +206,43 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
 
   return (
     <div className="flex h-full flex-col">
-      <header className="titlebar-drag flex items-center justify-between border-b border-[var(--border)] px-5 h-[var(--density-toolbar-height)] flex-shrink-0">
-        <div className="titlebar-no-drag flex items-center gap-3 min-w-0">
+      <header className="titlebar-drag flex items-center border-b border-[var(--border)] px-5 h-[var(--density-toolbar-height)] flex-shrink-0">
+        <div className="titlebar-no-drag flex items-center gap-2 min-w-0">
           <Button variant="ghost" size="icon-sm" onClick={onBack}>
             <ArrowLeft size={16} />
           </Button>
-          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-            <span className="emoji-md">{team.emoji}</span>
-          </span>
-          <h2 className="type-section-title truncate text-[var(--text-primary)]">{team.name}</h2>
-        </div>
-        <div className="titlebar-no-drag flex items-center gap-1.5">
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            <Pencil size={14} />
-            {t('teams.editTeam')}
-          </Button>
-          <Button size="sm" onClick={onStartChat}>
-            <MessageSquare size={14} />
-            {t('teams.startChat')}
-          </Button>
+          <span className="type-body text-[var(--text-muted)]">{team.name}</span>
         </div>
       </header>
+
+      <div className="border-b border-[var(--border)] px-6 py-5 space-y-3 flex-shrink-0">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4 min-w-0">
+            <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--bg-tertiary)]">
+              <span className="emoji-lg">{team.emoji}</span>
+            </span>
+            <div className="min-w-0 space-y-1.5">
+              <h2 className="type-page-title text-[var(--text-primary)]">{team.name}</h2>
+              {team.version && (
+                <span className="type-meta flex items-center gap-1 text-[var(--text-muted)]">
+                  <Package size={12} />v{team.version}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              <Pencil size={14} />
+              {t('teams.editTeam')}
+            </Button>
+            <Button size="sm" onClick={onStartChat}>
+              <MessageSquare size={14} />
+              {t('teams.startChat')}
+            </Button>
+          </div>
+        </div>
+        {team.description && <p className="type-body text-[var(--text-secondary)]">{team.description}</p>}
+      </div>
 
       <div className="flex flex-1 min-h-0">
         <TeamFileTree

@@ -157,42 +157,15 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
           </Button>
           <span className="type-body text-[var(--text-muted)]">{t('teamshub.tabHub')}</span>
         </div>
-        <div className="titlebar-no-drag flex items-center gap-2">
-          {showProgress ? (
-            <span className="type-meta text-[var(--text-muted)]">
-              {phase === 'done'
-                ? t('teamshub.installed')
-                : phase === 'error'
-                  ? t('teams.wizard.installError')
-                  : t('teams.wizard.installing')}
-            </span>
-          ) : installed ? (
-            <span className="type-meta flex items-center gap-1 text-[var(--accent)]">
-              <Check size={14} />
-              {t('teamshub.installed')}
-            </span>
-          ) : (
-            <>
-              {gateways.length > 1 && (
-                <select
-                  value={gatewayId}
-                  onChange={(e) => setGatewayId(e.target.value)}
-                  className={cn(inputClass, 'h-7 max-w-36 type-meta')}
-                >
-                  {gateways.map(([id, gw]) => (
-                    <option key={id} value={id}>
-                      {gw.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <Button size="sm" onClick={handleInstall} disabled={!gatewayId || !parsedData}>
-                <Download size={14} />
-                {t('teamshub.install')}
-              </Button>
-            </>
-          )}
-        </div>
+        {showProgress && (
+          <span className="titlebar-no-drag type-meta text-[var(--text-muted)]">
+            {phase === 'done'
+              ? t('teamshub.installed')
+              : phase === 'error'
+                ? t('teams.wizard.installError')
+                : t('teams.wizard.installing')}
+          </span>
+        )}
       </header>
 
       {showProgress ? (
@@ -220,38 +193,68 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
       ) : parsedData ? (
         <div className="flex flex-1 flex-col min-h-0">
           <div className="border-b border-[var(--border)] px-6 py-5 space-y-3 flex-shrink-0">
-            <div className="flex items-start gap-4">
-              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--bg-tertiary)]">
-                <span className="emoji-lg">{entry.emoji}</span>
-              </span>
-              <div className="min-w-0 space-y-1.5">
-                <h2 className="type-page-title text-[var(--text-primary)]">{entry.name}</h2>
-                <div className="flex flex-wrap items-center gap-3">
-                  {entry.version && (
-                    <span className="type-meta flex items-center gap-1 text-[var(--text-muted)]">
-                      <Package size={12} />v{entry.version}
-                    </span>
-                  )}
-                  {entry.author && (
-                    <span className="type-meta flex items-center gap-1 text-[var(--text-muted)]">
-                      <User size={12} />
-                      {entry.author}
-                    </span>
-                  )}
-                  {entry.category && <span className="type-meta text-[var(--text-secondary)]">{entry.category}</span>}
-                </div>
-                {entry.tags && entry.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {entry.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="type-support flex items-center gap-1 rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[var(--accent)]"
-                      >
-                        <Tag size={10} />
-                        {tag}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4 min-w-0">
+                <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--bg-tertiary)]">
+                  <span className="emoji-lg">{entry.emoji}</span>
+                </span>
+                <div className="min-w-0 space-y-1.5">
+                  <h2 className="type-page-title text-[var(--text-primary)]">{entry.name}</h2>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {entry.version && (
+                      <span className="type-meta flex items-center gap-1 text-[var(--text-muted)]">
+                        <Package size={12} />v{entry.version}
                       </span>
-                    ))}
+                    )}
+                    {entry.author && (
+                      <span className="type-meta flex items-center gap-1 text-[var(--text-muted)]">
+                        <User size={12} />
+                        {entry.author}
+                      </span>
+                    )}
+                    {entry.category && <span className="type-meta text-[var(--text-secondary)]">{entry.category}</span>}
                   </div>
+                  {entry.tags && entry.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {entry.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="type-support flex items-center gap-1 rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[var(--accent)]"
+                        >
+                          <Tag size={10} />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {installed ? (
+                  <span className="type-meta flex items-center gap-1 text-[var(--accent)]">
+                    <Check size={14} />
+                    {t('teamshub.installed')}
+                  </span>
+                ) : (
+                  <>
+                    {gateways.length > 1 && (
+                      <select
+                        value={gatewayId}
+                        onChange={(e) => setGatewayId(e.target.value)}
+                        className={cn(inputClass, 'h-7 max-w-36 type-meta')}
+                      >
+                        {gateways.map(([id, gw]) => (
+                          <option key={id} value={id}>
+                            {gw.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <Button size="sm" onClick={handleInstall} disabled={!gatewayId || !parsedData}>
+                      <Download size={14} />
+                      {t('teamshub.install')}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
