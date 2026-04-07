@@ -13,7 +13,10 @@ function cacheDir(): string {
   return dir;
 }
 
+const SAFE_ID_RE = /^[a-z0-9-]+$/;
+
 function cachePath(registryId: string): string {
+  if (!SAFE_ID_RE.test(registryId)) throw new Error(`Invalid registry id: ${registryId}`);
   return join(cacheDir(), `${registryId}.json`);
 }
 
