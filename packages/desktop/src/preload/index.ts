@@ -388,6 +388,13 @@ function buildApi(): ClawWorkAPI {
     deleteAgentAvatar: (gatewayId: string, agentId: string) =>
       ipcRenderer.invoke('avatar:delete', { gatewayId, agentId }),
     listLocalAvatars: (gatewayId: string) => ipcRenderer.invoke('avatar:list-local', { gatewayId }),
+
+    hubListRegistries: () => ipcRenderer.invoke('hub:registries-list'),
+    hubFetchRegistry: (id: string) => ipcRenderer.invoke('hub:registry-fetch', { id }),
+    hubAddRegistry: (url: string) => ipcRenderer.invoke('hub:registry-add', { url }),
+    hubRemoveRegistry: (id: string) => ipcRenderer.invoke('hub:registry-remove', { id }),
+    hubDownloadTeam: (registryId: string, slug: string) =>
+      ipcRenderer.invoke('hub:team-download', { registryId, slug }),
   };
 }
 

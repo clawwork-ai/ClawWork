@@ -77,6 +77,9 @@ export const CONFIG_FILE_NAME = 'clawwork-config.json';
 
 export const DB_FILE_NAME = '.clawwork.db';
 
+export const TEAMSHUB_COMMUNITY_URL = 'https://github.com/clawwork-ai/teamshub-community';
+export const TEAMSHUB_COMMUNITY_ID = 'community';
+
 export function buildConductorPrompt(agentCatalog: string): string {
   return [
     'You are a task coordinator (Conductor). Your responsibilities:',

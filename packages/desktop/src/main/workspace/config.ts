@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { homedir } from 'os';
 import { randomUUID } from 'node:crypto';
 import { CONFIG_FILE_NAME, DEFAULT_WORKSPACE_DIR } from '@clawwork/shared';
-import type { GatewayAuth, LanguageCode } from '@clawwork/shared';
+import type { GatewayAuth, LanguageCode, TeamHubRegistryConfig } from '@clawwork/shared';
 
 export interface GatewayServerConfig {
   id: string;
@@ -54,6 +54,7 @@ export interface AppConfig {
   deviceId?: string;
   zoomLevel?: number;
   devMode?: boolean;
+  teamHubRegistries?: TeamHubRegistryConfig[];
 }
 
 function configFilePath(): string {

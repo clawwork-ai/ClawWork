@@ -2,6 +2,7 @@ import type {
   IpcResult as SharedIpcResult,
   ChatAttachment as SharedChatAttachment,
   Team,
+  TeamHubRegistry,
   ApprovalDecision,
   CronJob,
   CronJobCreate,
@@ -23,6 +24,8 @@ import type {
   ConfigPatchResult,
   ConfigSchemaResult,
   ConfigSchemaLookupResult,
+  ParsedTeam,
+  AgentFileSet,
 } from '@clawwork/shared';
 
 type IpcResult<T = Record<string, unknown>> = SharedIpcResult<T>;
@@ -124,6 +127,7 @@ interface AppSettings {
   leftNavShortcut?: 'Comma' | 'BracketLeft';
   rightPanelShortcut?: 'Period' | 'BracketRight';
   devMode?: boolean;
+  teamHubRegistries?: Array<{ id: string; url: string; isOfficial: boolean }>;
 }
 
 export type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';
@@ -498,6 +502,15 @@ export interface ClawWorkAPI {
   saveAgentAvatar: (gatewayId: string, agentId: string, dataUrl: string) => Promise<IpcResult>;
   deleteAgentAvatar: (gatewayId: string, agentId: string) => Promise<IpcResult>;
   listLocalAvatars: (gatewayId: string) => Promise<IpcResult<{ result: string[] }>>;
+
+  hubListRegistries: () => Promise<IpcResult<TeamHubRegistry[]>>;
+  hubFetchRegistry: (id: string) => Promise<IpcResult<TeamHubRegistry>>;
+  hubAddRegistry: (url: string) => Promise<IpcResult<TeamHubRegistry>>;
+  hubRemoveRegistry: (id: string) => Promise<IpcResult>;
+  hubDownloadTeam: (
+    registryId: string,
+    slug: string,
+  ) => Promise<IpcResult<{ parsed: ParsedTeam; agentFiles: Record<string, AgentFileSet> }>>;
 }
 
 declare global {

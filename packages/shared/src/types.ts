@@ -73,9 +73,39 @@ export interface Team {
   gatewayId: string;
   source: 'local' | 'hub';
   version: string;
+  hubSlug?: string;
   agents: TeamAgent[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TeamHubEntry {
+  slug: string;
+  name: string;
+  emoji: string;
+  description: string;
+  version: string;
+  agentCount: number;
+  category: string;
+  tags: string[];
+  author: string;
+  registryId?: string;
+}
+
+export interface TeamHubRegistry {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  isOfficial: boolean;
+  teams: TeamHubEntry[];
+  fetchedAt: string;
+}
+
+export interface TeamHubRegistryConfig {
+  id: string;
+  url: string;
+  isOfficial: boolean;
 }
 
 export interface ParsedTeamAgent {
