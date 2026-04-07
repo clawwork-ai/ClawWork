@@ -188,7 +188,7 @@ export default function AboutSection() {
               </Button>
             </SettingRow>
           )}
-          {deviceId && (
+          {devMode && deviceId && (
             <SettingRow label={t('settings.deviceId')}>
               <span className="type-mono-data select-all text-[var(--text-secondary)]">{deviceId}</span>
             </SettingRow>
