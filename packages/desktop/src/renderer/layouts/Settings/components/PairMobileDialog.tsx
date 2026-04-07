@@ -63,8 +63,8 @@ export default function PairMobileDialog({
   }, []);
 
   const handleGenerate = useCallback(
-    async (identity = shareIdentity) => {
-      if (!selectedGatewayId) return;
+    async (identity = shareIdentity, gatewayId = selectedGatewayId) => {
+      if (!gatewayId) return;
       setGenerating(true);
 
       try {
@@ -76,7 +76,7 @@ export default function PairMobileDialog({
           payload.s = await window.clawwork.getDeviceId();
         }
 
-        const cfg = settings.gateways.find((g: { id: string }) => g.id === selectedGatewayId);
+        const cfg = settings.gateways.find((g: { id: string }) => g.id === gatewayId);
         if (!cfg) return;
 
         const mode: 'token' | 'password' | 'pairingCode' =
@@ -141,7 +141,10 @@ export default function PairMobileDialog({
                       type="radio"
                       name="pair-mobile-gateway"
                       checked={selectedGatewayId === id}
-                      onChange={() => setSelectedGatewayId(id)}
+                      onChange={() => {
+                        setSelectedGatewayId(id);
+                        if (qrData) handleGenerate(shareIdentity, id);
+                      }}
                       className="h-4 w-4 accent-[var(--accent)]"
                     />
                     <span className="flex-1 truncate type-body text-[var(--text-primary)]">{info.name}</span>
@@ -167,7 +170,7 @@ export default function PairMobileDialog({
               onChange={(e) => {
                 const next = e.target.checked;
                 setShareIdentity(next);
-                if (qrData) handleGenerate(next);
+                if (qrData) handleGenerate(next, selectedGatewayId);
               }}
               className="h-4 w-4 accent-[var(--accent)]"
             />
