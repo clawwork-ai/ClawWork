@@ -553,6 +553,7 @@
     "skillsDesc": "管理已連線閘道上的技能",
     "skillSource": "來源",
     "skillSourceBundled": "內建",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "本機",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "已安裝",

@@ -51,7 +51,7 @@ function SkillCard({
   const sourceLabel = skill.bundled
     ? t('settings.skillSourceBundled')
     : skill.source === 'clawhub'
-      ? 'ClawHub'
+      ? t('settings.skillSourceClawHub')
       : t('settings.skillSourceLocal');
 
   const SKILL_PREFIX = 'settings.skill';
@@ -331,6 +331,7 @@ function ClawHubTab({ gatewayId, onInstalled }: { gatewayId: string; onInstalled
     setQuery('');
     setDetailCache({});
     setExpandedSlug(null);
+    setInstallingSlugs(new Set());
   }, [gatewayId]);
 
   const doSearch = useCallback(
@@ -387,7 +388,7 @@ function ClawHubTab({ gatewayId, onInstalled }: { gatewayId: string; onInstalled
         const detail = res.result;
         setDetailCache((prev) => ({ ...prev, [slug]: detail }));
       } else {
-        toast.error(t('settings.skillHubSearchFailed'));
+        toast.error(t('settings.skillHubDetailUnavailable'));
         setDetailCache((prev) => ({ ...prev, [slug]: 'failed' }));
       }
       setDetailLoading(null);

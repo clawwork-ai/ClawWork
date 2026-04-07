@@ -553,6 +553,7 @@
     "skillsDesc": "Gestionar habilidades en gateways conectados",
     "skillSource": "Origen",
     "skillSourceBundled": "Integrada",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "Local",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "Instaladas",

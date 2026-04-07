@@ -553,6 +553,7 @@
     "skillsDesc": "管理已连接网关上的技能",
     "skillSource": "来源",
     "skillSourceBundled": "内置",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "本地",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "已安装",

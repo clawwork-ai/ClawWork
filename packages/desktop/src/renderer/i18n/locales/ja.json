@@ -553,6 +553,7 @@
     "skillsDesc": "接続されたゲートウェイのスキルを管理",
     "skillSource": "ソース",
     "skillSourceBundled": "組み込み",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "ローカル",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "インストール済み",

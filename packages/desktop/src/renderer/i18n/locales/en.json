@@ -553,6 +553,7 @@
     "skillsDesc": "Manage skills on connected gateways",
     "skillSource": "Source",
     "skillSourceBundled": "Bundled",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "Local",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "Installed",

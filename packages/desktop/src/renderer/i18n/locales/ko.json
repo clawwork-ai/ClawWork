@@ -553,6 +553,7 @@
     "skillsDesc": "연결된 게이트웨이의 스킬 관리",
     "skillSource": "출처",
     "skillSourceBundled": "기본 제공",
+    "skillSourceClawHub": "ClawHub",
     "skillSourceLocal": "로컬",
     "skillTabClawHub": "ClawHub",
     "skillTabInstalled": "설치됨",
