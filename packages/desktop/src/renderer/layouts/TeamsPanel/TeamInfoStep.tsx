@@ -3,34 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import type { TeamInfo } from './types';
-import { inputClass } from './utils';
-
-const EMOJI_OPTIONS = [
-  '🤖',
-  '🧪',
-  '🎯',
-  '🚀',
-  '💡',
-  '🔧',
-  '📊',
-  '🎨',
-  '🛡️',
-  '📦',
-  '🌐',
-  '⚡',
-  '🔬',
-  '📝',
-  '🎲',
-  '🧩',
-  '🏗️',
-  '💻',
-  '🔍',
-  '🤝',
-  '📡',
-  '🧠',
-  '🌟',
-  '🎵',
-];
+import { EMOJI_OPTIONS, inputClass } from './utils';
 
 interface TeamInfoStepProps {
   info: TeamInfo;

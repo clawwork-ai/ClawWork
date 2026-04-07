@@ -10,6 +10,33 @@ export function toSlug(name: string): string {
   );
 }
 
+export const EMOJI_OPTIONS = [
+  '🤖',
+  '🧪',
+  '🎯',
+  '🚀',
+  '💡',
+  '🔧',
+  '📊',
+  '🎨',
+  '🛡️',
+  '📦',
+  '🌐',
+  '⚡',
+  '🔬',
+  '📝',
+  '🎲',
+  '🧩',
+  '🏗️',
+  '💻',
+  '🔍',
+  '🤝',
+  '📡',
+  '🧠',
+  '🌟',
+  '🎵',
+];
+
 export const inputClass = cn(
   'w-full h-[var(--density-control-height)] px-3 rounded-md',
   'bg-[var(--bg-primary)] border border-[var(--border)]',

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Users, Plus } from 'lucide-react';
+import { Users, Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import type { Team, TeamHubEntry } from '@clawwork/shared';
@@ -15,6 +15,7 @@ import TeamCard from './TeamCard';
 import TeamDetailView from './TeamDetailView';
 import TeamHubDetailView from './TeamHubDetailView';
 import CreateTeamWizard from './CreateTeamWizard';
+import TeamBuilderDialog from '@/components/TeamBuilderDialog';
 import TeamsHubTab from './TeamsHubTab';
 
 export default function TeamsPanel() {
@@ -28,6 +29,7 @@ export default function TeamsPanel() {
   const [activeTab, setActiveTab] = useState<'myTeams' | 'hub'>('myTeams');
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
   const [selectedHubEntry, setSelectedHubEntry] = useState<(TeamHubEntry & { _registryId: string }) | null>(null);
@@ -115,16 +117,22 @@ export default function TeamsPanel() {
             }
             right={
               activeTab === 'myTeams' && teams.length > 0 ? (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setEditTeam(null);
-                    setWizardOpen(true);
-                  }}
-                >
-                  <Plus size={14} />
-                  {t('teams.createTeam')}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setBuilderOpen(true)}>
+                    <Sparkles size={14} />
+                    {t('teams.teamBuilderTitle')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setEditTeam(null);
+                      setWizardOpen(true);
+                    }}
+                  >
+                    <Plus size={14} />
+                    {t('teams.createTeam')}
+                  </Button>
+                </div>
               ) : undefined
             }
           />
@@ -137,16 +145,22 @@ export default function TeamsPanel() {
                   title={t('teams.emptyTitle')}
                   description={t('teams.emptyDesc')}
                   action={
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setEditTeam(null);
-                        setWizardOpen(true);
-                      }}
-                    >
-                      <Plus size={14} />
-                      {t('teams.createTeam')}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setBuilderOpen(true)}>
+                        <Sparkles size={14} />
+                        {t('teams.teamBuilderTitle')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setEditTeam(null);
+                          setWizardOpen(true);
+                        }}
+                      >
+                        <Plus size={14} />
+                        {t('teams.createTeam')}
+                      </Button>
+                    </div>
                   }
                 />
               ) : (
@@ -175,6 +189,13 @@ export default function TeamsPanel() {
         onOpenChange={handleWizardClose}
         defaultGatewayId={defaultGatewayId ?? ''}
         editTeam={editTeam}
+      />
+
+      <TeamBuilderDialog
+        open={builderOpen}
+        onOpenChange={setBuilderOpen}
+        gatewayId={defaultGatewayId ?? ''}
+        onCreated={loadTeams}
       />
 
       <ConfirmDialog
