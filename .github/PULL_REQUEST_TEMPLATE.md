@@ -63,6 +63,7 @@ NONE
 
 ## Checklist
 
+- [ ] All commits are signed off (`git commit -s`)
 - [ ] The PR title uses at least one approved prefix: `[Feat]`, `[Fix]`, `[UI]`, `[Docs]`, `[Refactor]`, `[Build]`, or `[Chore]`
 - [ ] The summary explains both what changed and why
 - [ ] Validation reflects the commands actually run for this PR

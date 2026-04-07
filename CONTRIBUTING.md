@@ -4,6 +4,23 @@ Thanks for contributing.
 
 This project is still early. Keep changes focused, explain the problem clearly, and prefer small pull requests over broad refactors.
 
+## Sign-off
+
+All commits must carry a `Signed-off-by` trailer.
+
+Add `-s` (or `--signoff`) when you commit:
+
+```bash
+git commit -s -m "fix: correct truncation logic"
+```
+
+If you already pushed without sign-off:
+
+```bash
+git rebase origin/main --signoff
+git push --force-with-lease
+```
+
 ## Before you start
 
 1. Open or find an issue for the problem when the change is non-trivial.
