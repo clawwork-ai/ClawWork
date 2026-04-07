@@ -218,10 +218,8 @@ export function createSessionSync(deps: SessionSyncDeps) {
     const chainKey = sessionKeyOverride ?? deps.getTaskStore().tasks.find((t) => t.id === taskId)?.sessionKey ?? taskId;
     const prev = syncChains.get(chainKey) ?? Promise.resolve();
     const job = prev.then(() => syncWithRetry(taskId, sessionKeyOverride));
-    syncChains.set(
-      chainKey,
-      job.catch(() => {}),
-    );
+    const settled = job.catch(() => {}).finally(() => syncChains.delete(chainKey));
+    syncChains.set(chainKey, settled);
     return job;
   }
 
