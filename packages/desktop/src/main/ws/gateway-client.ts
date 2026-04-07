@@ -506,7 +506,17 @@ export class GatewayClient {
           params: summarizePayload(params),
         },
       });
-      this.ws.send(JSON.stringify(frame));
+      try {
+        this.ws.send(JSON.stringify(frame));
+      } catch (err) {
+        this.pendingRequests.delete(id);
+        clearTimeout(timer);
+        const sendErr = new Error(
+          `failed to send request: ${err instanceof Error ? err.message : 'unknown'}`
+        ) as Error & { code?: string };
+        sendErr.code = 'SEND_FAILED';
+        reject(sendErr);
+      }
     });
   }
 
