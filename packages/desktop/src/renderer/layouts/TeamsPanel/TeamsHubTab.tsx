@@ -149,7 +149,7 @@ export default function TeamsHubTab({ onSelectEntry }: TeamsHubTabProps) {
           title={t('teamshub.emptyTitle')}
           description={t('teamshub.emptyDesc')}
           action={
-            <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Button size="sm" variant="outline" onClick={() => setDialogOpen(true)}>
               <Settings size={14} />
               {t('teamshub.manageRegistries')}
             </Button>

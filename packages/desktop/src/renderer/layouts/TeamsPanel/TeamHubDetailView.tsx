@@ -250,7 +250,7 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
                         ))}
                       </select>
                     )}
-                    <Button size="sm" onClick={handleInstall} disabled={!gatewayId || !parsedData}>
+                    <Button size="sm" variant="soft" onClick={handleInstall} disabled={!gatewayId || !parsedData}>
                       <Download size={14} />
                       {t('teamshub.install')}
                     </Button>

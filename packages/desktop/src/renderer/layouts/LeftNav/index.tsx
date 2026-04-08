@@ -424,12 +424,14 @@ export default function LeftNav() {
           {CollapseToggleButton}
         </div>
         <div className="titlebar-no-drag flex items-center gap-1">
-          <IconButton
-            icon={Plus}
-            tooltip={t('common.newTask')}
-            onClick={() => startNewTask()}
-            className="bg-[var(--accent-dim)] text-[var(--accent)] hover:opacity-80"
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon-sm" onClick={() => startNewTask()} className="h-7 w-7">
+                <Plus />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t('common.newTask')}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
       <div className="px-3 pb-2 flex-shrink-0">

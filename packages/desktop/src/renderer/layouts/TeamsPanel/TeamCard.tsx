@@ -69,6 +69,7 @@ export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete
         </div>
         <Button
           size="sm"
+          variant="soft"
           onClick={(e) => {
             e.stopPropagation();
             onStartChat();

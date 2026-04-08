@@ -235,7 +235,7 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
               <Pencil size={14} />
               {t('teams.editTeam')}
             </Button>
-            <Button size="sm" onClick={onStartChat}>
+            <Button size="sm" variant="soft" onClick={onStartChat}>
               <MessageSquare size={14} />
               {t('teams.startChat')}
             </Button>
