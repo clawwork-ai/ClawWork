@@ -15,16 +15,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
+import { useGatewaySelector } from '@/hooks/useGatewaySelector';
 import logo from '@/assets/logo.png';
 
 type WelcomeTab = 'agent' | 'team' | 'orchestrate';
 
 export default function WelcomeScreen() {
   const { t } = useTranslation();
-  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
-  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
-  const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
   const setMainView = useUiStore((s) => s.setMainView);
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
@@ -42,18 +39,22 @@ export default function WelcomeScreen() {
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
-  const gateways = useMemo(() => Object.values(gatewayInfoMap), [gatewayInfoMap]);
-  const hasMultipleGw = gateways.length > 1;
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
   const hasTeams = teams.length > 0;
-
-  const [selectedGwId, setSelectedGwId] = useState(
-    pendingNewTask?.gatewayId ?? defaultGatewayId ?? gateways[0]?.id ?? '',
-  );
-
-  const gwAgents = agentCatalogByGateway[selectedGwId];
-  const agentCatalog = useMemo(() => gwAgents?.agents ?? [], [gwAgents]);
-  const hasMultipleAgents = agentCatalog.length > 1;
+  const {
+    gateways,
+    selectedGwId,
+    setSelectedGwId,
+    agentCatalog,
+    defaultAgentId,
+    effectiveAgentId,
+    setSelectedAgentId,
+    hasMultipleGw,
+    hasMultipleAgents,
+  } = useGatewaySelector({
+    initialGatewayId: pendingNewTask?.gatewayId,
+    initialAgentId: pendingNewTask?.agentId,
+  });
 
   const [activeTab, setActiveTab] = useState<WelcomeTab>(() => {
     const ensemble = activeTaskEnsemble ?? pendingNewTask?.ensemble;
@@ -62,32 +63,14 @@ export default function WelcomeScreen() {
     return hasTeams ? 'team' : 'agent';
   });
 
-  const initialAgentId =
-    pendingNewTask?.agentId ||
-    agentCatalogByGateway[pendingNewTask?.gatewayId ?? defaultGatewayId ?? '']?.defaultId ||
-    '';
-  const [selectedAgentId, setSelectedAgentId] = useState(initialAgentId);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
     pendingNewTask?.teamId ?? activeTaskTeamId ?? null,
   );
   const [agentExpanded, setAgentExpanded] = useState(false);
 
-  const effectiveAgentId = selectedAgentId || gwAgents?.defaultId || '';
-
   useEffect(() => {
     loadTeams();
   }, [loadTeams]);
-
-  useEffect(() => {
-    if (!selectedGwId) {
-      const fallback = defaultGatewayId ?? gateways[0]?.id ?? '';
-      if (fallback) setSelectedGwId(fallback);
-    }
-  }, [defaultGatewayId, gateways, selectedGwId]);
-
-  useEffect(() => {
-    if (selectedGwId) fetchAgentsForGateway(selectedGwId);
-  }, [selectedGwId]);
 
   useEffect(() => {
     if (activeTab === 'agent') {
@@ -140,7 +123,7 @@ export default function WelcomeScreen() {
           updateTaskMetadata(activeTaskId, { ensemble: true, teamId: null });
         }
       } else {
-        const defaultAgent = gwAgents?.defaultId || agentCatalog[0]?.id || '';
+        const defaultAgent = defaultAgentId || agentCatalog[0]?.id || '';
         const prev = useTaskStore.getState().pendingNewTask;
         if (
           prev?.gatewayId === selectedGwId &&
@@ -160,7 +143,7 @@ export default function WelcomeScreen() {
     effectiveAgentId,
     selectedTeamId,
     teamsMap,
-    gwAgents,
+    defaultAgentId,
     agentCatalog,
     activeTaskId,
     activeTaskEnsemble,
@@ -168,11 +151,14 @@ export default function WelcomeScreen() {
     updateTaskMetadata,
   ]);
 
-  const handleSelectGateway = useCallback((gwId: string) => {
-    setSelectedGwId(gwId);
-    setSelectedAgentId('');
-    setAgentExpanded(false);
-  }, []);
+  const handleSelectGateway = useCallback(
+    (gwId: string) => {
+      setSelectedGwId(gwId);
+      setSelectedAgentId('');
+      setAgentExpanded(false);
+    },
+    [setSelectedAgentId, setSelectedGwId],
+  );
 
   const handleSelectTeam = useCallback((teamId: string) => {
     setSelectedTeamId(teamId);
