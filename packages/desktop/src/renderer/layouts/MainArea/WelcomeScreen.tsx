@@ -93,7 +93,7 @@ export default function WelcomeScreen() {
     if (activeTab === 'agent') {
       if (activeTaskId) {
         if (activeTaskEnsemble || activeTaskTeamId) {
-          updateTaskMetadata(activeTaskId, { ensemble: undefined, teamId: null });
+          updateTaskMetadata(activeTaskId, { ensemble: false, teamId: null });
         }
       } else {
         const prev = useTaskStore.getState().pendingNewTask;
@@ -112,7 +112,7 @@ export default function WelcomeScreen() {
       if (activeTaskId) {
         if (!!activeTaskEnsemble !== needsEnsemble || activeTaskTeamId !== selectedTeamId) {
           updateTaskMetadata(activeTaskId, {
-            ensemble: needsEnsemble || undefined,
+            ensemble: needsEnsemble,
             teamId: selectedTeamId,
           });
         }
@@ -129,7 +129,7 @@ export default function WelcomeScreen() {
           pendingNewTask: {
             gatewayId: team.gatewayId,
             agentId,
-            ensemble: needsEnsemble || undefined,
+            ensemble: needsEnsemble,
             teamId: selectedTeamId,
           },
         });

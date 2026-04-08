@@ -497,7 +497,7 @@ function ChatContent() {
               messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
             )}
           >
-            <WelcomeScreen />
+            <WelcomeScreen key={activeTaskId ?? '__new'} />
           </div>
         </div>
         <ChatInput />
