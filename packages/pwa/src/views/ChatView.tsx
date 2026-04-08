@@ -127,7 +127,7 @@ export function ChatView() {
     <div className="flex h-full flex-col" role="main" aria-label={t('chat.mainArea')}>
       <div
         ref={useVirtualization ? undefined : scrollRef}
-        className={`flex-1 px-4 py-4 ${useVirtualization ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        className={`flex-1 px-4 py-4 ${useVirtualization ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}
       >
         {useVirtualization ? (
           <Virtuoso

@@ -15,9 +15,6 @@ const ScrollArea = React.forwardRef<React.ComponentRef<typeof ScrollAreaPrimitiv
       <ScrollAreaPrimitive.ScrollAreaScrollbar orientation="vertical" className="!w-0 !p-0 !m-0">
         <ScrollAreaPrimitive.ScrollAreaThumb />
       </ScrollAreaPrimitive.ScrollAreaScrollbar>
-      <ScrollAreaPrimitive.ScrollAreaScrollbar orientation="horizontal" className="!h-0 !p-0 !m-0">
-        <ScrollAreaPrimitive.ScrollAreaThumb />
-      </ScrollAreaPrimitive.ScrollAreaScrollbar>
     </ScrollAreaPrimitive.Root>
   ),
 );

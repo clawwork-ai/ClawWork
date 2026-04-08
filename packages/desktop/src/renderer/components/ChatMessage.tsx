@@ -264,7 +264,7 @@ const ChatMessage = memo(function ChatMessage({
         {isUser && parsedFiles && (parsedFiles.files.length > 0 || parsedFiles.text) ? (
           <div
             className={cn(
-              'inline-block leading-relaxed rounded-2xl px-4 py-3',
+              'inline-block max-w-full leading-relaxed rounded-2xl px-4 py-3',
               'bg-[var(--bg-tertiary)] text-[var(--text-primary)]',
             )}
           >
@@ -280,7 +280,7 @@ const ChatMessage = memo(function ChatMessage({
             {parsedFiles.text && <p className="whitespace-pre-wrap">{parsedFiles.text}</p>}
           </div>
         ) : message.content || !images?.length ? (
-          <div className="inline-block leading-relaxed rounded-2xl px-4 py-3 text-[var(--text-primary)]">
+          <div className="inline-block max-w-full leading-relaxed rounded-2xl px-4 py-3 text-[var(--text-primary)]">
             <MarkdownContent
               content={message.content}
               onImageClick={onImageClick}
