@@ -314,7 +314,7 @@ export function createBrowserGatewayTransport(
 
     async listModels(gatewayId) {
       const client = getClient(gatewayId);
-      if (!client?.isConnected) return { ok: false, error: 'gateway not connected' };
+      if (!client?.isConnected) return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
       try {
         const result = await client.listModels();
         return { ok: true, result };
@@ -325,7 +325,7 @@ export function createBrowserGatewayTransport(
 
     async listAgents(gatewayId) {
       const client = getClient(gatewayId);
-      if (!client?.isConnected) return { ok: false, error: 'gateway not connected' };
+      if (!client?.isConnected) return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
       try {
         const result = await client.listAgents();
         return { ok: true, result };
@@ -336,7 +336,7 @@ export function createBrowserGatewayTransport(
 
     async getToolsCatalog(gatewayId, agentId) {
       const client = getClient(gatewayId);
-      if (!client?.isConnected) return { ok: false, error: 'gateway not connected' };
+      if (!client?.isConnected) return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
       try {
         const result = await client.getToolsCatalog(agentId);
         return { ok: true, result };
@@ -347,7 +347,7 @@ export function createBrowserGatewayTransport(
 
     async getSkillsStatus(gatewayId, agentId) {
       const client = getClient(gatewayId);
-      if (!client?.isConnected) return { ok: false, error: 'gateway not connected' };
+      if (!client?.isConnected) return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
       try {
         const result = await client.getSkillsStatus(agentId);
         return { ok: true, result };
