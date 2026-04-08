@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "アーカイブ",
     "compactSession": "セッションを圧縮",
+    "copySessionKey": "セッションキーをコピー",
     "deleteTask": "タスクを削除",
     "exportToFiles": "ファイルにエクスポート",
     "markCompleted": "完了にする",

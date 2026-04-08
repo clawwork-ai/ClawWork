@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "보관",
     "compactSession": "세션 압축",
+    "copySessionKey": "세션 키 복사",
     "deleteTask": "작업 삭제",
     "exportToFiles": "파일로 내보내기",
     "markCompleted": "완료로 표시",

@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "Archivieren",
     "compactSession": "Sitzung komprimieren",
+    "copySessionKey": "Sitzungsschlüssel kopieren",
     "deleteTask": "Aufgabe loeschen",
     "exportToFiles": "In Dateien exportieren",
     "markCompleted": "Als abgeschlossen markieren",

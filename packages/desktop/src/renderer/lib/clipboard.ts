@@ -1,7 +1,11 @@
 export async function copyTextToClipboard(text: string): Promise<void> {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const textarea = document.createElement('textarea');

@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "归档",
     "compactSession": "压缩会话",
+    "copySessionKey": "复制 Session Key",
     "deleteTask": "删除任务",
     "exportToFiles": "导出到文件管理",
     "markCompleted": "标记完成",

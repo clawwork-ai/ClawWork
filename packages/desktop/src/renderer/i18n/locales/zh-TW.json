@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "封存",
     "compactSession": "壓縮工作階段",
+    "copySessionKey": "複製 Session Key",
     "deleteTask": "刪除任務",
     "exportToFiles": "匯出為檔案",
     "markCompleted": "標記為完成",

@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "Arquivar",
     "compactSession": "Compactar Sessão",
+    "copySessionKey": "Copiar chave da sessão",
     "deleteTask": "Excluir Tarefa",
     "exportToFiles": "Exportar para Arquivos",
     "markCompleted": "Marcar como Concluída",

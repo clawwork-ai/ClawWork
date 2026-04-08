@@ -108,6 +108,7 @@
   "contextMenu": {
     "archive": "Archive",
     "compactSession": "Compact Session",
+    "copySessionKey": "Copy Session Key",
     "deleteTask": "Delete Task",
     "exportToFiles": "Export to Files",
     "markCompleted": "Mark Completed",

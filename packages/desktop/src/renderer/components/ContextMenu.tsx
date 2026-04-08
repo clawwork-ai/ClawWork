@@ -4,6 +4,9 @@ import type { TaskStatus } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import i18n from '../i18n';
 import ListItem from '@/components/semantic/ListItem';
+import { copyTextToClipboard } from '@/lib/clipboard';
+import { useTaskStore } from '@/stores/taskStore';
+import { useUiStore } from '@/stores/uiStore';
 
 export interface MenuItem {
   label: string;
@@ -95,6 +98,16 @@ export function useTaskContextMenu(
       action: () => sessionActions.deleteTask(state.taskId),
       danger: true,
     });
+  }
+
+  if (useUiStore.getState().devMode && state.isOpen) {
+    const task = useTaskStore.getState().tasks.find((t) => t.id === state.taskId);
+    if (task?.sessionKey) {
+      items.push({
+        label: i18n.t('contextMenu.copySessionKey'),
+        action: () => void copyTextToClipboard(task.sessionKey).catch(console.error),
+      });
+    }
   }
 
   if (state.taskStatus === 'active' || state.taskStatus === 'completed') {

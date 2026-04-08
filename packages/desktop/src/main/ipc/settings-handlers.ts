@@ -8,7 +8,9 @@ import type { GatewayAuth } from '@clawwork/shared';
 
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get', (): AppConfig | null => {
-    return readConfig();
+    const config = readConfig();
+    if (config && process.env.NODE_ENV === 'development') config.devMode = true;
+    return config;
   });
 
   ipcMain.handle('settings:update', (_event, partial: Partial<AppConfig>): { ok: boolean; config: AppConfig } => {
