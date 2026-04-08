@@ -71,15 +71,25 @@ function encryptField(value: string | undefined): string | undefined {
   if (!value) return value;
   if (value.startsWith(ENCRYPTED_PREFIX)) return value;
   if (!safeStorage.isEncryptionAvailable()) return value;
-  return ENCRYPTED_PREFIX + safeStorage.encryptString(value).toString('base64');
+  try {
+    return ENCRYPTED_PREFIX + safeStorage.encryptString(value).toString('base64');
+  } catch (e) {
+    console.error('safeStorage: encrypt failed, storing plaintext', e);
+    return value;
+  }
 }
 
 function decryptField(value: string | undefined): string | undefined {
   if (!value) return value;
   if (!value.startsWith(ENCRYPTED_PREFIX)) return value;
   if (!safeStorage.isEncryptionAvailable()) return value;
-  const buf = Buffer.from(value.slice(ENCRYPTED_PREFIX.length), 'base64');
-  return safeStorage.decryptString(buf);
+  try {
+    const buf = Buffer.from(value.slice(ENCRYPTED_PREFIX.length), 'base64');
+    return safeStorage.decryptString(buf);
+  } catch (e) {
+    console.error('safeStorage: decrypt failed, credential lost', e);
+    return undefined;
+  }
 }
 
 function encryptGatewayCredentials(config: AppConfig): AppConfig {
@@ -95,14 +105,15 @@ function encryptGatewayCredentials(config: AppConfig): AppConfig {
 }
 
 function decryptGatewayCredentials(config: AppConfig): AppConfig {
-  for (const gw of config.gateways) {
+  const clone = structuredClone(config);
+  for (const gw of clone.gateways) {
     gw.token = decryptField(gw.token);
     gw.password = decryptField(gw.password);
     gw.pairingCode = decryptField(gw.pairingCode);
   }
-  config.bootstrapToken = decryptField(config.bootstrapToken);
-  config.password = decryptField(config.password);
-  return config;
+  clone.bootstrapToken = decryptField(clone.bootstrapToken);
+  clone.password = decryptField(clone.password);
+  return clone;
 }
 
 function migrateConfigIfNeeded(config: AppConfig): AppConfig {
