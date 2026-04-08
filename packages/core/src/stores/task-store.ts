@@ -107,9 +107,9 @@ export interface TaskStoreDeps {
   onTaskCreated?: () => void;
 }
 
-let cachedDeviceId: string | null = null;
-
 export function createTaskStore(deps: TaskStoreDeps) {
+  let cachedDeviceId: string | null = null;
+
   return createStore<TaskState>((set, get) => ({
     tasks: [],
     activeTaskId: null,
