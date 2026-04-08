@@ -40,7 +40,7 @@
     "thinkingOff": "Desactivado"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "Coordinador",
     "copied": "Copiado",
     "copyCode": "Copiar código",
     "copyMessage": "Copiar mensaje",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "El agente no responde — puede estar no disponible o mal configurado en el servidor. Prueba con otro agente.",
     "boundaryTitle": "Algo salió mal",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "Error al inicializar el coordinador del equipo",
     "failed": "falló",
     "reload": "Recargar",
     "requestFailed": "Error en la solicitud",
@@ -319,7 +319,7 @@
     "allAgents": "Todos los agentes",
     "files": "Archivos",
     "local": "Local",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "Aún no se han descubierto agentes",
     "noFiles": "No se encontraron archivos",
     "noLocalFiles": "No se encontraron archivos locales",
     "noTasks": "No se encontraron tareas",

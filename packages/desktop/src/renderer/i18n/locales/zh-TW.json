@@ -40,7 +40,7 @@
     "thinkingOff": "關閉"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "協調者",
     "copied": "已複製",
     "copyCode": "複製程式碼",
     "copyMessage": "複製訊息",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "代理無回應 — 可能無法使用或伺服器端設定有誤。請嘗試其他代理。",
     "boundaryTitle": "發生錯誤",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "團隊協調者初始化失敗",
     "failed": "失敗",
     "reload": "重新載入",
     "requestFailed": "請求失敗",
@@ -319,7 +319,7 @@
     "allAgents": "所有代理",
     "files": "檔案",
     "local": "本機",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "尚未發現可用 Agent",
     "noFiles": "找不到符合的檔案",
     "noLocalFiles": "找不到符合的本機檔案",
     "noTasks": "找不到符合的任務",

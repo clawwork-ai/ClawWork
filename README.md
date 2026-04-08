@@ -15,7 +15,7 @@ Parallel tasks, structured artifacts, scheduled automation — and files you can
 [![License](https://img.shields.io/github/license/clawwork-ai/clawwork?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork)
 
-[Download](#download) · [**PWA**](https://cpwa.pages.dev) · [Quick start](#quick-start) · [What you get](#what-you-get) · [What it stores](#what-clawwork-stores) · [How it works](#how-it-works) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
+[Download](#download) · [**PWA**](https://cpwa.pages.dev) · [Quick start](#quick-start) · [Teams](#teams) · [What you get](#what-you-get) · [What it stores](#what-clawwork-stores) · [How it works](#how-it-works) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
 
 </div>
 
@@ -26,6 +26,40 @@ OpenClaw is powerful. Plain chat is a bad container for the kind of work it can 
 Once you have multiple sessions, long-running jobs, approval stops, generated files, recurring automation, and different gateways, chat history turns into mud. Status vanishes. Files vanish. Context vanishes.
 
 ClawWork fixes that. Every task becomes a durable workspace with its own session, artifacts, controls, and history — laid out in a three-panel UI: tasks on the left, active work in the center, artifacts and context on the right.
+
+## Teams
+
+One agent is useful. A coordinated team of agents is a workforce.
+
+ClawWork Teams package multiple agents into a single deployable unit — roles, personalities, skills, and workflow included. A **coordinator** agent breaks down the task and delegates to **worker** agents, each running in its own sub-session. You see the full orchestration in real time.
+
+```
+skill → agent → team
+```
+
+### Team structure
+
+```
+teams/clawwork-dev/
+├── TEAM.md                  # team metadata and workflow
+└── agents/
+    ├── manager/             # coordinator — orchestrates the team
+    │   ├── IDENTITY.md      # role and prompt
+    │   ├── SOUL.md          # personality and style
+    │   └── skills.json      # skill dependencies
+    ├── architect/            # worker — designs solutions
+    ├── frontend-dev/         # worker — builds UI
+    ├── core-dev/             # worker — builds core logic
+    └── ...
+```
+
+### Three ways to get a team
+
+- **[TeamsHub](https://github.com/clawwork-ai/teamshub-community)** — browse and install community-contributed teams from a Git-native registry.
+- **Create manually** — define agents, identities, and skills in a step-by-step wizard.
+- **AI Builder** — describe what you need and let an LLM design the team structure, roles, and prompts for you.
+
+Once installed, pick a team when creating a task. The coordinator takes over from there.
 
 ## Why it feels better
 
@@ -105,7 +139,7 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 - Keyboard shortcuts throughout the app
 - The app updates itself in the background — you see progress in Settings and it installs on quit
 - Zoom in or out to your comfort level, and the app remembers your preference
-- Light and dark themes, plus English and Chinese UI
+- Light and dark themes with 8 languages
 
 ### 🔧 Debugging
 
@@ -176,6 +210,10 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 - Gateway server version display
 - PWA with offline support and mobile UI ([cpwa.pages.dev](https://cpwa.pages.dev))
 - Linux packages (AppImage + deb)
+- Teams: create, manage, and orchestrate multi-agent ensembles
+- TeamsHub: Git-native marketplace for discovering and installing team definitions
+- Skills: ClawHub-powered skill discovery and install
+- AI Builder: LLM-assisted team creation
 
 🔮 Next up:
 

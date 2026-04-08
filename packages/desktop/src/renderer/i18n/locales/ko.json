@@ -40,7 +40,7 @@
     "thinkingOff": "끄기"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "코디네이터",
     "copied": "복사됨",
     "copyCode": "코드 복사",
     "copyMessage": "메시지 복사",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "에이전트가 응답하지 않습니다 — 서버에서 사용할 수 없거나 잘못 구성되었을 수 있습니다. 다른 에이전트를 시도해 보세요.",
     "boundaryTitle": "오류가 발생했습니다",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "팀 코디네이터 초기화에 실패했습니다",
     "failed": "실패",
     "reload": "새로고침",
     "requestFailed": "요청 실패",
@@ -319,7 +319,7 @@
     "allAgents": "모든 에이전트",
     "files": "파일",
     "local": "로컬",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "아직 발견된 에이전트가 없습니다",
     "noFiles": "일치하는 파일이 없습니다",
     "noLocalFiles": "일치하는 로컬 파일이 없습니다",
     "noTasks": "일치하는 작업이 없습니다",

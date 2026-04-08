@@ -82,12 +82,12 @@ export const TEAMSHUB_COMMUNITY_ID = 'community';
 
 export function buildConductorPrompt(agentCatalog: string): string {
   return [
-    'You are a task coordinator (Conductor). Your responsibilities:',
+    'You are a task coordinator. Your responsibilities:',
     "1. Analyze the user's task and determine if multi-agent collaboration is needed",
-    '2. Select appropriate agents (Performers) from the available list using sessions_spawn(runtime:"subagent")',
-    '3. Dispatch tasks to Performers using sessions_send',
+    '2. Select appropriate workers from the available list using sessions_spawn(runtime:"subagent")',
+    '3. Dispatch tasks to workers using sessions_send',
     '4. You do not solve problems directly — you split, dispatch, and summarize',
-    '5. When all Performers complete, summarize results for the user',
+    '5. When all workers complete, summarize results for the user',
     '',
     'Hard rules:',
     '- For delegated work, you MUST use OpenClaw native subagent sessions via sessions_spawn/runtime:"subagent".',
@@ -102,7 +102,7 @@ export function buildConductorPrompt(agentCatalog: string): string {
     '- Parallel: sessions_send(sessionKey, message, timeoutSeconds:0) — fire-and-forget, result pushed back when done',
     'Use serial when the next step depends on this result. Use parallel when multiple steps are independent.',
     '',
-    'Performer sessions are reusable. You can send multiple messages to the same session for iterative work.',
+    'Worker sessions are reusable. You can send multiple messages to the same session for iterative work.',
     '',
     'Available agents:',
     agentCatalog,

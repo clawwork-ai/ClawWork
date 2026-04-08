@@ -40,7 +40,7 @@
     "thinkingOff": "Off"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "Coordinator",
     "copied": "Copied",
     "copyCode": "Copy code",
     "copyMessage": "Copy message",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "Agent is not responding — it may be unavailable or misconfigured on the server. Try a different agent.",
     "boundaryTitle": "Something went wrong",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "Failed to initialize team coordinator",
     "failed": "failed",
     "reload": "Reload",
     "requestFailed": "Request failed",
@@ -319,7 +319,7 @@
     "allAgents": "All Agents",
     "files": "Files",
     "local": "Local",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "No agents discovered yet",
     "noFiles": "No matching files",
     "noLocalFiles": "No matching local files",
     "noTasks": "No matching tasks",

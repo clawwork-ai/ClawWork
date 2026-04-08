@@ -101,12 +101,17 @@ packages/
         task-store.ts      task CRUD, session adoption, selection
         ui-store.ts        panels, modals, preferences
         room-store.ts      ensemble task rooms, conductor/performer orchestration
+        team-store.ts      team CRUD, TeamsHub install state
+        system-session-store.ts  system-level session tracking
       services/            business logic
         gateway-dispatcher.ts  sole event router for all Gateway messages
         session-sync.ts    reconcile local state with Gateway sessions
         chat-composer.ts   message construction and send orchestration
         auto-title.ts      task auto-titling from first message
         error-classify.ts  error categorization for user display
+        team-parser.ts     parse team definition files
+        team-installer.ts  install teams from TeamsHub or local definitions
+        system-session-service.ts  system session lifecycle
       protocol/            Gateway protocol utilities
         normalize-history.ts  history response → local message format
         parse-content.ts   content block parsing
@@ -175,6 +180,8 @@ Task is the product primitive, not chat thread cosmetics.
 - `taskStore`: task lifecycle, selection, session adoption
 - `messageStore`: append, stream, finalize, map events to task
 - `roomStore`: ensemble task rooms, conductor/performer orchestration
+- `teamStore`: team definitions, TeamsHub discovery and install state
+- `systemSessionStore`: system-level session tracking
 - session sync reconstructs local tasks from Gateway sessions and histories
 - every bug here is usually a routing bug, session-key bug, or optimistic UI bug
 

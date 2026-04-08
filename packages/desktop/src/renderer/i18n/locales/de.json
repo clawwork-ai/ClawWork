@@ -40,7 +40,7 @@
     "thinkingOff": "Aus"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "Koordinator",
     "copied": "Kopiert",
     "copyCode": "Code kopieren",
     "copyMessage": "Nachricht kopieren",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "Agent antwortet nicht — moeglicherweise ist er nicht verfuegbar oder auf dem Server falsch konfiguriert. Versuchen Sie einen anderen Agent.",
     "boundaryTitle": "Etwas ist schiefgelaufen",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "Team-Koordinator konnte nicht initialisiert werden",
     "failed": "Fehlgeschlagen",
     "reload": "Neu laden",
     "requestFailed": "Anfrage fehlgeschlagen",
@@ -319,7 +319,7 @@
     "allAgents": "Alle Agents",
     "files": "Dateien",
     "local": "Lokal",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "Noch keine Agents entdeckt",
     "noFiles": "Keine passenden Dateien",
     "noLocalFiles": "Keine passenden lokalen Dateien",
     "noTasks": "Keine passenden Aufgaben",

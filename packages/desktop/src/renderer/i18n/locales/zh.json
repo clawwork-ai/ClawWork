@@ -40,7 +40,7 @@
     "thinkingOff": "关闭"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "协调者",
     "copied": "已复制",
     "copyCode": "复制代码",
     "copyMessage": "复制消息",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "Agent 未响应 — 可能不可用或服务端配置有误，请尝试其他 Agent",
     "boundaryTitle": "应用出现异常",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "团队协调者初始化失败",
     "failed": "失败",
     "reload": "重新加载",
     "requestFailed": "请求出错",
@@ -319,7 +319,7 @@
     "allAgents": "所有智能体",
     "files": "文件",
     "local": "本地",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "暂未发现可用 Agent",
     "noFiles": "没有匹配的文件",
     "noLocalFiles": "没有匹配的本地文件",
     "noTasks": "没有匹配的任务",

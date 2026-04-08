@@ -40,7 +40,7 @@
     "thinkingOff": "オフ"
   },
   "chatMessage": {
-    "conductor": "Conductor",
+    "conductor": "コーディネーター",
     "copied": "コピーしました",
     "copyCode": "コードをコピー",
     "copyMessage": "メッセージをコピー",
@@ -257,7 +257,7 @@
   "errors": {
     "agentNotResponding": "エージェントが応答していません — サーバー上で利用できないか、設定に誤りがある可能性があります。別のエージェントをお試しください。",
     "boundaryTitle": "問題が発生しました",
-    "conductorInitFailed": "Failed to initialize ensemble conductor",
+    "conductorInitFailed": "チームコーディネーターの初期化に失敗しました",
     "failed": "失敗",
     "reload": "再読み込み",
     "requestFailed": "リクエストに失敗しました",
@@ -319,7 +319,7 @@
     "allAgents": "全エージェント",
     "files": "ファイル",
     "local": "ローカル",
-    "noAgents": "No performers discovered yet",
+    "noAgents": "エージェントがまだ見つかりません",
     "noFiles": "一致するファイルがありません",
     "noLocalFiles": "一致するローカルファイルがありません",
     "noTasks": "一致するタスクがありません",
