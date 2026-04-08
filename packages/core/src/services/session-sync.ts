@@ -210,7 +210,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
           runId: mergedCanonical.runId,
           toolCalls: mergedCanonical.toolCalls,
         })
-        .catch(() => {});
+        .catch((err) => console.error('[session-sync] persistMessage failed:', err));
     }
   }
 
@@ -284,7 +284,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
           imageAttachments: msg.imageAttachments as unknown[] | undefined,
           toolCalls: msg.toolCalls,
         })
-        .catch(() => {});
+        .catch((err) => console.error('[session-sync] loadAndPersist persistMessage failed:', err));
     }
   }
 

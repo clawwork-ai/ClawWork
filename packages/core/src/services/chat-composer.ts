@@ -194,7 +194,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
               room.conductorSessionKey,
               `[User directed message to ${targetNames}: "${preview}"]`,
             )
-            .catch(() => {});
+            .catch((err) => console.error('[chat-composer] conductor sendMessage failed:', err));
         }
       } else {
         const result = await deps.gateway.sendMessage(
@@ -253,7 +253,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
           imageAttachments: pendingUserMessage.imageAttachments as unknown[] | undefined,
           toolCalls: pendingUserMessage.toolCalls,
         })
-        .catch(() => {});
+        .catch((err) => console.error('[chat-composer] persistMessage failed:', err));
 
       return { ok: true, taskId: task.id };
     } catch (err) {

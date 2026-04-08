@@ -162,7 +162,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         if (settings?.notifications?.[settingKey] === false) return;
         deps.sendNotification(params);
       })
-      .catch(() => {});
+      .catch((err) => console.error('[gateway-dispatcher] getSettings failed:', err));
   }
 
   function isSameFailure(a: ErrorCorrelation, existing: ErrorCorrelation): boolean {
