@@ -76,27 +76,31 @@ export function registerDataHandlers(): void {
         id: string;
         title?: string;
         status?: string;
+        ensemble?: boolean;
         model?: string;
         modelProvider?: string;
         thinkingLevel?: string;
         inputTokens?: number;
         outputTokens?: number;
         contextTokens?: number;
+        teamId?: string | null;
         updatedAt: string;
       },
     ) => {
       if (!isDbReady()) return ipcError(new Error('database not ready'));
       try {
         const db = getDb();
-        const updates: Record<string, string | number | null | undefined> = { updatedAt: params.updatedAt };
+        const updates: Record<string, string | number | boolean | null | undefined> = { updatedAt: params.updatedAt };
         if (params.title !== undefined) updates.title = params.title;
         if (params.status !== undefined) updates.status = params.status;
+        if (params.ensemble !== undefined) updates.ensemble = params.ensemble;
         if (params.model !== undefined) updates.model = params.model;
         if (params.modelProvider !== undefined) updates.modelProvider = params.modelProvider;
         if (params.thinkingLevel !== undefined) updates.thinkingLevel = params.thinkingLevel;
         if (params.inputTokens !== undefined) updates.inputTokens = params.inputTokens;
         if (params.outputTokens !== undefined) updates.outputTokens = params.outputTokens;
         if (params.contextTokens !== undefined) updates.contextTokens = params.contextTokens;
+        if (params.teamId !== undefined) updates.teamId = params.teamId;
         db.update(tasks).set(updates).where(eq(tasks.id, params.id)).run();
         return { ok: true };
       } catch (err) {

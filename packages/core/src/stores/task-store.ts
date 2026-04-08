@@ -27,12 +27,14 @@ export interface TaskState {
   updateTaskMetadata: (
     id: string,
     meta: {
+      ensemble?: boolean;
       model?: string;
       modelProvider?: string;
       thinkingLevel?: string;
       inputTokens?: number;
       outputTokens?: number;
       contextTokens?: number;
+      teamId?: string | null;
       updatedAt?: string;
     },
   ) => void;
@@ -62,12 +64,14 @@ export interface TaskStoreDeps {
     id: string;
     title?: string;
     status?: string;
+    ensemble?: boolean;
     model?: string;
     modelProvider?: string;
     thinkingLevel?: string;
     inputTokens?: number;
     outputTokens?: number;
     contextTokens?: number;
+    teamId?: string | null;
     updatedAt: string;
   }) => Promise<IpcResult>;
   deleteTask: (taskId: string) => Promise<IpcResult>;
@@ -199,17 +203,23 @@ export function createTaskStore(deps: TaskStoreDeps) {
     updateTaskMetadata: (id, meta) => {
       const updatedAt = meta.updatedAt ?? new Date().toISOString();
       set((s) => ({
-        tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...meta, updatedAt } : t)),
+        tasks: s.tasks.map((t) =>
+          t.id === id
+            ? { ...t, ...meta, teamId: meta.teamId === null ? undefined : (meta.teamId ?? t.teamId), updatedAt }
+            : t,
+        ),
       }));
       deps
         .persistTaskUpdate({
           id,
+          ensemble: meta.ensemble,
           model: meta.model,
           modelProvider: meta.modelProvider,
           thinkingLevel: meta.thinkingLevel,
           inputTokens: meta.inputTokens,
           outputTokens: meta.outputTokens,
           contextTokens: meta.contextTokens,
+          teamId: meta.teamId,
           updatedAt,
         })
         .catch((err) => {

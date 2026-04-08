@@ -27,6 +27,18 @@ export default function WelcomeScreen() {
   const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
   const setMainView = useUiStore((s) => s.setMainView);
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
+  const activeTaskId = useTaskStore((s) => s.activeTaskId);
+  const activeTaskEnsemble = useTaskStore((s) => {
+    if (!s.activeTaskId) return undefined;
+    const t = s.tasks.find((tt) => tt.id === s.activeTaskId);
+    return t?.ensemble;
+  });
+  const activeTaskTeamId = useTaskStore((s) => {
+    if (!s.activeTaskId) return undefined;
+    const t = s.tasks.find((tt) => tt.id === s.activeTaskId);
+    return t?.teamId;
+  });
+  const updateTaskMetadata = useTaskStore((s) => s.updateTaskMetadata);
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
@@ -43,14 +55,21 @@ export default function WelcomeScreen() {
   const agentCatalog = useMemo(() => gwAgents?.agents ?? [], [gwAgents]);
   const hasMultipleAgents = agentCatalog.length > 1;
 
-  const [activeTab, setActiveTab] = useState<WelcomeTab>(hasTeams ? 'team' : 'agent');
+  const [activeTab, setActiveTab] = useState<WelcomeTab>(() => {
+    const ensemble = activeTaskEnsemble ?? pendingNewTask?.ensemble;
+    const teamId = activeTaskTeamId ?? pendingNewTask?.teamId;
+    if (ensemble) return teamId ? 'team' : 'orchestrate';
+    return hasTeams ? 'team' : 'agent';
+  });
 
   const initialAgentId =
     pendingNewTask?.agentId ||
     agentCatalogByGateway[pendingNewTask?.gatewayId ?? defaultGatewayId ?? '']?.defaultId ||
     '';
   const [selectedAgentId, setSelectedAgentId] = useState(initialAgentId);
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(pendingNewTask?.teamId ?? null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
+    pendingNewTask?.teamId ?? activeTaskTeamId ?? null,
+  );
   const [agentExpanded, setAgentExpanded] = useState(false);
 
   const effectiveAgentId = selectedAgentId || gwAgents?.defaultId || '';
@@ -72,49 +91,82 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     if (activeTab === 'agent') {
-      const prev = useTaskStore.getState().pendingNewTask;
-      if (prev?.gatewayId === selectedGwId && prev?.agentId === effectiveAgentId && !prev?.ensemble && !prev?.teamId)
-        return;
-      useTaskStore.setState({
-        pendingNewTask: { gatewayId: selectedGwId, agentId: effectiveAgentId },
-      });
+      if (activeTaskId) {
+        if (activeTaskEnsemble || activeTaskTeamId) {
+          updateTaskMetadata(activeTaskId, { ensemble: undefined, teamId: null });
+        }
+      } else {
+        const prev = useTaskStore.getState().pendingNewTask;
+        if (prev?.gatewayId === selectedGwId && prev?.agentId === effectiveAgentId && !prev?.ensemble && !prev?.teamId)
+          return;
+        useTaskStore.setState({
+          pendingNewTask: { gatewayId: selectedGwId, agentId: effectiveAgentId },
+        });
+      }
     } else if (activeTab === 'team' && selectedTeamId) {
       const team = teamsMap[selectedTeamId];
       if (!team) return;
       const manager = team.agents.find((a) => a.isManager);
       const agentId = manager?.agentId ?? team.agents[0]?.agentId ?? '';
       const needsEnsemble = team.agents.length >= 2;
-      const prev = useTaskStore.getState().pendingNewTask;
-      if (
-        prev?.gatewayId === team.gatewayId &&
-        prev?.agentId === agentId &&
-        !!prev?.ensemble === needsEnsemble &&
-        prev?.teamId === selectedTeamId
-      )
-        return;
-      useTaskStore.setState({
-        pendingNewTask: {
-          gatewayId: team.gatewayId,
-          agentId,
-          ensemble: needsEnsemble || undefined,
-          teamId: selectedTeamId,
-        },
-      });
+      if (activeTaskId) {
+        if (!!activeTaskEnsemble !== needsEnsemble || activeTaskTeamId !== selectedTeamId) {
+          updateTaskMetadata(activeTaskId, {
+            ensemble: needsEnsemble || undefined,
+            teamId: selectedTeamId,
+          });
+        }
+      } else {
+        const prev = useTaskStore.getState().pendingNewTask;
+        if (
+          prev?.gatewayId === team.gatewayId &&
+          prev?.agentId === agentId &&
+          !!prev?.ensemble === needsEnsemble &&
+          prev?.teamId === selectedTeamId
+        )
+          return;
+        useTaskStore.setState({
+          pendingNewTask: {
+            gatewayId: team.gatewayId,
+            agentId,
+            ensemble: needsEnsemble || undefined,
+            teamId: selectedTeamId,
+          },
+        });
+      }
     } else if (activeTab === 'orchestrate') {
-      const defaultAgent = gwAgents?.defaultId || agentCatalog[0]?.id || '';
-      const prev = useTaskStore.getState().pendingNewTask;
-      if (
-        prev?.gatewayId === selectedGwId &&
-        prev?.agentId === defaultAgent &&
-        prev?.ensemble === true &&
-        !prev?.teamId
-      )
-        return;
-      useTaskStore.setState({
-        pendingNewTask: { gatewayId: selectedGwId, agentId: defaultAgent, ensemble: true },
-      });
+      if (activeTaskId) {
+        if (!activeTaskEnsemble || activeTaskTeamId) {
+          updateTaskMetadata(activeTaskId, { ensemble: true, teamId: null });
+        }
+      } else {
+        const defaultAgent = gwAgents?.defaultId || agentCatalog[0]?.id || '';
+        const prev = useTaskStore.getState().pendingNewTask;
+        if (
+          prev?.gatewayId === selectedGwId &&
+          prev?.agentId === defaultAgent &&
+          prev?.ensemble === true &&
+          !prev?.teamId
+        )
+          return;
+        useTaskStore.setState({
+          pendingNewTask: { gatewayId: selectedGwId, agentId: defaultAgent, ensemble: true },
+        });
+      }
     }
-  }, [activeTab, selectedGwId, effectiveAgentId, selectedTeamId, teamsMap, gwAgents, agentCatalog]);
+  }, [
+    activeTab,
+    selectedGwId,
+    effectiveAgentId,
+    selectedTeamId,
+    teamsMap,
+    gwAgents,
+    agentCatalog,
+    activeTaskId,
+    activeTaskEnsemble,
+    activeTaskTeamId,
+    updateTaskMetadata,
+  ]);
 
   const handleSelectGateway = useCallback((gwId: string) => {
     setSelectedGwId(gwId);

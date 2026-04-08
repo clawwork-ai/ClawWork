@@ -232,12 +232,14 @@ function buildApi(): ClawWorkAPI {
       id: string;
       title?: string;
       status?: string;
+      ensemble?: boolean;
       model?: string;
       modelProvider?: string;
       thinkingLevel?: string;
       inputTokens?: number;
       outputTokens?: number;
       contextTokens?: number;
+      teamId?: string | null;
       updatedAt: string;
     }) => ipcRenderer.invoke('data:update-task', params),
 
