@@ -23,11 +23,16 @@ export default function FilePreviewModal({ file, onClose }: FilePreviewModalProp
     return () => window.removeEventListener('keydown', handler);
   }, [file, onClose]);
 
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
   const handleCopy = useCallback(() => {
     if (!file) return;
     navigator.clipboard.writeText(file.content);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }, [file]);
 
   const fileName = file?.path.split('/').pop() ?? '';
