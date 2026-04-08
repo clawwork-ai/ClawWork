@@ -413,7 +413,10 @@ function ChatContent() {
   const highlightedId = useMessageStore((s) => s.highlightedMessageId);
   const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
+  const isAutoScrolling = useRef(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const closeLightbox = useCallback(() => setLightboxSrc(null), []);
   const [previewFile, setPreviewFile] = useState<{ path: string; content: string } | null>(null);
@@ -477,16 +480,47 @@ function ChatContent() {
   const conductorLabel = t('chatMessage.conductor');
 
   const handleScroll = useCallback(() => {
+    if (isAutoScrolling.current) return;
     const el = viewportRef.current;
     if (!el) return;
-    stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < STICK_TO_BOTTOM_THRESHOLD_PX;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < STICK_TO_BOTTOM_THRESHOLD_PX;
+    stickToBottom.current = atBottom;
+    setShowScrollButton(!atBottom);
   }, []);
 
   useEffect(() => {
-    if (!stickToBottom.current) return;
+    if (showWelcome) return;
+    const viewport = viewportRef.current;
+    const content = contentRef.current;
+    if (!viewport || !content) return;
+
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      if (!stickToBottom.current) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        isAutoScrolling.current = true;
+        viewport.scrollTop = viewport.scrollHeight;
+        requestAnimationFrame(() => {
+          isAutoScrolling.current = false;
+        });
+      });
+    });
+    ro.observe(content);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [showWelcome]);
+
+  const scrollToBottom = useCallback(() => {
     const el = viewportRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, activeTurns.length, isProcessing]);
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+    stickToBottom.current = true;
+    setShowScrollButton(false);
+  }, []);
 
   if (showWelcome) {
     return (
@@ -509,110 +543,122 @@ function ChatContent() {
 
   return (
     <>
-      <ScrollArea viewportRef={viewportRef} className="flex-1 px-5 pt-4 pb-0" onScrollCapture={handleScroll}>
-        <div
-          className={cn(
-            'space-y-3',
-            messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
-          )}
-        >
-          {timelineItems.map((item, index) => {
-            if (item.kind === 'message') {
-              const previous = index > 0 ? timelineItems[index - 1] : null;
-              const previousRole = previous?.kind === 'message' ? previous.message.role : 'assistant';
-              const identity =
-                item.message.role === 'assistant'
-                  ? resolveAssistantIdentity({
-                      task: activeTask,
-                      sessionKey: item.message.sessionKey,
-                      agentId: item.message.agentId,
-                      gatewayId: activeTask?.gatewayId,
-                      performerBySessionKey,
-                      performerByAgentId,
-                      catalogAgentById,
-                      conductorLabel,
-                    })
-                  : undefined;
-              return (
-                <div
-                  key={item.key}
-                  className={cn(index > 0 && item.message.role === 'user' && previousRole !== 'user' && 'pt-3')}
-                >
+      <div className="relative flex-1 min-h-0">
+        <ScrollArea viewportRef={viewportRef} className="h-full px-5 pt-4 pb-0" onScrollCapture={handleScroll}>
+          <div
+            ref={contentRef}
+            className={cn(
+              'space-y-3',
+              messageLayout === 'centered' ? 'max-w-[var(--content-max-width)] mx-auto' : 'w-full max-w-none',
+            )}
+          >
+            {timelineItems.map((item, index) => {
+              if (item.kind === 'message') {
+                const previous = index > 0 ? timelineItems[index - 1] : null;
+                const previousRole = previous?.kind === 'message' ? previous.message.role : 'assistant';
+                const identity =
+                  item.message.role === 'assistant'
+                    ? resolveAssistantIdentity({
+                        task: activeTask,
+                        sessionKey: item.message.sessionKey,
+                        agentId: item.message.agentId,
+                        gatewayId: activeTask?.gatewayId,
+                        performerBySessionKey,
+                        performerByAgentId,
+                        catalogAgentById,
+                        conductorLabel,
+                      })
+                    : undefined;
+                return (
+                  <div
+                    key={item.key}
+                    className={cn(index > 0 && item.message.role === 'user' && previousRole !== 'user' && 'pt-3')}
+                  >
+                    <ChatMessage
+                      message={item.message}
+                      agentName={identity?.agentName}
+                      agentEmoji={identity?.agentEmoji}
+                      localAvatarUrl={identity?.localAvatarUrl}
+                      gatewayAvatarUrl={identity?.gatewayAvatarUrl}
+                      agentRoleLabel={identity?.agentRoleLabel}
+                      highlighted={item.message.id === highlightedId}
+                      onHighlightDone={handleHighlightDone}
+                      onImageClick={setLightboxSrc}
+                      onFileClick={setPreviewFile}
+                    />
+                  </div>
+                );
+              }
+
+              if (item.turn.finalized && item.turn.content) {
+                const identity = resolveAssistantIdentity({
+                  task: activeTask,
+                  sessionKey: item.sessionKey,
+                  agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                  gatewayId: activeTask?.gatewayId,
+                  performerBySessionKey,
+                  performerByAgentId,
+                  catalogAgentById,
+                  conductorLabel,
+                });
+                return (
                   <ChatMessage
-                    message={item.message}
-                    agentName={identity?.agentName}
-                    agentEmoji={identity?.agentEmoji}
-                    localAvatarUrl={identity?.localAvatarUrl}
-                    gatewayAvatarUrl={identity?.gatewayAvatarUrl}
-                    agentRoleLabel={identity?.agentRoleLabel}
-                    highlighted={item.message.id === highlightedId}
+                    key={item.key}
+                    message={activeTurnToMessage(item.turn, activeTaskId!, item.sessionKey)}
+                    agentName={identity.agentName}
+                    agentEmoji={identity.agentEmoji}
+                    localAvatarUrl={identity.localAvatarUrl}
+                    gatewayAvatarUrl={identity.gatewayAvatarUrl}
+                    agentRoleLabel={identity.agentRoleLabel}
+                    highlighted={false}
                     onHighlightDone={handleHighlightDone}
                     onImageClick={setLightboxSrc}
                     onFileClick={setPreviewFile}
                   />
-                </div>
-              );
-            }
+                );
+              }
 
-            if (item.turn.finalized && item.turn.content) {
-              const identity = resolveAssistantIdentity({
-                task: activeTask,
-                sessionKey: item.sessionKey,
-                agentId: parseAgentIdFromSessionKey(item.sessionKey),
-                gatewayId: activeTask?.gatewayId,
-                performerBySessionKey,
-                performerByAgentId,
-                catalogAgentById,
-                conductorLabel,
-              });
-              return (
-                <ChatMessage
-                  key={item.key}
-                  message={activeTurnToMessage(item.turn, activeTaskId!, item.sessionKey)}
-                  agentName={identity.agentName}
-                  agentEmoji={identity.agentEmoji}
-                  localAvatarUrl={identity.localAvatarUrl}
-                  gatewayAvatarUrl={identity.gatewayAvatarUrl}
-                  agentRoleLabel={identity.agentRoleLabel}
-                  highlighted={false}
-                  onHighlightDone={handleHighlightDone}
-                  onImageClick={setLightboxSrc}
-                  onFileClick={setPreviewFile}
-                />
-              );
-            }
+              if (item.turn.streamingText || item.turn.streamingThinking || item.turn.toolCalls.length > 0) {
+                const identity = resolveAssistantIdentity({
+                  task: activeTask,
+                  sessionKey: item.sessionKey,
+                  agentId: parseAgentIdFromSessionKey(item.sessionKey),
+                  gatewayId: activeTask?.gatewayId,
+                  performerBySessionKey,
+                  performerByAgentId,
+                  catalogAgentById,
+                  conductorLabel,
+                });
+                return (
+                  <StreamingMessage
+                    key={item.key}
+                    content={item.turn.streamingText}
+                    thinkingContent={item.turn.streamingThinking || undefined}
+                    toolCalls={item.turn.toolCalls}
+                    agentEmoji={identity.agentEmoji}
+                    localAvatarUrl={identity.localAvatarUrl}
+                    gatewayAvatarUrl={identity.gatewayAvatarUrl}
+                    agentName={identity.agentName}
+                    agentRoleLabel={identity.agentRoleLabel}
+                  />
+                );
+              }
 
-            if (item.turn.streamingText || item.turn.streamingThinking || item.turn.toolCalls.length > 0) {
-              const identity = resolveAssistantIdentity({
-                task: activeTask,
-                sessionKey: item.sessionKey,
-                agentId: parseAgentIdFromSessionKey(item.sessionKey),
-                gatewayId: activeTask?.gatewayId,
-                performerBySessionKey,
-                performerByAgentId,
-                catalogAgentById,
-                conductorLabel,
-              });
-              return (
-                <StreamingMessage
-                  key={item.key}
-                  content={item.turn.streamingText}
-                  thinkingContent={item.turn.streamingThinking || undefined}
-                  toolCalls={item.turn.toolCalls}
-                  agentEmoji={identity.agentEmoji}
-                  localAvatarUrl={identity.localAvatarUrl}
-                  gatewayAvatarUrl={identity.gatewayAvatarUrl}
-                  agentName={identity.agentName}
-                  agentRoleLabel={identity.agentRoleLabel}
-                />
-              );
-            }
-
-            return null;
-          })}
-          <AnimatePresence>{isProcessing && !hasRenderableActiveTurn && <ThinkingIndicator />}</AnimatePresence>
-        </div>
-      </ScrollArea>
+              return null;
+            })}
+            <AnimatePresence>{isProcessing && !hasRenderableActiveTurn && <ThinkingIndicator />}</AnimatePresence>
+          </div>
+        </ScrollArea>
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+            style={{ boxShadow: 'var(--shadow-elevated)' }}
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       <ChatInput />
       <ImageLightbox src={lightboxSrc} onClose={closeLightbox} />
       <FilePreviewModal file={previewFile} onClose={closeFilePreview} />
