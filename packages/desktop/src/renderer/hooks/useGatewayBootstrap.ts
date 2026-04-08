@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createGatewayDispatcher } from '@clawwork/core';
 import type { ExecApprovalRequest, ModelCatalogEntry, AgentInfo } from '@clawwork/shared';
-import { parseTaskIdFromSessionKey } from '@clawwork/shared';
+import { parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
 import { toast } from 'sonner';
 import i18n from '../i18n';
 import { ports, composerBridge, useMessageStore, useTaskStore, useUiStore, useRoomStore } from '../platform';
@@ -39,6 +39,16 @@ function getDispatcher() {
       setSkillsStatusForGateway: (gwId, report) => useUiStore.getState().setSkillsStatusForGateway(gwId, report),
 
       lookupTaskIdBySubagentKey: (key) => useRoomStore.getState().lookupTaskIdBySubagentKey(key),
+      onPerformerCandidate: (taskId, sessionKey) => {
+        if (useRoomStore.getState().lookupTaskIdBySubagentKey(sessionKey)) return;
+        const room = useRoomStore.getState().rooms[taskId];
+        if (!room || room.status === 'stopped') return;
+        const agentId = parseAgentIdFromSessionKey(sessionKey);
+        useRoomStore.getState().registerPerformerKey(taskId, sessionKey, agentId, agentId);
+        void syncSessionMessages(taskId, sessionKey).catch((err) =>
+          console.error('[performer] syncSessionMessages failed:', err),
+        );
+      },
       onSubagentCandidate: (sessionKey, gatewayId) => {
         const tasks = useTaskStore.getState().tasks;
         const ensembleTasks = tasks.filter((t) => t.ensemble && t.gatewayId === gatewayId);

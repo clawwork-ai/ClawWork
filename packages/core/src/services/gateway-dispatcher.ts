@@ -58,6 +58,13 @@ interface AgentEvent {
   data?: AgentToolData | AgentLifecycleData | AgentErrorData | AgentCompactionData;
 }
 
+interface SessionChangedEvent {
+  sessionKey?: string;
+  spawnedBy?: string;
+  reason?: string;
+  phase?: string;
+}
+
 interface ErrorCorrelation {
   taskId: string;
   runId?: string;
@@ -132,6 +139,7 @@ export interface GatewayDispatcherDeps {
 }
 
 const DEDUP_FALLBACK_WINDOW_MS = 2000;
+const SESSION_DELETE_REASONS = new Set(['delete', 'deleted', 'session-delete']);
 
 export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
   const perTaskLastError = new Map<string, ErrorCorrelation>();
@@ -207,7 +215,15 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
   function resolveTaskId(sessionKey: string): string | null {
     const direct = parseTaskIdFromSessionKey(sessionKey);
     if (direct) return direct;
-    return deps.lookupTaskIdBySubagentKey?.(sessionKey) ?? null;
+    const mapped = deps.lookupTaskIdBySubagentKey?.(sessionKey);
+    return mapped ?? null;
+  }
+
+  function resolveTaskIdFromSpawnedBy(spawnedBy?: string): string | null {
+    if (!spawnedBy) return null;
+    const mapped = deps.lookupTaskIdBySubagentKey?.(spawnedBy);
+    if (mapped) return mapped;
+    return parseTaskIdFromSessionKey(spawnedBy);
   }
 
   function handleChatEvent(payload: ChatEventPayload, gatewayId: string): void {
@@ -294,18 +310,26 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
       store.setProcessing(sessionKey, false);
       store.clearActiveTurn(sessionKey);
 
+      const errorCode = payload.errorCode ?? payload.error?.code;
+      const rawMessage =
+        payload.errorMessage ??
+        payload.error?.message ??
+        (extractText(payload) || deps.translate('errors.requestFailed'));
+
+      debugEvent('renderer.chat.error', { taskId, sessionKey, rawMessage, code: errorCode, runId: payload.runId });
+
+      if (isSubagentSession(sessionKey) && /^\s*terminated\s*$/i.test(rawMessage)) {
+        debugEvent('renderer.chat.subagent_terminated', { taskId, sessionKey });
+        return;
+      }
+
       const buffered = lifecycleErrorBuffer.get(taskId);
       if (buffered) {
         clearTimeout(buffered.timer);
         lifecycleErrorBuffer.delete(taskId);
       }
 
-      const errorCode = payload.errorCode ?? payload.error?.code;
       const errorDetails = payload.error?.details;
-      const rawMessage =
-        payload.errorMessage ??
-        payload.error?.message ??
-        (extractText(payload) || deps.translate('errors.requestFailed'));
       const appError = buildAppError({
         source: 'upstream',
         stage: 'stream',
@@ -321,8 +345,6 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         rawMessage,
         displayedAt: 0,
       };
-
-      debugEvent('renderer.chat.error', { taskId, sessionKey, rawMessage, code: errorCode, runId: payload.runId });
 
       if (shouldDisplayError(correlation)) {
         const userText = formatErrorForUser(appError, deps.translate);
@@ -413,6 +435,39 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         });
         break;
     }
+  }
+
+  function handleSessionChangedEvent(payload: SessionChangedEvent, gatewayId: string): void {
+    const { sessionKey, spawnedBy, reason, phase } = payload;
+    if (!sessionKey) {
+      debugEvent('renderer.session.dropped.missing_session', { gatewayId, reason, phase });
+      return;
+    }
+
+    if (isSystemSession(sessionKey) || !isSubagentSession(sessionKey)) return;
+
+    if (reason && SESSION_DELETE_REASONS.has(reason)) {
+      debugEvent('renderer.session.ignored.delete', { gatewayId, sessionKey, reason });
+      return;
+    }
+
+    const taskId = resolveTaskIdFromSpawnedBy(spawnedBy);
+    if (!taskId) {
+      debugEvent('renderer.session.subagent_unresolved', { gatewayId, sessionKey, spawnedBy, reason, phase });
+      return;
+    }
+
+    const localTasks = deps.getTaskStore().tasks;
+    const matchedTask = localTasks.find((t) => t.id === taskId);
+    if (!matchedTask) {
+      debugEvent('renderer.session.dropped.unknown_task', { taskId, sessionKey, reason, phase });
+      return;
+    }
+
+    if (!matchedTask.ensemble || sessionKey === matchedTask.sessionKey) return;
+
+    deps.onPerformerCandidate?.(taskId, sessionKey, matchedTask.gatewayId);
+    debugEvent('renderer.session.performer_candidate', { taskId, sessionKey, spawnedBy, reason, phase });
   }
 
   function handleAgentToolStream(taskId: string, sessionKey: string, data: AgentToolData): void {
@@ -587,6 +642,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         handleChatEvent(data.payload as unknown as ChatEventPayload, data.gatewayId);
       } else if (data.event === 'agent') {
         handleAgentEvent(data.payload as unknown as AgentEvent, data.gatewayId);
+      } else if (data.event === 'sessions.changed') {
+        handleSessionChangedEvent(data.payload as SessionChangedEvent, data.gatewayId);
       } else if (data.event === 'exec.approval.requested') {
         deps.onApprovalRequested?.(data.gatewayId, data.payload);
       } else if (data.event === 'exec.approval.resolved') {

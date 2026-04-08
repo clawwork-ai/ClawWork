@@ -325,6 +325,7 @@ export class GatewayClient {
           const rawVersion = server?.['version'];
           this.serverVersion = typeof rawVersion === 'string' ? rawVersion : undefined;
           this.storeDeviceTokenFromPayload(payload);
+          this.subscribeSessionEvents();
           this.startHeartbeat();
           sendToWindow(getMainWindow(), 'gateway-status', {
             gatewayId: this.gatewayId,
@@ -353,6 +354,27 @@ export class GatewayClient {
           data: { errorCode: this.lastErrorCode },
         });
         this.ws?.close(WS_CLOSE_POLICY_VIOLATION, 'auth failed');
+      });
+  }
+
+  private subscribeSessionEvents(): void {
+    this.sendReq('sessions.subscribe', {}, { requestId: 'sessions-subscribe' })
+      .then(() => {
+        getDebugLogger().info({
+          domain: 'gateway',
+          event: 'gateway.sessions.subscribe.ok',
+          gatewayId: this.gatewayId,
+          requestId: 'sessions-subscribe',
+        });
+      })
+      .catch((err: Error & { code?: string }) => {
+        getDebugLogger().warn({
+          domain: 'gateway',
+          event: 'gateway.sessions.subscribe.failed',
+          gatewayId: this.gatewayId,
+          requestId: 'sessions-subscribe',
+          error: { name: err.name, message: err.message, stack: err.stack, code: err.code },
+        });
       });
   }
 
