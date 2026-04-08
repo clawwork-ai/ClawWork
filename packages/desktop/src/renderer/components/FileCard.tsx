@@ -45,18 +45,22 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
           aria-hidden
         />
       )}
-      <motion.button
-        onClick={onClick}
-        onContextMenu={onContextMenu}
+      <motion.div
         {...motionPresets.cardHover}
         whileTap={{ scale: 0.97 }}
         className={cn(
-          'relative w-full text-left rounded-xl border transition-all duration-150 overflow-hidden group',
+          'relative w-full rounded-xl border transition-all duration-150 overflow-hidden group',
           selected
             ? 'border-[var(--border-accent)] bg-[var(--accent-dim)] shadow-[var(--shadow-card)]'
             : 'border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--border-accent)]/50 hover:bg-[var(--bg-hover)]',
         )}
       >
+        <button
+          onClick={onClick}
+          onContextMenu={onContextMenu}
+          className="absolute inset-0 z-0 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--border-accent)]"
+          aria-label={artifact.name}
+        />
         <button
           type="button"
           onClick={(e) => {
@@ -72,7 +76,7 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
         >
           <MoreHorizontal size={14} />
         </button>
-        <div className="p-3">
+        <div className="pointer-events-none relative p-3">
           <div className="flex items-start gap-2.5">
             <div className={cn('flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center', bg)}>
               <Icon size={18} className={color} />
@@ -88,13 +92,13 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
             )}
           </div>
         </div>
-        <div className="px-3 pb-2.5 flex items-center gap-1.5">
+        <div className="pointer-events-none relative px-3 pb-2.5 flex items-center gap-1.5">
           <span className="type-support flex-1 truncate text-[var(--text-muted)]">{taskTitle}</span>
           <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">
             {formatRelativeTime(new Date(artifact.createdAt))}
           </span>
         </div>
-      </motion.button>
+      </motion.div>
     </div>
   );
 }
