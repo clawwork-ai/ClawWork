@@ -82,7 +82,10 @@ function encryptField(value: string | undefined): string | undefined {
 function decryptField(value: string | undefined): string | undefined {
   if (!value) return value;
   if (!value.startsWith(ENCRYPTED_PREFIX)) return value;
-  if (!safeStorage.isEncryptionAvailable()) return value;
+  if (!safeStorage.isEncryptionAvailable()) {
+    console.error('safeStorage: decryption not available, credential lost');
+    return undefined;
+  }
   try {
     const buf = Buffer.from(value.slice(ENCRYPTED_PREFIX.length), 'base64');
     return safeStorage.decryptString(buf);
