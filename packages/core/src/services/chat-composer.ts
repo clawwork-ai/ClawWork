@@ -32,7 +32,10 @@ export interface ChatComposerDeps {
     setProcessing: (taskId: string, processing: boolean) => void;
     clearMessages: (taskId: string) => void;
     processingBySession: Set<string>;
-    activeTurnBySession: Record<string, { streamingText: string; streamingThinking: string }>;
+    activeTurnBySession: Record<
+      string,
+      { streamingText: string; streamingThinking: string; toolCalls: { id: string }[] }
+    >;
   };
 
   persistMessage: (msg: {
@@ -226,7 +229,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
           const s = deps.getMessageStore();
           const anyResponded = watchKeys.some((sk) => {
             const turn = s.activeTurnBySession[sk];
-            return turn && (turn.streamingText || turn.streamingThinking);
+            return turn && (turn.streamingText || turn.streamingThinking || turn.toolCalls.length > 0);
           });
           if (anyResponded) return;
 
