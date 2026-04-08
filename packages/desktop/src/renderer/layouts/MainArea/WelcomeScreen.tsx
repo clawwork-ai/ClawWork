@@ -123,7 +123,7 @@ export default function WelcomeScreen() {
           updateTaskMetadata(activeTaskId, { ensemble: true, teamId: null });
         }
       } else {
-        const defaultAgent = defaultAgentId || agentCatalog[0]?.id || '';
+        const defaultAgent = defaultAgentId;
         const prev = useTaskStore.getState().pendingNewTask;
         if (
           prev?.gatewayId === selectedGwId &&

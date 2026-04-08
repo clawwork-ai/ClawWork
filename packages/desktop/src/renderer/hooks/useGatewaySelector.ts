@@ -4,8 +4,6 @@ import type { AgentInfo } from '@clawwork/shared';
 import { useUiStore } from '@/stores/uiStore';
 import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
 
-type AgentCatalogEntry = AgentInfo;
-
 interface UseGatewaySelectorOptions {
   initialGatewayId?: string;
   initialAgentId?: string;
@@ -15,7 +13,7 @@ interface UseGatewaySelectorResult {
   gateways: GatewayInfo[];
   selectedGwId: string;
   setSelectedGwId: (id: string) => void;
-  agentCatalog: AgentCatalogEntry[];
+  agentCatalog: AgentInfo[];
   defaultAgentId: string;
   effectiveAgentId: string;
   setSelectedAgentId: (id: string) => void;
@@ -36,13 +34,16 @@ export function useGatewaySelector(options: UseGatewaySelectorOptions = {}): Use
   const gwAgents = agentCatalogByGateway[selectedGwId];
   const agentCatalog = useMemo(() => gwAgents?.agents ?? [], [gwAgents]);
   const [selectedAgentId, setSelectedAgentId] = useState(
-    options.initialAgentId ||
-      agentCatalogByGateway[options.initialGatewayId ?? defaultGatewayId ?? '']?.defaultId ||
+    options.initialAgentId ??
+      agentCatalogByGateway[options.initialGatewayId ?? defaultGatewayId ?? '']?.defaultId ??
       '',
   );
 
-  const defaultAgentId = gwAgents?.defaultId || '';
-  const effectiveAgentId = selectedAgentId || defaultAgentId;
+  const defaultAgentId = gwAgents?.defaultId ?? agentCatalog[0]?.id ?? '';
+  const effectiveAgentId = useMemo(
+    () => (agentCatalog.some((agent) => agent.id === selectedAgentId) ? selectedAgentId : defaultAgentId),
+    [agentCatalog, defaultAgentId, selectedAgentId],
+  );
 
   useEffect(() => {
     if (!selectedGwId) {
