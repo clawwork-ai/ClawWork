@@ -167,81 +167,95 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-app.whenReady().then(() => {
-  initDebugLogger(app.getPath('logs'));
-  getDebugLogger().info({ domain: 'app', event: 'app.start', data: { userData: app.getPath('userData') } });
-  electronApp.setAppUserModelId('com.clawwork.app');
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window);
-  });
-
-  registerWsHandlers();
-  registerArtifactHandlers();
-  registerWorkspaceHandlers();
-  registerSettingsHandlers();
-  registerSearchHandlers();
-  registerDataHandlers();
-  registerUpdateHandlers();
-  registerDebugHandlers();
-  registerVoiceHandlers();
-  configureVoicePermissionHandlers();
-  registerTrayHandlers();
-  registerQuickLaunchHandlers();
-  registerContextHandlers();
-  registerNotificationHandlers();
-  registerAvatarHandlers();
-  registerAvatarProtocol();
-  registerHubHandlers();
-
-  ipcMain.handle('app:rebuild-menu', () => {
-    const dm = readConfig()?.devMode === true;
-    Menu.setApplicationMenu(buildAppMenu(dm));
-  });
-
-  ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
-    if (process.platform === 'darwin') {
-      const win = getMainWindow();
-      if (win) win.setWindowButtonVisibility(visible);
-    }
-  });
-
-  const wsPath = getWorkspacePath();
-  if (wsPath) {
-    getDebugLogger().info({ domain: 'workspace', event: 'workspace.detected', data: { workspacePath: wsPath } });
-    try {
-      getDebugLogger().info({ domain: 'db', event: 'db.init.start', data: { workspacePath: wsPath } });
-      initDatabase(wsPath);
-      getDebugLogger().info({ domain: 'db', event: 'db.init.ok', data: { workspacePath: wsPath } });
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      getDebugLogger().error({
-        domain: 'db',
-        event: 'db.init.failed',
-        data: { workspacePath: wsPath },
-        error: { name: err.name, message: err.message, stack: err.stack },
-      });
-      dialog.showErrorBox('Database Error', err.message);
-      app.quit();
-      return;
-    }
-  }
-
-  createWindow();
-  initAllGateways();
-  initTray();
-  initQuickLaunch();
-
-  app.on('activate', () => {
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
     const win = getMainWindow();
     if (win) {
+      if (win.isMinimized()) win.restore();
       win.show();
       win.focus();
-    } else {
-      createWindow();
     }
   });
-});
+
+  app.whenReady().then(() => {
+    initDebugLogger(app.getPath('logs'));
+    getDebugLogger().info({ domain: 'app', event: 'app.start', data: { userData: app.getPath('userData') } });
+    electronApp.setAppUserModelId('com.clawwork.app');
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window);
+    });
+
+    registerWsHandlers();
+    registerArtifactHandlers();
+    registerWorkspaceHandlers();
+    registerSettingsHandlers();
+    registerSearchHandlers();
+    registerDataHandlers();
+    registerUpdateHandlers();
+    registerDebugHandlers();
+    registerVoiceHandlers();
+    configureVoicePermissionHandlers();
+    registerTrayHandlers();
+    registerQuickLaunchHandlers();
+    registerContextHandlers();
+    registerNotificationHandlers();
+    registerAvatarHandlers();
+    registerAvatarProtocol();
+    registerHubHandlers();
+
+    ipcMain.handle('app:rebuild-menu', () => {
+      const dm = readConfig()?.devMode === true;
+      Menu.setApplicationMenu(buildAppMenu(dm));
+    });
+
+    ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
+      if (process.platform === 'darwin') {
+        const win = getMainWindow();
+        if (win) win.setWindowButtonVisibility(visible);
+      }
+    });
+
+    const wsPath = getWorkspacePath();
+    if (wsPath) {
+      getDebugLogger().info({ domain: 'workspace', event: 'workspace.detected', data: { workspacePath: wsPath } });
+      try {
+        getDebugLogger().info({ domain: 'db', event: 'db.init.start', data: { workspacePath: wsPath } });
+        initDatabase(wsPath);
+        getDebugLogger().info({ domain: 'db', event: 'db.init.ok', data: { workspacePath: wsPath } });
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(String(e));
+        getDebugLogger().error({
+          domain: 'db',
+          event: 'db.init.failed',
+          data: { workspacePath: wsPath },
+          error: { name: err.name, message: err.message, stack: err.stack },
+        });
+        dialog.showErrorBox('Database Error', err.message);
+        app.quit();
+        return;
+      }
+    }
+
+    createWindow();
+    initAllGateways();
+    initTray();
+    initQuickLaunch();
+
+    app.on('activate', () => {
+      const win = getMainWindow();
+      if (win) {
+        win.show();
+        win.focus();
+      } else {
+        createWindow();
+      }
+    });
+  });
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
