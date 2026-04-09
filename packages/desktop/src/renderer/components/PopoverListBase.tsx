@@ -1,5 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { type ReactNode, type RefObject, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
@@ -29,7 +29,8 @@ export default function PopoverListBase({
 
   useEffect(() => {
     selectedItemRef.current?.scrollIntoView({ block: 'nearest' });
-  }, [selectedIndex, selectedItemRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedItemRef is a stable ref, only selectedIndex matters
+  }, [selectedIndex]);
 
   return (
     <AnimatePresence>
@@ -47,7 +48,10 @@ export default function PopoverListBase({
             initial={{ opacity: 0, y: 4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: motionDuration.fast, ease: motionEase.exit }}
+            transition={{
+              duration: motionDuration.fast,
+              ease: motionEase.exit,
+            }}
           >
             {header}
             <ul className="max-h-52 overflow-y-auto py-1">{children}</ul>
