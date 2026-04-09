@@ -1,55 +1,55 @@
-import { useRef, useCallback, useState, useEffect, useMemo, type KeyboardEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
-  Send,
-  Square,
-  X,
   ChevronDown,
-  Mic,
-  Loader2,
-  TerminalSquare,
   File,
   FileCode,
   FolderOpen,
   ListTodo,
+  Loader2,
+  Mic,
   Plus,
+  Send,
+  Square,
+  TerminalSquare,
   Users,
+  X,
 } from 'lucide-react';
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
 import AgentIcon from '@/components/AgentIcon';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSub,
-  DropdownMenuSubTrigger,
   DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { createWhisperSttSession } from '@/lib/voice/whisper-stt';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
+import { cn } from '@/lib/utils';
+import { createWhisperSttSession } from '@/lib/voice/whisper-stt';
+import { useRoomStore } from '@/stores/roomStore';
+import { motionDuration, motion as motionPresets } from '@/styles/design-tokens';
 import { useTaskStore } from '../../stores/taskStore';
 import { useUiStore } from '../../stores/uiStore';
-import SlashCommandMenu from '../SlashCommandMenu';
-import SlashCommandDashboard from '../SlashCommandDashboard';
-import ToolsCatalog from '../ToolsCatalog';
+import MentionPicker, { type AgentMentionEntry, type MentionTab } from '../MentionPicker';
 import SlashArgPicker from '../SlashArgPicker';
+import SlashCommandDashboard from '../SlashCommandDashboard';
+import SlashCommandMenu from '../SlashCommandMenu';
+import ToolsCatalog from '../ToolsCatalog';
 import VoiceIntroDialog from '../VoiceIntroDialog';
-import MentionPicker, { type MentionTab, type AgentMentionEntry } from '../MentionPicker';
-import { useRoomStore } from '@/stores/roomStore';
-import { ACCEPTED_TYPES, THINKING_LEVELS, THINKING_LABEL_KEYS, MENTION_ALL_AGENT_ID } from './constants';
-import { formatContextWindow } from './utils';
-import { useImageAttachments } from './useImageAttachments';
+import { ACCEPTED_TYPES, MENTION_ALL_AGENT_ID, THINKING_LABEL_KEYS, THINKING_LEVELS } from './constants';
+import { useChatSend } from './useChatSend';
 import { useContextFolders } from './useContextFolders';
+import { useImageAttachments } from './useImageAttachments';
 import { useMentionPicker } from './useMentionPicker';
 import { useSlashAutocomplete } from './useSlashAutocomplete';
-import { useChatSend } from './useChatSend';
+import { formatContextWindow } from './utils';
 
 export default function ChatInput() {
   const { t } = useTranslation();
@@ -134,7 +134,12 @@ export default function ChatInput() {
     selectedAgents,
     setSelectedAgents,
     removeSelectedAgent,
-  } = useMentionPicker({ textareaRef, contextFolders, loadLocalFiles, hasAgents: mentionAgents.length > 0 });
+  } = useMentionPicker({
+    textareaRef,
+    contextFolders,
+    loadLocalFiles,
+    hasAgents: mentionAgents.length > 0,
+  });
 
   const [whisperAvailable, setWhisperAvailable] = useState(false);
   useEffect(() => {
@@ -232,6 +237,16 @@ export default function ChatInput() {
   const allTasks = useTaskStore((s) => s.tasks);
   const mentionTasks = allTasks.filter((tt) => tt.id !== activeTask?.id && tt.title);
 
+  const mentionTabs = useMemo<MentionTab[]>(
+    () => [
+      ...(mentionAgents.length > 0 ? (['agents'] as const) : []),
+      ...(contextFolders.length > 0 ? (['local'] as const) : []),
+      'tasks',
+      'files',
+    ],
+    [mentionAgents.length, contextFolders.length],
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       handleVoiceKeyDown(e);
@@ -240,25 +255,13 @@ export default function ChatInput() {
       if (mentionVisible) {
         if (e.key === 'Tab' || e.key === 'ArrowRight') {
           e.preventDefault();
-          const tabs: MentionTab[] = [
-            ...(mentionAgents.length > 0 ? (['agents'] as const) : []),
-            ...(contextFolders.length > 0 ? (['local'] as const) : []),
-            'tasks',
-            'files',
-          ];
-          setMentionTab((cur) => tabs[(tabs.indexOf(cur) + 1) % tabs.length]);
+          setMentionTab((cur) => mentionTabs[(mentionTabs.indexOf(cur) + 1) % mentionTabs.length]);
           setMentionIndex(0);
           return;
         }
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
-          const tabs: MentionTab[] = [
-            ...(mentionAgents.length > 0 ? (['agents'] as const) : []),
-            ...(contextFolders.length > 0 ? (['local'] as const) : []),
-            'tasks',
-            'files',
-          ];
-          setMentionTab((cur) => tabs[(tabs.indexOf(cur) - 1 + tabs.length) % tabs.length]);
+          setMentionTab((cur) => mentionTabs[(mentionTabs.indexOf(cur) - 1 + mentionTabs.length) % mentionTabs.length]);
           setMentionIndex(0);
           return;
         }
@@ -354,7 +357,7 @@ export default function ChatInput() {
       mentionIndex,
       commitMention,
       closeMentionPicker,
-      contextFolders,
+      mentionTabs,
       argPickerVisible,
       argPickerOptions,
       argPickerIndex,
@@ -369,7 +372,6 @@ export default function ChatInput() {
       isGenerating,
       handleVoiceKeyDown,
       sendShortcut,
-      mentionAgents.length,
       mentionItemsRef,
       setMentionTab,
       setMentionIndex,
