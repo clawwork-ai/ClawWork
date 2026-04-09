@@ -191,7 +191,10 @@ export default function ChatInput() {
 		window.clawwork
 			.checkWhisper()
 			.then((r) => setWhisperAvailable(r.available))
-			.catch(() => setWhisperAvailable(false));
+			.catch((err) => {
+			console.error("Failed to check whisper availability:", err);
+			setWhisperAvailable(false);
+		});
 	}, []);
 
 	const loadVoiceIntroSeen = useCallback(async () => {

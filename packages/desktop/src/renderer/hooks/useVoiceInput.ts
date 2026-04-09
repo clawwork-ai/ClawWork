@@ -87,8 +87,8 @@ export function useVoiceInput({
 				if (cancelled) return;
 				introSeenRef.current = seen;
 			})
-			.catch(() => {
-				/* default to not seen on failure */
+			.catch((err) => {
+				console.error("Failed to load voice intro seen status:", err);
 			});
 		return () => {
 			cancelled = true;
