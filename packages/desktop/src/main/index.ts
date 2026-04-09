@@ -153,7 +153,12 @@ function createWindow(): BrowserWindow {
   });
 
   win.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
+    try {
+      const parsed = new URL(details.url);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        shell.openExternal(details.url);
+      }
+    } catch {}
     return { action: 'deny' };
   });
 
