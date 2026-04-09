@@ -13,6 +13,7 @@ import {
   Info,
   Star,
   Tag,
+  Settings2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -22,31 +23,172 @@ import { useUiStore } from '@/stores/uiStore';
 import type { SkillStatusEntry, SkillStatusReport, SkillSearchResultEntry, SkillDetailResult } from '@clawwork/shared';
 import { summarizeSkillMissing, getSkillReason } from '@/lib/skill-utils';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ConfirmDialog from '@/components/semantic/ConfirmDialog';
 import EmptyState from '@/components/semantic/EmptyState';
 import LoadingBlock from '@/components/semantic/LoadingBlock';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
+import { useDialogGuard } from '@/hooks/useDialogGuard';
 
-type SkillFilter = 'all' | 'available' | 'unavailable';
+type SkillFilter = 'all' | 'available' | 'unavailable' | 'disabled';
 type SkillsTab = 'installed' | 'clawhub';
 
 function isSkillAvailable(skill: SkillStatusEntry): boolean {
   return skill.eligible && !skill.disabled;
 }
 
+function SkillConfigDialog({
+  skill,
+  gatewayId,
+  open,
+  onOpenChange,
+  onSaved,
+}: {
+  skill: SkillStatusEntry;
+  gatewayId: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const [envDraft, setEnvDraft] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) setEnvDraft({});
+  }, [open]);
+
+  const isDirty = useCallback(() => Object.values(envDraft).some((v) => v.trim()), [envDraft]);
+
+  const doClose = useCallback(() => {
+    setEnvDraft({});
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const { confirmOpen, guardedOpenChange, contentProps, confirmDiscard, cancelDiscard } = useDialogGuard({
+    isDirty,
+    onConfirmClose: doClose,
+  });
+
+  const allMissingEnv = skill.missing.env;
+  const hasPrimaryKey = skill.primaryEnv && allMissingEnv.includes(skill.primaryEnv);
+
+  const handleSave = useCallback(async () => {
+    const filled = Object.fromEntries(Object.entries(envDraft).filter(([, v]) => v.trim()));
+    if (Object.keys(filled).length === 0) return;
+    setSaving(true);
+
+    const primaryVal = hasPrimaryKey && skill.primaryEnv ? filled[skill.primaryEnv] : undefined;
+    const envOnly = { ...filled };
+    if (skill.primaryEnv) delete envOnly[skill.primaryEnv];
+
+    const promises: Promise<unknown>[] = [];
+    if (primaryVal) {
+      promises.push(window.clawwork.updateSkill(gatewayId, { skillKey: skill.skillKey, apiKey: primaryVal }));
+    }
+    if (Object.keys(envOnly).length > 0) {
+      promises.push(window.clawwork.updateSkill(gatewayId, { skillKey: skill.skillKey, env: envOnly }));
+    }
+
+    const results = await Promise.all(promises);
+    const allOk = results.every((r) => (r as { ok: boolean }).ok);
+    if (allOk) {
+      toast.success(t('settings.skillEnvSaved'));
+      onSaved();
+      doClose();
+    } else {
+      toast.error(t('settings.skillUpdateFailed'));
+    }
+    setSaving(false);
+  }, [gatewayId, skill.skillKey, skill.primaryEnv, hasPrimaryKey, envDraft, onSaved, doClose, t]);
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={guardedOpenChange}>
+        <DialogContent {...contentProps}>
+          <DialogHeader>
+            <DialogTitle>
+              {skill.emoji && <span className="mr-2">{skill.emoji}</span>}
+              {skill.name}
+            </DialogTitle>
+            <DialogDescription>{t('settings.skillConfigDialogDesc')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-4">
+            {allMissingEnv.map((envName) => (
+              <div key={envName} className="space-y-1.5">
+                <label className="type-label text-[var(--text-secondary)]">{envName}</label>
+                <input
+                  type="password"
+                  value={envDraft[envName] ?? ''}
+                  onChange={(e) => setEnvDraft((prev) => ({ ...prev, [envName]: e.target.value }))}
+                  placeholder={t('settings.skillEnvPlaceholder', { env: envName })}
+                  className={cn(
+                    'w-full h-9 px-3 py-2 rounded-md type-mono-data',
+                    'bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                    'text-[var(--text-primary)] placeholder:text-[var(--text-muted)]',
+                    'glow-focus',
+                  )}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && allMissingEnv.length === 1) handleSave();
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => guardedOpenChange(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button disabled={!isDirty() || saving} onClick={handleSave}>
+              {saving && <Loader2 size={14} className="mr-1.5 animate-spin" />}
+              {t('settings.skillApiKeySave')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t('common.discardChangesTitle')}
+        description={t('common.discardChangesDesc')}
+        confirmLabel={t('common.discard')}
+        onConfirm={confirmDiscard}
+        onCancel={cancelDiscard}
+      />
+    </>
+  );
+}
+
 function SkillCard({
   skill,
+  gatewayId,
   onToggleEnabled,
+  onConfigSaved,
   toggling,
 }: {
   skill: SkillStatusEntry;
+  gatewayId: string;
   onToggleEnabled: (skill: SkillStatusEntry) => void;
+  onConfigSaved: () => void;
   toggling: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [configOpen, setConfigOpen] = useState(false);
+
+  const hasConfigurableEnv = skill.missing.env.length > 0;
 
   const sourceLabel = skill.bundled
     ? t('settings.skillSourceBundled')
@@ -87,6 +229,16 @@ function SkillCard({
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1 pl-3 border-l border-[var(--border-subtle)]">
+          {hasConfigurableEnv && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon-sm" onClick={() => setConfigOpen(true)}>
+                  <Settings2 size={14} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('settings.skillConfigure')}</TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -100,7 +252,7 @@ function SkillCard({
                 ) : skill.disabled ? (
                   <PowerOff size={14} />
                 ) : (
-                  <Power size={14} className="text-[var(--accent)]" />
+                  <Power size={14} />
                 )}
               </Button>
             </TooltipTrigger>
@@ -151,6 +303,11 @@ function SkillCard({
                         )}
                       />
                       <span className="type-mono-data text-[var(--text-muted)]">{check.path}</span>
+                      <span
+                        className={cn('type-badge', check.satisfied ? 'text-[var(--accent)]' : 'text-[var(--warning)]')}
+                      >
+                        {check.satisfied ? t('settings.skillConfigSatisfied') : t('settings.skillConfigNotFound')}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -159,6 +316,16 @@ function SkillCard({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {hasConfigurableEnv && (
+        <SkillConfigDialog
+          skill={skill}
+          gatewayId={gatewayId}
+          open={configOpen}
+          onOpenChange={setConfigOpen}
+          onSaved={onConfigSaved}
+        />
+      )}
     </motion.div>
   );
 }
@@ -525,7 +692,8 @@ export default function SkillsSection() {
 
   const filteredSkills = useMemo(() => {
     if (filter === 'available') return allSkills.filter(isSkillAvailable);
-    if (filter === 'unavailable') return allSkills.filter((s) => !isSkillAvailable(s));
+    if (filter === 'unavailable') return allSkills.filter((s) => !isSkillAvailable(s) && !s.disabled);
+    if (filter === 'disabled') return allSkills.filter((s) => s.disabled);
     return allSkills;
   }, [allSkills, filter]);
 
@@ -533,7 +701,8 @@ export default function SkillsSection() {
     () => ({
       all: allSkills.length,
       available: allSkills.filter(isSkillAvailable).length,
-      unavailable: allSkills.filter((s) => !isSkillAvailable(s)).length,
+      unavailable: allSkills.filter((s) => !isSkillAvailable(s) && !s.disabled).length,
+      disabled: allSkills.filter((s) => s.disabled).length,
     }),
     [allSkills],
   );
@@ -629,7 +798,7 @@ export default function SkillsSection() {
       {activeTab === 'installed' ? (
         <>
           <div className="mb-3 flex items-center gap-1">
-            {(['all', 'available', 'unavailable'] as const).map((f) => (
+            {(['all', 'available', 'unavailable', 'disabled'] as const).map((f) => (
               <button
                 key={f}
                 type="button"
@@ -661,7 +830,9 @@ export default function SkillsSection() {
                   <SkillCard
                     key={skill.skillKey}
                     skill={skill}
+                    gatewayId={selectedGatewayId!}
                     onToggleEnabled={handleToggleEnabled}
+                    onConfigSaved={refreshSkills}
                     toggling={togglingKeys.has(skill.skillKey)}
                   />
                 ))}
