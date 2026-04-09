@@ -28,9 +28,9 @@ export default function PopoverListBase({
   const { t } = useTranslation();
 
   useEffect(() => {
+    if (!open) return;
     selectedItemRef.current?.scrollIntoView({ block: 'nearest' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedItemRef is a stable ref, only selectedIndex matters
-  }, [selectedIndex]);
+  }, [selectedIndex, open]);
 
   return (
     <AnimatePresence>
