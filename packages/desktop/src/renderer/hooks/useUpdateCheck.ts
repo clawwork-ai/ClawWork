@@ -13,6 +13,11 @@ export function useUpdateCheck(): void {
         }
       } catch (err) {
         console.error('[useUpdateCheck] check failed:', err);
+        window.clawwork?.reportDebugEvent?.({
+          domain: 'renderer',
+          event: 'update-check-failed',
+          data: { error: String(err) },
+        });
       }
     }, 5000);
 
