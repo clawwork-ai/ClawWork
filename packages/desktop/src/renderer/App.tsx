@@ -77,31 +77,42 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    window.clawwork.isWorkspaceConfigured().then((configured) => {
-      if (configured) {
-        setReady(true);
-      } else {
+    window.clawwork
+      .isWorkspaceConfigured()
+      .then((configured) => {
+        if (configured) {
+          setReady(true);
+        } else {
+          setNeedsSetup(true);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[App] isWorkspaceConfigured failed:', err);
         setNeedsSetup(true);
-      }
-    });
+      });
   }, []);
 
   useEffect(() => {
     if (!ready) return;
-    window.clawwork.getSettings().then((settings) => {
-      if (settings?.sendShortcut) {
-        useUiStore.setState({ sendShortcut: settings.sendShortcut });
-      }
-      if (settings?.leftNavShortcut) {
-        useUiStore.setState({ leftNavShortcut: settings.leftNavShortcut });
-      }
-      if (settings?.rightPanelShortcut) {
-        useUiStore.setState({ rightPanelShortcut: settings.rightPanelShortcut });
-      }
-      if (settings?.devMode) {
-        useUiStore.setState({ devMode: true });
-      }
-    });
+    window.clawwork
+      .getSettings()
+      .then((settings) => {
+        if (settings?.sendShortcut) {
+          useUiStore.setState({ sendShortcut: settings.sendShortcut });
+        }
+        if (settings?.leftNavShortcut) {
+          useUiStore.setState({ leftNavShortcut: settings.leftNavShortcut });
+        }
+        if (settings?.rightPanelShortcut) {
+          useUiStore.setState({ rightPanelShortcut: settings.rightPanelShortcut });
+        }
+        if (settings?.devMode) {
+          useUiStore.setState({ devMode: true });
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[App] getSettings failed:', err);
+      });
   }, [ready]);
 
   const handleGlobalKeyDown = useCallback(
