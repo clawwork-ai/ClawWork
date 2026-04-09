@@ -11,7 +11,9 @@ export function useUpdateCheck(): void {
         if (result.hasUpdate) {
           setHasUpdate(true);
         }
-      } catch {}
+      } catch (err) {
+        console.error('[useUpdateCheck] check failed:', err);
+      }
     }, 5000);
 
     return () => clearTimeout(timer);
