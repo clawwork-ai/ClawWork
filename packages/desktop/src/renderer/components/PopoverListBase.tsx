@@ -29,7 +29,7 @@ export default function PopoverListBase({
 
   useEffect(() => {
     selectedItemRef.current?.scrollIntoView({ block: 'nearest' });
-  }, [selectedIndex, selectedItemRef]);
+  }, [selectedIndex]);
 
   return (
     <AnimatePresence>
