@@ -75,10 +75,16 @@ export function useVoiceInput({
 
   useEffect(() => {
     let cancelled = false;
-    void loadIntroSeen().then((seen) => {
-      if (cancelled) return;
-      introSeenRef.current = seen;
-    });
+    void loadIntroSeen()
+      .then((seen) => {
+        if (cancelled) return;
+        introSeenRef.current = seen;
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error('[useVoiceInput] loadIntroSeen failed:', err);
+        introSeenRef.current = false;
+      });
     return () => {
       cancelled = true;
     };

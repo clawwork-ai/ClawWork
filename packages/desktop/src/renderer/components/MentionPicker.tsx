@@ -77,11 +77,16 @@ export default function MentionPicker({
       return;
     }
     artifactsLoaded.current = true;
-    window.clawwork.listArtifacts().then((res) => {
-      if (res.ok && res.result) {
-        setArtifacts(res.result as unknown as Artifact[]);
-      }
-    });
+    window.clawwork
+      .listArtifacts()
+      .then((res) => {
+        if (res.ok && res.result) {
+          setArtifacts(res.result as unknown as Artifact[]);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('[MentionPicker] listArtifacts failed:', err);
+      });
   }, [visible, artifacts.length, setArtifacts]);
 
   const tabs = useMemo(() => {
