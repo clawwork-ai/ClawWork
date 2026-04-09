@@ -104,6 +104,11 @@ function NavButton({
   );
 }
 
+const navActiveClass = (active: boolean) =>
+  active
+    ? "bg-[var(--accent-dim)] text-[var(--text-primary)]"
+    : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]";
+
 export default function LeftNav() {
   const { t } = useTranslation();
   const tasks = useTaskStore((s) => s.tasks);
@@ -322,9 +327,7 @@ export default function LeftNav() {
             tooltip={`${t('teams.title')} (Beta)`}
             onClick={() => setMainView('teams')}
             className={
-              mainView === 'teams'
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(mainView === 'teams')
             }
           />
           <IconButton
@@ -332,9 +335,7 @@ export default function LeftNav() {
             tooltip={t('common.fileManager')}
             onClick={() => setMainView('files')}
             className={
-              mainView === 'files'
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(mainView === 'files')
             }
           />
         </div>
@@ -380,9 +381,7 @@ export default function LeftNav() {
             tooltip={t('leftNav.scheduledTasks')}
             onClick={() => setMainView('cron')}
             className={
-              mainView === 'cron'
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(mainView === 'cron')
             }
           />
           <IconButton
@@ -390,9 +389,7 @@ export default function LeftNav() {
             tooltip={t('leftNav.archivedChats')}
             onClick={() => setMainView('archived')}
             className={
-              mainView === 'archived'
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(mainView === 'archived')
             }
           />
           <IconButton
@@ -400,9 +397,7 @@ export default function LeftNav() {
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
             onClick={() => setSettingsOpen(!settingsOpen)}
             className={
-              settingsOpen
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(settingsOpen)
             }
             badge={
               hasUpdate ? (
@@ -545,9 +540,7 @@ export default function LeftNav() {
             onClick={() => setMainView('archived')}
             tooltipSide="top"
             className={
-              mainView === 'archived'
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(mainView === 'archived')
             }
           />
           <div className="flex-1" />
@@ -557,9 +550,7 @@ export default function LeftNav() {
             onClick={() => setSettingsOpen(true)}
             tooltipSide="top"
             className={
-              settingsOpen
-                ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
-                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
+              navActiveClass(settingsOpen)
             }
             badge={
               hasUpdate ? (
