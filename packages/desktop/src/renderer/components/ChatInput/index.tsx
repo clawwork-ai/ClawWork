@@ -14,7 +14,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import AgentIcon from '@/components/AgentIcon';
@@ -50,6 +50,35 @@ import { useImageAttachments } from './useImageAttachments';
 import { useMentionPicker } from './useMentionPicker';
 import { useSlashAutocomplete } from './useSlashAutocomplete';
 import { formatContextWindow } from './utils';
+
+function SelectionTag({
+  icon,
+  label,
+  onRemove,
+  variant = 'accent',
+}: {
+  icon: ReactNode;
+  label: string;
+  onRemove: () => void;
+  variant?: 'accent' | 'muted';
+}) {
+  return (
+    <span
+      className={cn(
+        'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
+        variant === 'accent'
+          ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
+          : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+      )}
+    >
+      <span className="flex-shrink-0">{icon}</span>
+      {label}
+      <button onClick={onRemove} className="ml-0.5 opacity-50 hover:opacity-100">
+        <X size={12} />
+      </button>
+    </span>
+  );
+}
 
 export default function ChatInput() {
   const { t } = useTranslation();
@@ -534,17 +563,12 @@ export default function ChatInput() {
                   selectedAgents.length > 0) && (
                   <div className="flex flex-wrap gap-1.5 pb-2">
                     {selectedAgents.map((a) => (
-                      <span
+                      <SelectionTag
                         key={`agent-${a.agentId}`}
-                        className={cn(
-                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                          'bg-[var(--accent)]/10 text-[var(--accent)]',
-                        )}
-                      >
-                        {a.agentId === MENTION_ALL_AGENT_ID ? (
-                          <Users size={14} className="flex-shrink-0" />
-                        ) : (
-                          <span className="flex-shrink-0">
+                        icon={
+                          a.agentId === MENTION_ALL_AGENT_ID ? (
+                            <Users size={14} />
+                          ) : (
                             <AgentIcon
                               gatewayId={a.gatewayId}
                               agentId={a.agentId}
@@ -552,70 +576,36 @@ export default function ChatInput() {
                               emoji={a.emoji}
                               imgClass="w-3.5 h-3.5 rounded-full object-cover"
                             />
-                          </span>
-                        )}
-                        {a.agentName}
-                        <button
-                          onClick={() => removeSelectedAgent(a.agentId)}
-                          className="ml-0.5 opacity-50 hover:opacity-100"
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
+                          )
+                        }
+                        label={a.agentName}
+                        onRemove={() => removeSelectedAgent(a.agentId)}
+                      />
                     ))}
                     {selectedLocalFiles.map((f) => (
-                      <span
+                      <SelectionTag
                         key={f.absolutePath}
-                        className={cn(
-                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                          'bg-[var(--accent)]/10 text-[var(--accent)]',
-                        )}
-                      >
-                        <FileCode size={14} className="flex-shrink-0" />
-                        {f.relativePath}
-                        <button
-                          onClick={() => removeSelectedLocalFile(f.absolutePath)}
-                          className="ml-0.5 opacity-50 hover:opacity-100"
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
+                        icon={<FileCode size={14} />}
+                        label={f.relativePath}
+                        onRemove={() => removeSelectedLocalFile(f.absolutePath)}
+                      />
                     ))}
                     {selectedTasks.map((task) => (
-                      <span
+                      <SelectionTag
                         key={`task-${task.id}`}
-                        className={cn(
-                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                          'bg-[var(--accent)]/10 text-[var(--accent)]',
-                        )}
-                      >
-                        <ListTodo size={14} className="flex-shrink-0" />
-                        {task.title}
-                        <button
-                          onClick={() => removeSelectedTask(task.id)}
-                          className="ml-0.5 opacity-50 hover:opacity-100"
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
+                        icon={<ListTodo size={14} />}
+                        label={task.title}
+                        onRemove={() => removeSelectedTask(task.id)}
+                      />
                     ))}
                     {selectedArtifacts.map((a) => (
-                      <span
+                      <SelectionTag
                         key={a.id}
-                        className={cn(
-                          'type-support inline-flex items-center gap-1 rounded-lg px-2 py-1',
-                          'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
-                        )}
-                      >
-                        <File size={14} className="flex-shrink-0" />
-                        {a.name}
-                        <button
-                          onClick={() => removeSelectedArtifact(a.id)}
-                          className="ml-0.5 opacity-50 hover:opacity-100"
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
+                        icon={<File size={14} />}
+                        label={a.name}
+                        variant="muted"
+                        onRemove={() => removeSelectedArtifact(a.id)}
+                      />
                     ))}
                   </div>
                 )}
