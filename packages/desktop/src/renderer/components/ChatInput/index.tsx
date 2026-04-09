@@ -224,10 +224,7 @@ export default function ChatInput() {
   });
 
   const allTasks = useTaskStore((s) => s.tasks);
-  const mentionTasks = useMemo(
-    () => allTasks.filter((tt) => tt.id !== activeTask?.id && tt.title),
-    [allTasks, activeTask?.id],
-  );
+  const mentionTasks = allTasks.filter((tt) => tt.id !== activeTask?.id && tt.title);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {

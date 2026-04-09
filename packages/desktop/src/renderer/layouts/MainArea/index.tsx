@@ -686,7 +686,7 @@ function ArchivedTasks() {
     });
   }, [tasks, searchQuery, gwInfoMap]);
 
-  const totalArchived = useMemo(() => tasks.filter((task) => task.status === 'archived').length, [tasks]);
+  const totalArchived = tasks.filter((task) => task.status === 'archived').length;
 
   const handleReactivate = (taskId: string): void => {
     updateTaskStatus(taskId, 'active');

@@ -39,7 +39,7 @@ export default function WelcomeScreen() {
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
-  const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
+  const teams = Object.values(teamsMap);
   const hasTeams = teams.length > 0;
   const {
     gateways,
