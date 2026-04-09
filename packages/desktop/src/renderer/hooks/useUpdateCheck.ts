@@ -1,21 +1,21 @@
-import { useEffect } from "react";
-import { useUiStore } from "@/stores/uiStore";
+import { useEffect } from 'react';
+import { useUiStore } from '@/stores/uiStore';
 
 export function useUpdateCheck(): void {
-	const setHasUpdate = useUiStore((s) => s.setHasUpdate);
+  const setHasUpdate = useUiStore((s) => s.setHasUpdate);
 
-	useEffect(() => {
-		const timer = setTimeout(async () => {
-			try {
-				const result = await window.clawwork.checkForUpdates();
-				if (result.hasUpdate) {
-					setHasUpdate(true);
-				}
-			} catch (err) {
-				console.error("[useUpdateCheck] check failed:", err);
-			}
-		}, 5000);
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      try {
+        const result = await window.clawwork.checkForUpdates();
+        if (result.hasUpdate) {
+          setHasUpdate(true);
+        }
+      } catch (err) {
+        console.error('[useUpdateCheck] check failed:', err);
+      }
+    }, 5000);
 
-		return () => clearTimeout(timer);
-	}, [setHasUpdate]);
+    return () => clearTimeout(timer);
+  }, [setHasUpdate]);
 }
