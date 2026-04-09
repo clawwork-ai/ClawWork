@@ -121,11 +121,24 @@ export default function FileBrowser() {
   }, [setSelectedArtifact]);
 
   useEffect(() => {
-    window.clawwork.listArtifacts().then((res) => {
-      if (res.ok && res.result) {
-        setArtifacts(res.result as unknown as Artifact[]);
-      }
-    });
+    let cancelled = false;
+
+    window.clawwork
+      .listArtifacts()
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok && res.result) {
+          setArtifacts(res.result as unknown as Artifact[]);
+        }
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error('[FileBrowser] listArtifacts failed:', err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [setArtifacts]);
 
   useEffect(() => {
