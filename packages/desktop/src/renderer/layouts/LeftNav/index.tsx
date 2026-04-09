@@ -106,8 +106,8 @@ function NavButton({
 
 const navActiveClass = (active: boolean) =>
   active
-    ? "bg-[var(--accent-dim)] text-[var(--text-primary)]"
-    : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]";
+    ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
+    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]';
 
 export default function LeftNav() {
   const { t } = useTranslation();
@@ -326,17 +326,13 @@ export default function LeftNav() {
             icon={Users}
             tooltip={`${t('teams.title')} (Beta)`}
             onClick={() => setMainView('teams')}
-            className={
-              navActiveClass(mainView === 'teams')
-            }
+            className={navActiveClass(mainView === 'teams')}
           />
           <IconButton
             icon={FolderOpen}
             tooltip={t('common.fileManager')}
             onClick={() => setMainView('files')}
-            className={
-              navActiveClass(mainView === 'files')
-            }
+            className={navActiveClass(mainView === 'files')}
           />
         </div>
 
@@ -380,25 +376,19 @@ export default function LeftNav() {
             icon={Clock}
             tooltip={t('leftNav.scheduledTasks')}
             onClick={() => setMainView('cron')}
-            className={
-              navActiveClass(mainView === 'cron')
-            }
+            className={navActiveClass(mainView === 'cron')}
           />
           <IconButton
             icon={Archive}
             tooltip={t('leftNav.archivedChats')}
             onClick={() => setMainView('archived')}
-            className={
-              navActiveClass(mainView === 'archived')
-            }
+            className={navActiveClass(mainView === 'archived')}
           />
           <IconButton
             icon={Settings}
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
             onClick={() => setSettingsOpen(!settingsOpen)}
-            className={
-              navActiveClass(settingsOpen)
-            }
+            className={navActiveClass(settingsOpen)}
             badge={
               hasUpdate ? (
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
@@ -539,9 +529,7 @@ export default function LeftNav() {
             tooltip={t('leftNav.archivedChats')}
             onClick={() => setMainView('archived')}
             tooltipSide="top"
-            className={
-              navActiveClass(mainView === 'archived')
-            }
+            className={navActiveClass(mainView === 'archived')}
           />
           <div className="flex-1" />
           <IconButton
@@ -549,9 +537,7 @@ export default function LeftNav() {
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
             onClick={() => setSettingsOpen(true)}
             tooltipSide="top"
-            className={
-              navActiveClass(settingsOpen)
-            }
+            className={navActiveClass(settingsOpen)}
             badge={
               hasUpdate ? (
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-[var(--accent)]" />
