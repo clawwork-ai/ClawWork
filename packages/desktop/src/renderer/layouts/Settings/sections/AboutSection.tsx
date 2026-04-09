@@ -71,12 +71,16 @@ export default function AboutSection() {
     window.clawwork
       .getAppVersion()
       .then(setCurrentVersion)
-      .catch(() => {});
+      .catch((err: unknown) => {
+        console.error('[AboutSection] getAppVersion failed:', err);
+      });
 
     window.clawwork
       .getDeviceId()
       .then(setDeviceId)
-      .catch(() => {});
+      .catch((err: unknown) => {
+        console.error('[AboutSection] getDeviceId failed:', err);
+      });
 
     const unsubs: (() => void)[] = [];
 
