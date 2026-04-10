@@ -8,12 +8,23 @@ export type SendShortcut = 'enter' | 'cmdEnter';
 export type MessageLayout = 'centered' | 'wide';
 export type PanelShortcutLeft = 'Comma' | 'BracketLeft';
 export type PanelShortcutRight = 'Period' | 'BracketRight';
-export type GatewayConnectionStatus = 'connected' | 'connecting' | 'disconnected';
-
 export interface GatewayInfo {
   id: string;
   name: string;
   color?: string;
+}
+
+export type GatewayConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+
+export interface GatewayState {
+  status: GatewayConnectionStatus;
+  version?: string;
+  reconnectInfo?: { attempt: number; max: number; gaveUp: boolean };
+  info: GatewayInfo;
+  models: ModelCatalogEntry[];
+  agents: { agents: AgentInfo[]; defaultId: string };
+  tools: ToolsCatalog | null;
+  skills: SkillStatusReport | null;
 }
 
 export interface UiState {
@@ -38,6 +49,8 @@ export interface UiState {
 
   gatewayStatusMap: Record<string, GatewayConnectionStatus>;
   setGatewayStatusByGateway: (gatewayId: string, status: GatewayConnectionStatus) => void;
+
+  gatewayRegistry: Record<string, GatewayState>;
 
   gatewayVersionMap: Record<string, string>;
   setGatewayVersion: (gatewayId: string, version: string | undefined) => void;
@@ -172,6 +185,8 @@ export function createUiStore(deps: UiStoreDeps) {
       set((s) => ({
         gatewayStatusMap: { ...s.gatewayStatusMap, [gatewayId]: status },
       })),
+
+    gatewayRegistry: {},
 
     gatewayVersionMap: {},
     setGatewayVersion: (gatewayId, version) =>
