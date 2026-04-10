@@ -237,7 +237,7 @@ export default function MentionPicker({
                 </button>
               );
             }
-            case 'task':
+            case 'task': {
               return (
                 <button
                   key={item.task.id}
@@ -254,6 +254,7 @@ export default function MentionPicker({
                   <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">{item.task.status}</span>
                 </button>
               );
+            }
             case 'file': {
               const a = item.artifact;
               return (
@@ -265,12 +266,14 @@ export default function MentionPicker({
                   onClick={() => onSelectArtifact(a)}
                   onMouseEnter={() => onHoverIndex(i)}
                 >
-                  {artifactIcon(a.type, 14)}
+                  <span className="flex-shrink-0">{artifactIcon(a.type, 14)}</span>
                   <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.name}</span>
                   <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
                 </button>
               );
             }
+            default:
+              return null;
           }
         })}
       </div>
