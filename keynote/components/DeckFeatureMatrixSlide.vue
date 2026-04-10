@@ -11,6 +11,54 @@ interface Feature {
 
 const features: Feature[] = [
   {
+    icon: '👥',
+    name: {
+      en: 'Teams',
+      zh: '团队',
+      ja: 'チーム',
+      ko: '팀',
+      fr: 'Équipes',
+      de: 'Teams',
+      es: 'Equipos',
+      pt: 'Equipes',
+    },
+    tone: 'purple',
+    stars: 3,
+    ver: 'v0.0.14',
+  },
+  {
+    icon: '🏪',
+    name: {
+      en: 'TeamsHub',
+      zh: '团队市场',
+      ja: 'TeamsHub',
+      ko: 'TeamsHub',
+      fr: 'TeamsHub',
+      de: 'TeamsHub',
+      es: 'TeamsHub',
+      pt: 'TeamsHub',
+    },
+    tone: 'cyan',
+    stars: 3,
+    ver: 'v0.0.14',
+  },
+  {
+    icon: '🧩',
+    name: {
+      en: 'Skills',
+      zh: '技能',
+      ja: 'Skills',
+      ko: 'Skills',
+      fr: 'Skills',
+      de: 'Skills',
+      es: 'Skills',
+      pt: 'Skills',
+    },
+    tone: 'green',
+    stars: 3,
+    ver: 'v0.0.14',
+  },
+  {
     icon: '🛡',
     name: {
       en: 'Tool Approval',
@@ -348,24 +396,6 @@ const features: Feature[] = [
   },
 ];
 
-const next: Omit<Feature, 'ver'>[] = [
-  {
-    icon: '🎯',
-    name: {
-      en: 'Multi-Agent Task',
-      zh: '多 Agent 任务',
-      ja: 'マルチ Agent タスク',
-      ko: '멀티 Agent 태스크',
-      fr: 'Tâche multi-Agent',
-      de: 'Multi-Agent-Aufgabe',
-      es: 'Tarea multi-Agent',
-      pt: 'Tarefa multi-Agent',
-    },
-    tone: 'purple',
-    stars: 3,
-  },
-];
-
 function starLabel(n: number) {
   return n > 0 ? '★'.repeat(n) : '';
 }
@@ -380,14 +410,6 @@ function starLabel(n: number) {
         <span v-if="f.stars" class="cw-feature-cell-stars">{{ starLabel(f.stars) }}</span>
       </div>
       <span class="cw-feature-cell-ver">{{ f.ver }}</span>
-    </div>
-  </div>
-  <div class="cw-feature-next-row">
-    <span class="cw-feature-next-tag">NEXT</span>
-    <div v-for="n in next" :key="n.name.en" class="cw-feature-cell cw-feature-cell--next" :data-tone="n.tone">
-      <span class="cw-feature-cell-icon">{{ n.icon }}</span>
-      <span class="cw-feature-cell-label">{{ t(n.name) }}</span>
-      <span class="cw-feature-cell-stars">{{ starLabel(n.stars) }}</span>
     </div>
   </div>
 </template>

@@ -5,8 +5,11 @@
   "description": "ClawWork presentation slides powered by Slidev",
   "scripts": {
     "dev": "slidev --open",
+    "dev:dev": "slidev slides-dev.md --open",
     "build": "slidev build",
+    "build:dev": "slidev build slides-dev.md --out dist-dev",
     "export": "slidev export",
+    "export:dev": "slidev export slides-dev.md",
     "preview": "slidev build && vite preview --open"
   },
   "dependencies": {

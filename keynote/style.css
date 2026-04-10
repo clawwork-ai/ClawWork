@@ -500,7 +500,7 @@ html:not(.dark) .slidev-layout {
 }
 
 .cw-card--feature {
-  padding: 24px;
+  padding: 16px;
 }
 
 .cw-card--compact {
@@ -528,12 +528,12 @@ html:not(.dark) .slidev-layout {
 }
 
 .cw-card-icon {
-  margin-bottom: 16px;
-  font-size: 1.875rem;
+  margin-bottom: 10px;
+  font-size: 1.625rem;
 }
 
 .cw-card-title {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--cw-tone);
@@ -548,7 +548,7 @@ html:not(.dark) .slidev-layout {
   margin: 0;
   font-size: 0.95rem;
   color: var(--cw-text-secondary);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .cw-card-copy--compact {
@@ -564,7 +564,7 @@ html:not(.dark) .slidev-layout {
 }
 
 .cw-mini-panel {
-  padding: 12px 14px;
+  padding: 10px 14px;
   background: var(--cw-tone-soft);
   border: 1px solid var(--cw-tone-border);
   border-radius: var(--cw-radius-md);
@@ -587,7 +587,7 @@ html:not(.dark) .slidev-layout {
 }
 
 .cw-mini-panel-copy {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 0.9rem;
   color: var(--cw-text-secondary);
 }
@@ -884,7 +884,7 @@ html:not(.dark) .slidev-layout {
 }
 
 .cw-note-panel {
-  padding: 16px;
+  padding: 12px;
   border-radius: var(--cw-radius-lg);
   border: 1px solid var(--cw-tone-border);
   background: var(--cw-tone-soft);
@@ -1570,16 +1570,13 @@ html:not(.dark) .slidev-layout {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  opacity: 0.2;
   transition:
     border-color 0.2s,
-    transform 0.15s,
-    opacity 0.25s;
+    transform 0.15s;
   font-family: system-ui, sans-serif;
 }
 
 .lang-switch:hover {
-  opacity: 1;
   border-color: var(--cw-green);
   background: var(--cw-lang-hover-bg);
   transform: scale(1.1);
@@ -1630,4 +1627,102 @@ html:not(.dark) .slidev-layout {
 .lang-option--active {
   background: var(--cw-tone-soft);
   color: var(--cw-green);
+}
+
+:root {
+  --cw-font-base:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --cw-font-display: var(--cw-font-base);
+  --cw-bg-cover: none;
+  --cw-bg-content: none;
+  --cw-bg-section: none;
+  --cw-bg-thanks: none;
+  --cw-event-logo: none;
+  --cw-code-bg: color-mix(in srgb, var(--cw-green) 14%, transparent);
+  --cw-code-fg: var(--cw-green-bright);
+  --cw-code-border: color-mix(in srgb, var(--cw-green) 22%, transparent);
+}
+
+.slidev-layout :not(pre) > code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--cw-code-bg);
+  color: var(--cw-code-fg);
+  border: 1px solid var(--cw-code-border);
+  font-family: var(--cw-font-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.slidev-layout {
+  font-family: var(--cw-font-base);
+  isolation: isolate;
+}
+
+.slidev-layout::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--cw-bg-content);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.slidev-layout :where(h1, h2, h3, h4) {
+  font-family: var(--cw-font-display);
+}
+
+.slidev-layout:has(.cw-split--hero)::before {
+  background-image: var(--cw-bg-cover);
+}
+
+.slidev-layout:has(.cw-thanks-shell):not(:has(.cw-final-links))::before {
+  background-image: var(--cw-bg-section);
+}
+
+.slidev-layout:has(.cw-final-links)::before {
+  background-image: var(--cw-bg-thanks);
+}
+
+.slidev-layout:has(.cw-split--hero)::after,
+.slidev-layout:has(.cw-final-links)::after {
+  content: '';
+  position: absolute;
+  right: 32px;
+  bottom: 28px;
+  width: 140px;
+  height: 40px;
+  background-image: var(--cw-event-logo);
+  background-size: contain;
+  background-position: right center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.controls-hotzone {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 140px;
+  height: 56px;
+  z-index: 9998;
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) {
+  .controls-hotzone {
+    opacity: 0;
+  }
+  .controls-hotzone:hover {
+    opacity: 1;
+  }
+}
+
+.controls-hotzone--pinned {
+  opacity: 1;
 }
