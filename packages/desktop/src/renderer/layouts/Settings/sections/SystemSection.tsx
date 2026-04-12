@@ -18,17 +18,23 @@ export default function SystemSection() {
   const [changingWorkspace, setChangingWorkspace] = useState(false);
 
   useEffect(() => {
-    window.clawwork.getQuickLaunchConfig().then((config) => {
-      setQuickLaunchEnabled(config.enabled);
-      setQuickLaunchShortcut(config.shortcut);
-    }).catch((err) => console.error('[SystemSection] getQuickLaunchConfig failed:', err));;
-    window.clawwork.getTrayEnabled()
-    .then(setTrayEnabled)
-    .catch((err) => console.error('[SystemSection] getTrayEnabled failed:', err));;
-    window.clawwork.getSettings().then((settings) => {
-      if (settings) setWorkspacePath(settings.workspacePath || t('common.notConfigured'));
-    })
-    .catch((err) => console.error('[SystemSection] getSettings failed:', err));;
+    window.clawwork
+      .getQuickLaunchConfig()
+      .then((config) => {
+        setQuickLaunchEnabled(config.enabled);
+        setQuickLaunchShortcut(config.shortcut);
+      })
+      .catch((err) => console.error('[SystemSection] getQuickLaunchConfig failed:', err));
+    window.clawwork
+      .getTrayEnabled()
+      .then(setTrayEnabled)
+      .catch((err) => console.error('[SystemSection] getTrayEnabled failed:', err));
+    window.clawwork
+      .getSettings()
+      .then((settings) => {
+        if (settings) setWorkspacePath(settings.workspacePath || t('common.notConfigured'));
+      })
+      .catch((err) => console.error('[SystemSection] getSettings failed:', err));
   }, [t]);
 
   const handleTrayToggle = useCallback(
@@ -101,15 +107,17 @@ export default function SystemSection() {
       const shortcut = parts.join('+');
       setRecordingShortcut(false);
 
-      window.clawwork.updateQuickLaunchConfig(quickLaunchEnabled, shortcut).then((ok) => {
-        if (ok) {
-          setQuickLaunchShortcut(shortcut);
-          toast.success(t('settings.shortcutUpdated'));
-        } else {
-          toast.error(t('settings.quickLaunchShortcutConflict'));
-        }
-      })
-      .catch(() => toast.error(t('settings.quickLaunchUpdateFailed')));
+      window.clawwork
+        .updateQuickLaunchConfig(quickLaunchEnabled, shortcut)
+        .then((ok) => {
+          if (ok) {
+            setQuickLaunchShortcut(shortcut);
+            toast.success(t('settings.shortcutUpdated'));
+          } else {
+            toast.error(t('settings.quickLaunchShortcutConflict'));
+          }
+        })
+        .catch(() => toast.error(t('settings.quickLaunchUpdateFailed')));
     },
     [quickLaunchEnabled, t],
   );

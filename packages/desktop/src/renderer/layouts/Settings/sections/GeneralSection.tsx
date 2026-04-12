@@ -85,15 +85,18 @@ export default function GeneralSection() {
   });
 
   useEffect(() => {
-    window.clawwork.getSettings().then((settings) => {
-      if (!settings?.notifications) return;
-      const n = settings.notifications;
-      setNotifyState((prev) => ({
-        taskComplete: n.taskComplete ?? prev.taskComplete,
-        approvalRequest: n.approvalRequest ?? prev.approvalRequest,
-        gatewayDisconnect: n.gatewayDisconnect ?? prev.gatewayDisconnect,
-      }));
-    }).catch((err) => console.error('[GeneralSection] getSettings failed:', err));;
+    window.clawwork
+      .getSettings()
+      .then((settings) => {
+        if (!settings?.notifications) return;
+        const n = settings.notifications;
+        setNotifyState((prev) => ({
+          taskComplete: n.taskComplete ?? prev.taskComplete,
+          approvalRequest: n.approvalRequest ?? prev.approvalRequest,
+          gatewayDisconnect: n.gatewayDisconnect ?? prev.gatewayDisconnect,
+        }));
+      })
+      .catch((err) => console.error('[GeneralSection] getSettings failed:', err));
   }, []);
 
   const handleNotificationToggle = useCallback(

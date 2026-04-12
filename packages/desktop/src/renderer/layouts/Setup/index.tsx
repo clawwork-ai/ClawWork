@@ -66,9 +66,10 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
   };
 
   useEffect(() => {
-    window.clawwork.getDefaultWorkspacePath()
-    .then(setPath)
-    .catch((err) => console.error('[Setup] getDefaultWorkspacePath failed:', err));
+    window.clawwork
+      .getDefaultWorkspacePath()
+      .then(setPath)
+      .catch((err) => console.error('[Setup] getDefaultWorkspacePath failed:', err));
   }, []);
 
   const handleBrowse = async (): Promise<void> => {
