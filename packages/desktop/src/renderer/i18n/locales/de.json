@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "Schnellstart aktiviert",
     "quickLaunchShortcut": "Tastenkuerzel",
     "quickLaunchShortcutConflict": "Tastenkuerzel koennte mit einer anderen App kollidieren",
+    "quickLaunchUpdateFailed": "Quick Launch-Konfiguration konnte nicht aktualisiert werden",
     "readyToInstall": "Neustart fuer Update",
     "remove": "Entfernen",
     "rightPanelShortcut": "Kontextbereich ein-/ausblenden",

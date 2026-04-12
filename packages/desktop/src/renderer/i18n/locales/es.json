@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "Inicio rápido activado",
     "quickLaunchShortcut": "Atajo",
     "quickLaunchShortcutConflict": "El atajo podría entrar en conflicto con otra aplicación",
+    "quickLaunchUpdateFailed": "Error al actualizar la configuración de Quick Launch",
     "readyToInstall": "Reiniciar para actualizar",
     "remove": "Eliminar",
     "rightPanelShortcut": "Alternar panel de contexto",

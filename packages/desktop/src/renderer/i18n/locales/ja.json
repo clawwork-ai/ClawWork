@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "クイック起動を有効にしました",
     "quickLaunchShortcut": "ショートカット",
     "quickLaunchShortcutConflict": "ショートカットが他のアプリと競合する可能性があります",
+    "quickLaunchUpdateFailed": "クイック起動の設定を更新できませんでした",
     "readyToInstall": "再起動してアップデート",
     "remove": "削除",
     "rightPanelShortcut": "コンテキストパネルの切替",

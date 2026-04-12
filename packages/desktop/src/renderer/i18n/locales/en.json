@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "Quick Launch enabled",
     "quickLaunchShortcut": "Shortcut",
     "quickLaunchShortcutConflict": "Shortcut may conflict with another app",
+    "quickLaunchUpdateFailed": "Failed to update Quick Launch config",
     "readyToInstall": "Restart to Update",
     "remove": "Remove",
     "rightPanelShortcut": "Toggle context panel",

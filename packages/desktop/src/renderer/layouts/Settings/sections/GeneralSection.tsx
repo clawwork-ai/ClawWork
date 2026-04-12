@@ -93,7 +93,7 @@ export default function GeneralSection() {
         approvalRequest: n.approvalRequest ?? prev.approvalRequest,
         gatewayDisconnect: n.gatewayDisconnect ?? prev.gatewayDisconnect,
       }));
-    });
+    }).catch((err) => console.error('[GeneralSection] getSettings failed:', err));;
   }, []);
 
   const handleNotificationToggle = useCallback(

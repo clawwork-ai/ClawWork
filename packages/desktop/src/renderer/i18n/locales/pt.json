@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "Acesso Rápido ativado",
     "quickLaunchShortcut": "Atalho",
     "quickLaunchShortcutConflict": "O atalho pode conflitar com outro aplicativo",
+    "quickLaunchUpdateFailed": "Falha ao atualizar a configuração do Quick Launch",
     "readyToInstall": "Reiniciar para Atualizar",
     "remove": "Remover",
     "rightPanelShortcut": "Alternar painel de contexto",

@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "빠른 실행이 활성화되었습니다",
     "quickLaunchShortcut": "단축키",
     "quickLaunchShortcutConflict": "다른 앱과 단축키가 충돌할 수 있습니다",
+    "quickLaunchUpdateFailed": "빠른 실행 설정을 업데이트하지 못했습니다",
     "readyToInstall": "재시작하여 업데이트",
     "remove": "제거",
     "rightPanelShortcut": "컨텍스트 패널 전환",

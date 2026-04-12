@@ -502,6 +502,7 @@
     "quickLaunchEnabled": "快速啟動已啟用",
     "quickLaunchShortcut": "快捷鍵",
     "quickLaunchShortcutConflict": "快捷鍵可能與其他應用程式衝突",
+    "quickLaunchUpdateFailed": "無法更新快速啟動設定",
     "readyToInstall": "重新啟動以更新",
     "remove": "移除",
     "rightPanelShortcut": "切換上下文面板",

@@ -21,11 +21,14 @@ export default function SystemSection() {
     window.clawwork.getQuickLaunchConfig().then((config) => {
       setQuickLaunchEnabled(config.enabled);
       setQuickLaunchShortcut(config.shortcut);
-    });
-    window.clawwork.getTrayEnabled().then(setTrayEnabled);
+    }).catch((err) => console.error('[SystemSection] getQuickLaunchConfig failed:', err));;
+    window.clawwork.getTrayEnabled()
+    .then(setTrayEnabled)
+    .catch((err) => console.error('[SystemSection] getTrayEnabled failed:', err));;
     window.clawwork.getSettings().then((settings) => {
       if (settings) setWorkspacePath(settings.workspacePath || t('common.notConfigured'));
-    });
+    })
+    .catch((err) => console.error('[SystemSection] getSettings failed:', err));;
   }, [t]);
 
   const handleTrayToggle = useCallback(
@@ -105,7 +108,8 @@ export default function SystemSection() {
         } else {
           toast.error(t('settings.quickLaunchShortcutConflict'));
         }
-      });
+      })
+      .catch(() => toast.error(t('settings.quickLaunchUpdateFailed')));
     },
     [quickLaunchEnabled, t],
   );
