@@ -1,15 +1,5 @@
 import type { ToolCall } from '@clawwork/shared';
 
-export interface ChatContentBlock {
-  type: string;
-  text?: string;
-  thinking?: string;
-  id?: string;
-  name?: string;
-  arguments?: Record<string, unknown> | string;
-  result?: unknown;
-}
-
 export interface ChatMessage {
   role?: string;
   content?: ChatContentBlock[];
@@ -36,6 +26,10 @@ export interface RawContentBlock {
   arguments?: Record<string, unknown> | string;
   result?: unknown;
 }
+
+export type ChatContentBlock = RawContentBlock & {
+  thinking?: string;
+};
 
 export interface RawHistoryMessage {
   role: string;
