@@ -11,6 +11,7 @@ import { registerWorkspaceHandlers } from './ipc/workspace-handlers.js';
 import { registerSettingsHandlers } from './ipc/settings-handlers.js';
 import { registerSearchHandlers } from './ipc/search-handlers.js';
 import { registerDataHandlers } from './ipc/data-handlers.js';
+import { registerStatsHandlers } from './ipc/stats-handlers.js';
 import { registerUpdateHandlers } from './ipc/update-handlers.js';
 import { registerDebugHandlers } from './ipc/debug-handlers.js';
 import { configureVoicePermissionHandlers, registerVoiceHandlers } from './ipc/voice-handlers.js';
@@ -200,6 +201,7 @@ if (!gotLock) {
     registerSettingsHandlers();
     registerSearchHandlers();
     registerDataHandlers();
+    registerStatsHandlers();
     registerUpdateHandlers();
     registerDebugHandlers();
     registerVoiceHandlers();
