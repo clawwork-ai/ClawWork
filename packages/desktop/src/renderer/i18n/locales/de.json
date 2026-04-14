@@ -250,7 +250,12 @@
     "wakeMode_now": "Sofort"
   },
   "dashboard": {
-    "comingSoon": "Dein Claw-Profil wird gerade zusammengestellt."
+    "formingTitle": "Dein Claw-Profil entsteht",
+    "heading": "Dein Claw-Profil",
+    "mvpAgent": "MVP-Agent",
+    "signatureSkill": "Signatur-Skill",
+    "tasks": "Aufgaben",
+    "unlockHint": "Erledige 3 Aufgaben, um dein Profil freizuschalten"
   },
   "dialog": {
     "confirm": "Fortfahren",

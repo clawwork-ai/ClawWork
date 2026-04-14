@@ -250,7 +250,12 @@
     "wakeMode_now": "즉시"
   },
   "dashboard": {
-    "comingSoon": "Claw 프로필을 준비 중입니다."
+    "formingTitle": "Claw 프로필 생성 중",
+    "heading": "나의 Claw 프로필",
+    "mvpAgent": "MVP agent",
+    "signatureSkill": "시그니처 skill",
+    "tasks": "태스크",
+    "unlockHint": "3 개의 태스크를 완료하면 프로필이 열립니다"
   },
   "dialog": {
     "confirm": "계속",

@@ -250,7 +250,12 @@
     "wakeMode_now": "立即"
   },
   "dashboard": {
-    "comingSoon": "你的 Claw 画像正在组装中，敬请期待。"
+    "formingTitle": "你的 Claw 画像正在生成",
+    "heading": "你的 Claw 画像",
+    "mvpAgent": "MVP agent",
+    "signatureSkill": "签名 skill",
+    "tasks": "任务",
+    "unlockHint": "完成 3 个任务解锁你的画像"
   },
   "dialog": {
     "confirm": "继续",

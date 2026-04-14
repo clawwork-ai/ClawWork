@@ -250,7 +250,12 @@
     "wakeMode_now": "即時"
   },
   "dashboard": {
-    "comingSoon": "あなたの Claw プロフィールを準備中です。"
+    "formingTitle": "あなたの Claw プロフィールを生成中",
+    "heading": "あなたの Claw プロフィール",
+    "mvpAgent": "MVP agent",
+    "signatureSkill": "シグネチャ skill",
+    "tasks": "タスク",
+    "unlockHint": "3 つのタスクを完了してプロフィールを解放"
   },
   "dialog": {
     "confirm": "続行",

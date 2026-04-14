@@ -250,7 +250,12 @@
     "wakeMode_now": "Inmediato"
   },
   "dashboard": {
-    "comingSoon": "Tu perfil de Claw se está preparando."
+    "formingTitle": "Tu perfil de Claw se está formando",
+    "heading": "Tu perfil de Claw",
+    "mvpAgent": "Agente MVP",
+    "signatureSkill": "Skill distintiva",
+    "tasks": "tareas",
+    "unlockHint": "Completa 3 tareas para desbloquear tu perfil"
   },
   "dialog": {
     "confirm": "Continuar",

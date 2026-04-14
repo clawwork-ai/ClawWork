@@ -250,7 +250,12 @@
     "wakeMode_now": "Immediate"
   },
   "dashboard": {
-    "comingSoon": "Your Claw profile is being assembled. Come back soon."
+    "formingTitle": "Your Claw Profile is forming",
+    "heading": "Your Claw Profile",
+    "mvpAgent": "MVP agent",
+    "signatureSkill": "Signature skill",
+    "tasks": "tasks",
+    "unlockHint": "Complete 3 tasks to unlock your profile"
   },
   "dialog": {
     "confirm": "Continue",
