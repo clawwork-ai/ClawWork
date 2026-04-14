@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "Naechster Heartbeat",
     "wakeMode_now": "Sofort"
   },
+  "dashboard": {
+    "comingSoon": "Dein Claw-Profil wird gerade zusammengestellt."
+  },
   "dialog": {
     "confirm": "Fortfahren",
     "deleteTaskDesc": "Dadurch werden die Aufgabe, alle Nachrichten und die Server-Sitzung dauerhaft geloescht. Dies kann nicht rueckgaengig gemacht werden.",
@@ -297,6 +300,7 @@
     "appSettings": "App-Einstellungen",
     "archivedChats": "Archivierte Chats",
     "collapseNav": "Seitenleiste einklappen",
+    "dashboard": "Dashboard",
     "emptyHint": "Klicken Sie auf \"Neue Aufgabe\"",
     "expandNav": "Seitenleiste ausklappen",
     "scheduledTasks": "Geplant",

@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "Next Heartbeat",
     "wakeMode_now": "Immediate"
   },
+  "dashboard": {
+    "comingSoon": "Your Claw profile is being assembled. Come back soon."
+  },
   "dialog": {
     "confirm": "Continue",
     "deleteTaskDesc": "This will permanently delete the task, all messages, and the server session. This cannot be undone.",
@@ -297,6 +300,7 @@
     "appSettings": "App Settings",
     "archivedChats": "Archived Chats",
     "collapseNav": "Collapse sidebar",
+    "dashboard": "Dashboard",
     "emptyHint": "Click \"New Task\" to start",
     "expandNav": "Expand sidebar",
     "scheduledTasks": "Scheduled",

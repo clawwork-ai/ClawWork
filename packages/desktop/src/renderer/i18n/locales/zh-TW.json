@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "下次心跳",
     "wakeMode_now": "立即"
   },
+  "dashboard": {
+    "comingSoon": "你的 Claw 畫像正在組裝中，敬請期待。"
+  },
   "dialog": {
     "confirm": "繼續",
     "deleteTaskDesc": "這將永久刪除此任務、所有訊息及伺服器端工作階段。此操作無法復原。",
@@ -297,6 +300,7 @@
     "appSettings": "應用程式設定",
     "archivedChats": "已封存對話",
     "collapseNav": "收合側邊欄",
+    "dashboard": "儀表板",
     "emptyHint": "點擊「新任務」開始",
     "expandNav": "展開側邊欄",
     "scheduledTasks": "排程任務",

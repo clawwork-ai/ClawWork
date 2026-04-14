@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "次のハートビート",
     "wakeMode_now": "即時"
   },
+  "dashboard": {
+    "comingSoon": "あなたの Claw プロフィールを準備中です。"
+  },
   "dialog": {
     "confirm": "続行",
     "deleteTaskDesc": "タスク、すべてのメッセージ、およびサーバーセッションが完全に削除されます。この操作は取り消せません。",
@@ -297,6 +300,7 @@
     "appSettings": "アプリ設定",
     "archivedChats": "アーカイブ済みチャット",
     "collapseNav": "サイドバーを折りたたむ",
+    "dashboard": "ダッシュボード",
     "emptyHint": "「新規タスク」をクリックして開始",
     "expandNav": "サイドバーを展開",
     "scheduledTasks": "スケジュール",

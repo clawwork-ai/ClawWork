@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "Próximo latido",
     "wakeMode_now": "Inmediato"
   },
+  "dashboard": {
+    "comingSoon": "Tu perfil de Claw se está preparando."
+  },
   "dialog": {
     "confirm": "Continuar",
     "deleteTaskDesc": "Esto eliminará permanentemente la tarea, todos los mensajes y la sesión del servidor. Esta acción no se puede deshacer.",
@@ -297,6 +300,7 @@
     "appSettings": "Configuración de la app",
     "archivedChats": "Chats archivados",
     "collapseNav": "Contraer barra lateral",
+    "dashboard": "Panel",
     "emptyHint": "Haz clic en “Nueva tarea” para comenzar",
     "expandNav": "Expandir barra lateral",
     "scheduledTasks": "Programadas",

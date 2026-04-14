@@ -9,7 +9,18 @@ import {
   type ReactNode,
 } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Search, FolderOpen, Settings, Archive, PanelLeftClose, PanelLeftOpen, Clock, Users } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  FolderOpen,
+  Settings,
+  Archive,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Clock,
+  Users,
+  Gauge,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
@@ -385,6 +396,12 @@ export default function LeftNav() {
             className={navActiveClass(mainView === 'archived')}
           />
           <IconButton
+            icon={Gauge}
+            tooltip={t('leftNav.dashboard')}
+            onClick={() => setMainView('dashboard')}
+            className={navActiveClass(mainView === 'dashboard')}
+          />
+          <IconButton
             icon={Settings}
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}
             onClick={() => setSettingsOpen(!settingsOpen)}
@@ -532,6 +549,13 @@ export default function LeftNav() {
             className={navActiveClass(mainView === 'archived')}
           />
           <div className="flex-1" />
+          <IconButton
+            icon={Gauge}
+            tooltip={t('leftNav.dashboard')}
+            onClick={() => setMainView('dashboard')}
+            tooltipSide="top"
+            className={navActiveClass(mainView === 'dashboard')}
+          />
           <IconButton
             icon={Settings}
             tooltip={hasUpdate ? t('leftNav.updateAvailable') : t('leftNav.appSettings')}

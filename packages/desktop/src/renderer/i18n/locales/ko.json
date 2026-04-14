@@ -249,6 +249,9 @@
     "wakeMode_nextHeartbeat": "다음 하트비트",
     "wakeMode_now": "즉시"
   },
+  "dashboard": {
+    "comingSoon": "Claw 프로필을 준비 중입니다."
+  },
   "dialog": {
     "confirm": "계속",
     "deleteTaskDesc": "작업, 모든 메시지, 서버 세션이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
@@ -297,6 +300,7 @@
     "appSettings": "앱 설정",
     "archivedChats": "보관된 대화",
     "collapseNav": "사이드바 접기",
+    "dashboard": "대시보드",
     "emptyHint": "\"새 작업\"을 클릭하여 시작하세요",
     "expandNav": "사이드바 펼치기",
     "scheduledTasks": "예약 작업",
