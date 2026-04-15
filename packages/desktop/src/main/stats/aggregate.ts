@@ -19,7 +19,7 @@ export async function collectDashboardData(db: Database.Database): Promise<ClawD
   const totalMessages = (db.prepare('SELECT COUNT(*) as c FROM messages').get() as { c: number }).c;
   const totalArtifacts = (db.prepare('SELECT COUNT(*) as c FROM artifacts').get() as { c: number }).c;
 
-  const breakdowns = collectBreakdowns(db, totalTasks);
+  const breakdowns = collectBreakdowns(db, totalTasks, buildGatewayNameMap());
   const last30d = await collectLast30d();
 
   return {
@@ -48,7 +48,20 @@ function toEntries(
     }));
 }
 
-function collectBreakdowns(db: Database.Database, totalTasks: number): DashboardBreakdowns {
+function buildGatewayNameMap(): Map<string, string> {
+  const clients = getAllGatewayClients();
+  const nameMap = new Map<string, string>();
+  for (const [id, client] of clients) {
+    nameMap.set(id, client.name || id);
+  }
+  return nameMap;
+}
+
+function collectBreakdowns(
+  db: Database.Database,
+  totalTasks: number,
+  gatewayNames: Map<string, string>,
+): DashboardBreakdowns {
   const modelRows = db
     .prepare(
       `SELECT model as name, COUNT(*) as count
@@ -58,22 +71,18 @@ function collectBreakdowns(db: Database.Database, totalTasks: number): Dashboard
     )
     .all() as Array<{ name: string; count: number }>;
 
-  const gatewayRows = db
+  const gatewayRawRows = db
     .prepare(
-      `SELECT gateway_id as name, COUNT(*) as count
+      `SELECT gateway_id as id, COUNT(*) as count
        FROM tasks
        WHERE gateway_id IS NOT NULL AND gateway_id != ''
        GROUP BY gateway_id`,
     )
-    .all() as Array<{ name: string; count: number }>;
-
-  const statusRows = db
-    .prepare(
-      `SELECT status as name, COUNT(*) as count
-       FROM tasks
-       GROUP BY status`,
-    )
-    .all() as Array<{ name: string; count: number }>;
+    .all() as Array<{ id: string; count: number }>;
+  const gatewayRows = gatewayRawRows.map((row) => ({
+    name: gatewayNames.get(row.id) ?? row.id,
+    count: row.count,
+  }));
 
   const sessionKeyRows = db.prepare('SELECT session_key as sessionKey FROM tasks').all() as Array<{
     sessionKey: string;
@@ -90,7 +99,6 @@ function collectBreakdowns(db: Database.Database, totalTasks: number): Dashboard
     models: toEntries(modelRows, totalTasks, 5),
     gateways: toEntries(gatewayRows, totalTasks, 5),
     agents: toEntries(agentRows, totalTasks, 5),
-    statuses: toEntries(statusRows, totalTasks, 5),
   };
 }
 

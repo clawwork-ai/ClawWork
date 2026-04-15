@@ -715,7 +715,6 @@ export interface DashboardBreakdowns {
   models: DashboardBreakdownEntry[];
   gateways: DashboardBreakdownEntry[];
   agents: DashboardBreakdownEntry[];
-  statuses: DashboardBreakdownEntry[];
 }
 
 export interface DashboardLast30d {

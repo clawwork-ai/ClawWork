@@ -77,7 +77,7 @@ export default function Dashboard() {
 
       <section>
         <SectionHeader text={t('dashboard.breakdownsSection')} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <BreakdownTile
             label={t('dashboard.topModels')}
             entries={data?.breakdowns.models ?? []}
@@ -91,11 +91,6 @@ export default function Dashboard() {
           <BreakdownTile
             label={t('dashboard.topAgents')}
             entries={data?.breakdowns.agents ?? []}
-            emptyText={t('dashboard.noBreakdownData')}
-          />
-          <BreakdownTile
-            label={t('dashboard.taskStatus')}
-            entries={data?.breakdowns.statuses ?? []}
             emptyText={t('dashboard.noBreakdownData')}
           />
         </div>
