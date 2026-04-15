@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "Próximo Heartbeat",
     "wakeMode_now": "Imediato"
   },
+  "dashboard": {
+    "activeDays": "Dias ativos",
+    "inputTokens": "Tokens de entrada",
+    "outputTokens": "Tokens de saída",
+    "totalTasks": "Total de tarefas"
+  },
   "dialog": {
     "confirm": "Continuar",
     "deleteTaskDesc": "Isso excluirá permanentemente a tarefa, todas as mensagens e a sessão no servidor. Esta ação não pode ser desfeita.",

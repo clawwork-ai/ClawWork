@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "Naechster Heartbeat",
     "wakeMode_now": "Sofort"
   },
+  "dashboard": {
+    "activeDays": "Aktive Tage",
+    "inputTokens": "Eingabe-Tokens",
+    "outputTokens": "Ausgabe-Tokens",
+    "totalTasks": "Gesamte Aufgaben"
+  },
   "dialog": {
     "confirm": "Fortfahren",
     "deleteTaskDesc": "Dadurch werden die Aufgabe, alle Nachrichten und die Server-Sitzung dauerhaft geloescht. Dies kann nicht rueckgaengig gemacht werden.",

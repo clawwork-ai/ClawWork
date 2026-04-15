@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "下次心跳",
     "wakeMode_now": "立即"
   },
+  "dashboard": {
+    "activeDays": "活躍天數",
+    "inputTokens": "輸入 Token",
+    "outputTokens": "輸出 Token",
+    "totalTasks": "總任務數"
+  },
   "dialog": {
     "confirm": "繼續",
     "deleteTaskDesc": "這將永久刪除此任務、所有訊息及伺服器端工作階段。此操作無法復原。",

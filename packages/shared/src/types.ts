@@ -708,6 +708,8 @@ export interface SessionsUsageResult {
 export interface ClawDashboardData {
   totalTasks: number;
   activeDays: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
 }
 
 export type CronSchedule =

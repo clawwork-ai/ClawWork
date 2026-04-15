@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "次のハートビート",
     "wakeMode_now": "即時"
   },
+  "dashboard": {
+    "activeDays": "アクティブ日数",
+    "inputTokens": "入力トークン",
+    "outputTokens": "出力トークン",
+    "totalTasks": "総タスク数"
+  },
   "dialog": {
     "confirm": "続行",
     "deleteTaskDesc": "タスク、すべてのメッセージ、およびサーバーセッションが完全に削除されます。この操作は取り消せません。",

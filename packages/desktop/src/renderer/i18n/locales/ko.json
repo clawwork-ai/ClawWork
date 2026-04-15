@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "다음 하트비트",
     "wakeMode_now": "즉시"
   },
+  "dashboard": {
+    "activeDays": "활동 일수",
+    "inputTokens": "입력 토큰",
+    "outputTokens": "출력 토큰",
+    "totalTasks": "총 태스크"
+  },
   "dialog": {
     "confirm": "계속",
     "deleteTaskDesc": "작업, 모든 메시지, 서버 세션이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",

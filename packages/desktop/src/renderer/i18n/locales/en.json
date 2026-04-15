@@ -249,6 +249,12 @@
     "wakeMode_nextHeartbeat": "Next Heartbeat",
     "wakeMode_now": "Immediate"
   },
+  "dashboard": {
+    "activeDays": "Active Days",
+    "inputTokens": "Input Tokens",
+    "outputTokens": "Output Tokens",
+    "totalTasks": "Total Tasks"
+  },
   "dialog": {
     "confirm": "Continue",
     "deleteTaskDesc": "This will permanently delete the task, all messages, and the server session. This cannot be undone.",
