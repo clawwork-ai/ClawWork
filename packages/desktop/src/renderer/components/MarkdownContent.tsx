@@ -169,8 +169,8 @@ export default function MarkdownContent({
                 <a
                   href={href}
                   onClick={(e) => {
+                    e.preventDefault();
                     if (href && /^https?:\/\//.test(href)) {
-                      e.preventDefault();
                       window.open(href, '_blank');
                     }
                   }}

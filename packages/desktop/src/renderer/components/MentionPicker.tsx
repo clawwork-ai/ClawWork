@@ -186,115 +186,101 @@ export default function MentionPicker({
           </div>
         )}
 
-        {activeTab === 'agents' &&
-          items.map((item, i) => {
-            if (item.kind !== 'agent') return null;
-            const a = item.agent;
-            return (
-              <button
-                key={a.sessionKey}
-                data-mention-selected={i === selectedIndex ? '' : undefined}
-                className={cn(
-                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
-                  'hover:bg-[var(--bg-hover)] transition-colors',
-                  i === selectedIndex && 'bg-[var(--bg-hover)]',
-                )}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onSelectAgent(a)}
-                onMouseEnter={() => onHoverIndex(i)}
-              >
-                {a.agentId === MENTION_ALL_AGENT_ID ? (
-                  <Users size={14} className="text-[var(--accent)] flex-shrink-0" />
-                ) : (
-                  <span className="flex-shrink-0">
-                    <AgentIcon
-                      gatewayId={a.gatewayId}
-                      agentId={a.agentId}
-                      gatewayAvatarUrl={a.avatarUrl}
-                      emoji={a.emoji}
-                      imgClass="w-4 h-4 rounded-full object-cover"
-                      iconClass="text-[var(--accent)]"
-                    />
+        {items.map((item, i) => {
+          const className = cn(
+            'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
+            'hover:bg-[var(--bg-hover)] transition-colors',
+            i === selectedIndex && 'bg-[var(--bg-hover)]',
+          );
+          const selectedAttr = i === selectedIndex ? '' : undefined;
+
+          switch (item.kind) {
+            case 'agent': {
+              const a = item.agent;
+              return (
+                <button
+                  key={a.sessionKey}
+                  data-mention-selected={selectedAttr}
+                  className={className}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onSelectAgent(a)}
+                  onMouseEnter={() => onHoverIndex(i)}
+                >
+                  {a.agentId === MENTION_ALL_AGENT_ID ? (
+                    <Users size={14} className="text-[var(--accent)] flex-shrink-0" />
+                  ) : (
+                    <span className="flex-shrink-0">
+                      <AgentIcon
+                        gatewayId={a.gatewayId}
+                        agentId={a.agentId}
+                        gatewayAvatarUrl={a.avatarUrl}
+                        emoji={a.emoji}
+                        imgClass="w-4 h-4 rounded-full object-cover"
+                        iconClass="text-[var(--accent)]"
+                      />
+                    </span>
+                  )}
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.agentName}</span>
+                  <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{a.agentId}</span>
+                </button>
+              );
+            }
+            case 'local': {
+              const f = item.file;
+              return (
+                <button
+                  key={f.absolutePath}
+                  data-mention-selected={selectedAttr}
+                  className={className}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onSelectLocalFile(f)}
+                  onMouseEnter={() => onHoverIndex(i)}
+                >
+                  <FileCode size={14} className="text-[var(--accent)] flex-shrink-0" />
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{f.relativePath}</span>
+                  <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(f.size)}</span>
+                </button>
+              );
+            }
+            case 'task': {
+              return (
+                <button
+                  key={item.task.id}
+                  data-mention-selected={selectedAttr}
+                  className={className}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onSelectTask(item.task)}
+                  onMouseEnter={() => onHoverIndex(i)}
+                >
+                  <ListTodo size={14} className="text-[var(--accent)] flex-shrink-0" />
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">
+                    {item.task.title || t('common.noTitle')}
                   </span>
-                )}
-                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.agentName}</span>
-                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{a.agentId}</span>
-              </button>
-            );
-          })}
-
-        {activeTab === 'local' &&
-          items.map((item, i) => {
-            if (item.kind !== 'local') return null;
-            const f = item.file;
-            return (
-              <button
-                key={f.absolutePath}
-                data-mention-selected={i === selectedIndex ? '' : undefined}
-                className={cn(
-                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
-                  'hover:bg-[var(--bg-hover)] transition-colors',
-                  i === selectedIndex && 'bg-[var(--bg-hover)]',
-                )}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onSelectLocalFile(f)}
-                onMouseEnter={() => onHoverIndex(i)}
-              >
-                <FileCode size={14} className="text-[var(--accent)] flex-shrink-0" />
-                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{f.relativePath}</span>
-                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(f.size)}</span>
-              </button>
-            );
-          })}
-
-        {activeTab === 'tasks' &&
-          items.map((item, i) => {
-            if (item.kind !== 'task') return null;
-            return (
-              <button
-                key={item.task.id}
-                data-mention-selected={i === selectedIndex ? '' : undefined}
-                className={cn(
-                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
-                  'hover:bg-[var(--bg-hover)] transition-colors',
-                  i === selectedIndex && 'bg-[var(--bg-hover)]',
-                )}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onSelectTask(item.task)}
-                onMouseEnter={() => onHoverIndex(i)}
-              >
-                <ListTodo size={14} className="text-[var(--accent)] flex-shrink-0" />
-                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">
-                  {item.task.title || t('common.noTitle')}
-                </span>
-                <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">{item.task.status}</span>
-              </button>
-            );
-          })}
-
-        {activeTab === 'files' &&
-          items.map((item, i) => {
-            if (item.kind !== 'file') return null;
-            const a = item.artifact;
-            return (
-              <button
-                key={a.id}
-                data-mention-selected={i === selectedIndex ? '' : undefined}
-                className={cn(
-                  'type-label flex w-full items-center gap-2.5 px-3 py-2 text-left',
-                  'hover:bg-[var(--bg-hover)] transition-colors',
-                  i === selectedIndex && 'bg-[var(--bg-hover)]',
-                )}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => onSelectArtifact(a)}
-                onMouseEnter={() => onHoverIndex(i)}
-              >
-                {artifactIcon(a.type, 14)}
-                <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.name}</span>
-                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
-              </button>
-            );
-          })}
+                  <span className="type-meta flex-shrink-0 text-[var(--text-muted)]">{item.task.status}</span>
+                </button>
+              );
+            }
+            case 'file': {
+              const a = item.artifact;
+              return (
+                <button
+                  key={a.id}
+                  data-mention-selected={selectedAttr}
+                  className={className}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => onSelectArtifact(a)}
+                  onMouseEnter={() => onHoverIndex(i)}
+                >
+                  <span className="flex-shrink-0">{artifactIcon(a.type, 14)}</span>
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.name}</span>
+                  <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
+                </button>
+              );
+            }
+            default:
+              return null;
+          }
+        })}
       </div>
 
       <div className="type-meta flex items-center gap-2 border-t border-[var(--border-subtle)] px-3 py-1.5 text-[var(--text-muted)]">

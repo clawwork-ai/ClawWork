@@ -101,7 +101,9 @@ export default function GeneralSection() {
 
   const handleNotificationToggle = useCallback(
     (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
-      void updateSettings({ notifications: { ...notifyState, [key]: value } });
+      void updateSettings({ notifications: { ...notifyState, [key]: value } }).catch((err: unknown) => {
+        console.error('[GeneralSection] updateSettings failed:', err);
+      });
     },
     [notifyState, updateSettings],
   );

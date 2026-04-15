@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+import { useCallback, useEffect, type KeyboardEvent, type RefObject } from 'react';
 import type { MainView } from '@clawwork/core';
 import {
   insertTranscriptAtCaret,
@@ -11,6 +11,9 @@ import type {
   VoicePermissionStatus,
   VoiceSession,
 } from '@/lib/voice/types';
+import { usePressHoldTiming } from '@/hooks/usePressHoldTiming';
+import { useVoiceIntro } from '@/hooks/useVoiceIntro';
+import { useVoiceSession } from '@/hooks/useVoiceSession';
 
 export type { VoicePermissionStatus } from '@/lib/voice/types';
 
@@ -58,75 +61,24 @@ export function useVoiceInput({
   isSupported = true,
   onTextInserted,
 }: UseVoiceInputOptions): UseVoiceInputResult {
-  const [isIntroOpen, setIsIntroOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [interimTranscript, setInterimTranscript] = useState('');
-  const [errorCode, setErrorCode] = useState<VoiceErrorCode | null>(null);
+  const { isIntroOpen, hasSeenIntro, openIntro, confirmIntro, dismissIntro } = useVoiceIntro({
+    loadIntroSeen,
+    markIntroSeen,
+  });
+  const { clearHoldTimer, beginPress, releasePress, resetPress, isPressActive, markStartedFromCurrentPress } =
+    usePressHoldTiming(pressHoldDelayMs);
 
-  const sessionRef = useRef<VoiceSession | null>(null);
-  const holdTimerRef = useRef<number | null>(null);
-  const pressStartedAtRef = useRef<number | null>(null);
-  const pressActiveRef = useRef(false);
-  const startedFromCurrentPressRef = useRef(false);
-  const isListeningRef = useRef(false);
-  const introSeenRef = useRef(false);
-  const startRequestIdRef = useRef(0);
+  const canStartAfterPermission = useCallback(
+    (requiresActivePress: boolean) => !requiresActivePress || isPressActive(),
+    [isPressActive],
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    void loadIntroSeen()
-      .then((seen) => {
-        if (cancelled) return;
-        introSeenRef.current = seen;
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        console.error('[useVoiceInput] loadIntroSeen failed:', err);
-        introSeenRef.current = false;
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loadIntroSeen]);
-
-  useEffect(() => {
-    isListeningRef.current = isListening;
-  }, [isListening]);
-
-  const clearHoldTimer = useCallback(() => {
-    if (holdTimerRef.current != null) {
-      window.clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-  }, []);
-
-  const releaseSession = useCallback((shouldStop: boolean) => {
-    const session = sessionRef.current;
-    sessionRef.current = null;
-    if (!session) return;
-    if (shouldStop) {
-      session.stop();
-    } else {
-      session.destroy?.();
-    }
-  }, []);
-
-  const clearListeningState = useCallback(() => {
-    setIsListening(false);
-    isListeningRef.current = false;
-    setInterimTranscript('');
-  }, []);
-
-  const stopListening = useCallback(() => {
-    clearHoldTimer();
-    const wasListening = isListeningRef.current;
-    releaseSession(true);
-    clearListeningState();
-    if (wasListening) {
-      setIsTranscribing(true);
-    }
-  }, [clearHoldTimer, releaseSession, clearListeningState]);
+  const handleSessionStarted = useCallback(
+    (requiresActivePress: boolean) => {
+      markStartedFromCurrentPress(requiresActivePress);
+    },
+    [markStartedFromCurrentPress],
+  );
 
   const insertIntoTextarea = useCallback(
     (transcript: string) => {
@@ -163,78 +115,36 @@ export function useVoiceInput({
     onTextInserted?.();
   }, [textareaRef, onTextInserted]);
 
-  const beginListening = useCallback(
-    async (requiresActivePress: boolean) => {
-      if (!isSupported) {
-        setErrorCode('unsupported');
-        return;
-      }
-
-      setErrorCode(null);
-      const requestId = startRequestIdRef.current + 1;
-      startRequestIdRef.current = requestId;
-
-      const permissionStatus = await requestPermission();
-
-      if (startRequestIdRef.current !== requestId) return;
-      if (requiresActivePress && !pressActiveRef.current) return;
-
-      if (permissionStatus !== 'granted') {
-        setErrorCode(permissionStatus === 'unsupported' ? 'unsupported' : 'permission-denied');
-        clearListeningState();
-        return;
-      }
-
-      const session = createSession({
-        onInterimResult: (text) => {
-          setInterimTranscript(text);
-        },
-        onFinalResult: (text) => {
-          setInterimTranscript('');
-          setIsTranscribing(false);
-          insertIntoTextarea(text);
-        },
-        onError: (code) => {
-          setErrorCode(code);
-          setIsTranscribing(false);
-          releaseSession(false);
-          clearListeningState();
-        },
-        onEnd: () => {
-          setIsTranscribing(false);
-          releaseSession(false);
-          clearListeningState();
-        },
-      });
-
-      if (!session) {
-        setErrorCode('unsupported');
-        clearListeningState();
-        return;
-      }
-
-      sessionRef.current = session;
-      session.start();
-      startedFromCurrentPressRef.current = requiresActivePress;
-      setInterimTranscript('');
-      setIsListening(true);
-      isListeningRef.current = true;
-    },
-    [isSupported, requestPermission, createSession, insertIntoTextarea, releaseSession, clearListeningState],
-  );
+  const {
+    isListening,
+    isTranscribing,
+    interimTranscript,
+    errorCode,
+    beginListening,
+    stopListening,
+    cleanup,
+    isListeningActive,
+    reportUnsupported,
+  } = useVoiceSession({
+    isSupported,
+    requestPermission,
+    createSession,
+    canStartAfterPermission,
+    onSessionStarted: handleSessionStarted,
+    onFinalTranscript: insertIntoTextarea,
+  });
 
   const handleLongPress = useCallback(() => {
-    clearHoldTimer();
-    if (!introSeenRef.current) {
-      setIsIntroOpen(true);
+    if (!hasSeenIntro()) {
+      openIntro();
       return;
     }
     void beginListening(true);
-  }, [clearHoldTimer, beginListening]);
+  }, [beginListening, hasSeenIntro, openIntro]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key === ' ' && pressActiveRef.current) {
+      if (event.key === ' ' && isPressActive()) {
         event.preventDefault();
         return;
       }
@@ -257,27 +167,19 @@ export function useVoiceInput({
       }
 
       event.preventDefault();
-      clearHoldTimer();
-      pressActiveRef.current = true;
-      pressStartedAtRef.current = Date.now();
-      startedFromCurrentPressRef.current = false;
-      holdTimerRef.current = window.setTimeout(handleLongPress, pressHoldDelayMs);
+      beginPress(handleLongPress);
     },
-    [hasActiveTask, isSupported, mainView, settingsOpen, clearHoldTimer, handleLongPress, pressHoldDelayMs],
+    [beginPress, handleLongPress, hasActiveTask, isPressActive, isSupported, mainView, settingsOpen],
   );
 
   const handleKeyUp = useCallback(
     (event: KeyboardEvent<HTMLTextAreaElement>) => {
       if (event.key !== ' ') return;
-      if (pressStartedAtRef.current == null) return;
+      const { pressDuration, startedFromCurrentPress } = releasePress();
+      if (pressDuration == null) return;
 
       event.preventDefault();
-      const pressDuration = Date.now() - pressStartedAtRef.current;
-      pressStartedAtRef.current = null;
-      pressActiveRef.current = false;
-      clearHoldTimer();
-
-      if (isListeningRef.current || startedFromCurrentPressRef.current) {
+      if (isListeningActive() || startedFromCurrentPress) {
         stopListening();
         return;
       }
@@ -286,59 +188,48 @@ export function useVoiceInput({
         insertLiteralSpace();
       }
     },
-    [clearHoldTimer, insertLiteralSpace, pressHoldDelayMs, stopListening],
+    [insertLiteralSpace, isListeningActive, pressHoldDelayMs, releasePress, stopListening],
   );
-
-  const confirmIntro = useCallback(async () => {
-    await markIntroSeen();
-    introSeenRef.current = true;
-    setIsIntroOpen(false);
-  }, [markIntroSeen]);
-
-  const dismissIntro = useCallback(() => {
-    setIsIntroOpen(false);
-  }, []);
 
   const startFromTrigger = useCallback(async () => {
     if (!hasActiveTask || mainView !== 'chat' || settingsOpen) return;
     if (!isSupported) {
-      setErrorCode('unsupported');
+      reportUnsupported();
       return;
     }
-    if (!introSeenRef.current) {
-      setIsIntroOpen(true);
+    if (!hasSeenIntro()) {
+      openIntro();
       return;
     }
     await beginListening(false);
-  }, [hasActiveTask, isSupported, mainView, settingsOpen, beginListening]);
+  }, [beginListening, hasActiveTask, hasSeenIntro, isSupported, mainView, openIntro, reportUnsupported, settingsOpen]);
 
   useEffect(() => {
     if (!isListening) return;
-    const onWindowKeyUp = (e: globalThis.KeyboardEvent): void => {
-      if (e.key !== ' ') return;
-      if (!isListeningRef.current) return;
-      e.preventDefault();
-      pressStartedAtRef.current = null;
-      pressActiveRef.current = false;
-      clearHoldTimer();
+    const onWindowKeyUp = (event: globalThis.KeyboardEvent): void => {
+      if (event.key !== ' ') return;
+      if (!isListeningActive()) return;
+      event.preventDefault();
+      resetPress();
       stopListening();
     };
     window.addEventListener('keyup', onWindowKeyUp);
     return () => window.removeEventListener('keyup', onWindowKeyUp);
-  }, [isListening, clearHoldTimer, stopListening]);
+  }, [isListening, isListeningActive, resetPress, stopListening]);
 
   useEffect(() => {
     if (!hasActiveTask || mainView !== 'chat' || settingsOpen) {
+      clearHoldTimer();
       stopListening();
     }
-  }, [activeTaskKey, hasActiveTask, mainView, settingsOpen, stopListening]);
+  }, [activeTaskKey, clearHoldTimer, hasActiveTask, mainView, settingsOpen, stopListening]);
 
   useEffect(() => {
     return () => {
       clearHoldTimer();
-      releaseSession(false);
+      cleanup();
     };
-  }, [clearHoldTimer, releaseSession]);
+  }, [cleanup, clearHoldTimer]);
 
   return {
     isSupported,

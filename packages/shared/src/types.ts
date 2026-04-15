@@ -705,6 +705,34 @@ export interface SessionsUsageResult {
   totals: CostUsageTotals;
 }
 
+export interface DashboardBreakdownEntry {
+  name: string;
+  count: number;
+  percent: number;
+}
+
+export interface DashboardBreakdowns {
+  models: DashboardBreakdownEntry[];
+  gateways: DashboardBreakdownEntry[];
+  agents: DashboardBreakdownEntry[];
+}
+
+export interface DashboardLast30d {
+  input: number;
+  output: number;
+  cost: number;
+  daily: Array<{ date: string; input: number; output: number; cost: number }>;
+}
+
+export interface ClawDashboardData {
+  totalTasks: number;
+  activeDays: number;
+  totalMessages: number;
+  totalArtifacts: number;
+  breakdowns: DashboardBreakdowns;
+  last30d: DashboardLast30d | null;
+}
+
 export type CronSchedule =
   | { kind: 'at'; at: string }
   | { kind: 'every'; everyMs: number; anchorMs?: number }

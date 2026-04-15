@@ -115,6 +115,7 @@ function buildApi(): ClawWorkAPI {
 
     loadTasks: () => ipcRenderer.invoke('data:list-tasks'),
     loadMessages: (taskId: string) => ipcRenderer.invoke('data:list-messages', { taskId }),
+    loadDashboardStats: () => ipcRenderer.invoke('stats:get-dashboard'),
 
     saveArtifact: (params: {
       taskId: string;

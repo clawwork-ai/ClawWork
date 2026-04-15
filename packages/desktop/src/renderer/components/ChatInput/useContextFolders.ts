@@ -2,6 +2,10 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { FileIndexEntry } from '@clawwork/shared';
 import { useTaskStore } from '../../stores/taskStore';
 
+const hasApi = (method: string) =>
+  typeof window.clawwork !== 'undefined' &&
+  typeof (window.clawwork as unknown as Record<string, unknown>)?.[method] === 'function';
+
 export function useContextFolders() {
   const [contextFolders, setContextFolders] = useState<string[]>([]);
   const [localFilesForPicker, setLocalFilesForPicker] = useState<FileIndexEntry[]>([]);
@@ -14,12 +18,12 @@ export function useContextFolders() {
     const prevKey = prevTaskIdRef.current;
 
     const prevFolders = foldersByTaskRef.current[prevKey] ?? [];
-    if (typeof window.clawwork.unwatchContextFolder === 'function') {
+    if (hasApi('unwatchContextFolder')) {
       for (const f of prevFolders) window.clawwork.unwatchContextFolder(f);
     }
 
     const nextFolders = foldersByTaskRef.current[key] ?? [];
-    if (typeof window.clawwork.watchContextFolder === 'function') {
+    if (hasApi('watchContextFolder')) {
       for (const f of nextFolders) window.clawwork.watchContextFolder(f);
     }
     setContextFolders(nextFolders);
@@ -32,17 +36,14 @@ export function useContextFolders() {
     const prevRef = prevTaskIdRef;
     return () => {
       const folders = taskFolders[prevRef.current] ?? [];
-      if (typeof window.clawwork.unwatchContextFolder === 'function') {
+      if (hasApi('unwatchContextFolder')) {
         for (const f of folders) window.clawwork.unwatchContextFolder(f);
       }
     };
   }, []);
 
   const handleAddContextFolder = useCallback(async () => {
-    if (
-      typeof window.clawwork.selectContextFolder !== 'function' ||
-      typeof window.clawwork.watchContextFolder !== 'function'
-    ) {
+    if (!hasApi('selectContextFolder') || !hasApi('watchContextFolder')) {
       return;
     }
     const res = await window.clawwork.selectContextFolder();
@@ -60,7 +61,7 @@ export function useContextFolders() {
 
   const handleRemoveContextFolder = useCallback(
     (path: string) => {
-      if (typeof window.clawwork.unwatchContextFolder === 'function') {
+      if (hasApi('unwatchContextFolder')) {
         window.clawwork.unwatchContextFolder(path);
       }
       setContextFolders((prev) => {
@@ -79,7 +80,7 @@ export function useContextFolders() {
         setLocalFilesForPicker([]);
         return;
       }
-      if (typeof window.clawwork.listContextFiles !== 'function') {
+      if (!hasApi('listContextFiles')) {
         setLocalFilesForPicker([]);
         return;
       }

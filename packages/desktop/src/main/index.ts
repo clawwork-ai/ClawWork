@@ -11,6 +11,7 @@ import { registerWorkspaceHandlers } from './ipc/workspace-handlers.js';
 import { registerSettingsHandlers } from './ipc/settings-handlers.js';
 import { registerSearchHandlers } from './ipc/search-handlers.js';
 import { registerDataHandlers } from './ipc/data-handlers.js';
+import { registerStatsHandlers } from './ipc/stats-handlers.js';
 import { registerUpdateHandlers } from './ipc/update-handlers.js';
 import { registerDebugHandlers } from './ipc/debug-handlers.js';
 import { configureVoicePermissionHandlers, registerVoiceHandlers } from './ipc/voice-handlers.js';
@@ -24,7 +25,7 @@ import { unwatchAll } from './context/file-watcher.js';
 import { isInstallingUpdate } from './auto-updater.js';
 import { initTray, destroyTray } from './tray.js';
 import { initQuickLaunch, destroyQuickLaunch } from './quick-launch.js';
-import { getWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
+import { getWorkspacePath, getDefaultWorkspacePath, readConfig, updateConfig } from './workspace/config.js';
 import { initDatabase, closeDatabase } from './db/index.js';
 
 protocol.registerSchemesAsPrivileged([
@@ -153,7 +154,12 @@ function createWindow(): BrowserWindow {
   });
 
   win.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
+    try {
+      const parsed = new URL(details.url);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        shell.openExternal(details.url);
+      }
+    } catch {}
     return { action: 'deny' };
   });
 
@@ -195,6 +201,7 @@ if (!gotLock) {
     registerSettingsHandlers();
     registerSearchHandlers();
     registerDataHandlers();
+    registerStatsHandlers();
     registerUpdateHandlers();
     registerDebugHandlers();
     registerVoiceHandlers();
@@ -219,25 +226,23 @@ if (!gotLock) {
       }
     });
 
-    const wsPath = getWorkspacePath();
-    if (wsPath) {
-      getDebugLogger().info({ domain: 'workspace', event: 'workspace.detected', data: { workspacePath: wsPath } });
-      try {
-        getDebugLogger().info({ domain: 'db', event: 'db.init.start', data: { workspacePath: wsPath } });
-        initDatabase(wsPath);
-        getDebugLogger().info({ domain: 'db', event: 'db.init.ok', data: { workspacePath: wsPath } });
-      } catch (e) {
-        const err = e instanceof Error ? e : new Error(String(e));
-        getDebugLogger().error({
-          domain: 'db',
-          event: 'db.init.failed',
-          data: { workspacePath: wsPath },
-          error: { name: err.name, message: err.message, stack: err.stack },
-        });
-        dialog.showErrorBox('Database Error', err.message);
-        app.quit();
-        return;
-      }
+    const wsPath = getWorkspacePath() || getDefaultWorkspacePath();
+    getDebugLogger().info({ domain: 'workspace', event: 'workspace.detected', data: { workspacePath: wsPath } });
+    try {
+      getDebugLogger().info({ domain: 'db', event: 'db.init.start', data: { workspacePath: wsPath } });
+      initDatabase(wsPath);
+      getDebugLogger().info({ domain: 'db', event: 'db.init.ok', data: { workspacePath: wsPath } });
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      getDebugLogger().error({
+        domain: 'db',
+        event: 'db.init.failed',
+        data: { workspacePath: wsPath },
+        error: { name: err.name, message: err.message, stack: err.stack },
+      });
+      dialog.showErrorBox('Database Error', err.message);
+      app.quit();
+      return;
     }
 
     createWindow();

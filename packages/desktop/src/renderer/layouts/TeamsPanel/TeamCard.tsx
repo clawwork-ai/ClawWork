@@ -1,9 +1,6 @@
-import { motion } from 'framer-motion';
-import { MessageSquare, MoreHorizontal, Pencil, Trash2, Users } from 'lucide-react';
+import { MessageSquare, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Team } from '@clawwork/shared';
-import { cn } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { TeamCardShell } from './TeamCardShell';
 
 interface TeamCardProps {
   team: Team;
@@ -24,22 +22,13 @@ export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete
   const { t } = useTranslation();
 
   return (
-    <motion.div
-      {...motionPresets.listItem}
+    <TeamCardShell
+      emoji={team.emoji}
+      name={team.name}
+      description={team.description}
+      memberCount={team.agents.length}
       onClick={onSelect}
-      className={cn(
-        'surface-card flex w-full cursor-pointer flex-col items-start gap-3 rounded-xl p-5',
-        'border border-[var(--border)] transition-colors',
-        'hover:border-[var(--border-hover)] hover:bg-[var(--bg-hover)]',
-      )}
-    >
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--bg-tertiary)]">
-            <span className="emoji-lg">{team.emoji}</span>
-          </span>
-          <h3 className="type-section-title text-[var(--text-primary)] truncate">{team.name}</h3>
-        </div>
+      topRight={
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -60,13 +49,8 @@ export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
-      {team.description && <p className="type-body text-[var(--text-secondary)] line-clamp-2">{team.description}</p>}
-      <div className="flex w-full items-center justify-between">
-        <div className="type-meta flex items-center gap-1.5 text-[var(--text-muted)]">
-          <Users size={13} className="opacity-60" />
-          <span>{t('teams.memberCount', { count: team.agents.length })}</span>
-        </div>
+      }
+      actions={
         <Button
           size="sm"
           variant="soft"
@@ -78,7 +62,7 @@ export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete
           <MessageSquare size={14} />
           {t('teams.startChat')}
         </Button>
-      </div>
-    </motion.div>
+      }
+    />
   );
 }

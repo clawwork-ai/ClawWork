@@ -410,4 +410,68 @@ describe('useVoiceInput', () => {
 
     unmount();
   });
+
+  it('prioritizes unsupported errors over the intro dialog for trigger start', async () => {
+    const requestPermission = vi.fn(async () => 'granted' as const);
+    const sessionFactory = createFakeSessionFactory();
+    const { container, unmount } = render(
+      <Harness
+        isSupported={false}
+        loadIntroSeen={async () => false}
+        requestPermission={requestPermission}
+        createSession={sessionFactory.createSession}
+      />,
+    );
+
+    await flushAsync();
+
+    const startButton = container.querySelector('[data-testid="start-trigger"]');
+    const error = container.querySelector('[data-testid="error"]');
+    const introState = container.querySelector('[data-testid="intro-state"]');
+
+    await act(async () => {
+      startButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(error?.textContent).toBe('unsupported');
+    expect(introState?.textContent).toBe('closed');
+    expect(requestPermission).not.toHaveBeenCalled();
+    expect(sessionFactory.createSession).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('falls back to showing the intro when loading intro state fails', async () => {
+    const requestPermission = vi.fn(async () => 'granted' as const);
+    const loadIntroSeen = vi.fn(async () => {
+      throw new Error('load failed');
+    });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const sessionFactory = createFakeSessionFactory();
+    const { container, unmount } = render(
+      <Harness
+        loadIntroSeen={loadIntroSeen}
+        requestPermission={requestPermission}
+        createSession={sessionFactory.createSession}
+      />,
+    );
+
+    await flushAsync();
+
+    const textarea = container.querySelector('textarea');
+    const introState = container.querySelector('[data-testid="intro-state"]');
+
+    act(() => {
+      textarea!.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      vi.advanceTimersByTime(220);
+    });
+
+    await flushAsync();
+
+    expect(consoleError).toHaveBeenCalledWith('[voice-input] Failed to load intro seen state', expect.any(Error));
+    expect(introState?.textContent).toBe('open');
+    expect(requestPermission).not.toHaveBeenCalled();
+
+    unmount();
+  });
 });

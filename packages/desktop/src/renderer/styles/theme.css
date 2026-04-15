@@ -26,7 +26,8 @@
   }
 
   :root,
-  :root[data-theme='dark'] {
+  :root[data-theme='dark'],
+  [data-theme='dark'] {
     --bg-primary: #1c1c1c;
     --bg-secondary: #242424;
     --bg-tertiary: #2a2a2a;
