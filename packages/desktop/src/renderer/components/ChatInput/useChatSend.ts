@@ -189,6 +189,13 @@ export function useChatSend(opts: UseChatSendOpts) {
           const teamAgentIds = new Set(team?.agents.map((a) => a.agentId) ?? []);
           teamAgentMap = new Map(team?.agents.map((a) => [a.agentId, a]));
           agents = allAgents.filter((a) => teamAgentIds.has(a.id) && a.id !== task.agentId);
+          // Fallback: if gateway agent catalog has not been fetched yet,
+          // build minimal AgentInfo objects from the team definition itself.
+          if (agents.length === 0 && !catalogEntryAll && team) {
+            agents = team.agents
+              .filter((ta) => ta.agentId !== task.agentId)
+              .map((ta) => ({ id: ta.agentId } satisfies AgentInfo));
+          }
         } else {
           agents = allAgents.filter((a) => a.id !== 'main');
         }
