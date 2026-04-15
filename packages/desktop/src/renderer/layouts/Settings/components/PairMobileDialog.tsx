@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useUiStore } from '@/stores/uiStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface QrPayload {
   v: 1;
@@ -31,6 +32,9 @@ export default function PairMobileDialog({
   const { t } = useTranslation();
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const gatewayStatusMap = useUiStore((s) => s.gatewayStatusMap);
+  const gatewayConfigs = useSettingsStore((s) => s.settings?.gateways ?? []);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
 
   const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
   const [shareIdentity, setShareIdentity] = useState(true);
@@ -62,21 +66,25 @@ export default function PairMobileDialog({
     };
   }, []);
 
+  useEffect(() => {
+    if (settingsLoaded) return;
+    void loadSettings().catch((err: unknown) => {
+      console.error('[PairMobileDialog] loadSettings failed:', err);
+    });
+  }, [settingsLoaded, loadSettings]);
+
   const handleGenerate = useCallback(
     async (identity = shareIdentity, gatewayId = selectedGatewayId) => {
       if (!gatewayId) return;
       setGenerating(true);
 
       try {
-        const settings = await window.clawwork.getSettings();
-        if (!settings) return;
-
         const payload: QrPayload = { v: 1, g: [] };
         if (identity) {
           payload.s = await window.clawwork.getDeviceId();
         }
 
-        const cfg = settings.gateways.find((g: { id: string }) => g.id === gatewayId);
+        const cfg = gatewayConfigs.find((g) => g.id === gatewayId);
         if (!cfg) return;
 
         const mode: 'token' | 'password' | 'pairingCode' =
@@ -109,7 +117,7 @@ export default function PairMobileDialog({
         setGenerating(false);
       }
     },
-    [selectedGatewayId, shareIdentity],
+    [gatewayConfigs, selectedGatewayId, shareIdentity],
   );
 
   return (

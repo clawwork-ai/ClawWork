@@ -23,6 +23,7 @@ import type {
 import { toast } from 'sonner';
 import { createElectronPorts } from './electron-adapter';
 import i18n from '../i18n';
+import { syncSettingsUpdate } from '../stores/settingsStore';
 
 let _ports: PlatformPorts | null = null;
 
@@ -53,8 +54,12 @@ const localStorageAdapter = {
 };
 
 const uiStoreApi = createUiStore({
-  updateSettings: (partial) =>
-    getPorts().settings.updateSettings(partial as Parameters<PlatformPorts['settings']['updateSettings']>[0]),
+  updateSettings: async (partial) => {
+    const typedPartial = partial as Parameters<PlatformPorts['settings']['updateSettings']>[0];
+    const result = await getPorts().settings.updateSettings(typedPartial);
+    syncSettingsUpdate(typedPartial, result);
+    return result;
+  },
   changeLanguage: (lang) => i18n.changeLanguage(lang),
   onRebuildMenu: () => window.clawwork.rebuildMenu(),
   storage: localStorageAdapter,

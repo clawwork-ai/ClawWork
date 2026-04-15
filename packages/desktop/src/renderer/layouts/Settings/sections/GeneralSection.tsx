@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Moon, Sun, Monitor, Bell, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ import SegmentedControl from '../components/SegmentedControl';
 import Toggle from '../components/Toggle';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import PairMobileDialog from '../components/PairMobileDialog';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 export default function GeneralSection() {
   const { t } = useTranslation();
@@ -34,6 +35,10 @@ export default function GeneralSection() {
   const setLeftNavShortcut = useUiStore((s) => s.setLeftNavShortcut);
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
   const setRightPanelShortcut = useUiStore((s) => s.setRightPanelShortcut);
+  const notifications = useSettingsStore((s) => s.settings?.notifications);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
 
   const handleThemeToggle = useCallback(
     (next: Theme) => {
@@ -78,33 +83,27 @@ export default function GeneralSection() {
     [rightPanelShortcut, setRightPanelShortcut, t],
   );
 
-  const [notifyState, setNotifyState] = useState({
-    taskComplete: true,
-    approvalRequest: true,
-    gatewayDisconnect: true,
-  });
-
   useEffect(() => {
-    window.clawwork.getSettings().then((settings) => {
-      if (!settings?.notifications) return;
-      const n = settings.notifications;
-      setNotifyState((prev) => ({
-        taskComplete: n.taskComplete ?? prev.taskComplete,
-        approvalRequest: n.approvalRequest ?? prev.approvalRequest,
-        gatewayDisconnect: n.gatewayDisconnect ?? prev.gatewayDisconnect,
-      }));
+    if (settingsLoaded) return;
+    void loadSettings().catch((err: unknown) => {
+      console.error('[GeneralSection] loadSettings failed:', err);
     });
-  }, []);
+  }, [settingsLoaded, loadSettings]);
+
+  const notifyState = useMemo(
+    () => ({
+      taskComplete: notifications?.taskComplete ?? true,
+      approvalRequest: notifications?.approvalRequest ?? true,
+      gatewayDisconnect: notifications?.gatewayDisconnect ?? true,
+    }),
+    [notifications?.approvalRequest, notifications?.gatewayDisconnect, notifications?.taskComplete],
+  );
 
   const handleNotificationToggle = useCallback(
     (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
-      setNotifyState((prev) => {
-        const next = { ...prev, [key]: value };
-        window.clawwork.updateSettings({ notifications: next });
-        return next;
-      });
+      void updateSettings({ notifications: { ...notifyState, [key]: value } });
     },
-    [],
+    [notifyState, updateSettings],
   );
 
   const notificationToggles = [

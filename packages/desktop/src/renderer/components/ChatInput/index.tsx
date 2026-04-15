@@ -34,6 +34,7 @@ import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { cn } from '@/lib/utils';
 import { createWhisperSttSession } from '@/lib/voice/whisper-stt';
 import { useRoomStore } from '@/stores/roomStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { motionDuration, motion as motionPresets } from '@/styles/design-tokens';
 import { useTaskStore } from '../../stores/taskStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -171,6 +172,8 @@ export default function ChatInput() {
   });
 
   const [whisperAvailable, setWhisperAvailable] = useState(false);
+  const loadSettings = useSettingsStore((s) => s.load);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
   useEffect(() => {
     if (typeof window.clawwork.checkWhisper !== 'function') {
       setWhisperAvailable(false);
@@ -186,17 +189,17 @@ export default function ChatInput() {
   }, []);
 
   const loadVoiceIntroSeen = useCallback(async () => {
-    const settings = await window.clawwork.getSettings();
+    const settings = useSettingsStore.getState().settings ?? (await loadSettings());
     return Boolean(settings?.voiceInput?.introSeen);
-  }, []);
+  }, [loadSettings]);
 
   const markVoiceIntroSeen = useCallback(async () => {
-    await window.clawwork.updateSettings({
+    await updateSettings({
       voiceInput: {
         introSeen: true,
       },
     });
-  }, []);
+  }, [updateSettings]);
 
   const requestVoicePermission = useCallback(async () => {
     const result = await window.clawwork.requestMicrophonePermission();

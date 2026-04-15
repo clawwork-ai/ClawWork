@@ -1,5 +1,6 @@
-import { createContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useEffect, useMemo, useRef, type PropsWithChildren } from 'react';
 import { useUiStore, type Theme, type DensityMode } from '@/stores/uiStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -21,33 +22,41 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   const setTheme = useUiStore((s) => s.setTheme);
   const density = useUiStore((s) => s.density);
   const setDensity = useUiStore((s) => s.setDensity);
-  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const settingsTheme = useSettingsStore((s) => s.settings?.theme);
+  const settingsDensity = useSettingsStore((s) => s.settings?.density);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
   const resolvedTheme = useMemo(() => resolveThemeMode(theme), [theme]);
+  const hydratedFromSettingsRef = useRef(false);
 
   useEffect(() => {
-    let active = true;
+    if (settingsLoaded) return;
+    void loadSettings().catch(() => {});
+  }, [settingsLoaded, loadSettings]);
 
-    window.clawwork
-      .getSettings()
-      .then((settings) => {
-        if (!active) return;
-        if (settings?.theme) {
-          setTheme(settings.theme);
-        }
-        if (settings?.density) {
-          setDensity(settings.density);
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setSettingsLoaded(true);
-        }
-      });
+  useEffect(() => {
+    if (hydratedFromSettingsRef.current) return;
+    if (!settingsLoaded) return;
 
-    return () => {
-      active = false;
-    };
-  }, [setTheme, setDensity]);
+    let waitingForHydration = false;
+    if (settingsTheme) {
+      if (theme !== settingsTheme) {
+        setTheme(settingsTheme);
+        waitingForHydration = true;
+      }
+    }
+    if (settingsDensity) {
+      if (density !== settingsDensity) {
+        setDensity(settingsDensity);
+        waitingForHydration = true;
+      }
+    }
+    if (waitingForHydration) {
+      return;
+    }
+    hydratedFromSettingsRef.current = true;
+  }, [density, settingsDensity, settingsLoaded, settingsTheme, setDensity, setTheme, theme]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -68,14 +77,16 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   }, [density, resolvedTheme, theme]);
 
   useEffect(() => {
-    if (!settingsLoaded) return;
-    window.clawwork.updateSettings({ theme });
-  }, [settingsLoaded, theme]);
+    if (!settingsLoaded || !hydratedFromSettingsRef.current) return;
+    if (settingsTheme === theme) return;
+    void updateSettings({ theme });
+  }, [settingsLoaded, settingsTheme, theme, updateSettings]);
 
   useEffect(() => {
-    if (!settingsLoaded) return;
-    window.clawwork.updateSettings({ density });
-  }, [settingsLoaded, density]);
+    if (!settingsLoaded || !hydratedFromSettingsRef.current) return;
+    if (settingsDensity === density) return;
+    void updateSettings({ density });
+  }, [density, settingsDensity, settingsLoaded, updateSettings]);
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, density, setDensity }}>

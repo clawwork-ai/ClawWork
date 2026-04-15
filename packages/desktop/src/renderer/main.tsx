@@ -10,6 +10,7 @@ import { ThemeProvider } from './context/ThemeProvider';
 import { resolveSystemLanguage, type Language } from './i18n/languages';
 import { SUPPORTED_LANGUAGE_CODES } from '@clawwork/shared';
 import type { LanguageCode } from '@clawwork/shared';
+import { replaceSettingsSnapshot } from './stores/settingsStore';
 
 if (!window.clawwork) {
   const root = document.getElementById('root')!;
@@ -37,8 +38,10 @@ async function bootstrap() {
   let lang: Language = resolveSystemLanguage();
   let needsPersist = false;
   let settingsReadFailed = false;
+  let settingsSnapshot: NonNullable<Awaited<ReturnType<Window['clawwork']['getSettings']>>> | null = null;
   try {
     const settings = await window.clawwork.getSettings();
+    settingsSnapshot = settings;
     const persisted = settings?.language;
     if (isValidLang(persisted)) {
       lang = persisted;
@@ -54,6 +57,12 @@ async function bootstrap() {
   } catch {}
 
   useUiStore.setState({ language: lang });
+  if (settingsSnapshot) {
+    replaceSettingsSnapshot({
+      ...settingsSnapshot,
+      language: lang,
+    });
+  }
   if (needsPersist && !settingsReadFailed) window.clawwork.updateSettings({ language: lang });
 
   const root = createRoot(document.getElementById('root')!);

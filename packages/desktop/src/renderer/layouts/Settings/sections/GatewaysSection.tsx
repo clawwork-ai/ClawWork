@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useCallback, Fragment, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useUiStore, type GatewayConnectionStatus } from '@/stores/uiStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import EmptyState from '@/components/semantic/EmptyState';
 import InlineNotice from '@/components/semantic/InlineNotice';
 import SettingGroup from '@/components/semantic/SettingGroup';
@@ -395,9 +396,13 @@ export default function GatewaysSection() {
   const gatewayVersionMap = useUiStore((s) => s.gatewayVersionMap);
   const setDefaultGatewayId = useUiStore((s) => s.setDefaultGatewayId);
   const setGatewayInfoMap = useUiStore((s) => s.setGatewayInfoMap);
+  const settings = useSettingsStore((s) => s.settings);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
+  const refreshSettings = useSettingsStore((s) => s.refresh);
 
-  const [gateways, setGateways] = useState<GatewayServerConfig[]>([]);
-  const [defaultGwId, setDefaultGwId] = useState<string | null>(null);
+  const gateways = useMemo(() => settings?.gateways ?? [], [settings?.gateways]);
+  const defaultGwId = settings?.defaultGatewayId ?? gateways[0]?.id ?? null;
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<GatewayFormData>(EMPTY_FORM);
@@ -407,30 +412,35 @@ export default function GatewaysSection() {
   const [pairingRetrying, setPairingRetrying] = useState(false);
   const [deletingGwId, setDeletingGwId] = useState<string | null>(null);
 
+  const syncGatewayUi = useCallback(
+    (nextSettings: typeof settings) => {
+      const nextGateways = nextSettings?.gateways ?? [];
+      const nextDefaultGatewayId = nextSettings?.defaultGatewayId ?? nextGateways[0]?.id ?? null;
+      setDefaultGatewayId(nextDefaultGatewayId);
+      const infoMap: Record<string, { id: string; name: string; color?: string }> = {};
+      for (const gateway of nextGateways) {
+        infoMap[gateway.id] = { id: gateway.id, name: gateway.name, color: gateway.color };
+      }
+      setGatewayInfoMap(infoMap);
+    },
+    [setDefaultGatewayId, setGatewayInfoMap],
+  );
+
   const loadGateways = useCallback(async () => {
-    const settings = await window.clawwork.getSettings();
-    if (!settings) {
-      setGateways([]);
-      setDefaultGwId(null);
-      setDefaultGatewayId(null);
-      setGatewayInfoMap({});
-      return;
-    }
-    const gwList = settings.gateways ?? [];
-    const nextDefaultGatewayId = settings.defaultGatewayId ?? gwList[0]?.id ?? null;
-    setGateways(gwList);
-    setDefaultGwId(nextDefaultGatewayId);
-    setDefaultGatewayId(nextDefaultGatewayId);
-    const infoMap: Record<string, { id: string; name: string; color?: string }> = {};
-    for (const gw of gwList) {
-      infoMap[gw.id] = { id: gw.id, name: gw.name, color: gw.color };
-    }
-    setGatewayInfoMap(infoMap);
-  }, [setDefaultGatewayId, setGatewayInfoMap]);
+    const nextSettings = settingsLoaded ? await refreshSettings() : await loadSettings();
+    syncGatewayUi(nextSettings);
+  }, [loadSettings, refreshSettings, settingsLoaded, syncGatewayUi]);
 
   useEffect(() => {
-    loadGateways();
-  }, [loadGateways]);
+    if (settingsLoaded) return;
+    void loadGateways().catch((err: unknown) => {
+      console.error('[GatewaysSection] loadSettings failed:', err);
+    });
+  }, [loadGateways, settingsLoaded]);
+
+  useEffect(() => {
+    syncGatewayUi(settings);
+  }, [settings, syncGatewayUi]);
 
   const openAddForm = useCallback(() => {
     setEditingId(null);

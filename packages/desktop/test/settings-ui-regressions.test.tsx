@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ThemeProvider } from '../src/renderer/context/ThemeProvider';
 import { useUiStore } from '../src/renderer/stores/uiStore';
+import { resetSettingsStore } from '../src/renderer/stores/settingsStore';
 import GatewaysSection from '../src/renderer/layouts/Settings/sections/GatewaysSection';
 
 vi.mock('sonner', () => ({
@@ -76,6 +77,7 @@ describe('settings UI regressions', () => {
       gatewayStatusMap: {},
       defaultGatewayId: null,
     });
+    resetSettingsStore();
 
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -127,12 +129,11 @@ describe('settings UI regressions', () => {
     expect(updateSettings).not.toHaveBeenCalled();
 
     await flushAsync();
+    await flushAsync();
 
     expect(useUiStore.getState().theme).toBe('light');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(updateSettings).toHaveBeenCalledTimes(2);
-    expect(updateSettings).toHaveBeenCalledWith({ theme: 'light' });
-    expect(updateSettings).toHaveBeenCalledWith({ density: 'comfortable' });
+    expect(updateSettings).not.toHaveBeenCalled();
 
     unmount();
   });
@@ -149,6 +150,8 @@ describe('settings UI regressions', () => {
 
     const { unmount } = render(<GatewaysSection />);
 
+    await flushAsync();
+    await flushAsync();
     await flushAsync();
 
     expect(useUiStore.getState().defaultGatewayId).toBe('gw-2');

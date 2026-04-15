@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
 import AmbientShell from '@/components/ambient/AmbientShell';
+import { useSettingsStore } from './stores/settingsStore';
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -45,6 +46,9 @@ export default function App() {
   const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
   const themeMode = useUiStore((s) => s.theme);
+  const settings = useSettingsStore((s) => s.settings);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const loadSettings = useSettingsStore((s) => s.load);
 
   useGatewayBootstrap();
   useUpdateCheck();
@@ -94,26 +98,21 @@ export default function App() {
 
   useEffect(() => {
     if (!ready) return;
-    window.clawwork
-      .getSettings()
-      .then((settings) => {
-        if (settings?.sendShortcut) {
-          useUiStore.setState({ sendShortcut: settings.sendShortcut });
-        }
-        if (settings?.leftNavShortcut) {
-          useUiStore.setState({ leftNavShortcut: settings.leftNavShortcut });
-        }
-        if (settings?.rightPanelShortcut) {
-          useUiStore.setState({ rightPanelShortcut: settings.rightPanelShortcut });
-        }
-        if (settings?.devMode) {
-          useUiStore.setState({ devMode: true });
-        }
-      })
-      .catch((err: unknown) => {
-        console.error('[App] getSettings failed:', err);
-      });
-  }, [ready]);
+    if (settingsLoaded) return;
+    void loadSettings().catch((err: unknown) => {
+      console.error('[App] loadSettings failed:', err);
+    });
+  }, [ready, settingsLoaded, loadSettings]);
+
+  useEffect(() => {
+    if (!ready || !settings) return;
+    useUiStore.setState({
+      ...(settings.sendShortcut ? { sendShortcut: settings.sendShortcut } : {}),
+      ...(settings.leftNavShortcut ? { leftNavShortcut: settings.leftNavShortcut } : {}),
+      ...(settings.rightPanelShortcut ? { rightPanelShortcut: settings.rightPanelShortcut } : {}),
+      devMode: Boolean(settings.devMode),
+    });
+  }, [ready, settings]);
 
   const handleGlobalKeyDown = useCallback(
     (e: KeyboardEvent) => {
