@@ -102,6 +102,8 @@ function collectBreakdowns(
   };
 }
 
+const GATEWAY_COST_TIMEOUT_MS = 5_000;
+
 async function collectLast30d(): Promise<DashboardLast30d | null> {
   const clients = getAllGatewayClients();
   const connected = Array.from(clients.values()).filter((gw) => gw.isConnected);
@@ -109,11 +111,19 @@ async function collectLast30d(): Promise<DashboardLast30d | null> {
 
   const summaries = await Promise.all(
     connected.map(async (gw) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
       try {
-        return (await gw.getUsageCost({ days: 30 })) as unknown as CostUsageSummary;
-      } catch (err) {
-        console.error('[stats:dashboard] getUsageCost failed:', err);
-        return null;
+        const timeoutPromise = new Promise<null>((resolve) => {
+          timer = setTimeout(() => resolve(null), GATEWAY_COST_TIMEOUT_MS);
+        });
+        const costPromise = gw.getUsageCost({ days: 30 }).catch((err) => {
+          console.error('[stats:dashboard] getUsageCost failed:', err);
+          return null;
+        });
+        const result = await Promise.race([costPromise, timeoutPromise]);
+        return result as unknown as CostUsageSummary | null;
+      } finally {
+        if (timer !== undefined) clearTimeout(timer);
       }
     }),
   );

@@ -5,7 +5,7 @@ import type { DashboardBreakdownEntry } from '@clawwork/shared';
 import { useDashboardStore } from '@/stores/dashboardStore';
 import { formatCost, formatTokenCount } from '@/lib/utils';
 
-function Tile({ label, value }: { label: string; value: string | number }) {
+function Tile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-5">
       <div className="type-meta uppercase tracking-wider text-[var(--text-muted)]">{label}</div>
