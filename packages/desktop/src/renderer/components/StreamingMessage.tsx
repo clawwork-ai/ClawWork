@@ -6,6 +6,7 @@ import MessageAvatar from './MessageAvatar';
 import ThinkingSection from './ThinkingSection';
 import MarkdownContent from './MarkdownContent';
 import ToolCallCard from './ToolCallCard';
+import ToolCallSummary from './ToolCallSummary';
 
 interface StreamingMessageProps {
   content: string;
@@ -28,12 +29,18 @@ const StreamingMessage = memo(function StreamingMessage({
   agentName,
   agentRoleLabel,
 }: StreamingMessageProps) {
-  const lastRunningId = useMemo(() => {
-    if (!toolCalls?.length) return null;
+  const { visibleTool, completedTools } = useMemo(() => {
+    if (!toolCalls?.length) return { visibleTool: null, completedTools: [] as ToolCall[] };
+    let visibleIdx = -1;
     for (let i = toolCalls.length - 1; i >= 0; i--) {
-      if (toolCalls[i].status === 'running') return toolCalls[i].id;
+      if (toolCalls[i].status === 'running') {
+        visibleIdx = i;
+        break;
+      }
     }
-    return null;
+    if (visibleIdx === -1) visibleIdx = toolCalls.length - 1;
+    const completed = toolCalls.filter((_, i) => i !== visibleIdx);
+    return { visibleTool: toolCalls[visibleIdx], completedTools: completed };
   }, [toolCalls]);
 
   return (
@@ -63,16 +70,8 @@ const StreamingMessage = memo(function StreamingMessage({
         {thinkingContent && <ThinkingSection content={thinkingContent} defaultOpen streaming showCursor={!content} />}
         {toolCalls?.length ? (
           <div className="mb-2 space-y-1">
-            {toolCalls.map((tc) => {
-              const isLatestRunning = tc.id === lastRunningId;
-              return (
-                <ToolCallCard
-                  key={`${tc.id}-${isLatestRunning ? 'expanded' : 'collapsed'}`}
-                  toolCall={tc}
-                  defaultOpen={isLatestRunning}
-                />
-              );
-            })}
+            {completedTools.length > 0 ? <ToolCallSummary toolCalls={completedTools} /> : null}
+            {visibleTool ? <ToolCallCard key={visibleTool.id} toolCall={visibleTool} defaultOpen /> : null}
           </div>
         ) : null}
         {content && (
