@@ -705,6 +705,19 @@ export interface SessionsUsageResult {
   totals: CostUsageTotals;
 }
 
+export interface DashboardBreakdownEntry {
+  name: string;
+  count: number;
+  percent: number;
+}
+
+export interface DashboardBreakdowns {
+  models: DashboardBreakdownEntry[];
+  gateways: DashboardBreakdownEntry[];
+  agents: DashboardBreakdownEntry[];
+  statuses: DashboardBreakdownEntry[];
+}
+
 export interface DashboardLast30d {
   input: number;
   output: number;
@@ -717,6 +730,7 @@ export interface ClawDashboardData {
   activeDays: number;
   totalMessages: number;
   totalArtifacts: number;
+  breakdowns: DashboardBreakdowns;
   last30d: DashboardLast30d | null;
 }
 

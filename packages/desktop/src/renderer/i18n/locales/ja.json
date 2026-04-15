@@ -252,12 +252,18 @@
   "dashboard": {
     "activeDays": "アクティブ日数",
     "allTimeSection": "累計",
+    "breakdownsSection": "分布",
     "cost": "コスト",
     "inputTokens": "入力トークン",
     "last30dSection": "過去 30 日間",
+    "noBreakdownData": "データなし",
     "noData": "ゲートウェイデータなし",
     "outputTokens": "出力トークン",
+    "taskStatus": "タスクステータス",
     "tokenChart": "日次トークン推移",
+    "topAgents": "トップエージェント",
+    "topGateways": "トップゲートウェイ",
+    "topModels": "トップモデル",
     "totalArtifacts": "総アーティファクト数",
     "totalMessages": "総メッセージ数",
     "totalTasks": "総タスク数"

@@ -252,12 +252,18 @@
   "dashboard": {
     "activeDays": "活躍天數",
     "allTimeSection": "累計",
+    "breakdownsSection": "分布",
     "cost": "費用",
     "inputTokens": "輸入 Token",
     "last30dSection": "最近 30 天",
+    "noBreakdownData": "暫無資料",
     "noData": "暫無閘道資料",
     "outputTokens": "輸出 Token",
+    "taskStatus": "任務狀態",
     "tokenChart": "每日 Token 趨勢",
+    "topAgents": "Agent 排行",
+    "topGateways": "閘道排行",
+    "topModels": "模型排行",
     "totalArtifacts": "總檔案數",
     "totalMessages": "總訊息數",
     "totalTasks": "總任務數"

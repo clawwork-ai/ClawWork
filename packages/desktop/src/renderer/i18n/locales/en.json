@@ -252,12 +252,18 @@
   "dashboard": {
     "activeDays": "Active Days",
     "allTimeSection": "All Time",
+    "breakdownsSection": "Breakdowns",
     "cost": "Cost",
     "inputTokens": "Input Tokens",
     "last30dSection": "Last 30 Days",
+    "noBreakdownData": "No data",
     "noData": "No gateway data available",
     "outputTokens": "Output Tokens",
+    "taskStatus": "Task Status",
     "tokenChart": "Daily Token Trend",
+    "topAgents": "Top Agents",
+    "topGateways": "Top Gateways",
+    "topModels": "Top Models",
     "totalArtifacts": "Total Artifacts",
     "totalMessages": "Total Messages",
     "totalTasks": "Total Tasks"

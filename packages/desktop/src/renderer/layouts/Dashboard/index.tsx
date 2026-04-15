@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import type { DashboardBreakdownEntry } from '@clawwork/shared';
 import { useDashboardStore } from '@/stores/dashboardStore';
 import { formatCost, formatTokenCount } from '@/lib/utils';
 
@@ -15,6 +16,39 @@ function Tile({ label, value }: { label: string; value: string | number }) {
 
 function SectionHeader({ text }: { text: string }) {
   return <div className="type-section-title text-[var(--text-secondary)] mb-3">{text}</div>;
+}
+
+function BreakdownTile({
+  label,
+  entries,
+  emptyText,
+}: {
+  label: string;
+  entries: DashboardBreakdownEntry[];
+  emptyText: string;
+}) {
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-5">
+      <div className="type-meta uppercase tracking-wider text-[var(--text-muted)] mb-4">{label}</div>
+      {entries.length === 0 ? (
+        <div className="type-support text-[var(--text-muted)]">{emptyText}</div>
+      ) : (
+        <div className="space-y-3">
+          {entries.map((entry) => (
+            <div key={entry.name}>
+              <div className="mb-1 flex items-baseline justify-between gap-2">
+                <span className="type-body truncate text-[var(--text-primary)]">{entry.name}</span>
+                <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{entry.count}</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-[var(--border)]">
+                <div className="h-full bg-[var(--accent)]" style={{ width: `${entry.percent}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Dashboard() {
@@ -38,6 +72,32 @@ export default function Dashboard() {
           <Tile label={t('dashboard.activeDays')} value={(data?.activeDays ?? 0).toLocaleString()} />
           <Tile label={t('dashboard.totalMessages')} value={(data?.totalMessages ?? 0).toLocaleString()} />
           <Tile label={t('dashboard.totalArtifacts')} value={(data?.totalArtifacts ?? 0).toLocaleString()} />
+        </div>
+      </section>
+
+      <section>
+        <SectionHeader text={t('dashboard.breakdownsSection')} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <BreakdownTile
+            label={t('dashboard.topModels')}
+            entries={data?.breakdowns.models ?? []}
+            emptyText={t('dashboard.noBreakdownData')}
+          />
+          <BreakdownTile
+            label={t('dashboard.topGateways')}
+            entries={data?.breakdowns.gateways ?? []}
+            emptyText={t('dashboard.noBreakdownData')}
+          />
+          <BreakdownTile
+            label={t('dashboard.topAgents')}
+            entries={data?.breakdowns.agents ?? []}
+            emptyText={t('dashboard.noBreakdownData')}
+          />
+          <BreakdownTile
+            label={t('dashboard.taskStatus')}
+            entries={data?.breakdowns.statuses ?? []}
+            emptyText={t('dashboard.noBreakdownData')}
+          />
         </div>
       </section>
 

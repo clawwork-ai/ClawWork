@@ -1,5 +1,12 @@
 import type Database from 'better-sqlite3';
-import type { ClawDashboardData, CostUsageSummary, DashboardLast30d } from '@clawwork/shared';
+import type {
+  ClawDashboardData,
+  CostUsageSummary,
+  DashboardBreakdownEntry,
+  DashboardBreakdowns,
+  DashboardLast30d,
+} from '@clawwork/shared';
+import { parseAgentIdFromSessionKey } from '@clawwork/shared';
 import { getAllGatewayClients } from '../ws/index.js';
 
 export async function collectDashboardData(db: Database.Database): Promise<ClawDashboardData> {
@@ -12,6 +19,7 @@ export async function collectDashboardData(db: Database.Database): Promise<ClawD
   const totalMessages = (db.prepare('SELECT COUNT(*) as c FROM messages').get() as { c: number }).c;
   const totalArtifacts = (db.prepare('SELECT COUNT(*) as c FROM artifacts').get() as { c: number }).c;
 
+  const breakdowns = collectBreakdowns(db, totalTasks);
   const last30d = await collectLast30d();
 
   return {
@@ -19,7 +27,70 @@ export async function collectDashboardData(db: Database.Database): Promise<ClawD
     activeDays,
     totalMessages,
     totalArtifacts,
+    breakdowns,
     last30d,
+  };
+}
+
+function toEntries(
+  rows: Array<{ name: string; count: number }>,
+  total: number,
+  limit: number,
+): DashboardBreakdownEntry[] {
+  return rows
+    .slice()
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((row) => ({
+      name: row.name,
+      count: row.count,
+      percent: total > 0 ? Math.round((row.count / total) * 100) : 0,
+    }));
+}
+
+function collectBreakdowns(db: Database.Database, totalTasks: number): DashboardBreakdowns {
+  const modelRows = db
+    .prepare(
+      `SELECT model as name, COUNT(*) as count
+       FROM tasks
+       WHERE model IS NOT NULL AND model != ''
+       GROUP BY model`,
+    )
+    .all() as Array<{ name: string; count: number }>;
+
+  const gatewayRows = db
+    .prepare(
+      `SELECT gateway_id as name, COUNT(*) as count
+       FROM tasks
+       WHERE gateway_id IS NOT NULL AND gateway_id != ''
+       GROUP BY gateway_id`,
+    )
+    .all() as Array<{ name: string; count: number }>;
+
+  const statusRows = db
+    .prepare(
+      `SELECT status as name, COUNT(*) as count
+       FROM tasks
+       GROUP BY status`,
+    )
+    .all() as Array<{ name: string; count: number }>;
+
+  const sessionKeyRows = db.prepare('SELECT session_key as sessionKey FROM tasks').all() as Array<{
+    sessionKey: string;
+  }>;
+  const agentCounts = new Map<string, number>();
+  for (const { sessionKey } of sessionKeyRows) {
+    const agentId = parseAgentIdFromSessionKey(sessionKey);
+    if (!agentId) continue;
+    agentCounts.set(agentId, (agentCounts.get(agentId) ?? 0) + 1);
+  }
+  const agentRows = Array.from(agentCounts.entries()).map(([name, count]) => ({ name, count }));
+
+  return {
+    models: toEntries(modelRows, totalTasks, 5),
+    gateways: toEntries(gatewayRows, totalTasks, 5),
+    agents: toEntries(agentRows, totalTasks, 5),
+    statuses: toEntries(statusRows, totalTasks, 5),
   };
 }
 
