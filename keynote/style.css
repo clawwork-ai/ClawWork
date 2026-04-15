@@ -1570,13 +1570,16 @@ html:not(.dark) .slidev-layout {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
+  opacity: 0.2;
   transition:
     border-color 0.2s,
-    transform 0.15s;
+    transform 0.15s,
+    opacity 0.25s;
   font-family: system-ui, sans-serif;
 }
 
 .lang-switch:hover {
+  opacity: 1;
   border-color: var(--cw-green);
   background: var(--cw-lang-hover-bg);
   transform: scale(1.1);
@@ -1702,27 +1705,4 @@ html:not(.dark) .slidev-layout {
   background-repeat: no-repeat;
   pointer-events: none;
   z-index: 20;
-}
-
-.controls-hotzone {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  width: 140px;
-  height: 56px;
-  z-index: 9998;
-  transition: opacity 0.3s ease;
-}
-
-@media (hover: hover) {
-  .controls-hotzone {
-    opacity: 0;
-  }
-  .controls-hotzone:hover {
-    opacity: 1;
-  }
-}
-
-.controls-hotzone--pinned {
-  opacity: 1;
 }

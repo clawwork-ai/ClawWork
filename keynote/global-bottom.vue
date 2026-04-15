@@ -11,22 +11,20 @@ function pick(l: Lang) {
 </script>
 
 <template>
-  <div class="controls-hotzone" :class="{ 'controls-hotzone--pinned': open }">
-    <div class="lang-anchor">
-      <button class="lang-switch" @click="open = !open">
-        {{ LANG_LABELS[lang] }}
+  <div class="lang-anchor">
+    <button class="lang-switch" @click="open = !open">
+      {{ LANG_LABELS[lang] }}
+    </button>
+    <div v-if="open" class="lang-menu">
+      <button
+        v-for="l in LANGS"
+        :key="l"
+        class="lang-option"
+        :class="{ 'lang-option--active': l === lang }"
+        @click="pick(l)"
+      >
+        {{ LANG_LABELS[l] }}
       </button>
-      <div v-if="open" class="lang-menu">
-        <button
-          v-for="l in LANGS"
-          :key="l"
-          class="lang-option"
-          :class="{ 'lang-option--active': l === lang }"
-          @click="pick(l)"
-        >
-          {{ LANG_LABELS[l] }}
-        </button>
-      </div>
     </div>
   </div>
 </template>
