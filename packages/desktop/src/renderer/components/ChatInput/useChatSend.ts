@@ -194,7 +194,7 @@ export function useChatSend(opts: UseChatSendOpts) {
           if (agents.length === 0 && !catalogEntryAll && team) {
             agents = team.agents
               .filter((ta) => ta.agentId !== task.agentId)
-              .map((ta) => ({ id: ta.agentId } satisfies AgentInfo));
+              .map((ta) => ({ id: ta.agentId }) satisfies AgentInfo);
           }
         } else {
           agents = allAgents.filter((a) => a.id !== 'main');
