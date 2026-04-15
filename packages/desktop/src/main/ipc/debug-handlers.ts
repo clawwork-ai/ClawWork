@@ -11,7 +11,6 @@ export function registerDebugHandlers(): void {
     (
       _event,
       payload: {
-        domain: string;
         event: string;
         traceId?: string;
         feature?: string;
@@ -20,7 +19,7 @@ export function registerDebugHandlers(): void {
     ) => {
       const logger = getDebugLogger();
       logger.info({
-        domain: (payload.domain || 'renderer') as 'renderer',
+        domain: 'renderer',
         event: payload.event,
         traceId: payload.traceId,
         feature: payload.feature,
