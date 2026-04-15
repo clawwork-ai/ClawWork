@@ -251,8 +251,8 @@
   },
   "dashboard": {
     "activeDays": "활동 일수",
-    "inputTokens": "입력 토큰",
-    "outputTokens": "출력 토큰",
+    "totalArtifacts": "총 아티팩트",
+    "totalMessages": "총 메시지",
     "totalTasks": "총 태스크"
   },
   "dialog": {

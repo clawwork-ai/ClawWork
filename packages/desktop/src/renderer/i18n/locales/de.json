@@ -251,8 +251,8 @@
   },
   "dashboard": {
     "activeDays": "Aktive Tage",
-    "inputTokens": "Eingabe-Tokens",
-    "outputTokens": "Ausgabe-Tokens",
+    "totalArtifacts": "Gesamte Artefakte",
+    "totalMessages": "Gesamte Nachrichten",
     "totalTasks": "Gesamte Aufgaben"
   },
   "dialog": {

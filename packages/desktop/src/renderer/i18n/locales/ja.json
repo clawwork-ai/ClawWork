@@ -251,8 +251,8 @@
   },
   "dashboard": {
     "activeDays": "アクティブ日数",
-    "inputTokens": "入力トークン",
-    "outputTokens": "出力トークン",
+    "totalArtifacts": "総アーティファクト数",
+    "totalMessages": "総メッセージ数",
     "totalTasks": "総タスク数"
   },
   "dialog": {

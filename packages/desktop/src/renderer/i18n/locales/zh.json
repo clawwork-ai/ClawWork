@@ -251,8 +251,8 @@
   },
   "dashboard": {
     "activeDays": "活跃天数",
-    "inputTokens": "输入 Token",
-    "outputTokens": "输出 Token",
+    "totalArtifacts": "总文件数",
+    "totalMessages": "总消息数",
     "totalTasks": "总任务数"
   },
   "dialog": {

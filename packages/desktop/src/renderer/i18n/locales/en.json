@@ -251,8 +251,8 @@
   },
   "dashboard": {
     "activeDays": "Active Days",
-    "inputTokens": "Input Tokens",
-    "outputTokens": "Output Tokens",
+    "totalArtifacts": "Total Artifacts",
+    "totalMessages": "Total Messages",
     "totalTasks": "Total Tasks"
   },
   "dialog": {
