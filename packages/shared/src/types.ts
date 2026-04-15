@@ -705,14 +705,9 @@ export interface SessionsUsageResult {
   totals: CostUsageTotals;
 }
 
-export interface ClawProfileData {
+export interface ClawDashboardData {
   totalTasks: number;
   activeDays: number;
-  signatureSkill: { name: string; uses: number } | null;
-  mvpAgent: { agentId: string; taskCount: number } | null;
-  topModel: { model: string; tokens: number } | null;
-  busiestHour: number | null;
-  hasEnoughData: boolean;
 }
 
 export type CronSchedule =

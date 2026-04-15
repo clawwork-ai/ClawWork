@@ -12,7 +12,7 @@ import type {
   CronRunResult,
   CronRunsParams,
   CronStatusResult,
-  ClawProfileData,
+  ClawDashboardData,
   SkillInstallParams,
   SkillInstallResult,
   SkillSearchParams,
@@ -299,7 +299,7 @@ export interface ClawWorkAPI {
 
   loadTasks: () => Promise<ListResult<PersistedTask>>;
   loadMessages: (taskId: string) => Promise<ListResult<PersistedMessage>>;
-  loadProfileStats: () => Promise<IpcResult<ClawProfileData>>;
+  loadDashboardStats: () => Promise<IpcResult<ClawDashboardData>>;
 
   saveArtifact: (params: {
     taskId: string;

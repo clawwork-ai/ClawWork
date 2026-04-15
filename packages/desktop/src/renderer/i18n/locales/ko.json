@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "다음 하트비트",
     "wakeMode_now": "즉시"
   },
-  "dashboard": {
-    "formingTitle": "Claw 프로필 생성 중",
-    "heading": "나의 Claw 프로필",
-    "mvpAgent": "MVP agent",
-    "signatureSkill": "시그니처 skill",
-    "tasks": "태스크",
-    "unlockHint": "3 개의 태스크를 완료하면 프로필이 열립니다"
-  },
   "dialog": {
     "confirm": "계속",
     "deleteTaskDesc": "작업, 모든 메시지, 서버 세션이 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",

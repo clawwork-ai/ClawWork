@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "次のハートビート",
     "wakeMode_now": "即時"
   },
-  "dashboard": {
-    "formingTitle": "あなたの Claw プロフィールを生成中",
-    "heading": "あなたの Claw プロフィール",
-    "mvpAgent": "MVP agent",
-    "signatureSkill": "シグネチャ skill",
-    "tasks": "タスク",
-    "unlockHint": "3 つのタスクを完了してプロフィールを解放"
-  },
   "dialog": {
     "confirm": "続行",
     "deleteTaskDesc": "タスク、すべてのメッセージ、およびサーバーセッションが完全に削除されます。この操作は取り消せません。",

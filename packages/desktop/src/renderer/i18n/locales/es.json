@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "Próximo latido",
     "wakeMode_now": "Inmediato"
   },
-  "dashboard": {
-    "formingTitle": "Tu perfil de Claw se está formando",
-    "heading": "Tu perfil de Claw",
-    "mvpAgent": "Agente MVP",
-    "signatureSkill": "Skill distintiva",
-    "tasks": "tareas",
-    "unlockHint": "Completa 3 tareas para desbloquear tu perfil"
-  },
   "dialog": {
     "confirm": "Continuar",
     "deleteTaskDesc": "Esto eliminará permanentemente la tarea, todos los mensajes y la sesión del servidor. Esta acción no se puede deshacer.",

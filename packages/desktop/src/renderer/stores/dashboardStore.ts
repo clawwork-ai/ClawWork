@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import type { ClawProfileData } from '@clawwork/shared';
+import type { ClawDashboardData } from '@clawwork/shared';
 
 const STALE_MS = 60_000;
 
-interface ProfileState {
-  data: ClawProfileData | null;
+interface DashboardState {
+  data: ClawDashboardData | null;
   loading: boolean;
   error: string | null;
   loadedAt: number | null;
@@ -12,7 +12,7 @@ interface ProfileState {
   clear: () => void;
 }
 
-export const useProfileStore = create<ProfileState>((set, get) => ({
+export const useDashboardStore = create<DashboardState>((set, get) => ({
   data: null,
   loading: false,
   error: null,
@@ -24,7 +24,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     if (!force && state.loadedAt && Date.now() - state.loadedAt < STALE_MS) return;
     set({ loading: true, error: null });
     try {
-      const res = await window.clawwork.loadProfileStats();
+      const res = await window.clawwork.loadDashboardStats();
       if (res.ok && res.result) {
         set({ data: res.result, loading: false, loadedAt: Date.now() });
       } else {

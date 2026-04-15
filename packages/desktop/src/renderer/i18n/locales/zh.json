@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "下次心跳",
     "wakeMode_now": "立即"
   },
-  "dashboard": {
-    "formingTitle": "你的 Claw 画像正在生成",
-    "heading": "你的 Claw 画像",
-    "mvpAgent": "MVP agent",
-    "signatureSkill": "签名 skill",
-    "tasks": "任务",
-    "unlockHint": "完成 3 个任务解锁你的画像"
-  },
   "dialog": {
     "confirm": "继续",
     "deleteTaskDesc": "将永久删除该任务、所有消息和服务器会话，此操作不可撤销。",

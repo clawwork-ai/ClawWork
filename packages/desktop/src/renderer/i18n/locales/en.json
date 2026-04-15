@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "Next Heartbeat",
     "wakeMode_now": "Immediate"
   },
-  "dashboard": {
-    "formingTitle": "Your Claw Profile is forming",
-    "heading": "Your Claw Profile",
-    "mvpAgent": "MVP agent",
-    "signatureSkill": "Signature skill",
-    "tasks": "tasks",
-    "unlockHint": "Complete 3 tasks to unlock your profile"
-  },
   "dialog": {
     "confirm": "Continue",
     "deleteTaskDesc": "This will permanently delete the task, all messages, and the server session. This cannot be undone.",

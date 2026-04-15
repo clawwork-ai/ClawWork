@@ -249,14 +249,6 @@
     "wakeMode_nextHeartbeat": "Naechster Heartbeat",
     "wakeMode_now": "Sofort"
   },
-  "dashboard": {
-    "formingTitle": "Dein Claw-Profil entsteht",
-    "heading": "Dein Claw-Profil",
-    "mvpAgent": "MVP-Agent",
-    "signatureSkill": "Signatur-Skill",
-    "tasks": "Aufgaben",
-    "unlockHint": "Erledige 3 Aufgaben, um dein Profil freizuschalten"
-  },
   "dialog": {
     "confirm": "Fortfahren",
     "deleteTaskDesc": "Dadurch werden die Aufgabe, alle Nachrichten und die Server-Sitzung dauerhaft geloescht. Dies kann nicht rueckgaengig gemacht werden.",
