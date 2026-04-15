@@ -705,11 +705,19 @@ export interface SessionsUsageResult {
   totals: CostUsageTotals;
 }
 
+export interface DashboardLast30d {
+  input: number;
+  output: number;
+  cost: number;
+  daily: Array<{ date: string; input: number; output: number; cost: number }>;
+}
+
 export interface ClawDashboardData {
   totalTasks: number;
   activeDays: number;
   totalMessages: number;
   totalArtifacts: number;
+  last30d: DashboardLast30d | null;
 }
 
 export type CronSchedule =

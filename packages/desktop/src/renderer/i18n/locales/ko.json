@@ -251,6 +251,13 @@
   },
   "dashboard": {
     "activeDays": "활동 일수",
+    "allTimeSection": "누적",
+    "cost": "비용",
+    "inputTokens": "입력 토큰",
+    "last30dSection": "최근 30일",
+    "noData": "게이트웨이 데이터 없음",
+    "outputTokens": "출력 토큰",
+    "tokenChart": "일별 토큰 추이",
     "totalArtifacts": "총 아티팩트",
     "totalMessages": "총 메시지",
     "totalTasks": "총 태스크"

@@ -251,6 +251,13 @@
   },
   "dashboard": {
     "activeDays": "活跃天数",
+    "allTimeSection": "累计",
+    "cost": "费用",
+    "inputTokens": "输入 Token",
+    "last30dSection": "最近 30 天",
+    "noData": "暂无网关数据",
+    "outputTokens": "输出 Token",
+    "tokenChart": "每日 Token 趋势",
     "totalArtifacts": "总文件数",
     "totalMessages": "总消息数",
     "totalTasks": "总任务数"

@@ -251,6 +251,13 @@
   },
   "dashboard": {
     "activeDays": "Dias ativos",
+    "allTimeSection": "Total",
+    "cost": "Custo",
+    "inputTokens": "Tokens de entrada",
+    "last30dSection": "Últimos 30 dias",
+    "noData": "Sem dados de gateway disponíveis",
+    "outputTokens": "Tokens de saída",
+    "tokenChart": "Tendência diária de tokens",
     "totalArtifacts": "Total de artefatos",
     "totalMessages": "Total de mensagens",
     "totalTasks": "Total de tarefas"
