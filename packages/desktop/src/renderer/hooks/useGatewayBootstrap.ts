@@ -7,5 +7,5 @@ export { fetchAgentsForGateway } from './useGatewayDispatcherSetup';
 export function useGatewayBootstrap(): void {
   const dispatcher = useGatewayDispatcherSetup();
   useGatewayEventListeners(dispatcher);
-  useEnsembleSync(dispatcher);
+  useEnsembleSync();
 }
