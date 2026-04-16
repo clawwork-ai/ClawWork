@@ -1,13 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createGatewayDispatcher } from '@clawwork/core';
-import type { GatewayDispatcherDeps } from '@clawwork/core';
-import type { GatewayEvent } from '@clawwork/core/ports/gateway-transport';
+import type { GatewayDispatcherDeps, GatewayEvent } from '@clawwork/core';
 
 type EventListener = (data: GatewayEvent) => void;
 
 function createHarness(
   overrides?: Partial<{
-    tasks: GatewayDispatcherDeps extends { getTaskStore: () => infer T } ? ReturnType<() => T>['tasks'] : never;
+    tasks: ReturnType<GatewayDispatcherDeps['getTaskStore']>['tasks'];
     lookupTaskIdBySubagentKey: (key: string) => string | undefined;
   }>,
 ) {
@@ -63,7 +62,7 @@ function createHarness(
       tasks,
       updateTaskTitle: vi.fn(),
     }),
-    getMessageStore: () => messageStore,
+    getMessageStore: () => messageStore as unknown as ReturnType<GatewayDispatcherDeps['getMessageStore']>,
     getActiveTaskId: () => null,
     markUnread: vi.fn(),
     setGatewayStatusByGateway: vi.fn(),

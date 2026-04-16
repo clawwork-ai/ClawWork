@@ -88,7 +88,7 @@ describe('settings UI regressions', () => {
       })),
     });
 
-    (globalThis.window as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
+    (globalThis.window as unknown as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
       getSettings: vi.fn().mockResolvedValue(null),
       updateSettings: vi.fn().mockResolvedValue({ ok: true, config: {} }),
       getQuickLaunchConfig: vi.fn().mockResolvedValue({ enabled: false, shortcut: 'Alt+Space', sendShortcut: 'enter' }),
@@ -99,7 +99,7 @@ describe('settings UI regressions', () => {
       addGateway: vi.fn().mockResolvedValue({ ok: true }),
       removeGateway: vi.fn().mockResolvedValue({ ok: true }),
       setDefaultGateway: vi.fn().mockResolvedValue({ ok: true }),
-    };
+    } as unknown as Window['clawwork'] & Record<string, unknown>;
   });
 
   afterEach(() => {

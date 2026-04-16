@@ -315,7 +315,7 @@ describe('createBrowserGatewayTransport', () => {
 
   describe('syncSessions', () => {
     it('continues past a failed client and returns discovered from others', async () => {
-      mockClient.listSessions.mockRejectedValue(new Error('sync failed'));
+      vi.mocked(mockClient.listSessions).mockRejectedValue(new Error('sync failed'));
       const { transport } = createBrowserGatewayTransport(getClients, getClient, getDeviceId);
 
       const result = await transport.syncSessions();

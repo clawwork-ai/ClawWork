@@ -87,7 +87,7 @@ function createHarness(params: {
     },
     getTaskStore: () => taskStore,
     getMessageStore: () => messageStore,
-  });
+  } as unknown as Parameters<typeof createSessionSync>[0]);
 
   return { sessionSync, taskStore, messageStore, persisted };
 }

@@ -204,6 +204,22 @@ jobs:
         if: needs.changes.outputs.typecheck_website == 'true'
         run: pnpm --filter @clawwork/website exec tsc --noEmit
 
+      - name: Type check shared tests
+        if: needs.changes.outputs.test_shared == 'true'
+        run: pnpm --filter @clawwork/shared exec tsc --noEmit -p tsconfig.test.json
+
+      - name: Type check core tests
+        if: needs.changes.outputs.test_core == 'true'
+        run: pnpm --filter @clawwork/core exec tsc --noEmit -p tsconfig.test.json
+
+      - name: Type check desktop tests
+        if: needs.changes.outputs.test_desktop == 'true'
+        run: pnpm --filter @clawwork/desktop exec tsc --noEmit -p tsconfig.test.json
+
+      - name: Type check PWA tests
+        if: needs.changes.outputs.test_pwa == 'true'
+        run: pnpm --filter @clawwork/pwa exec tsc --noEmit -p tsconfig.test.json
+
       - name: Test shared
         if: needs.changes.outputs.test_shared == 'true'
         run: pnpm --filter @clawwork/shared test

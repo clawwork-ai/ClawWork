@@ -9,7 +9,7 @@ async function loadStore() {
 describe('message store tool call persistence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as Window & {
+    const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as unknown as Window & {
       clawwork: {
         persistMessage: ReturnType<typeof vi.fn>;
       };

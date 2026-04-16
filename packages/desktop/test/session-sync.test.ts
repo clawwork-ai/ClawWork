@@ -1,4 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+
+type MockedApi = {
+  syncSessions: Mock;
+  chatHistory: Mock;
+  persistTask: Mock;
+  persistTaskUpdate: Mock;
+  loadMessages: Mock;
+  loadTasks: Mock;
+  persistMessage: Mock;
+  getDeviceId: Mock;
+};
+
+let mockApi: MockedApi;
 
 function createDeferred<T>(): {
   promise: Promise<T>;
@@ -24,19 +37,7 @@ async function loadModules() {
 describe('session sync startup flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as Window & {
-      clawwork: {
-        syncSessions: ReturnType<typeof vi.fn>;
-        chatHistory: ReturnType<typeof vi.fn>;
-        persistTask: ReturnType<typeof vi.fn>;
-        persistTaskUpdate: ReturnType<typeof vi.fn>;
-        loadMessages: ReturnType<typeof vi.fn>;
-        loadTasks: ReturnType<typeof vi.fn>;
-        persistMessage: ReturnType<typeof vi.fn>;
-        getDeviceId: ReturnType<typeof vi.fn>;
-      };
-    };
-    windowWithClawwork.clawwork = {
+    mockApi = {
       syncSessions: vi.fn(),
       chatHistory: vi.fn(),
       persistTask: vi.fn().mockResolvedValue({ ok: true }),
@@ -46,6 +47,7 @@ describe('session sync startup flow', () => {
       persistMessage: vi.fn().mockResolvedValue({ ok: true }),
       getDeviceId: vi.fn().mockResolvedValue('device-1'),
     };
+    (globalThis.window ??= {} as typeof globalThis.window).clawwork = mockApi as unknown as Window['clawwork'];
   });
 
   it('filters gateway-injected model values from discovered session metadata', async () => {
@@ -59,7 +61,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -86,7 +88,7 @@ describe('session sync startup flow', () => {
     expect(task).toBeTruthy();
     expect(task.model).toBeUndefined();
     expect(task.modelProvider).toBe('openclaw');
-    expect(window.clawwork.persistTaskUpdate).toHaveBeenCalledWith(
+    expect(mockApi.persistTaskUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'task-1',
         model: undefined,
@@ -134,9 +136,9 @@ describe('session sync startup flow', () => {
     };
     const loadMessagesDeferred = createDeferred<{ ok: true; rows: (typeof existingRow)[] }>();
 
-    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
-    window.clawwork.loadMessages.mockReturnValue(loadMessagesDeferred.promise);
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    mockApi.loadMessages.mockReturnValue(loadMessagesDeferred.promise);
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -173,7 +175,7 @@ describe('session sync startup flow', () => {
 
     await Promise.all([hydratePromise, syncPromise]);
 
-    expect(window.clawwork.persistMessage).not.toHaveBeenCalled();
+    expect(mockApi.persistMessage).not.toHaveBeenCalled();
     expect(messageStore.useMessageStore.getState().messagesByTask['task-1']).toEqual([
       expect.objectContaining({
         id: 'local-msg-1',
@@ -212,8 +214,8 @@ describe('session sync startup flow', () => {
       artifactDir: 'tasks/task-dup',
       gatewayId: 'gw-1',
     };
-    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
-    window.clawwork.loadMessages.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    mockApi.loadMessages.mockResolvedValue({
       ok: true,
       rows: [
         { id: 'u1', taskId: 'task-dup', role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.123Z' },
@@ -226,7 +228,7 @@ describe('session sync startup flow', () => {
         },
       ],
     });
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -250,7 +252,7 @@ describe('session sync startup flow', () => {
     expect(msgs).toHaveLength(2);
     expect(msgs[0].content).toBe('Hello');
     expect(msgs[1].content).toBe('Hi there!');
-    expect(window.clawwork.persistMessage).not.toHaveBeenCalled();
+    expect(mockApi.persistMessage).not.toHaveBeenCalled();
   });
 
   it('syncs only new assistant messages for existing tasks (single-writer)', async () => {
@@ -282,12 +284,12 @@ describe('session sync startup flow', () => {
       artifactDir: 'tasks/task-legit',
       gatewayId: 'gw-1',
     };
-    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
-    window.clawwork.loadMessages.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    mockApi.loadMessages.mockResolvedValue({
       ok: true,
       rows: [{ id: 'u1', taskId: 'task-legit', role: 'user', content: 'Hello', timestamp: '2026-03-16T10:00:00.000Z' }],
     });
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -344,8 +346,8 @@ describe('session sync startup flow', () => {
       gatewayId: 'gw-1',
     };
 
-    window.clawwork.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
-    window.clawwork.loadMessages.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({ ok: true, rows: [taskRow] });
+    mockApi.loadMessages.mockResolvedValue({
       ok: true,
       rows: [
         {
@@ -357,7 +359,7 @@ describe('session sync startup flow', () => {
         },
       ],
     });
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -483,7 +485,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.chatHistory.mockResolvedValue({
+    mockApi.chatHistory.mockResolvedValue({
       ok: true,
       result: {
         messages: [
@@ -538,7 +540,7 @@ describe('session sync startup flow', () => {
       expect.objectContaining({ id: 'exec-1', status: 'done', result: 'fetch url' }),
       expect.objectContaining({ id: 'read-1', status: 'error', result: 'from memory/2026-03-23.md' }),
     ]);
-    expect(window.clawwork.persistMessage).toHaveBeenCalledTimes(1);
+    expect(mockApi.persistMessage).toHaveBeenCalledTimes(1);
   });
 
   it('prefers terminal tool status from active turn over stale running canonical tool calls during promote', async () => {
@@ -659,7 +661,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.chatHistory.mockResolvedValue({
+    mockApi.chatHistory.mockResolvedValue({
       ok: true,
       result: {
         messages: [
@@ -682,7 +684,7 @@ describe('session sync startup flow', () => {
 
     await sessionSync.syncSessionMessages('task-sync-persist');
 
-    expect(window.clawwork.persistMessage).toHaveBeenCalledWith(
+    expect(mockApi.persistMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         taskId: 'task-sync-persist',
         role: 'assistant',
@@ -702,7 +704,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.loadTasks.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({
       ok: true,
       rows: [
         {
@@ -725,15 +727,15 @@ describe('session sync startup flow', () => {
         },
       ],
     });
-    window.clawwork.loadMessages.mockResolvedValue({ ok: true, rows: [] });
-    window.clawwork.syncSessions.mockResolvedValue({ ok: true, discovered: [] });
+    mockApi.loadMessages.mockResolvedValue({ ok: true, rows: [] });
+    mockApi.syncSessions.mockResolvedValue({ ok: true, discovered: [] });
 
     await sessionSync.syncFromGateway();
     await sessionSync.syncFromGateway();
 
-    expect(window.clawwork.loadTasks).toHaveBeenCalledTimes(1);
-    expect(window.clawwork.loadMessages).toHaveBeenCalledTimes(1);
-    expect(window.clawwork.syncSessions).toHaveBeenCalledTimes(2);
+    expect(mockApi.loadTasks).toHaveBeenCalledTimes(1);
+    expect(mockApi.loadMessages).toHaveBeenCalledTimes(1);
+    expect(mockApi.syncSessions).toHaveBeenCalledTimes(2);
   });
 
   it('hydrates persisted tool calls from local storage', async () => {
@@ -747,7 +749,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.loadTasks.mockResolvedValue({
+    mockApi.loadTasks.mockResolvedValue({
       ok: true,
       rows: [
         {
@@ -770,7 +772,7 @@ describe('session sync startup flow', () => {
         },
       ],
     });
-    window.clawwork.loadMessages.mockResolvedValue({
+    mockApi.loadMessages.mockResolvedValue({
       ok: true,
       rows: [
         {
@@ -813,7 +815,7 @@ describe('session sync startup flow', () => {
       highlightedMessageId: null,
     });
 
-    window.clawwork.syncSessions.mockResolvedValue({
+    mockApi.syncSessions.mockResolvedValue({
       ok: true,
       discovered: [
         {
@@ -853,7 +855,7 @@ describe('session sync startup flow', () => {
 
     await sessionSync.syncFromGateway();
 
-    expect(window.clawwork.persistMessage).toHaveBeenCalledWith(
+    expect(mockApi.persistMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         taskId: 'task-persist-tools',
         role: 'assistant',

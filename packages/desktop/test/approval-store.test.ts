@@ -25,7 +25,7 @@ async function flushMicrotasks() {
 describe('approval store', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as Window & {
+    const windowWithClawwork = (globalThis.window ??= {} as typeof globalThis.window) as unknown as Window & {
       clawwork: {
         resolveExecApproval: ReturnType<typeof vi.fn>;
         updateSettings: ReturnType<typeof vi.fn>;
@@ -87,7 +87,7 @@ describe('approval store', () => {
   it('keeps pending approval visible when resolve fails', async () => {
     const { approvalStore } = await loadStores();
 
-    window.clawwork.resolveExecApproval.mockResolvedValueOnce({ ok: false, error: 'denied upstream' });
+    vi.mocked(window.clawwork.resolveExecApproval).mockResolvedValueOnce({ ok: false, error: 'denied upstream' });
 
     approvalStore.useApprovalStore.setState({
       pendingApprovals: [

@@ -58,10 +58,10 @@ describe('theme provider', () => {
     getSettingsMock = vi.fn().mockResolvedValue({});
     updateSettingsMock = vi.fn().mockResolvedValue({ ok: true, config: {} });
 
-    (globalThis.window as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
+    (globalThis.window as unknown as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
       getSettings: getSettingsMock,
       updateSettings: updateSettingsMock,
-    };
+    } as unknown as Window['clawwork'] & Record<string, unknown>;
   });
 
   afterEach(() => {

@@ -16,6 +16,7 @@
     "check:renderer-copy": "node scripts/check-renderer-copy.mjs",
     "check:ui-contract": "node scripts/check-ui-contract.mjs",
     "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/core exec tsc -b && pnpm --filter @clawwork/pwa exec tsc --noEmit && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
+    "typecheck:tests": "pnpm --filter @clawwork/shared exec tsc --noEmit -p tsconfig.test.json && pnpm --filter @clawwork/core exec tsc --noEmit -p tsconfig.test.json && pnpm --filter @clawwork/desktop exec tsc --noEmit -p tsconfig.test.json && pnpm --filter @clawwork/pwa exec tsc --noEmit -p tsconfig.test.json",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -28,7 +29,7 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:dead-code": "knip",
     "release-notes": "node scripts/generate-release-notes.mjs",
-    "check": "pnpm lint && pnpm check:architecture && pnpm check:ui-contract && pnpm check:renderer-copy && pnpm check:i18n && pnpm check:dead-code && pnpm format:check && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm check:architecture && pnpm check:ui-contract && pnpm check:renderer-copy && pnpm check:i18n && pnpm check:dead-code && pnpm format:check && pnpm typecheck && pnpm typecheck:tests && pnpm test"
   },
   "lint-staged": {
     "*.{ts,tsx,mts,cts,js,mjs,cjs}": [

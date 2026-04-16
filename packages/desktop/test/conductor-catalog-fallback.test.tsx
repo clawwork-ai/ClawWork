@@ -192,7 +192,7 @@ describe('conductor initialization - catalog fallback', () => {
     expect(mocks.roomState.initConductor).toHaveBeenCalledTimes(1);
 
     // Verify the agentCatalogStr passed to initConductor contains the two worker agents.
-    const catalogArg = mocks.roomState.initConductor.mock.calls[0][3] as string;
+    const catalogArg = (mocks.roomState.initConductor.mock.calls[0] as unknown[])[3] as string;
     expect(catalogArg).toContain('worker-a');
     expect(catalogArg).toContain('worker-b');
     // Manager agent should be excluded (it equals task.agentId).
@@ -247,7 +247,7 @@ describe('conductor initialization - catalog fallback', () => {
     expect(mocks.roomState.initConductor).toHaveBeenCalledTimes(1);
 
     // When catalog IS loaded, agent names from the catalog should appear.
-    const catalogArg = mocks.roomState.initConductor.mock.calls[0][3] as string;
+    const catalogArg = (mocks.roomState.initConductor.mock.calls[0] as unknown[])[3] as string;
     expect(catalogArg).toContain('Worker A');
     expect(catalogArg).toContain('Worker B');
     // unrelated-agent is not in the team, should not appear.

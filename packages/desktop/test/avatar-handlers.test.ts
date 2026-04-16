@@ -5,9 +5,9 @@ let protocolHandler: ((request: { url: string }) => Promise<Response>) | null = 
 
 const mkdirMock = vi.fn();
 const writeFileMock = vi.fn();
-const readdirMock = vi.fn<() => Promise<string[]>>(() => Promise.resolve([]));
+const readdirMock = vi.fn<(...args: unknown[]) => Promise<string[]>>(() => Promise.resolve([]));
 const unlinkMock = vi.fn();
-const netFetchMock = vi.fn(() => new Response('ok'));
+const netFetchMock = vi.fn<(...args: unknown[]) => Response>(() => new Response('ok'));
 const debugInfoMock = vi.fn();
 
 vi.mock('electron', () => ({

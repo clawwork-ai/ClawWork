@@ -70,14 +70,14 @@ describe('gateway settings flow', () => {
       defaultGatewayId: null,
       gatewayInfoMap: {},
     });
-    (globalThis.window as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
+    (globalThis.window as unknown as Window & typeof globalThis & { clawwork: Record<string, unknown> }).clawwork = {
       getSettings: vi.fn().mockResolvedValue({ gateways: [], defaultGatewayId: null }),
       addGateway: vi.fn().mockResolvedValue({ ok: true }),
       updateGateway: vi.fn().mockResolvedValue({ ok: true }),
       removeGateway: vi.fn().mockResolvedValue({ ok: true }),
       setDefaultGateway: vi.fn().mockResolvedValue({ ok: true }),
       testGateway: vi.fn().mockResolvedValue({ ok: true }),
-    };
+    } as unknown as Window['clawwork'] & Record<string, unknown>;
   });
 
   afterEach(() => {
