@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import type { ElectronApplication, Page } from 'playwright';
+import type { ElectronApplication, Page } from '@playwright/test';
 import { launchApp } from '../helpers/electron-app';
 
 let app: ElectronApplication;
@@ -46,10 +46,10 @@ test.describe('Layer 1: Smoke Tests', () => {
   });
 
   test('S4: preload API is exposed', async () => {
-    const apiType = await page.evaluate(() => typeof (window as Record<string, unknown>).clawwork);
+    const apiType = await page.evaluate(() => typeof window.clawwork);
     expect(apiType).toBe('object');
 
-    const methods = await page.evaluate(() => Object.keys((window as Record<string, unknown>).clawwork as object));
+    const methods = await page.evaluate(() => Object.keys(window.clawwork as object));
     expect(methods).toContain('sendMessage');
     expect(methods).toContain('gatewayStatus');
     expect(methods).toContain('listGateways');

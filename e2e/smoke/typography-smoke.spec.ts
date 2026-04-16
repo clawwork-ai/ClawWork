@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import type { ElectronApplication, Page } from 'playwright';
+import type { ElectronApplication, Page } from '@playwright/test';
 import { launchApp } from '../helpers/electron-app';
 
 let app: ElectronApplication;

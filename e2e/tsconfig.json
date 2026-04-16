@@ -9,6 +9,6 @@
     "declarationMap": false,
     "sourceMap": false
   },
-  "include": ["./**/*.ts"],
+  "include": ["./**/*.ts", "../packages/desktop/src/preload/clawwork.d.ts"],
   "exclude": ["dist"]
 }
