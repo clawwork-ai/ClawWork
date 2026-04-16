@@ -54,6 +54,7 @@ jobs:
   release:
     needs: prepare-release
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -130,7 +131,33 @@ jobs:
         run: pnpm --filter @clawwork/desktop build
 
       - name: Package and publish (${{ matrix.platform }})
+        if: matrix.platform != 'mac'
         run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_VERSION: ${{ github.run_number }}
+          EP_PRE_RELEASE: ${{ env.IS_PRERELEASE }}
+
+      - name: Package and publish (mac, with adhoc fallback)
+        if: matrix.platform == 'mac'
+        run: |
+          LOG=$(mktemp)
+          set +e
+          pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION" 2>&1 | tee "$LOG"
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -eq 0 ]; then
+            exit 0
+          fi
+          if ! grep -q "Failed to notarize" "$LOG"; then
+            echo "::error::electron-builder failed for a non-notarization reason — not falling back to ad-hoc."
+            exit "$status"
+          fi
+          echo "::warning::Notarization failed — falling back to ad-hoc signing for ${{ matrix.arch }}."
+          rm -rf packages/desktop/dist
+          unset APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID
+          export CSC_IDENTITY_AUTO_DISCOVERY=false
+          pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION" -c.mac.identity=null -c.mac.notarize=false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_VERSION: ${{ github.run_number }}
