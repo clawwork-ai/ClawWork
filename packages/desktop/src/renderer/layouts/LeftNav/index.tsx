@@ -67,6 +67,7 @@ function IconButton({
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
+          aria-label={tooltip}
           className={cn(
             'titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md transition-colors relative',
             'focus-visible:outline-none glow-focus',
@@ -266,6 +267,7 @@ export default function LeftNav() {
       <TooltipTrigger asChild>
         <button
           onClick={toggleLeftNavCollapsed}
+          aria-label={leftNavCollapsed ? t('leftNav.expandNav') : t('leftNav.collapseNav')}
           className="titlebar-no-drag flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors focus-visible:outline-none glow-focus active:scale-95"
         >
           {leftNavCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
@@ -428,7 +430,12 @@ export default function LeftNav() {
         <div className="titlebar-no-drag flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon-sm" onClick={() => startNewTask()} className="h-7 w-7">
+              <Button
+                size="icon-sm"
+                onClick={() => startNewTask()}
+                aria-label={t('common.newTask')}
+                className="h-7 w-7"
+              >
                 <Plus />
               </Button>
             </TooltipTrigger>

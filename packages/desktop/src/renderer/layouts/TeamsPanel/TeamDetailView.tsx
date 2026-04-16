@@ -208,7 +208,7 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
     <div className="flex h-full flex-col">
       <header className="titlebar-drag flex items-center border-b border-[var(--border)] px-5 h-[var(--density-toolbar-height)] flex-shrink-0">
         <div className="titlebar-no-drag flex items-center gap-2 min-w-0">
-          <Button variant="ghost" size="icon-sm" onClick={onBack}>
+          <Button variant="ghost" size="icon-sm" onClick={onBack} aria-label={t('common.back')}>
             <ArrowLeft size={16} />
           </Button>
           <span className="type-body text-[var(--text-muted)]">{team.name}</span>
@@ -257,16 +257,33 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
             <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-2 flex-shrink-0">
               <span className="type-support text-[var(--text-muted)] truncate">{selectedFile.label}</span>
               {isEditable && !isEditing && (
-                <Button variant="ghost" size="icon-sm" onClick={() => setEditingContent(fileContent ?? '')}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setEditingContent(fileContent ?? '')}
+                  aria-label={t('common.edit')}
+                >
                   <Pencil size={13} />
                 </Button>
               )}
               {isEditing && (
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon-sm" onClick={() => setEditingContent(null)} disabled={saving}>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setEditingContent(null)}
+                    disabled={saving}
+                    aria-label={t('common.cancel')}
+                  >
                     <X size={14} />
                   </Button>
-                  <Button variant="ghost" size="icon-sm" onClick={handleSave} disabled={saving}>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={handleSave}
+                    disabled={saving}
+                    aria-label={t('common.save')}
+                  >
                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                   </Button>
                 </div>
