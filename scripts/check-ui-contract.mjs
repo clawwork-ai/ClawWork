@@ -9,7 +9,6 @@ const EXCLUDED_FILES = new Set([
   'packages/desktop/src/renderer/styles/theme.css',
   'packages/desktop/src/renderer/styles/design-tokens.ts',
   'packages/desktop/src/renderer/styles/typography.css',
-  'packages/desktop/src/renderer/components/ambient/AmbientShell.tsx',
   'packages/pwa/src/styles/index.css',
 ]);
 

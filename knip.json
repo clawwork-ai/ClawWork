@@ -30,6 +30,6 @@
     },
     "website": {}
   },
-  "ignore": ["keynote/**"],
+  "ignore": ["keynote/**", "website/**", ".claude/**"],
   "exclude": ["unlisted"]
 }

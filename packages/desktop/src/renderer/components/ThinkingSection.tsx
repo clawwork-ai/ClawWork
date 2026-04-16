@@ -49,7 +49,6 @@ export default function ThinkingSection({
               className={cn(
                 'type-support mt-1.5 rounded-lg px-3 py-2 leading-relaxed',
                 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
-                'border-l-2 border-[var(--accent)] border-opacity-30',
                 'max-h-60 overflow-y-auto',
               )}
             >

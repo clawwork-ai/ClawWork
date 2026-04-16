@@ -15,7 +15,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          'bg-[image:var(--accent-gradient-vibrant)] text-[var(--accent-foreground)] font-semibold',
+          'bg-[var(--accent)] text-[var(--accent-foreground)] font-semibold',
           'hover:bg-[var(--accent-hover)] hover:shadow-[var(--glow-accent)]',
           'active:brightness-90 active:scale-[0.98]',
         ].join(' '),

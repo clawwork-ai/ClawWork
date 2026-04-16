@@ -219,7 +219,7 @@ export default function CommandPalette() {
       onClick={close}
     >
       <motion.div
-        className="w-full rounded-2xl glass-command glow-3 overflow-hidden"
+        className="w-full rounded-2xl glass-command overflow-hidden"
         style={{ maxWidth: 580 }}
         {...panelMotion}
         onClick={(e) => e.stopPropagation()}

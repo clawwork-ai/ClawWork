@@ -83,16 +83,12 @@ export function ChatInput({ taskId }: ChatInputProps) {
   };
 
   return (
-    <div className="safe-area-bottom px-3 py-2" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      <div
-        className="flex items-end gap-2 rounded-[22px] px-2 py-1.5"
-        style={{ backgroundColor: 'var(--input-bar-bg)' }}
-      >
+    <div className="safe-area-bottom bg-[var(--bg-primary)] px-3 py-2">
+      <div className="flex items-end gap-2 rounded-[22px] bg-[var(--input-bar-bg)] px-2 py-1.5">
         <button
           onClick={handleNewTask}
           aria-label={t('drawer.newTaskButton')}
-          className="flex shrink-0 items-center justify-center rounded-full transition-colors"
-          style={{ color: 'var(--text-secondary)', width: 32, height: 32 }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors"
         >
           <Plus size={18} />
         </button>
@@ -106,15 +102,13 @@ export function ChatInput({ taskId }: ChatInputProps) {
           disabled={!connected}
           rows={1}
           aria-label={t('chat.inputPlaceholder')}
-          className="type-body flex-1 resize-none bg-transparent py-1 outline-none"
-          style={{ color: 'var(--text-primary)', minHeight: 32 }}
+          className="type-body min-h-8 flex-1 resize-none bg-transparent py-1 text-[var(--text-primary)] outline-none"
         />
         {isStreaming ? (
           <button
             onClick={handleAbort}
             aria-label={t('chat.abortButton')}
-            className="flex shrink-0 items-center justify-center rounded-full transition-colors"
-            style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', width: 32, height: 32 }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--danger-bg)] text-[var(--danger)] transition-colors"
           >
             <Square size={14} />
           </button>
@@ -123,8 +117,7 @@ export function ChatInput({ taskId }: ChatInputProps) {
             onClick={handleSend}
             disabled={!text.trim() || !connected}
             aria-label={t('chat.sendButton')}
-            className="flex shrink-0 items-center justify-center rounded-full transition-colors disabled:opacity-30"
-            style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', width: 32, height: 32 }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-foreground)] transition-colors disabled:opacity-30"
           >
             <ArrowUp size={16} />
           </button>

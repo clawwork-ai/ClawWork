@@ -593,12 +593,22 @@ function ClawHubTab({ gatewayId, onInstalled }: { gatewayId: string; onInstalled
           placeholder={t('settings.skillHubSearchPlaceholder')}
           className="min-w-0 flex-1 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] type-label outline-none"
         />
-        {searching && <Loader2 size={14} className="animate-spin text-[var(--text-muted)]" />}
-      </div>
-
-      <div className="flex items-start gap-2 rounded-lg border-l-2 border-l-[var(--info)] bg-[var(--bg-secondary)] px-3 py-2">
-        <Info size={14} className="mt-0.5 flex-shrink-0 text-[var(--info)]" />
-        <p className="type-support text-[var(--text-secondary)]">{t('settings.skillHubMirrorTip')}</p>
+        {searching ? (
+          <Loader2 size={14} className="animate-spin text-[var(--text-muted)]" />
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label={t('settings.skillHubMirrorTip')}
+                className="flex-shrink-0 text-[var(--text-muted)] transition-colors hover:text-[var(--text-secondary)]"
+              >
+                <Info size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">{t('settings.skillHubMirrorTip')}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
       {searching && results.length === 0 ? (
