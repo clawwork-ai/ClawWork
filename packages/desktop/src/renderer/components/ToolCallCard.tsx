@@ -4,21 +4,14 @@ import { ChevronDown, ChevronRight, Loader2, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ToolCall } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
-import { motionSpring, motion as motionPresets } from '@/styles/design-tokens';
+import { motion as motionPresets } from '@/styles/design-tokens';
 import { getToolColor } from '@/lib/getToolFamily';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 function StatusIcon({ status }: { status: ToolCall['status'] }) {
   return (
     <AnimatePresence mode="wait">
-      <motion.span
-        key={status}
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.6 }}
-        transition={motionSpring.bouncy}
-        className="inline-flex"
-      >
+      <motion.span key={status} {...motionPresets.crossfade} className="inline-flex">
         {status === 'running' && <Loader2 size={14} className="animate-spin text-[var(--accent)]" />}
         {status === 'done' && <Check size={14} className="text-[var(--accent)]" />}
         {status === 'error' && <X size={14} className="text-[var(--danger)]" />}
