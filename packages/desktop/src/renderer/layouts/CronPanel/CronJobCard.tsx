@@ -164,7 +164,7 @@ export default function CronJobCard({
             <div className="flex items-center gap-1 mt-2 border-t border-[var(--border)] pt-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" onClick={() => onRunNow(job)}>
+                  <Button variant="ghost" size="icon-sm" onClick={() => onRunNow(job)} aria-label={t('cron.runNow')}>
                     <Play size={14} />
                   </Button>
                 </TooltipTrigger>
@@ -172,7 +172,12 @@ export default function CronJobCard({
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" onClick={() => onShowHistory(job)}>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => onShowHistory(job)}
+                    aria-label={t('cron.history')}
+                  >
                     <Clock size={14} />
                   </Button>
                 </TooltipTrigger>
@@ -180,7 +185,7 @@ export default function CronJobCard({
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" onClick={() => onEdit(job)}>
+                  <Button variant="ghost" size="icon-sm" onClick={() => onEdit(job)} aria-label={t('common.edit')}>
                     <Pencil size={14} />
                   </Button>
                 </TooltipTrigger>

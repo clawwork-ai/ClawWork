@@ -64,6 +64,7 @@
     "toggleTheme": "테마 전환"
   },
   "common": {
+    "back": "뒤로",
     "cancel": "취소",
     "close": "닫기",
     "completed": "완료됨",
@@ -79,6 +80,7 @@
     "light": "라이트",
     "minAgo": "{{count}}분 전",
     "missing": "누락",
+    "moreActions": "추가 작업",
     "navigate": "이동",
     "newTask": "새 작업",
     "noFiles": "파일이 없습니다",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "메시지 영역 펼치기",
     "orchestrateCount": "현재 게이트웨이에 {{count}}개의 Agent 사용 가능",
     "orchestrateDesc": "AI가 작업에 맞는 Agent를 자동으로 선택하고, 분업 및 결과를 종합합니다.",
+    "refreshUsage": "사용량 새로고침",
+    "scrollToBottom": "맨 아래로 스크롤",
     "starOnGithub": "ClawWork가 마음에 드셨나요? GitHub에서 별을 눌러주세요",
     "tabAgent": "Agent",
     "tabOrchestrate": "스마트 편성",
@@ -701,6 +705,7 @@
     "title": "팀",
     "wizard": {
       "addAgent": "에이전트 추가",
+      "addSkill": "스킬 추가",
       "agentCount": "{{count}}개 에이전트",
       "agentMdPlaceholder": "에이전트 지시사항...",
       "agentName": "에이전트 이름",
@@ -751,6 +756,7 @@
     "installSuccess": "팀이 성공적으로 설치되었습니다",
     "manageRegistries": "레지스트리",
     "notFetched": "아직 동기화되지 않음 — 새로고침 클릭",
+    "refresh": "레지스트리 새로고침",
     "refreshed": "레지스트리가 새로고침되었습니다",
     "registryAdded": "레지스트리가 추가되었습니다",
     "registryRemoved": "레지스트리가 제거되었습니다",

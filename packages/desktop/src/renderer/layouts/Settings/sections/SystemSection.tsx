@@ -217,6 +217,7 @@ export default function SystemSection() {
               onClick={() => window.clawwork.openWorkspaceFolder()}
               className="titlebar-no-drag h-9 w-9 flex-shrink-0"
               title={t('settings.workspaceOpenFolder')}
+              aria-label={t('settings.workspaceOpenFolder')}
             >
               <ExternalLink size={14} />
             </Button>

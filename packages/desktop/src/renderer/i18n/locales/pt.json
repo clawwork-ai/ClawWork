@@ -64,6 +64,7 @@
     "toggleTheme": "Alternar tema"
   },
   "common": {
+    "back": "Voltar",
     "cancel": "Cancelar",
     "close": "Fechar",
     "completed": "Concluída",
@@ -79,6 +80,7 @@
     "light": "Claro",
     "minAgo": "{{count}} min atrás",
     "missing": "Ausente",
+    "moreActions": "Mais ações",
     "navigate": "navegar",
     "newTask": "Nova Tarefa",
     "noFiles": "Nenhum arquivo ainda",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "Expandir largura das mensagens",
     "orchestrateCount": "{{count}} agentes disponíveis neste gateway",
     "orchestrateDesc": "A IA selecionará automaticamente os agentes adequados, coordenará o trabalho e sintetizará os resultados.",
+    "refreshUsage": "Atualizar uso",
+    "scrollToBottom": "Rolar para o final",
     "starOnGithub": "Curtindo o ClawWork? Deixe uma estrela no GitHub",
     "tabAgent": "Agent",
     "tabOrchestrate": "Orquestração",
@@ -701,6 +705,7 @@
     "title": "Equipes",
     "wizard": {
       "addAgent": "Adicionar agente",
+      "addSkill": "Adicionar Skill",
       "agentCount": "{{count}} agentes",
       "agentMdPlaceholder": "Instruções do agente...",
       "agentName": "Nome do agente",
@@ -751,6 +756,7 @@
     "installSuccess": "Equipe instalada com sucesso",
     "manageRegistries": "Registros",
     "notFetched": "Ainda não sincronizado — clique em atualizar",
+    "refresh": "Atualizar registros",
     "refreshed": "Registros atualizados",
     "registryAdded": "Registro adicionado",
     "registryRemoved": "Registro removido",

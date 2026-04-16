@@ -64,6 +64,7 @@
     "toggleTheme": "切換主題"
   },
   "common": {
+    "back": "返回",
     "cancel": "取消",
     "close": "關閉",
     "completed": "已完成",
@@ -79,6 +80,7 @@
     "light": "淺色",
     "minAgo": "{{count}} 分鐘前",
     "missing": "缺少",
+    "moreActions": "更多操作",
     "navigate": "導覽",
     "newTask": "新任務",
     "noFiles": "尚無檔案",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "鋪開訊息區域",
     "orchestrateCount": "當前網關共 {{count}} 個 Agent 可用",
     "orchestrateDesc": "AI 將根據你的任務自動選擇合適的 Agent，協調分工並彙總結果。",
+    "refreshUsage": "重新整理用量",
+    "scrollToBottom": "捲動至底部",
     "starOnGithub": "喜歡 ClawWork 嗎？在 GitHub 上給我們一顆星",
     "tabAgent": "Agent",
     "tabOrchestrate": "智能編排",
@@ -701,6 +705,7 @@
     "title": "團隊",
     "wizard": {
       "addAgent": "新增 Agent",
+      "addSkill": "新增技能",
       "agentCount": "{{count}} 個 Agent",
       "agentMdPlaceholder": "Agent 指令...",
       "agentName": "Agent 名稱",
@@ -751,6 +756,7 @@
     "installSuccess": "團隊安裝成功",
     "manageRegistries": "Registry",
     "notFetched": "尚未同步 — 點擊重新整理",
+    "refresh": "重新整理註冊表",
     "refreshed": "Registry 已重新整理",
     "registryAdded": "Registry 已新增",
     "registryRemoved": "Registry 已移除",

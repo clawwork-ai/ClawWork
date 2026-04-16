@@ -103,6 +103,7 @@ export default function RegistryManageDialog({
                 <button
                   onClick={() => handleRefresh(reg.id)}
                   disabled={refreshingIds.has(reg.id)}
+                  aria-label={t('teamshub.refresh')}
                   className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] disabled:opacity-40"
                 >
                   <RefreshCw size={14} className={refreshingIds.has(reg.id) ? 'animate-spin' : ''} />
@@ -110,6 +111,7 @@ export default function RegistryManageDialog({
                 {!reg.isOfficial && (
                   <button
                     onClick={() => handleRemove(reg.id)}
+                    aria-label={t('common.delete')}
                     className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--danger)]"
                   >
                     <Trash2 size={14} />

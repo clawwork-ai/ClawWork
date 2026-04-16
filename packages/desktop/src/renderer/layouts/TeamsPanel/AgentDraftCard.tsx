@@ -338,7 +338,13 @@ export default function AgentDraftCard({
                   placeholder={t('teams.wizard.skillSlugPlaceholder')}
                   className={cn(inputClass, 'flex-1')}
                 />
-                <Button size="sm" variant="outline" onClick={addSkill} disabled={!skillInput.trim()}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={addSkill}
+                  disabled={!skillInput.trim()}
+                  aria-label={t('teams.wizard.addSkill')}
+                >
                   <Plus size={14} />
                 </Button>
               </div>

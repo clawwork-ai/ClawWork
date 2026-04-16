@@ -172,10 +172,21 @@ export default function TeamsHubTab({ onSelectEntry }: TeamsHubTabProps) {
                 className="type-body flex-1 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
               />
             </div>
-            <Button size="sm" variant="outline" onClick={() => setDialogOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDialogOpen(true)}
+              aria-label={t('teamshub.manageRegistries')}
+            >
               <Settings size={14} />
             </Button>
-            <Button size="sm" variant="outline" onClick={handleRefreshAll} disabled={refreshing}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefreshAll}
+              disabled={refreshing}
+              aria-label={t('teamshub.refresh')}
+            >
               <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
             </Button>
           </div>

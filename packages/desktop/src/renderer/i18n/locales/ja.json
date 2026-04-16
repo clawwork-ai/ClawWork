@@ -64,6 +64,7 @@
     "toggleTheme": "テーマを切替"
   },
   "common": {
+    "back": "戻る",
     "cancel": "キャンセル",
     "close": "閉じる",
     "completed": "完了",
@@ -79,6 +80,7 @@
     "light": "ライト",
     "minAgo": "{{count}} 分前",
     "missing": "不明",
+    "moreActions": "その他の操作",
     "navigate": "移動",
     "newTask": "新規タスク",
     "noFiles": "ファイルがありません",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "メッセージ幅を広げる",
     "orchestrateCount": "このゲートウェイで {{count}} 個の Agent が利用可能",
     "orchestrateDesc": "AI がタスクに応じて適切な Agent を自動選択し、分担・統合します。",
+    "refreshUsage": "使用量を更新",
+    "scrollToBottom": "最下部へスクロール",
     "starOnGithub": "ClawWork を気に入っていただけましたか？GitHub でスターをお願いします",
     "tabAgent": "Agent",
     "tabOrchestrate": "スマート編成",
@@ -701,6 +705,7 @@
     "title": "チーム",
     "wizard": {
       "addAgent": "エージェント追加",
+      "addSkill": "スキルを追加",
       "agentCount": "{{count}} エージェント",
       "agentMdPlaceholder": "エージェント指示...",
       "agentName": "エージェント名",
@@ -751,6 +756,7 @@
     "installSuccess": "チームのインストールが完了しました",
     "manageRegistries": "レジストリ",
     "notFetched": "未同期 — 更新をクリック",
+    "refresh": "レジストリを更新",
     "refreshed": "レジストリを更新しました",
     "registryAdded": "レジストリを追加しました",
     "registryRemoved": "レジストリを削除しました",

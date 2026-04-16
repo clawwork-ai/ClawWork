@@ -152,7 +152,7 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
     <div className="flex h-full flex-col">
       <header className="titlebar-drag flex items-center justify-between border-b border-[var(--border)] px-5 h-[var(--density-toolbar-height)] flex-shrink-0">
         <div className="titlebar-no-drag flex items-center gap-2 min-w-0">
-          <Button variant="ghost" size="icon-sm" onClick={onBack}>
+          <Button variant="ghost" size="icon-sm" onClick={onBack} aria-label={t('common.back')}>
             <ArrowLeft size={16} />
           </Button>
           <span className="type-body text-[var(--text-muted)]">{t('teamshub.tabHub')}</span>

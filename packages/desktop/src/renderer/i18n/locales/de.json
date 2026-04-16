@@ -64,6 +64,7 @@
     "toggleTheme": "Design wechseln"
   },
   "common": {
+    "back": "Zurueck",
     "cancel": "Abbrechen",
     "close": "Schliessen",
     "completed": "Abgeschlossen",
@@ -79,6 +80,7 @@
     "light": "Hell",
     "minAgo": "vor {{count}} Min.",
     "missing": "Fehlt",
+    "moreActions": "Weitere Aktionen",
     "navigate": "Navigieren",
     "newTask": "Neue Aufgabe",
     "noFiles": "Noch keine Dateien",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "Nachrichtenbereich verbreitern",
     "orchestrateCount": "{{count}} Agents auf diesem Gateway verfügbar",
     "orchestrateDesc": "Die KI wählt automatisch die passenden Agents aus, koordiniert die Arbeit und fasst die Ergebnisse zusammen.",
+    "refreshUsage": "Nutzung aktualisieren",
+    "scrollToBottom": "Nach unten scrollen",
     "starOnGithub": "ClawWork gefaellt Ihnen? Geben Sie uns einen Stern auf GitHub",
     "tabAgent": "Agent",
     "tabOrchestrate": "Orchestrierung",
@@ -701,6 +705,7 @@
     "title": "Teams",
     "wizard": {
       "addAgent": "Agent hinzufügen",
+      "addSkill": "Skill hinzufuegen",
       "agentCount": "{{count}} Agents",
       "agentMdPlaceholder": "Agent-Anweisungen...",
       "agentName": "Agent-Name",
@@ -751,6 +756,7 @@
     "installSuccess": "Team erfolgreich installiert",
     "manageRegistries": "Registries",
     "notFetched": "Noch nicht synchronisiert — klicken Sie auf Aktualisieren",
+    "refresh": "Registries aktualisieren",
     "refreshed": "Registries aktualisiert",
     "registryAdded": "Registry hinzugefügt",
     "registryRemoved": "Registry entfernt",

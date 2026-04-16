@@ -63,6 +63,7 @@ function SelectionTag({
   onRemove: () => void;
   variant?: 'accent' | 'muted';
 }) {
+  const { t } = useTranslation();
   return (
     <span
       className={cn(
@@ -74,7 +75,7 @@ function SelectionTag({
     >
       <span className="flex-shrink-0">{icon}</span>
       {label}
-      <button onClick={onRemove} className="ml-0.5 opacity-50 hover:opacity-100">
+      <button onClick={onRemove} aria-label={t('common.remove')} className="ml-0.5 opacity-50 hover:opacity-100">
         <X size={12} />
       </button>
     </span>

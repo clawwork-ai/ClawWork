@@ -232,7 +232,12 @@ function SkillCard({
           {hasConfigurableEnv && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon-sm" onClick={() => setConfigOpen(true)}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setConfigOpen(true)}
+                  aria-label={t('settings.skillConfigure')}
+                >
                   <Settings2 size={14} />
                 </Button>
               </TooltipTrigger>
@@ -246,6 +251,7 @@ function SkillCard({
                 size="icon-sm"
                 disabled={toggling || skill.blockedByAllowlist}
                 onClick={() => onToggleEnabled(skill)}
+                aria-label={skill.disabled ? t('settings.skillEnable') : t('settings.skillDisable')}
               >
                 {toggling ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -260,7 +266,12 @@ function SkillCard({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={() => setExpanded((v) => !v)}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setExpanded((v) => !v)}
+                aria-label={t('settings.skillDetails')}
+              >
                 <ChevronDown size={14} className={cn('transition-transform', expanded && 'rotate-180')} />
               </Button>
             </TooltipTrigger>
@@ -383,7 +394,13 @@ function ClawHubResultCard({
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-1 pl-3 border-l border-[var(--border-subtle)]">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="soft" size="icon-sm" disabled={installing} onClick={onInstall}>
+              <Button
+                variant="soft"
+                size="icon-sm"
+                disabled={installing}
+                onClick={onInstall}
+                aria-label={t('settings.skillHubInstall')}
+              >
                 {installing ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               </Button>
             </TooltipTrigger>
@@ -391,7 +408,7 @@ function ClawHubResultCard({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={onToggleExpand}>
+              <Button variant="ghost" size="icon-sm" onClick={onToggleExpand} aria-label={t('settings.skillDetails')}>
                 <ChevronDown size={14} className={cn('transition-transform', expanded && 'rotate-180')} />
               </Button>
             </TooltipTrigger>

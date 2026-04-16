@@ -64,6 +64,7 @@
     "toggleTheme": "Toggle Theme"
   },
   "common": {
+    "back": "Back",
     "cancel": "Cancel",
     "close": "Close",
     "completed": "Completed",
@@ -79,6 +80,7 @@
     "light": "Light",
     "minAgo": "{{count}} min ago",
     "missing": "Missing",
+    "moreActions": "More actions",
     "navigate": "navigate",
     "newTask": "New Task",
     "noFiles": "No files yet",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "Expand message width",
     "orchestrateCount": "{{count}} agents available on this gateway",
     "orchestrateDesc": "AI will automatically select the right agents, coordinate their work, and synthesize results.",
+    "refreshUsage": "Refresh usage",
+    "scrollToBottom": "Scroll to bottom",
     "starOnGithub": "Enjoying ClawWork? Give us a star on GitHub",
     "tabAgent": "Agent",
     "tabOrchestrate": "Orchestrate",
@@ -701,6 +705,7 @@
     "title": "Teams",
     "wizard": {
       "addAgent": "Add Agent",
+      "addSkill": "Add Skill",
       "agentCount": "{{count}} agents",
       "agentMdPlaceholder": "Agent instructions...",
       "agentName": "Agent Name",
@@ -751,6 +756,7 @@
     "installSuccess": "Team installed successfully",
     "manageRegistries": "Registries",
     "notFetched": "Not synced yet — click refresh",
+    "refresh": "Refresh Registries",
     "refreshed": "Registries refreshed",
     "registryAdded": "Registry added",
     "registryRemoved": "Registry removed",

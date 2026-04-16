@@ -273,6 +273,7 @@ function TabButton({
   onSelectTab: () => void;
   onSelectGateway: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const baseClass = cn(
     'type-body inline-flex items-center gap-2 rounded-full transition-all',
     active
@@ -298,7 +299,10 @@ function TabButton({
       </span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] cursor-pointer transition-colors ml-1">
+          <button
+            aria-label={t('settings.selectGateway')}
+            className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] cursor-pointer transition-colors ml-1"
+          >
             <ChevronDown size={12} className="opacity-60" />
           </button>
         </DropdownMenuTrigger>

@@ -64,6 +64,7 @@
     "toggleTheme": "切换主题"
   },
   "common": {
+    "back": "返回",
     "cancel": "取消",
     "close": "关闭",
     "completed": "已完成",
@@ -79,6 +80,7 @@
     "light": "浅色",
     "minAgo": "{{count}} 分钟前",
     "missing": "缺失",
+    "moreActions": "更多操作",
     "navigate": "导航",
     "newTask": "新任务",
     "noFiles": "暂无文件",
@@ -330,6 +332,8 @@
     "messageLayoutWide": "铺开消息区域",
     "orchestrateCount": "当前网关共 {{count}} 个 Agent 可用",
     "orchestrateDesc": "AI 将根据你的任务自动选择合适的 Agent，协调分工并汇总结果。",
+    "refreshUsage": "刷新用量",
+    "scrollToBottom": "滚动到底部",
     "starOnGithub": "觉得好用？在 GitHub 上给我们一颗 Star",
     "tabAgent": "Agent",
     "tabOrchestrate": "智能编排",
@@ -701,6 +705,7 @@
     "title": "团队",
     "wizard": {
       "addAgent": "添加 Agent",
+      "addSkill": "添加技能",
       "agentCount": "{{count}} 个 Agent",
       "agentMdPlaceholder": "Agent 指令...",
       "agentName": "Agent 名称",
@@ -751,6 +756,7 @@
     "installSuccess": "团队安装成功",
     "manageRegistries": "Registry",
     "notFetched": "尚未同步 — 点击刷新",
+    "refresh": "刷新镜像源",
     "refreshed": "Registry 已刷新",
     "registryAdded": "Registry 已添加",
     "registryRemoved": "Registry 已移除",

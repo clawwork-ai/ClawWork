@@ -320,6 +320,7 @@ function ChatHeader({
                       <button
                         onClick={() => fetchUsage(costGatewayId, sessionKey || undefined)}
                         disabled={usageLoading}
+                        aria-label={t('mainArea.refreshUsage')}
                         className="rounded p-1 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                       >
                         <RefreshCw size={12} className={cn(usageLoading && 'animate-spin')} />
@@ -379,6 +380,9 @@ function ChatHeader({
               variant={messageLayout === 'wide' ? 'secondary' : 'ghost'}
               size="icon"
               onClick={onToggleMessageLayout}
+              aria-label={
+                messageLayout === 'wide' ? t('mainArea.messageLayoutCentered') : t('mainArea.messageLayoutWide')
+              }
             >
               <ArrowLeftRight size={18} />
             </Button>
@@ -653,6 +657,7 @@ function ChatContent() {
         {showScrollButton && (
           <button
             onClick={scrollToBottom}
+            aria-label={t('mainArea.scrollToBottom')}
             className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
             style={{ boxShadow: 'var(--shadow-elevated)' }}
           >
@@ -745,6 +750,7 @@ function ArchivedTasks() {
                 event.stopPropagation();
                 handleReactivate(row.id);
               }}
+              aria-label={t('contextMenu.reactivate')}
             >
               <ArchiveRestore size={14} />
             </Button>

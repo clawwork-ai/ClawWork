@@ -33,6 +33,7 @@ export default function TeamCard({ team, onSelect, onStartChat, onEdit, onDelete
           <DropdownMenuTrigger asChild>
             <button
               onClick={(e) => e.stopPropagation()}
+              aria-label={t('common.moreActions')}
               className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-secondary)] cursor-pointer focus-visible:outline-none glow-focus"
             >
               <MoreHorizontal size={15} />
