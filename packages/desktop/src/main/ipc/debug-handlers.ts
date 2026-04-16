@@ -6,82 +6,81 @@ import { getAllGatewayClients } from '../ws/index.js';
 import { readConfig } from '../workspace/config.js';
 import { createRateLimiter } from './debug-rate-limiter.js';
 
-// ---------------------------------------------------------------------------
-// Constants for debug:renderer-event hardening (issue #413)
-// ---------------------------------------------------------------------------
+const MAX_PAYLOAD_BYTES = 16 * 1024;
+const RENDERER_DOMAIN = 'renderer' as const;
+const UNKNOWN_EVENT = 'unknown';
 
-/** Max serialized payload size in bytes — reject oversized events before processing */
-const MAX_PAYLOAD_BYTES = 16 * 1024; // 16 KB
-
-/** Per-(domain, event) rate limiter: 100 events/sec */
 const debugRateLimiter = createRateLimiter({
   maxEventsPerWindow: 100,
   windowMs: 1000,
   maxTrackedKeys: 256,
 });
 
-// ---------------------------------------------------------------------------
-// IPC handler registration
-// ---------------------------------------------------------------------------
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function getSerializedPayloadSize(payload: unknown): number | null {
+  try {
+    const serialized = JSON.stringify(payload);
+    return typeof serialized === 'string' ? serialized.length : 0;
+  } catch {
+    return null;
+  }
+}
 
 export function registerDebugHandlers(): void {
-  ipcMain.on(
-    'debug:renderer-event',
-    (
-      _event,
-      payload: {
-        event: string;
-        traceId?: string;
-        feature?: string;
-        data?: Record<string, unknown>;
-      },
-    ) => {
-      // 1. Payload size guard — reject oversized payloads before any processing
-      const payloadSize = JSON.stringify(payload).length;
-      if (payloadSize > MAX_PAYLOAD_BYTES) {
-        const logger = getDebugLogger();
-        logger.warn({
-          domain: 'renderer' as 'renderer',
-          event: 'renderer.payload-oversize',
-          data: {
-            payloadSize,
-            maxBytes: MAX_PAYLOAD_BYTES,
-            domain: payload?.domain,
-            event: payload?.event,
-          },
-        });
-        return;
-      }
+  ipcMain.on('debug:renderer-event', (_event, payload: unknown) => {
+    if (!isRecord(payload)) return;
 
-      // 2. Rate limit per (domain, event) tuple
-      const result = debugRateLimiter.check(payload.domain, payload.event);
-      if (result.evictedKey) {
-        const logger = getDebugLogger();
-        logger.warn({
-          domain: 'renderer' as 'renderer',
-          event: 'renderer.throttled',
-          data: {
-            key: result.evictedKey,
-            dropped: result.evictedDrops,
-            reason: 'rate-limit',
-          },
-        });
-      }
-      if (!result.allowed) {
-        return; // dropped — counted and will be summarized on next window flip
-      }
+    const payloadSize = getSerializedPayloadSize(payload);
+    if (payloadSize === null) return;
 
-      // 3. Normal logging path
+    const event = typeof payload.event === 'string' && payload.event ? payload.event : UNKNOWN_EVENT;
+    const traceId = typeof payload.traceId === 'string' ? payload.traceId : undefined;
+    const feature = typeof payload.feature === 'string' ? payload.feature : undefined;
+    const data = isRecord(payload.data) ? payload.data : undefined;
+
+    if (payloadSize > MAX_PAYLOAD_BYTES) {
       const logger = getDebugLogger();
-      logger.info({
-        domain: 'renderer',
-        event: payload.event,
-        traceId: payload.traceId,
-        feature: payload.feature,
-        data: payload.data,
+      logger.warn({
+        domain: RENDERER_DOMAIN,
+        event: 'renderer.payload-oversize',
+        data: {
+          payloadSize,
+          maxBytes: MAX_PAYLOAD_BYTES,
+          event,
+        },
       });
-    },
-  );
+      return;
+    }
+
+    const result = debugRateLimiter.check(RENDERER_DOMAIN, event);
+    if (result.evictedKey) {
+      const logger = getDebugLogger();
+      logger.warn({
+        domain: RENDERER_DOMAIN,
+        event: 'renderer.throttled',
+        data: {
+          key: result.evictedKey,
+          dropped: result.evictedDrops,
+          reason: 'rate-limit',
+        },
+      });
+    }
+    if (!result.allowed) {
+      return;
+    }
+
+    const logger = getDebugLogger();
+    logger.info({
+      domain: RENDERER_DOMAIN,
+      event,
+      traceId,
+      feature,
+      data,
+    });
+  });
 
   ipcMain.handle(
     'debug:export-bundle',
