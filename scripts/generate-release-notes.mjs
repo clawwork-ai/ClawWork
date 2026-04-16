@@ -113,7 +113,7 @@ function getPrCandidates(base, head) {
       i += 1;
       stderr.write(`  [${i}/${needsLookup.length}] commit->PR ${c.sha.slice(0, 8)}\r`);
       const out = sh(
-        `gh api repos/:owner/:repo/commits/${c.sha}/pulls --jq '[.[] | select(.state=="closed" or .state=="merged")] | .[0].number // empty'`,
+        `gh api repos/:owner/:repo/commits/${c.sha}/pulls --jq '[.[] | select(.merged_at != null)] | .[0].number // empty'`,
         { allowFail: true },
       );
       const num = Number(out);
@@ -209,10 +209,11 @@ function render({ base, head, groups, newContributors, repo }) {
     lines.push(`## ${group.emoji} ${group.name}`);
     lines.push('');
     for (const item of group.items) {
+      const text = item.text.replace(/\s+/g, ' ').trim();
       if (item.orphan) {
-        lines.push(`- ${item.text} by ${item.author} (${item.sha.slice(0, 7)})`);
+        lines.push(`- ${text} by ${item.author} (${item.sha.slice(0, 7)})`);
       } else {
-        lines.push(`- ${item.text} by @${item.author} in #${item.number}`);
+        lines.push(`- ${text} by @${item.author} in #${item.number}`);
       }
     }
     lines.push('');
