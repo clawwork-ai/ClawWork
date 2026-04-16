@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout source repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout tap repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: clawwork-ai/homebrew-clawwork
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
