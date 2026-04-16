@@ -121,6 +121,7 @@ export interface GatewayDispatcherDeps {
   onSubagentCandidate?: (sessionKey: string, gatewayId: string) => void;
   onApprovalRequested?: (gatewayId: string, approval: unknown) => void;
   onApprovalResolved?: (id: string) => void;
+  notifyAgentResponse?: (sessionKey: string) => void;
   onToast?: (type: 'error' | 'warning' | 'success', title: string, opts?: { description?: string }) => void;
   translate: TranslateFn;
   isWindowFocused: () => boolean;
@@ -260,6 +261,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
     if (taskId !== deps.getActiveTaskId()) {
       deps.markUnread(taskId);
     }
+
+    deps.notifyAgentResponse?.(sessionKey);
 
     const store = deps.getMessageStore();
     const text = extractText(payload);
@@ -473,6 +476,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
   function handleAgentToolStream(taskId: string, sessionKey: string, data: AgentToolData): void {
     if (!data.name || !data.toolCallId) return;
 
+    deps.notifyAgentResponse?.(sessionKey);
+
     if (taskId !== deps.getActiveTaskId()) {
       deps.markUnread(taskId);
     }
@@ -517,6 +522,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
 
     switch (data.phase) {
       case 'start':
+        deps.notifyAgentResponse?.(sessionKey);
         store.setProcessing(sessionKey, true);
         debugEvent('renderer.agent.lifecycle.start', { taskId, sessionKey });
         break;

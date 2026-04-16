@@ -4,7 +4,7 @@ import { parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork
 import { toast } from 'sonner';
 import { hydrateFromLocal, retrySyncPending, syncFromGateway, syncSessionMessages } from '../lib/session-sync';
 import i18n from '../i18n';
-import { composerBridge, ports, useMessageStore, useTaskStore, useUiStore, useRoomStore } from '../platform';
+import { composer, composerBridge, ports, useMessageStore, useTaskStore, useUiStore, useRoomStore } from '../platform';
 import { useApprovalStore } from '../stores/approvalStore';
 
 export type GatewayDispatcher = ReturnType<typeof createGatewayDispatcher>;
@@ -110,6 +110,7 @@ function getDispatcher(): GatewayDispatcher {
       onApprovalResolved: (id) => {
         useApprovalStore.getState().removeApproval(id);
       },
+      notifyAgentResponse: (sessionKey) => composer.notifyResponse(sessionKey),
       onToast: (type, title, opts) => {
         if (type === 'error') toast.error(title, opts);
         else if (type === 'warning') toast.warning(title, opts);

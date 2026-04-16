@@ -151,6 +151,7 @@ function getDispatcher() {
         uiStoreApi.getState().setAgentCatalogForGateway(gwId, agents as AgentInfo[], defaultId),
       setToolsCatalogForGateway: (gwId, catalog) => uiStoreApi.getState().setToolsCatalogForGateway(gwId, catalog),
       setSkillsStatusForGateway: (gwId, report) => uiStoreApi.getState().setSkillsStatusForGateway(gwId, report),
+      notifyAgentResponse: (sessionKey) => getComposer().notifyResponse(sessionKey),
       translate: (key, opts) => i18next.t(key, opts),
       isWindowFocused: () => typeof document !== 'undefined' && document.hasFocus(),
       reportDebugEvent: (event) => reportDebugEvent(event as Partial<DebugEvent>),

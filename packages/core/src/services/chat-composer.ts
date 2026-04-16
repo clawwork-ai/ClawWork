@@ -31,11 +31,6 @@ export interface ChatComposerDeps {
     ) => Message;
     setProcessing: (taskId: string, processing: boolean) => void;
     clearMessages: (taskId: string) => void;
-    processingBySession: Set<string>;
-    activeTurnBySession: Record<
-      string,
-      { streamingText: string; streamingThinking: string; toolCalls: { id: string }[] }
-    >;
   };
 
   persistMessage: (msg: {
@@ -97,6 +92,7 @@ function resolveMentionTargets(
 
 export function createChatComposer(deps: ChatComposerDeps) {
   const responseTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  const sessionToTask = new Map<string, string>();
 
   function resolveTask(taskId?: string): TaskRef | null {
     if (taskId) {
@@ -130,6 +126,14 @@ export function createChatComposer(deps: ChatComposerDeps) {
       clearTimeout(timer);
       responseTimers.delete(taskId);
     }
+    for (const [sk, tid] of sessionToTask) {
+      if (tid === taskId) sessionToTask.delete(sk);
+    }
+  }
+
+  function notifyResponse(sessionKey: string): void {
+    const taskId = sessionToTask.get(sessionKey);
+    if (taskId) clearTimer(taskId);
   }
 
   async function send(taskId: string | undefined, options: SendOptions): Promise<{ ok: boolean; taskId?: string }> {
@@ -222,23 +226,18 @@ export function createChatComposer(deps: ChatComposerDeps) {
 
       clearTimer(task.id);
       const watchKeys = isMentionSend ? mentionTargets : [task.sessionKey];
+      for (const sk of watchKeys) sessionToTask.set(sk, task.id);
       responseTimers.set(
         task.id,
         setTimeout(() => {
           responseTimers.delete(task.id);
-          const s = deps.getMessageStore();
-          const stillProcessing = watchKeys.some((sk) => s.processingBySession.has(sk));
-          const anyResponded = watchKeys.some((sk) => {
-            const turn = s.activeTurnBySession[sk];
-            return turn && (turn.streamingText || turn.streamingThinking || turn.toolCalls.length > 0);
-          });
-          if (stillProcessing || anyResponded) return;
+          for (const sk of watchKeys) sessionToTask.delete(sk);
           const appError = buildAppError({
             source: 'gateway',
             stage: 'lifecycle',
             rawMessage: deps.translate('errors.agentNotResponding'),
           });
-          s.addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate));
+          deps.getMessageStore().addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate));
         }, SEND_TIMEOUT_MS),
       );
 
@@ -343,9 +342,10 @@ export function createChatComposer(deps: ChatComposerDeps) {
   function dispose(): void {
     for (const timer of responseTimers.values()) clearTimeout(timer);
     responseTimers.clear();
+    sessionToTask.clear();
   }
 
-  return { send, abort, applySlashCommand, clearTimer, dispose };
+  return { send, abort, applySlashCommand, clearTimer, notifyResponse, dispose };
 }
 
 export type ChatComposer = ReturnType<typeof createChatComposer>;
