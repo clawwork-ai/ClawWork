@@ -165,7 +165,7 @@ function classify(title) {
 
 function extractReleaseNote(body) {
   if (!body) return null;
-  const m = body.match(/```release-note\s*\n([\s\S]*?)\n```/);
+  const m = body.match(/```release-note\s*([\s\S]*?)```/);
   if (!m) return null;
   const text = m[1].trim();
   if (!text || text.toUpperCase() === 'NONE') return null;
@@ -183,18 +183,18 @@ function findNewContributors(prs) {
 
   const result = [];
   for (const [login, firstPr] of firstByAuthor) {
-    const out = sh(`gh pr list --state merged --author ${JSON.stringify(login)} --limit 500 --json number`, {
-      allowFail: true,
-    });
-    let allNums = [];
+    const out = sh(
+      `gh pr list --state merged --author ${JSON.stringify(login)} --search "sort:created-asc" --limit 1 --json number`,
+      { allowFail: true },
+    );
+    let earliest = null;
     try {
-      allNums = JSON.parse(out || '[]').map((p) => p.number);
+      const arr = JSON.parse(out || '[]');
+      if (arr.length > 0) earliest = arr[0].number;
     } catch {
-      allNums = [];
+      earliest = null;
     }
-    if (allNums.length === 0) continue;
-    const globalMin = Math.min(...allNums);
-    if (globalMin === firstPr.number) {
+    if (earliest === firstPr.number) {
       result.push({ login, firstPr });
     }
   }
@@ -210,7 +210,7 @@ function render({ base, head, groups, newContributors, repo }) {
     lines.push('');
     for (const item of group.items) {
       if (item.orphan) {
-        lines.push(`- ${item.text} by @${item.author} (${item.sha.slice(0, 7)})`);
+        lines.push(`- ${item.text} by ${item.author} (${item.sha.slice(0, 7)})`);
       } else {
         lines.push(`- ${item.text} by @${item.author} in #${item.number}`);
       }
