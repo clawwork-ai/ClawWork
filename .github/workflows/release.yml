@@ -171,6 +171,9 @@ jobs:
   publish-release-notes:
     needs: [prepare-release, verify-release]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
     env:
       RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
     steps:
