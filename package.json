@@ -16,7 +16,7 @@
     "check:renderer-copy": "node scripts/check-renderer-copy.mjs",
     "check:ui-contract": "node scripts/check-ui-contract.mjs",
     "typecheck": "pnpm --filter @clawwork/shared exec tsc -b && pnpm --filter @clawwork/core exec tsc -b && pnpm --filter @clawwork/pwa exec tsc --noEmit && pnpm --filter @clawwork/desktop exec tsc --noEmit && pnpm --filter @clawwork/website exec tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

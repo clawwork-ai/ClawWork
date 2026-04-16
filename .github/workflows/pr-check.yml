@@ -26,6 +26,7 @@ jobs:
       typecheck_pwa: ${{ steps.plan.outputs.typecheck_pwa }}
       typecheck_website: ${{ steps.plan.outputs.typecheck_website }}
       test_shared: ${{ steps.plan.outputs.test_shared }}
+      test_core: ${{ steps.plan.outputs.test_core }}
       test_desktop: ${{ steps.plan.outputs.test_desktop }}
       test_pwa: ${{ steps.plan.outputs.test_pwa }}
       build_desktop: ${{ steps.plan.outputs.build_desktop }}
@@ -107,6 +108,7 @@ jobs:
           set_flag typecheck_pwa "$GLOBAL" "$SHARED" "$CORE" "$PWA"
           set_flag typecheck_website "$GLOBAL" "$WEBSITE"
           set_flag test_shared "$GLOBAL" "$SHARED"
+          set_flag test_core "$GLOBAL" "$SHARED" "$CORE"
           set_flag test_desktop "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE"
           set_flag test_pwa "$GLOBAL" "$SHARED" "$CORE" "$PWA"
           set_flag build_desktop "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE"
@@ -205,6 +207,10 @@ jobs:
       - name: Test shared
         if: needs.changes.outputs.test_shared == 'true'
         run: pnpm --filter @clawwork/shared test
+
+      - name: Test core
+        if: needs.changes.outputs.test_core == 'true'
+        run: pnpm --filter @clawwork/core test
 
       - name: Test desktop
         if: needs.changes.outputs.test_desktop == 'true'
