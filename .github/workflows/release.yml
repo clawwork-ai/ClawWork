@@ -168,6 +168,53 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  publish-release-notes:
+    needs: [prepare-release, verify-release]
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate release notes draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/generate-release-notes.mjs "$RELEASE_TAG" > /tmp/release-notes.md
+          {
+            echo "## Draft release notes for $RELEASE_TAG"
+            echo ''
+            cat /tmp/release-notes.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload draft as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes-${{ env.RELEASE_TAG }}
+          path: /tmp/release-notes.md
+
+      - name: Fill Release body only if empty
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          current=$(gh release view "$RELEASE_TAG" --repo ${{ github.repository }} --json body -q '.body' || echo '')
+          stripped=$(printf '%s' "$current" | tr -d '[:space:]')
+          if [ -z "$stripped" ]; then
+            echo "Release body is empty — writing draft"
+            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --notes-file /tmp/release-notes.md
+          else
+            echo "Release body already populated — leaving it alone"
+          fi
+
   update-homebrew:
     needs: [prepare-release, release, verify-release]
     if: ${{ needs.prepare-release.outputs.is_prerelease != 'true' }}
