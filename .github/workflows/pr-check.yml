@@ -241,3 +241,20 @@ jobs:
 
       - name: Package Linux smoke build
         run: pnpm --filter @clawwork/desktop exec electron-builder --linux --x64 --publish never
+
+  ci-passed:
+    needs: [changes, quality, test, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify aggregate status
+        env:
+          NEEDS: ${{ toJson(needs) }}
+        run: |
+          echo "$NEEDS"
+          failed=$(jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")' <<< "$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Required gates failed or cancelled: $failed"
+            exit 1
+          fi
+          echo "All required gates passed or skipped cleanly."

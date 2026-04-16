@@ -175,3 +175,20 @@ jobs:
           name: e2e-gateway-report
           path: playwright-report/
           retention-days: 7
+
+  e2e-passed:
+    needs: [changes, smoke, gateway]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify aggregate status
+        env:
+          NEEDS: ${{ toJson(needs) }}
+        run: |
+          echo "$NEEDS"
+          failed=$(jq -r '[to_entries[] | select(.value.result == "failure" or .value.result == "cancelled") | .key] | join(", ")' <<< "$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Required gates failed or cancelled: $failed"
+            exit 1
+          fi
+          echo "All required gates passed or skipped cleanly."
