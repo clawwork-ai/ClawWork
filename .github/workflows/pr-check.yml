@@ -32,7 +32,7 @@ jobs:
       build_desktop: ${{ steps.plan.outputs.build_desktop }}
       test_job: ${{ steps.plan.outputs.test_job }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - id: filter
         uses: dorny/paths-filter@v4
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -168,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -242,7 +242,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -272,7 +272,7 @@ jobs:
       GITLEAKS_VERSION: 8.30.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 

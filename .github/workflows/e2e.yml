@@ -17,7 +17,7 @@ jobs:
       smoke: ${{ steps.plan.outputs.smoke }}
       gateway: ${{ steps.plan.outputs.gateway }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - id: filter
         uses: dorny/paths-filter@v4
@@ -85,7 +85,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -128,7 +128,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
