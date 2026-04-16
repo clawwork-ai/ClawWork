@@ -33,28 +33,7 @@ export function registerDebugHandlers(): void {
   ipcMain.on('debug:renderer-event', (_event, payload: unknown) => {
     if (!isRecord(payload)) return;
 
-    const payloadSize = getSerializedPayloadSize(payload);
-    if (payloadSize === null) return;
-
     const event = typeof payload.event === 'string' && payload.event ? payload.event : UNKNOWN_EVENT;
-    const traceId = typeof payload.traceId === 'string' ? payload.traceId : undefined;
-    const feature = typeof payload.feature === 'string' ? payload.feature : undefined;
-    const data = isRecord(payload.data) ? payload.data : undefined;
-
-    if (payloadSize > MAX_PAYLOAD_BYTES) {
-      const logger = getDebugLogger();
-      logger.warn({
-        domain: RENDERER_DOMAIN,
-        event: 'renderer.payload-oversize',
-        data: {
-          payloadSize,
-          maxBytes: MAX_PAYLOAD_BYTES,
-          event,
-        },
-      });
-      return;
-    }
-
     const result = debugRateLimiter.check(RENDERER_DOMAIN, event);
     if (result.evictedKey) {
       const logger = getDebugLogger();
@@ -71,6 +50,27 @@ export function registerDebugHandlers(): void {
     if (!result.allowed) {
       return;
     }
+
+    const payloadSize = getSerializedPayloadSize(payload);
+    if (payloadSize === null) return;
+
+    if (payloadSize > MAX_PAYLOAD_BYTES) {
+      const logger = getDebugLogger();
+      logger.warn({
+        domain: RENDERER_DOMAIN,
+        event: 'renderer.payload-oversize',
+        data: {
+          payloadSize,
+          maxBytes: MAX_PAYLOAD_BYTES,
+          event,
+        },
+      });
+      return;
+    }
+
+    const traceId = typeof payload.traceId === 'string' ? payload.traceId : undefined;
+    const feature = typeof payload.feature === 'string' ? payload.feature : undefined;
+    const data = isRecord(payload.data) ? payload.data : undefined;
 
     const logger = getDebugLogger();
     logger.info({

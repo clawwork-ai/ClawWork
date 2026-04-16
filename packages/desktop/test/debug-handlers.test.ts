@@ -4,6 +4,7 @@ const onMap = new Map<string, (...args: unknown[]) => unknown>();
 const handleMap = new Map<string, (...args: unknown[]) => unknown>();
 const infoMock = vi.fn();
 const warnMock = vi.fn();
+const rateLimiterCheckMock = vi.fn();
 
 vi.mock('electron', () => ({
   app: { getPath: () => '/mock-userData' },
@@ -33,6 +34,14 @@ vi.mock('../src/main/debug/index.js', () => ({
   }),
 }));
 
+vi.mock('../src/main/ipc/debug-rate-limiter.js', () => ({
+  createRateLimiter: () => ({
+    check: (...args: unknown[]) => rateLimiterCheckMock(...args),
+    reset: vi.fn(),
+    size: vi.fn(() => 0),
+  }),
+}));
+
 vi.mock('../src/main/ws/index.js', () => ({
   getAllGatewayClients: vi.fn(() => new Map()),
 }));
@@ -45,7 +54,10 @@ describe('registerDebugHandlers', () => {
   beforeEach(async () => {
     onMap.clear();
     handleMap.clear();
+    vi.resetModules();
     vi.clearAllMocks();
+    rateLimiterCheckMock.mockReset();
+    rateLimiterCheckMock.mockReturnValue({ allowed: true });
 
     const mod = await import('../src/main/ipc/debug-handlers.js');
     mod.registerDebugHandlers();
@@ -66,6 +78,24 @@ describe('registerDebugHandlers', () => {
 
     const payload: Record<string, unknown> = { event: 'renderer.loop' };
     payload.self = payload;
+
+    expect(() => handler?.({}, payload)).not.toThrow();
+    expect(infoMock).not.toHaveBeenCalled();
+    expect(warnMock).not.toHaveBeenCalled();
+  });
+
+  it('drops throttled payloads before attempting serialization', () => {
+    const handler = onMap.get('debug:renderer-event');
+    expect(handler).toBeTypeOf('function');
+
+    rateLimiterCheckMock.mockReturnValueOnce({ allowed: false });
+
+    const payload = {
+      event: 'renderer.loop',
+      toJSON() {
+        throw new Error('should not stringify throttled payload');
+      },
+    };
 
     expect(() => handler?.({}, payload)).not.toThrow();
     expect(infoMock).not.toHaveBeenCalled();
