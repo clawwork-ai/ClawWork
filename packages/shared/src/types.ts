@@ -157,9 +157,12 @@ export interface InstallEvent {
   progress?: { current: number; total: number };
 }
 
-export interface MessageImageAttachment {
+export interface MessageAttachment {
   fileName: string;
   dataUrl: string;
+  mimeType?: string;
+  localPath?: string;
+  size?: number;
 }
 
 export interface Message {
@@ -169,7 +172,7 @@ export interface Message {
   content: string;
   artifacts: Artifact[];
   toolCalls: ToolCall[];
-  imageAttachments?: MessageImageAttachment[];
+  attachments?: MessageAttachment[];
   timestamp: string;
   sessionKey?: string;
   agentId?: string;

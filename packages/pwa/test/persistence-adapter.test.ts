@@ -58,7 +58,7 @@ function fullMessage() {
     role: 'assistant',
     content: 'Hello',
     timestamp: '2026-03-26T00:00:00.000Z',
-    imageAttachments: [{ url: 'https://example.com/img.png' }],
+    attachments: [{ url: 'https://example.com/img.png' }],
     toolCalls: [{ id: 'tc-1', name: 'read_file', status: 'done' }],
   };
 }
@@ -110,6 +110,27 @@ describe('createBrowserPersistence', () => {
 
       expect(result).toEqual({ ok: true, rows: [msg] });
       expect(mockedListMessages).toHaveBeenCalledWith('task-1');
+    });
+
+    it('maps legacy imageAttachments rows to attachments on load', async () => {
+      const legacyMsg = {
+        ...fullMessage(),
+        attachments: undefined,
+        imageAttachments: [{ url: 'https://example.com/legacy.png' }],
+      };
+      mockedListMessages.mockResolvedValue([legacyMsg as unknown as Awaited<ReturnType<typeof listMessages>>[number]]);
+
+      const result = await persistence.loadMessages('task-1');
+
+      expect(result).toEqual({
+        ok: true,
+        rows: [
+          {
+            ...legacyMsg,
+            attachments: legacyMsg.imageAttachments,
+          },
+        ],
+      });
     });
 
     it('returns ok false on error', async () => {
@@ -167,7 +188,7 @@ describe('createBrowserPersistence', () => {
   });
 
   describe('persistMessage', () => {
-    it('calls saveMessage with all fields including imageAttachments and toolCalls', async () => {
+    it('calls saveMessage with all fields including attachments and toolCalls', async () => {
       const msg = fullMessage();
       mockedSaveMessage.mockResolvedValue(undefined);
 

@@ -15,7 +15,7 @@ import type {
   AgentInfo,
   Artifact,
   FileIndexEntry,
-  MessageImageAttachment,
+  MessageAttachment,
   ModelCatalogEntry,
   ToolEntry,
   FileReadResult,
@@ -28,15 +28,15 @@ import { useUiStore } from '../../stores/uiStore';
 import { useRoomStore } from '../../stores/roomStore';
 import { useTeamStore } from '../../stores/teamStore';
 import { composer } from '../../platform';
-import type { PendingImage } from './types';
+import type { PendingAttachment } from './types';
 import type { ThinkingLevel } from './constants';
 import { GATEWAY_INJECTED_MODEL, EMPTY_MODELS_CATALOG, MAX_TEXT_TOTAL, MENTION_ALL_AGENT_ID } from './constants';
 import { getModelLabel, readAsBase64 } from './utils';
 
 interface UseChatSendOpts {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
-  pendingImages: PendingImage[];
-  setPendingImages: Dispatch<SetStateAction<PendingImage[]>>;
+  pendingAttachments: PendingAttachment[];
+  setPendingAttachments: Dispatch<SetStateAction<PendingAttachment[]>>;
   selectedTasks: Task[];
   setSelectedTasks: Dispatch<SetStateAction<Task[]>>;
   selectedArtifacts: Artifact[];
@@ -55,8 +55,8 @@ interface UseChatSendOpts {
 export function useChatSend(opts: UseChatSendOpts) {
   const {
     textareaRef,
-    pendingImages,
-    setPendingImages,
+    pendingAttachments,
+    setPendingAttachments,
     selectedTasks,
     setSelectedTasks,
     selectedArtifacts,
@@ -161,7 +161,7 @@ export function useChatSend(opts: UseChatSendOpts) {
     stopVoiceInput();
 
     const content = textarea.value.trim();
-    if (!content && !pendingImages.length) return;
+    if (!content && !pendingAttachments.length) return;
 
     const pendingPreset = !activeTask ? useTaskStore.getState().pendingNewTask : null;
     const pendingPresetModel = pendingPreset?.model;
@@ -176,6 +176,41 @@ export function useChatSend(opts: UseChatSendOpts) {
         return;
       }
     }
+
+    const attachmentRecords = pendingAttachments.length
+      ? await Promise.all(
+          pendingAttachments.map(async (att) => {
+            const mimeType = att.file.type || 'application/octet-stream';
+            const base64 = await readAsBase64(att.file);
+            const save = await window.clawwork.saveInboxAttachment({
+              taskId: task.id,
+              fileName: att.file.name,
+              base64,
+            });
+            if (!save.ok) {
+              toast.error(t('chatInput.attachmentSaveFailed', { fileName: att.file.name }));
+            }
+            return {
+              fileName: att.file.name,
+              mimeType,
+              base64,
+              previewUrl: att.previewUrl,
+              localPath: save.result?.localPath,
+              size: att.file.size,
+            };
+          }),
+        )
+      : [];
+
+    const msgAttachments: MessageAttachment[] | undefined = attachmentRecords.length
+      ? attachmentRecords.map((a) => ({
+          fileName: a.fileName,
+          dataUrl: a.previewUrl,
+          mimeType: a.mimeType,
+          localPath: a.localPath,
+          size: a.size,
+        }))
+      : undefined;
 
     if (task.ensemble) {
       const room = useRoomStore.getState().rooms[task.id];
@@ -204,17 +239,14 @@ export function useChatSend(opts: UseChatSendOpts) {
           return;
         }
 
-        const msgImages: MessageImageAttachment[] | undefined = pendingImages.length
-          ? pendingImages.map((img) => ({ fileName: img.file.name, dataUrl: img.previewUrl }))
-          : undefined;
-        if (content || msgImages?.length) {
-          addMessage(task.id, 'user', content, msgImages);
+        if (content || msgAttachments?.length) {
+          addMessage(task.id, 'user', content, msgAttachments);
         }
         setProcessing(task.sessionKey, true);
         textarea.value = '';
         textarea.style.height = 'auto';
         onComposerCleared?.();
-        setPendingImages([]);
+        setPendingAttachments([]);
         setSelectedAgents([]);
         setSelectedTasks([]);
         setSelectedArtifacts([]);
@@ -260,12 +292,11 @@ export function useChatSend(opts: UseChatSendOpts) {
     textarea.value = '';
     textarea.style.height = 'auto';
     onComposerCleared?.();
-    const images = [...pendingImages];
     const taskMentions = [...selectedTasks];
     const artifactMentions = [...selectedArtifacts];
     const localFileMentions = [...selectedLocalFiles];
     const agentMentions = [...selectedAgents];
-    setPendingImages([]);
+    setPendingAttachments([]);
     setSelectedAgents([]);
     setSelectedTasks([]);
     setSelectedArtifacts([]);
@@ -368,33 +399,25 @@ export function useChatSend(opts: UseChatSendOpts) {
         }
       }
 
-      const msgImages: MessageImageAttachment[] | undefined = images.length
-        ? images.map((img) => ({ fileName: img.file.name, dataUrl: img.previewUrl }))
-        : undefined;
-
-      const imageAttachments = images.length
-        ? await Promise.all(
-            images.map(async (img) => ({
-              mimeType: img.file.type || 'image/png',
-              fileName: img.file.name,
-              content: await readAsBase64(img.file),
-            })),
-          )
-        : [];
-      const allAttachments = [...imageAttachments, ...extraAttachments];
+      const gatewayAttachments = attachmentRecords.map((a) => ({
+        mimeType: a.mimeType,
+        fileName: a.fileName,
+        content: a.base64,
+      }));
+      const allAttachments = [...gatewayAttachments, ...extraAttachments];
 
       const titleHint =
         content ||
         (localFileMentions.length ? `[@${localFileMentions[0].fileName}]` : '') ||
         (taskMentions.length ? `[@${taskMentions[0].title}]` : '') ||
         (artifactMentions.length ? `[@${artifactMentions[0].name}]` : '') ||
-        (images.length ? `[${t('chatInput.image')}]` : '');
+        (attachmentRecords.length ? `[${attachmentRecords[0].fileName}]` : '');
 
       const isMentionAll = agentMentions.some((a) => a.agentId === MENTION_ALL_AGENT_ID);
       await composer.send(task.id, {
         content: finalContent,
         attachments: allAttachments.length > 0 ? allAttachments : undefined,
-        imageAttachments: msgImages,
+        messageAttachments: msgAttachments,
         presetModel: pendingPresetModel,
         presetThinking: pendingPresetThinking,
         titleHint: task.title ? undefined : titleHint,
@@ -413,14 +436,14 @@ export function useChatSend(opts: UseChatSendOpts) {
     addMessage,
     setProcessing,
     isOffline,
-    pendingImages,
+    pendingAttachments,
     selectedTasks,
     selectedArtifacts,
     selectedLocalFiles,
     selectedAgents,
     contextFolders,
     stopVoiceInput,
-    setPendingImages,
+    setPendingAttachments,
     setSelectedTasks,
     setSelectedArtifacts,
     setSelectedLocalFiles,

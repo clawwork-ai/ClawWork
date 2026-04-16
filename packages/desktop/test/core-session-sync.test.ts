@@ -33,7 +33,7 @@ function createHarness(params: {
     sessionKey?: string;
     agentId?: string;
     runId?: string;
-    imageAttachments?: unknown[];
+    attachments?: unknown[];
     toolCalls?: unknown[];
   }> = [];
 

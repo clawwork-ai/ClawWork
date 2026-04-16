@@ -130,7 +130,7 @@ describe('session sync startup flow', () => {
       role: 'assistant',
       content: 'same reply',
       timestamp: '2026-03-16T00:00:01.000Z',
-      imageAttachments: undefined,
+      attachments: undefined,
     };
     const loadMessagesDeferred = createDeferred<{ ok: true; rows: (typeof existingRow)[] }>();
 

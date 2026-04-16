@@ -197,7 +197,7 @@ interface PersistedMessage {
   sessionKey?: string;
   agentId?: string;
   runId?: string;
-  imageAttachments?: unknown[];
+  attachments?: unknown[];
   toolCalls?: unknown[];
 }
 
@@ -323,6 +323,14 @@ export interface ClawWorkAPI {
   searchArtifacts: (query: string) => Promise<IpcResult>;
   openArtifactFile: (localPath: string) => Promise<IpcResult>;
   showArtifactInFolder: (localPath: string) => Promise<IpcResult>;
+  saveInboxAttachment: (params: {
+    taskId: string;
+    fileName: string;
+    base64: string;
+  }) => Promise<IpcResult<{ localPath: string }>>;
+  readInboxFile: (localPath: string) => Promise<IpcResult<{ content: string; encoding: 'base64' }>>;
+  openInboxFile: (localPath: string) => Promise<IpcResult>;
+  showInboxInFolder: (localPath: string) => Promise<IpcResult>;
   exportSessionMarkdown: (taskId: string) => Promise<IpcResult>;
   exportSessionMarkdownAs: (taskId: string) => Promise<IpcResult>;
 
@@ -409,7 +417,7 @@ export interface ClawWorkAPI {
     sessionKey?: string;
     agentId?: string;
     runId?: string;
-    imageAttachments?: unknown[];
+    attachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;
 

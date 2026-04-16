@@ -123,7 +123,7 @@ export function registerDataHandlers(): void {
         sessionKey?: string;
         agentId?: string;
         runId?: string;
-        imageAttachments?: unknown[];
+        attachments?: unknown[];
         toolCalls?: unknown[];
       },
     ) => {
@@ -145,7 +145,7 @@ export function registerDataHandlers(): void {
             sessionKey: resolvedSessionKey,
             agentId: msg.agentId ?? null,
             runId: msg.runId ?? null,
-            imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
+            attachments: msg.attachments?.length ? JSON.stringify(msg.attachments) : null,
             toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
           })
           .onConflictDoUpdate({
@@ -154,7 +154,7 @@ export function registerDataHandlers(): void {
               content: msg.content,
               agentId: msg.agentId ?? null,
               runId: msg.runId ?? null,
-              imageAttachments: msg.imageAttachments?.length ? JSON.stringify(msg.imageAttachments) : null,
+              attachments: msg.attachments?.length ? JSON.stringify(msg.attachments) : null,
               toolCalls: msg.toolCalls?.length ? JSON.stringify(msg.toolCalls) : null,
             },
           })
@@ -225,11 +225,11 @@ export function registerDataHandlers(): void {
       return {
         ok: true,
         rows: rows.map((r) => {
-          let imageAttachments: unknown[] | undefined;
+          let attachments: unknown[] | undefined;
           let toolCalls: unknown[] | undefined;
-          if (r.imageAttachments) {
+          if (r.attachments) {
             try {
-              imageAttachments = JSON.parse(r.imageAttachments as string);
+              attachments = JSON.parse(r.attachments as string);
             } catch {}
           }
           if (r.toolCalls) {
@@ -237,7 +237,7 @@ export function registerDataHandlers(): void {
               toolCalls = JSON.parse(r.toolCalls as string);
             } catch {}
           }
-          return { ...r, imageAttachments, toolCalls };
+          return { ...r, attachments, toolCalls };
         }),
       };
     } catch (err) {

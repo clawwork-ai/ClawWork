@@ -1,6 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 import { mergeGatewayStreamText, parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork/shared';
-import type { Message, MessageRole, MessageImageAttachment, ToolCall, IpcResult } from '@clawwork/shared';
+import type { Message, MessageRole, MessageAttachment, ToolCall, IpcResult } from '@clawwork/shared';
 
 const EMPTY_MESSAGES: Message[] = [];
 
@@ -26,7 +26,7 @@ export interface MessageState {
     taskId: string,
     role: MessageRole,
     content: string,
-    imageAttachments?: MessageImageAttachment[],
+    attachments?: MessageAttachment[],
     options?: { persist?: boolean },
   ) => Message;
   upsertToolCall: (sessionKey: string, taskId: string, tc: ToolCall) => void;
@@ -51,7 +51,7 @@ export interface MessageStoreDeps {
     sessionKey?: string;
     agentId?: string;
     runId?: string;
-    imageAttachments?: unknown[];
+    attachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;
 }
@@ -145,7 +145,7 @@ function persistMessageUpdate(deps: MessageStoreDeps, msg: Message): void {
       sessionKey: msg.sessionKey,
       agentId: msg.agentId,
       runId: msg.runId,
-      imageAttachments: msg.imageAttachments as unknown[] | undefined,
+      attachments: msg.attachments as unknown[] | undefined,
       toolCalls: msg.toolCalls,
     })
     .catch((err) => {
@@ -162,7 +162,7 @@ export function createMessageStore(deps: MessageStoreDeps) {
     processingBySession: new Set(),
     highlightedMessageId: null,
 
-    addMessage: (taskId, role, content, imageAttachments?, options?) => {
+    addMessage: (taskId, role, content, attachments?, options?) => {
       const msg: Message = {
         id: generateId(),
         taskId,
@@ -170,7 +170,7 @@ export function createMessageStore(deps: MessageStoreDeps) {
         content,
         artifacts: [],
         toolCalls: [],
-        imageAttachments: imageAttachments?.length ? imageAttachments : undefined,
+        attachments: attachments?.length ? attachments : undefined,
         timestamp: new Date().toISOString(),
       };
       set((s) => ({

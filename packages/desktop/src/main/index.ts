@@ -7,6 +7,7 @@ import { getMainWindow, setMainWindow } from './window-manager.js';
 import { initDebugLogger, getDebugLogger } from './debug/index.js';
 import { registerWsHandlers } from './ipc/ws-handlers.js';
 import { registerArtifactHandlers } from './ipc/artifact-handlers.js';
+import { registerInboxHandlers } from './ipc/inbox-handlers.js';
 import { registerWorkspaceHandlers } from './ipc/workspace-handlers.js';
 import { registerSettingsHandlers } from './ipc/settings-handlers.js';
 import { registerSearchHandlers } from './ipc/search-handlers.js';
@@ -197,6 +198,7 @@ if (!gotLock) {
 
     registerWsHandlers();
     registerArtifactHandlers();
+    registerInboxHandlers();
     registerWorkspaceHandlers();
     registerSettingsHandlers();
     registerSearchHandlers();

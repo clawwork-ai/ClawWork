@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PendingImage } from './types';
-import { processImageFiles } from './utils';
+import type { PendingAttachment } from './types';
+import { processAttachmentFiles } from './utils';
 
-export function useImageAttachments() {
+export function useAttachments() {
   const { t } = useTranslation();
-  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
 
   useEffect(() => {
     return () => {
-      pendingImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+      pendingAttachments.forEach((att) => URL.revokeObjectURL(att.previewUrl));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- cleanup only on unmount
   }, []);
@@ -18,17 +18,17 @@ export function useImageAttachments() {
     (e: ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files?.length) return;
-      const accepted = processImageFiles(Array.from(files), t);
+      const accepted = processAttachmentFiles(Array.from(files), t);
       if (accepted.length) {
-        setPendingImages((prev) => [...prev, ...accepted]);
+        setPendingAttachments((prev) => [...prev, ...accepted]);
       }
       e.target.value = '';
     },
     [t],
   );
 
-  const removeImage = useCallback((index: number) => {
-    setPendingImages((prev) => {
+  const removeAttachment = useCallback((index: number) => {
+    setPendingAttachments((prev) => {
       const removed = prev[index];
       if (removed) URL.revokeObjectURL(removed.previewUrl);
       return prev.filter((_, i) => i !== index);
@@ -40,24 +40,24 @@ export function useImageAttachments() {
       const items = e.clipboardData?.items;
       if (!items) return;
 
-      const imageFiles: File[] = [];
+      const pastedFiles: File[] = [];
       for (const item of Array.from(items)) {
-        if (item.type.startsWith('image/')) {
+        if (item.kind === 'file') {
           const file = item.getAsFile();
-          if (file) imageFiles.push(file);
+          if (file) pastedFiles.push(file);
         }
       }
 
-      if (!imageFiles.length) return;
+      if (!pastedFiles.length) return;
       e.preventDefault();
 
-      const accepted = processImageFiles(imageFiles, t);
+      const accepted = processAttachmentFiles(pastedFiles, t);
       if (accepted.length) {
-        setPendingImages((prev) => [...prev, ...accepted]);
+        setPendingAttachments((prev) => [...prev, ...accepted]);
       }
     },
     [t],
   );
 
-  return { pendingImages, setPendingImages, handleFileSelect, removeImage, handlePaste };
+  return { pendingAttachments, setPendingAttachments, handleFileSelect, removeAttachment, handlePaste };
 }

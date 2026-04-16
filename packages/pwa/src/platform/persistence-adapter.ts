@@ -9,6 +9,17 @@ import {
 } from '../persistence/db.js';
 import type { StoredTask, StoredMessage } from '../persistence/db.js';
 
+type LegacyStoredMessage = StoredMessage & { imageAttachments?: unknown[] };
+
+function normalizeStoredMessage(row: StoredMessage): StoredMessage {
+  const legacyRow = row as LegacyStoredMessage;
+  if (row.attachments !== undefined || legacyRow.imageAttachments === undefined) return row;
+  return {
+    ...row,
+    attachments: legacyRow.imageAttachments,
+  };
+}
+
 export function createBrowserPersistence(): PersistencePort {
   return {
     async loadTasks() {
@@ -23,7 +34,7 @@ export function createBrowserPersistence(): PersistencePort {
     async loadMessages(taskId) {
       try {
         const rows = await listMessages(taskId);
-        return { ok: true, rows };
+        return { ok: true, rows: rows.map(normalizeStoredMessage) };
       } catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : 'loadMessages failed' };
       }

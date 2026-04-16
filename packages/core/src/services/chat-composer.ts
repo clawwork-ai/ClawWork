@@ -1,4 +1,4 @@
-import type { Message, MessageImageAttachment, IpcResult, ErrorStage, TaskRoom, RoomStatus } from '@clawwork/shared';
+import type { Message, MessageAttachment, IpcResult, ErrorStage, TaskRoom, RoomStatus } from '@clawwork/shared';
 import type { GatewayTransportPort, ChatAttachment } from '../ports/gateway-transport.js';
 import { buildAppError, formatErrorForUser, formatErrorForToast } from './error-classify.js';
 import type { TranslateFn } from './error-classify.js';
@@ -26,7 +26,7 @@ export interface ChatComposerDeps {
       taskId: string,
       role: 'user' | 'system',
       content: string,
-      imageAttachments?: MessageImageAttachment[],
+      attachments?: MessageAttachment[],
       options?: { persist?: boolean },
     ) => Message;
     setProcessing: (taskId: string, processing: boolean) => void;
@@ -45,7 +45,7 @@ export interface ChatComposerDeps {
     content: string;
     timestamp: string;
     sessionKey?: string;
-    imageAttachments?: unknown[];
+    attachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<unknown>;
 
@@ -66,7 +66,7 @@ export interface ChatComposerDeps {
 export interface SendOptions {
   content: string;
   attachments?: ChatAttachment[];
-  imageAttachments?: MessageImageAttachment[];
+  messageAttachments?: MessageAttachment[];
   presetModel?: string;
   presetThinking?: string;
   titleHint?: string;
@@ -143,7 +143,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
     }
 
     const store = deps.getMessageStore();
-    const pendingUserMessage = store.addMessage(task.id, 'user', options.content, options.imageAttachments, {
+    const pendingUserMessage = store.addMessage(task.id, 'user', options.content, options.messageAttachments, {
       persist: false,
     });
     store.setProcessing(task.sessionKey, true);
@@ -250,7 +250,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
           content: pendingUserMessage.content,
           timestamp: pendingUserMessage.timestamp,
           sessionKey: task.sessionKey,
-          imageAttachments: pendingUserMessage.imageAttachments as unknown[] | undefined,
+          attachments: pendingUserMessage.attachments as unknown[] | undefined,
           toolCalls: pendingUserMessage.toolCalls,
         })
         .catch((err) => console.error('[chat-composer] persistMessage failed:', err));

@@ -1,8 +1,13 @@
 import type { ModelCatalogEntry } from '@clawwork/shared';
 
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+export const MAX_ATTACHMENT_SIZE = 100 * 1024 * 1024;
 export const MAX_TEXT_TOTAL = 500 * 1024;
-export const ACCEPTED_TYPES = 'image/png,image/jpeg,image/gif,image/webp';
+export const ACCEPTED_TYPES = [
+  'image/*',
+  '.txt,.md,.csv,.json,.xml,.yaml,.yml,.log',
+  '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx',
+  '.zip,.tar,.gz,.7z,.rar',
+].join(',');
 export const GATEWAY_INJECTED_MODEL = 'gateway-injected';
 export const EMPTY_MODELS_CATALOG: ModelCatalogEntry[] = [];
 

@@ -2,8 +2,9 @@ import { memo, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import type { Message } from '@clawwork/shared';
-import { Check, Copy, FileCode, Loader2, Save } from 'lucide-react';
+import { Check, Copy, File, FileCode, Loader2, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { copyTextToClipboard } from '@/lib/clipboard';
@@ -103,6 +104,71 @@ function MessageActionButton({
   );
 }
 
+function AttachmentFileCard({ attachment }: { attachment: { fileName: string; localPath?: string } }) {
+  const { t } = useTranslation();
+  const canOpen = Boolean(attachment.localPath);
+  return (
+    <button
+      type="button"
+      disabled={!canOpen}
+      onClick={async () => {
+        if (!attachment.localPath) return;
+        const res = await window.clawwork.openInboxFile(attachment.localPath);
+        if (!res.ok) toast.error(t('chatInput.openFailed', { fileName: attachment.fileName }));
+      }}
+      className={cn(
+        'inline-flex items-center gap-2 rounded-xl px-3 py-2 max-w-xs',
+        'border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
+        canOpen
+          ? 'cursor-pointer hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors'
+          : 'opacity-70 cursor-default',
+      )}
+      title={attachment.fileName}
+    >
+      <File size={16} className="flex-shrink-0" />
+      <span className="type-body truncate">{attachment.fileName}</span>
+    </button>
+  );
+}
+
+function InlineImageBubble({
+  attachment,
+  single,
+  onOpen,
+}: {
+  attachment: { fileName: string; dataUrl: string; mimeType?: string; localPath?: string };
+  single: boolean;
+  onOpen?: (src: string) => void;
+}) {
+  const [src, setSrc] = useState(attachment.dataUrl);
+  useEffect(() => {
+    if (!attachment.localPath) return;
+    if (attachment.dataUrl.startsWith('data:')) return;
+    let aborted = false;
+    window.clawwork.readInboxFile(attachment.localPath).then((res) => {
+      if (aborted) return;
+      if (res.ok && res.result) {
+        setSrc(`data:${attachment.mimeType ?? 'image/png'};base64,${res.result.content}`);
+      }
+    });
+    return () => {
+      aborted = true;
+    };
+  }, [attachment.localPath, attachment.mimeType, attachment.dataUrl]);
+  return (
+    <img
+      src={src}
+      alt={attachment.fileName}
+      className={cn(
+        'rounded-xl object-cover cursor-pointer border border-[var(--border-subtle)]',
+        'hover:opacity-90 transition-opacity',
+        single ? 'max-w-72 max-h-48' : 'w-20 h-20',
+      )}
+      onClick={() => onOpen?.(src)}
+    />
+  );
+}
+
 const ChatMessage = memo(function ChatMessage({
   message,
   agentName,
@@ -156,7 +222,7 @@ const ChatMessage = memo(function ChatMessage({
     );
   }
 
-  const images = message.imageAttachments;
+  const attachments = message.attachments;
   const canSaveMessage = Boolean(message.content.trim()) && Boolean(message.taskId) && Boolean(message.id);
 
   const handleCopy = (): void => {
@@ -230,7 +296,7 @@ const ChatMessage = memo(function ChatMessage({
             </div>
             {parsedFiles.text && <p className="whitespace-pre-wrap">{parsedFiles.text}</p>}
           </div>
-        ) : message.content || !images?.length ? (
+        ) : message.content || !attachments?.length ? (
           <div className="inline-block max-w-full leading-relaxed rounded-2xl px-4 py-3 text-[var(--text-primary)]">
             <MarkdownContent
               content={message.content}
@@ -240,21 +306,21 @@ const ChatMessage = memo(function ChatMessage({
             />
           </div>
         ) : null}
-        {isUser && images?.length ? (
+        {isUser && attachments?.length ? (
           <div className={cn('flex gap-2 mt-2 flex-wrap', 'justify-end')}>
-            {images.map((img, i) => (
-              <img
-                key={`${img.fileName}-${i}`}
-                src={img.dataUrl}
-                alt={img.fileName}
-                className={cn(
-                  'rounded-xl object-cover cursor-pointer border border-[var(--border-subtle)]',
-                  'hover:opacity-90 transition-opacity',
-                  images.length === 1 ? 'max-w-72 max-h-48' : 'w-20 h-20',
-                )}
-                onClick={() => onImageClick?.(img.dataUrl)}
-              />
-            ))}
+            {attachments.map((attachment, i) => {
+              const isImage = !attachment.mimeType || attachment.mimeType.startsWith('image/');
+              return isImage ? (
+                <InlineImageBubble
+                  key={`${attachment.fileName}-${i}`}
+                  attachment={attachment}
+                  single={attachments.length === 1}
+                  onOpen={onImageClick}
+                />
+              ) : (
+                <AttachmentFileCard key={`${attachment.fileName}-${i}`} attachment={attachment} />
+              );
+            })}
           </div>
         ) : null}
         {message.toolCalls.length > 0 && <ToolCallSummary toolCalls={message.toolCalls} />}

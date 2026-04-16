@@ -5,6 +5,7 @@ import type { Artifact } from '@clawwork/shared';
 import { getDb } from '../db/index.js';
 import { artifacts } from '../db/schema.js';
 import { ensureTaskDir } from '../workspace/init.js';
+import { uniqueFileName } from '../workspace/safe-name.js';
 
 const MIME_MAP: Record<string, string> = {
   '.png': 'image/png',
@@ -30,15 +31,8 @@ function detectMimeType(fileName: string): string {
   return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
-function sanitizeArtifactName(name: string): string {
-  if (!name || name === '.' || name === '..') throw new Error('invalid artifact name');
-  if (name.includes('/') || name.includes('\\')) throw new Error('invalid artifact name');
-  if (name.includes('..')) throw new Error('invalid artifact name');
-  return basename(name);
-}
-
 function resolveArtifactDestination(taskDir: string, fileName: string): { destPath: string; finalName: string } {
-  const finalName = uniqueFileName(taskDir, fileName);
+  const finalName = uniqueFileName(fileName);
   const resolvedTaskDir = resolve(taskDir);
   const destPath = resolve(taskDir, finalName);
 
@@ -47,13 +41,6 @@ function resolveArtifactDestination(taskDir: string, fileName: string): { destPa
   }
 
   return { destPath, finalName };
-}
-
-function uniqueFileName(_dir: string, name: string): string {
-  const safeName = sanitizeArtifactName(name);
-  const ext = extname(safeName);
-  const base = safeName.slice(0, safeName.length - ext.length);
-  return `${base}-${randomUUID().slice(0, 8)}${ext}`;
 }
 
 interface SaveArtifactParams {

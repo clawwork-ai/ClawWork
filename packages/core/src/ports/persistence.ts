@@ -28,7 +28,7 @@ export interface PersistedMessage {
   sessionKey?: string;
   agentId?: string;
   runId?: string;
-  imageAttachments?: unknown[];
+  attachments?: unknown[];
   toolCalls?: unknown[];
 }
 
@@ -80,7 +80,7 @@ export interface PersistencePort {
     sessionKey?: string;
     agentId?: string;
     runId?: string;
-    imageAttachments?: unknown[];
+    attachments?: unknown[];
     toolCalls?: unknown[];
   }) => Promise<IpcResult>;
   deleteTask: (taskId: string) => Promise<IpcResult>;

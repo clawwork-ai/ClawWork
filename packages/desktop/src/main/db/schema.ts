@@ -32,7 +32,7 @@ export const messages = sqliteTable('messages', {
   sessionKey: text('session_key'),
   agentId: text('agent_id'),
   runId: text('run_id'),
-  imageAttachments: text('image_attachments'),
+  attachments: text('image_attachments'),
   toolCalls: text('tool_calls'),
 });
 

@@ -18,7 +18,7 @@ export interface SessionSyncDeps {
         sessionKey?: string;
         agentId?: string;
         runId?: string;
-        imageAttachments?: unknown[];
+        attachments?: unknown[];
         toolCalls?: unknown[];
       }[];
     }>;
@@ -31,7 +31,7 @@ export interface SessionSyncDeps {
       sessionKey?: string;
       agentId?: string;
       runId?: string;
-      imageAttachments?: unknown[];
+      attachments?: unknown[];
       toolCalls?: unknown[];
     }) => Promise<IpcResult>;
   };
@@ -127,7 +127,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
                 sessionKey: r.sessionKey,
                 agentId: r.agentId,
                 runId: r.runId,
-                imageAttachments: r.imageAttachments as Message['imageAttachments'],
+                attachments: r.attachments as Message['attachments'],
               }));
               messageStore.bulkLoad(t.id, msgs);
             }
@@ -281,7 +281,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
           sessionKey: msg.sessionKey,
           agentId: msg.agentId,
           runId: msg.runId,
-          imageAttachments: msg.imageAttachments as unknown[] | undefined,
+          attachments: msg.attachments as unknown[] | undefined,
           toolCalls: msg.toolCalls,
         })
         .catch((err) => console.error('[session-sync] loadAndPersist persistMessage failed:', err));

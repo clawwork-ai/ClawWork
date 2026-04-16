@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
-import type { PendingImage } from './types';
-import { MAX_IMAGE_SIZE, GATEWAY_INJECTED_MODEL } from './constants';
+import type { PendingAttachment } from './types';
+import { MAX_ATTACHMENT_SIZE, GATEWAY_INJECTED_MODEL } from './constants';
 
 type TranslateFn = (key: string, opts?: Record<string, unknown>) => string;
 
@@ -15,25 +15,11 @@ export function formatContextWindow(tokens: number): string {
   return String(tokens);
 }
 
-export function processImageFiles(files: File[], t: TranslateFn): PendingImage[] {
-  const accepted: PendingImage[] = [];
+export function processAttachmentFiles(files: File[], t: TranslateFn): PendingAttachment[] {
+  const accepted: PendingAttachment[] = [];
   for (const file of files) {
-    if (file.size > MAX_IMAGE_SIZE) {
-      toast.error(
-        t('chatInput.imageTooLarge', {
-          fileName: file.name,
-          defaultValue: `${file.name} exceeds 5MB limit`,
-        }),
-      );
-      continue;
-    }
-    if (!file.type.startsWith('image/')) {
-      toast.error(
-        t('chatInput.invalidImageType', {
-          fileName: file.name,
-          defaultValue: `${file.name} is not an image`,
-        }),
-      );
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      toast.error(t('chatInput.attachmentTooLarge', { fileName: file.name }));
       continue;
     }
     accepted.push({ file, previewUrl: URL.createObjectURL(file) });

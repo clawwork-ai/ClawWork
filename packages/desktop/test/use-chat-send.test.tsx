@@ -96,8 +96,8 @@ function Harness() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chat = useChatSend({
     textareaRef,
-    pendingImages: [],
-    setPendingImages: vi.fn(),
+    pendingAttachments: [],
+    setPendingAttachments: vi.fn(),
     selectedTasks: [],
     setSelectedTasks: vi.fn(),
     selectedArtifacts: [],

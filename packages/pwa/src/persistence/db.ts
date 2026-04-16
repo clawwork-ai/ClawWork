@@ -46,7 +46,7 @@ export interface StoredMessage {
   sessionKey?: string;
   agentId?: string;
   runId?: string;
-  imageAttachments?: unknown[];
+  attachments?: unknown[];
   toolCalls?: unknown[];
 }
 

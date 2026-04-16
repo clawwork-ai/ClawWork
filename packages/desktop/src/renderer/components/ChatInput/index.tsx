@@ -47,7 +47,7 @@ import VoiceIntroDialog from '../VoiceIntroDialog';
 import { ACCEPTED_TYPES, MENTION_ALL_AGENT_ID, THINKING_LABEL_KEYS, THINKING_LEVELS } from './constants';
 import { useChatSend } from './useChatSend';
 import { useContextFolders } from './useContextFolders';
-import { useImageAttachments } from './useImageAttachments';
+import { useAttachments } from './useAttachments';
 import { useMentionPicker } from './useMentionPicker';
 import { useSlashAutocomplete } from './useSlashAutocomplete';
 import { formatContextWindow } from './utils';
@@ -93,7 +93,8 @@ export default function ChatInput() {
   const mainView = useUiStore((s) => s.mainView);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
 
-  const { pendingImages, setPendingImages, handleFileSelect, removeImage, handlePaste } = useImageAttachments();
+  const { pendingAttachments, setPendingAttachments, handleFileSelect, removeAttachment, handlePaste } =
+    useAttachments();
 
   const { contextFolders, localFilesForPicker, handleAddContextFolder, handleRemoveContextFolder, loadLocalFiles } =
     useContextFolders();
@@ -227,8 +228,8 @@ export default function ChatInput() {
     handleToolSelect,
   } = useChatSend({
     textareaRef,
-    pendingImages,
-    setPendingImages,
+    pendingAttachments,
+    setPendingAttachments,
     selectedTasks,
     setSelectedTasks,
     selectedArtifacts,
@@ -419,11 +420,11 @@ export default function ChatInput() {
     if (!textarea) return;
     textarea.style.height = 'auto';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
-    setCanSend(Boolean(textarea.value.trim()) || pendingImages.length > 0);
+    setCanSend(Boolean(textarea.value.trim()) || pendingAttachments.length > 0);
     if (argPickerVisible) closeArgPicker();
     updateSlashMenu();
     updateMentionPicker();
-  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateMentionPicker, pendingImages.length]);
+  }, [updateSlashMenu, argPickerVisible, closeArgPicker, updateMentionPicker, pendingAttachments.length]);
 
   const voiceActive = isVoiceListening || isVoiceTranscribing;
   const disabled = isOffline;
@@ -454,36 +455,45 @@ export default function ChatInput() {
 
   useEffect(() => {
     const textarea = textareaRef.current;
-    setCanSend(Boolean(textarea?.value.trim()) || pendingImages.length > 0);
-  }, [pendingImages.length]);
+    setCanSend(Boolean(textarea?.value.trim()) || pendingAttachments.length > 0);
+  }, [pendingAttachments.length]);
 
   return (
     <div className="flex-shrink-0 px-6 pb-5">
       <div className="max-w-[var(--content-max-width)] mx-auto">
         <AnimatePresence>
-          {pendingImages.length > 0 && (
+          {pendingAttachments.length > 0 && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="mb-2 inline-flex max-w-full gap-2 overflow-x-auto overflow-y-visible px-1 pt-2 pb-1"
             >
-              {pendingImages.map((img, i) => (
+              {pendingAttachments.map((att, i) => (
                 <motion.div
-                  key={`${img.file.name}-${i}`}
+                  key={`${att.file.name}-${i}`}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   className="group relative flex-shrink-0 pt-1 pr-1"
                 >
                   <div className="relative overflow-hidden rounded-lg border border-[var(--border-subtle)] shadow-[var(--shadow-card)]">
-                    <img src={img.previewUrl} alt={img.file.name} className="h-16 w-16 object-cover" />
+                    {att.file.type.startsWith('image/') ? (
+                      <img src={att.previewUrl} alt={att.file.name} className="h-16 w-16 object-cover" />
+                    ) : (
+                      <div className="flex h-16 w-16 flex-col items-center justify-center gap-1 bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
+                        <File size={22} />
+                        <span className="type-support text-[var(--text-muted)]">
+                          {(att.file.size / 1024).toFixed(0)}KB
+                        </span>
+                      </div>
+                    )}
                     <span className="type-support absolute bottom-0 left-0 right-0 bg-[var(--overlay-scrim)] px-1 text-center truncate text-[var(--text-muted)]">
-                      {img.file.name}
+                      {att.file.name}
                     </span>
                   </div>
                   <button
-                    onClick={() => removeImage(i)}
+                    onClick={() => removeAttachment(i)}
                     aria-label={t('common.remove')}
                     className={cn(
                       'absolute top-0 right-0 h-5 w-5 rounded-full',

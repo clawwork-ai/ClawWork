@@ -141,6 +141,11 @@ function buildApi(): ClawWorkAPI {
     searchArtifacts: (query: string) => ipcRenderer.invoke('artifact:search', { query }),
     openArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:open-file', { localPath }),
     showArtifactInFolder: (localPath: string) => ipcRenderer.invoke('artifact:show-in-folder', { localPath }),
+    saveInboxAttachment: (params: { taskId: string; fileName: string; base64: string }) =>
+      ipcRenderer.invoke('inbox:save', params),
+    readInboxFile: (localPath: string) => ipcRenderer.invoke('inbox:read-file', { localPath }),
+    openInboxFile: (localPath: string) => ipcRenderer.invoke('inbox:open', { localPath }),
+    showInboxInFolder: (localPath: string) => ipcRenderer.invoke('inbox:show-in-folder', { localPath }),
     exportSessionMarkdown: (taskId: string) => ipcRenderer.invoke('session:export-markdown', { taskId }),
     exportSessionMarkdownAs: (taskId: string) => ipcRenderer.invoke('session:export-markdown-as', { taskId }),
 
@@ -253,7 +258,7 @@ function buildApi(): ClawWorkAPI {
       sessionKey?: string;
       agentId?: string;
       runId?: string;
-      imageAttachments?: unknown[];
+      attachments?: unknown[];
       toolCalls?: unknown[];
     }) => ipcRenderer.invoke('data:create-message', msg),
 
