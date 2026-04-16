@@ -224,10 +224,7 @@ export default function App() {
   return (
     <TooltipProvider>
       <AnimatePresence>{commandPaletteOpen && <CommandPalette />}</AnimatePresence>
-      <div
-        className="relative flex h-screen overflow-hidden bg-[var(--bg-primary)]"
-        style={{ backgroundImage: 'var(--bg-ambient)' }}
-      >
+      <div className="relative flex h-screen overflow-hidden bg-[var(--bg-primary)]">
         <motion.aside
           animate={{ width: leftNavCollapsed ? 52 : leftNavWidth }}
           transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
