@@ -76,6 +76,7 @@ function createHarness(
     setAgentCatalogForGateway: vi.fn(),
     setToolsCatalogForGateway: vi.fn(),
     setSkillsStatusForGateway: vi.fn(),
+    setCommandCatalogForGateway: vi.fn(),
     onPerformerCandidate: vi.fn((taskId, sessionKey, gatewayId) => {
       performerCandidates.push({ taskId, sessionKey, gatewayId });
     }),
