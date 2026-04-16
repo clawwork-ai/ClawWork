@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import type { AgentInfo, ModelCatalogEntry, SkillStatusReport, ToolsCatalog } from '@clawwork/shared';
+import type { AgentInfo, CommandEntry, ModelCatalogEntry, SkillStatusReport, ToolsCatalog } from '@clawwork/shared';
 
 export type MainView = 'chat' | 'files' | 'archived' | 'cron' | 'teams' | 'dashboard';
 export type Theme = 'dark' | 'light' | 'auto';
@@ -85,6 +85,9 @@ export interface UiState {
 
   skillsStatusByGateway: Record<string, SkillStatusReport>;
   setSkillsStatusForGateway: (gatewayId: string, report: SkillStatusReport) => void;
+
+  commandCatalogByGateway: Record<string, CommandEntry[]>;
+  setCommandCatalogForGateway: (gatewayId: string, commands: CommandEntry[]) => void;
 
   sendShortcut: SendShortcut;
   setSendShortcut: (shortcut: SendShortcut) => void;
@@ -272,6 +275,15 @@ export function createUiStore(deps: UiStoreDeps) {
         skillsStatusByGateway: {
           ...s.skillsStatusByGateway,
           [gatewayId]: report,
+        },
+      })),
+
+    commandCatalogByGateway: {},
+    setCommandCatalogForGateway: (gatewayId, commands) =>
+      set((s) => ({
+        commandCatalogByGateway: {
+          ...s.commandCatalogByGateway,
+          [gatewayId]: commands,
         },
       })),
 

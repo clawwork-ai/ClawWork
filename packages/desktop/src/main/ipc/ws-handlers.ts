@@ -6,6 +6,7 @@ import { parseToolArgs } from '@clawwork/core';
 import type {
   ApprovalDecision,
   ChatAttachment,
+  CommandsListParams,
   ConfigPatchParams,
   ConfigSetParams,
   ExecApprovalResolveParams,
@@ -385,6 +386,23 @@ export function registerWsHandlers(): void {
     if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
     try {
       const result = await gw.listModels();
+      return { ok: true, result };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+    }
+  });
+
+  ipcMain.handle('ws:commands-list', async (_event, payload: { gatewayId: string } & CommandsListParams) => {
+    const gw = getGatewayClient(payload.gatewayId);
+    if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
+    const params: Record<string, unknown> = {
+      scope: payload.scope ?? 'text',
+      includeArgs: payload.includeArgs ?? true,
+    };
+    if (payload.agentId) params.agentId = payload.agentId;
+    if (payload.provider) params.provider = payload.provider;
+    try {
+      const result = await gw.listCommands(params);
       return { ok: true, result };
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };

@@ -661,11 +661,19 @@
     "argOptions": "Opciones de /{{command}}"
   },
   "slashDashboard": {
-    "categoryAccess": "Acceso y seguridad",
-    "categoryInfo": "Información y ayuda",
-    "categoryModel": "Modelo y calidad",
+    "categoryDocks": "Docks",
+    "categoryManagement": "Acceso y gestión",
+    "categoryMedia": "Medios",
+    "categoryOptions": "Opciones y calidad",
     "categorySession": "Sesión y agente",
+    "categoryStatus": "Estado e información",
+    "categoryTools": "Herramientas",
     "description": "Todos los comandos disponibles para la sesión actual",
+    "empty": "Ningún comando coincide",
+    "searchPlaceholder": "Buscar comandos",
+    "sourceNative": "Nativo",
+    "sourcePlugin": "Plugin",
+    "sourceSkill": "Skill",
     "title": "Comandos slash",
     "tooltip": "Comandos"
   },

@@ -1,12 +1,13 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SlashCommand } from '@/lib/slash-commands';
+import { type SlashCommandView } from '@/lib/slash-commands';
+import CommandSourceBadge from './CommandSourceBadge';
 import PopoverListBase, { PopoverListItem } from './PopoverListBase';
 
 interface SlashCommandMenuProps {
-  commands: SlashCommand[];
+  commands: SlashCommandView[];
   selectedIndex: number;
-  onSelect: (command: SlashCommand) => void;
+  onSelect: (command: SlashCommandView) => void;
   onHoverIndex: (index: number) => void;
   onClose: () => void;
   className?: string;
@@ -41,6 +42,7 @@ export default function SlashCommandMenu({
           onSelect={() => onSelect(cmd)}
         >
           <span className="type-mono-data shrink-0 text-[var(--accent)]">/{cmd.name}</span>
+          <CommandSourceBadge source={cmd.source} />
           <span className="type-support truncate">{cmd.description}</span>
           {cmd.argHint && (
             <span className="type-mono-data ml-auto shrink-0 text-[var(--text-muted)]">{cmd.argHint}</span>

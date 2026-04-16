@@ -661,11 +661,19 @@
     "argOptions": "/{{command}} 옵션"
   },
   "slashDashboard": {
-    "categoryAccess": "접근 및 보안",
-    "categoryInfo": "정보 및 도움말",
-    "categoryModel": "모델 및 품질",
+    "categoryDocks": "Docks",
+    "categoryManagement": "권한 및 관리",
+    "categoryMedia": "미디어",
+    "categoryOptions": "옵션 및 품질",
     "categorySession": "세션 및 에이전트",
+    "categoryStatus": "상태 및 정보",
+    "categoryTools": "도구",
     "description": "현재 세션에서 사용 가능한 모든 명령어",
+    "empty": "일치하는 명령어가 없습니다",
+    "searchPlaceholder": "명령어 검색",
+    "sourceNative": "기본",
+    "sourcePlugin": "플러그인",
+    "sourceSkill": "스킬",
     "title": "슬래시 명령어",
     "tooltip": "명령어"
   },

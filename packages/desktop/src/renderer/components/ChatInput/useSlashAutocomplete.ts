@@ -1,12 +1,13 @@
-import { useState, useCallback, type RefObject } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, type RefObject } from 'react';
 import { useTaskStore } from '../../stores/taskStore';
 import { useUiStore } from '../../stores/uiStore';
 import {
   filterSlashCommands,
-  parseSlashQuery,
-  getEnumOptions,
+  getChoiceOptions,
+  getCommandsForGateway,
   hasArgPicker,
-  type SlashCommand,
+  parseSlashQuery,
+  type SlashCommandView,
 } from '@/lib/slash-commands';
 import type { ArgOption } from '../SlashArgPicker';
 
@@ -17,14 +18,22 @@ interface UseSlashAutocompleteOpts {
 export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
   const { textareaRef } = opts;
 
+  const activeGatewayId = useTaskStore((s) => {
+    const id = s.activeTaskId;
+    const task = id ? s.tasks.find((t) => t.id === id) : undefined;
+    return task?.gatewayId ?? s.pendingNewTask?.gatewayId ?? null;
+  });
+  const commandCatalog = useUiStore((s) => (activeGatewayId ? s.commandCatalogByGateway[activeGatewayId] : undefined));
+  const allCommands = useMemo(() => getCommandsForGateway(commandCatalog), [commandCatalog]);
+
   const [slashMenuVisible, setSlashMenuVisible] = useState(false);
   const [slashQuery, setSlashQuery] = useState('');
   const [slashIndex, setSlashIndex] = useState(0);
-  const slashCommands = filterSlashCommands(slashQuery);
+  const slashCommands = useMemo(() => filterSlashCommands(slashQuery, allCommands), [slashQuery, allCommands]);
   const [dashboardOpen, setDashboardOpen] = useState(false);
 
   const [argPickerVisible, setArgPickerVisible] = useState(false);
-  const [argPickerCommand, setArgPickerCommand] = useState<SlashCommand | null>(null);
+  const [argPickerCommand, setArgPickerCommand] = useState<SlashCommandView | null>(null);
   const [argPickerOptions, setArgPickerOptions] = useState<ArgOption[]>([]);
   const [argPickerIndex, setArgPickerIndex] = useState(0);
 
@@ -41,7 +50,7 @@ export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
     }
   }, [textareaRef]);
 
-  const buildArgOptions = useCallback((cmd: SlashCommand): ArgOption[] => {
+  const buildArgOptions = useCallback((cmd: SlashCommandView): ArgOption[] => {
     if (cmd.pickerType === 'model') {
       const gwId =
         useTaskStore.getState().tasks.find((t) => t.id === useTaskStore.getState().activeTaskId)?.gatewayId ??
@@ -53,32 +62,18 @@ export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
         detail: m.provider,
       }));
     }
-    const enumOpts = getEnumOptions(cmd);
-    if (enumOpts) return enumOpts.map((v) => ({ value: v, label: v }));
+    const choices = getChoiceOptions(cmd);
+    if (choices) return choices.map((c) => ({ value: c.value, label: c.label }));
     return [];
   }, []);
 
   const commitSlashCommand = useCallback(
-    (cmd: SlashCommand) => {
+    (cmd: SlashCommandView) => {
       const ta = textareaRef.current;
       if (!ta) return;
       setSlashMenuVisible(false);
       setSlashQuery('');
       setSlashIndex(0);
-
-      if (hasArgPicker(cmd)) {
-        const newValue = `/${cmd.name} `;
-        ta.value = newValue;
-        ta.style.height = 'auto';
-        ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
-        ta.setSelectionRange(newValue.length, newValue.length);
-        ta.focus();
-        setArgPickerCommand(cmd);
-        setArgPickerOptions(buildArgOptions(cmd));
-        setArgPickerIndex(0);
-        setArgPickerVisible(true);
-        return;
-      }
 
       const newValue = `/${cmd.name} `;
       ta.value = newValue;
@@ -86,6 +81,13 @@ export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
       ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
       ta.setSelectionRange(newValue.length, newValue.length);
       ta.focus();
+
+      if (hasArgPicker(cmd)) {
+        setArgPickerCommand(cmd);
+        setArgPickerOptions(buildArgOptions(cmd));
+        setArgPickerIndex(0);
+        setArgPickerVisible(true);
+      }
     },
     [textareaRef, buildArgOptions],
   );
@@ -116,6 +118,40 @@ export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
     textareaRef.current?.focus();
   }, [textareaRef]);
 
+  const argPickerIndexRef = useRef(argPickerIndex);
+  argPickerIndexRef.current = argPickerIndex;
+  const argPickerOptionsRef = useRef(argPickerOptions);
+  argPickerOptionsRef.current = argPickerOptions;
+
+  useEffect(() => {
+    if (!argPickerVisible) return;
+    const raf = requestAnimationFrame(() => textareaRef.current?.focus());
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (document.activeElement === textareaRef.current) return;
+      const opts = argPickerOptionsRef.current;
+      if (opts.length === 0) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setArgPickerIndex((i) => (i + 1) % opts.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setArgPickerIndex((i) => (i - 1 + opts.length) % opts.length);
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        const opt = opts[argPickerIndexRef.current];
+        if (opt) commitArgOption(opt);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeArgPicker();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [argPickerVisible, commitArgOption, closeArgPicker, textareaRef]);
+
   return {
     slashMenuVisible,
     setSlashMenuVisible,
@@ -123,6 +159,7 @@ export function useSlashAutocomplete(opts: UseSlashAutocompleteOpts) {
     slashIndex,
     setSlashIndex,
     slashCommands,
+    allCommands,
     dashboardOpen,
     setDashboardOpen,
     argPickerVisible,

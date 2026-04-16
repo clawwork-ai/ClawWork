@@ -330,6 +330,49 @@ export interface ModelListResponse {
   models: ModelCatalogEntry[];
 }
 
+export type CommandSource = 'native' | 'skill' | 'plugin';
+
+export type CommandScope = 'text' | 'native' | 'both';
+
+export type CommandCategory = 'session' | 'options' | 'status' | 'management' | 'media' | 'tools' | 'docks';
+
+export interface CommandArgChoice {
+  value: string;
+  label: string;
+}
+
+export interface CommandArg {
+  name: string;
+  description: string;
+  type: 'string' | 'number' | 'boolean';
+  required?: boolean;
+  choices?: CommandArgChoice[];
+  dynamic?: boolean;
+}
+
+export interface CommandEntry {
+  name: string;
+  nativeName?: string;
+  textAliases?: string[];
+  description: string;
+  category?: CommandCategory;
+  source: CommandSource;
+  scope: CommandScope;
+  acceptsArgs: boolean;
+  args?: CommandArg[];
+}
+
+export interface CommandsListParams {
+  agentId?: string;
+  provider?: string;
+  scope?: CommandScope;
+  includeArgs?: boolean;
+}
+
+export interface CommandsListResponse {
+  commands: CommandEntry[];
+}
+
 export interface ToolEntry {
   id: string;
   label: string;

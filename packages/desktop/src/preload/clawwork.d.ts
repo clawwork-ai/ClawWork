@@ -1,6 +1,7 @@
 import type {
   IpcResult as SharedIpcResult,
   ChatAttachment as SharedChatAttachment,
+  CommandsListParams,
   Team,
   TeamHubRegistry,
   ApprovalDecision,
@@ -243,6 +244,7 @@ export interface ClawWorkAPI {
   abortChat: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
 
   listModels: (gatewayId: string) => Promise<IpcResult>;
+  listCommands: (gatewayId: string, params?: CommandsListParams) => Promise<IpcResult>;
   listAgents: (gatewayId: string) => Promise<IpcResult>;
   createAgent: (
     gatewayId: string,

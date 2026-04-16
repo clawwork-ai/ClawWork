@@ -102,6 +102,8 @@ function getDispatcher(): GatewayDispatcher {
         useUiStore.getState().setToolsCatalogForGateway(gatewayId, catalog),
       setSkillsStatusForGateway: (gatewayId, report) =>
         useUiStore.getState().setSkillsStatusForGateway(gatewayId, report),
+      setCommandCatalogForGateway: (gatewayId, commands) =>
+        useUiStore.getState().setCommandCatalogForGateway(gatewayId, commands),
 
       lookupTaskIdBySubagentKey: (key) => useRoomStore.getState().lookupTaskIdBySubagentKey(key),
       onPerformerCandidate: (taskId, sessionKey) => handlePerformerCandidate(taskId, sessionKey),

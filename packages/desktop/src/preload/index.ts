@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type {
   ApprovalDecision,
+  CommandsListParams,
   CronJobCreate,
   CronJobPatch,
   CronListParams,
@@ -31,6 +32,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:abort-chat', { gatewayId, sessionKey }),
     listGateways: () => ipcRenderer.invoke('ws:list-gateways'),
     listModels: (gatewayId: string) => ipcRenderer.invoke('ws:models-list', { gatewayId }),
+    listCommands: (gatewayId: string, params?: CommandsListParams) =>
+      ipcRenderer.invoke('ws:commands-list', { gatewayId, ...(params ?? {}) }),
     listAgents: (gatewayId: string) => ipcRenderer.invoke('ws:agents-list', { gatewayId }),
     createAgent: (gatewayId: string, params: { name: string; workspace: string; emoji?: string; avatar?: string }) =>
       ipcRenderer.invoke('ws:agents-create', { gatewayId, ...params }),

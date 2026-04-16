@@ -1,89 +1,296 @@
-/**
- * Slash command definitions for ClawWork input autocomplete.
- *
- * Source: mirrors OpenClaw's native command surface.
- * Reference: ~/git/openclaw/src/tui/commands.ts (getSlashCommands)
- *            ~/git/openclaw/src/auto-reply/commands-registry.ts (NativeCommandSpec)
- *
- * PLACEHOLDER: In a future version, this list should be fetched dynamically from
- * the Gateway via a `commands.list` RPC (not yet exposed in the Gateway API).
- * When that RPC is available, extend `gateway-client.ts` with `listCommands()`,
- * add an IPC handler `ws:commands-list`, and replace the static list below with
- * a store that hydrates on gateway connect.
- */
+import type { CommandArg, CommandCategory, CommandEntry, CommandSource } from '@clawwork/shared';
 
-export type SlashCommandCategory = 'session' | 'model' | 'access' | 'info';
-export type SlashPickerType = 'enum' | 'model';
+export type SlashPickerType = 'model' | 'choices' | 'free';
 
-export interface SlashCommand {
+export interface SlashCommandView {
   name: string;
+  nativeName?: string;
   description: string;
+  aliases: string[];
+  category: CommandCategory;
+  source: CommandSource;
+  acceptsArgs: boolean;
+  args: CommandArg[];
+  pickerType: SlashPickerType;
   argHint?: string;
-  category?: SlashCommandCategory;
-  pickerType?: SlashPickerType;
 }
 
-/**
- * Static list of OpenClaw native slash commands supported in ClawWork sessions.
- * Derived from ~/git/openclaw/src/tui/commands.ts and the gateway NativeCommandSpec list.
- *
- * PLACEHOLDER: replace/extend with dynamic gateway commands when available.
- */
-const STATIC_SLASH_COMMANDS: SlashCommand[] = [
-  { name: 'new', description: 'Reset the session', argHint: undefined, category: 'session' },
-  { name: 'reset', description: 'Reset the session', argHint: undefined, category: 'session' },
-  { name: 'abort', description: 'Abort the active run', argHint: undefined, category: 'session' },
-  { name: 'agent', description: 'Switch agent (or open picker)', argHint: '<id>', category: 'session' },
-  { name: 'agents', description: 'Open agent picker', argHint: undefined, category: 'session' },
-  { name: 'session', description: 'Switch session (or open picker)', argHint: '<key>', category: 'session' },
-  { name: 'sessions', description: 'Open session picker', argHint: undefined, category: 'session' },
+const CATEGORY_ORDER: CommandCategory[] = ['session', 'options', 'management', 'tools', 'media', 'docks', 'status'];
 
+export const CATEGORY_I18N_KEYS: Record<CommandCategory, string> = {
+  session: 'slashDashboard.categorySession',
+  options: 'slashDashboard.categoryOptions',
+  status: 'slashDashboard.categoryStatus',
+  management: 'slashDashboard.categoryManagement',
+  media: 'slashDashboard.categoryMedia',
+  tools: 'slashDashboard.categoryTools',
+  docks: 'slashDashboard.categoryDocks',
+};
+
+export const SOURCE_I18N_KEYS: Record<CommandSource, string> = {
+  native: 'slashDashboard.sourceNative',
+  skill: 'slashDashboard.sourceSkill',
+  plugin: 'slashDashboard.sourcePlugin',
+};
+
+const MODEL_PICKER_COMMAND = 'model';
+
+function detectPickerType(entry: CommandEntry): SlashPickerType {
+  if (!entry.acceptsArgs) return 'free';
+  const first = entry.args?.[0];
+  if (!first) return 'free';
+  if (first.dynamic) {
+    const key = entry.nativeName ?? entry.name;
+    if (key === MODEL_PICKER_COMMAND) return 'model';
+    return 'free';
+  }
+  if (first.choices && first.choices.length > 0) return 'choices';
+  return 'free';
+}
+
+function buildArgHint(entry: CommandEntry, picker: SlashPickerType): string | undefined {
+  if (!entry.acceptsArgs) return undefined;
+  const first = entry.args?.[0];
+  if (!first) return undefined;
+  if (picker === 'choices' && first.choices) {
+    return first.choices.map((c) => c.value).join('|');
+  }
+  return `<${first.name}>`;
+}
+
+function commandEntryToView(entry: CommandEntry): SlashCommandView {
+  const picker = detectPickerType(entry);
+  const aliases = Array.from(new Set([entry.name, ...(entry.textAliases ?? [])]));
+  return {
+    name: entry.name,
+    nativeName: entry.nativeName,
+    description: entry.description,
+    aliases,
+    category: entry.category ?? 'status',
+    source: entry.source,
+    acceptsArgs: entry.acceptsArgs,
+    args: entry.args ?? [],
+    pickerType: picker,
+    argHint: buildArgHint(entry, picker),
+  };
+}
+
+function enumArg(name: string, description: string, values: string[], dynamic = false): CommandArg {
+  return {
+    name,
+    description,
+    type: 'string',
+    choices: values.map((v) => ({ value: v, label: v })),
+    dynamic,
+  };
+}
+
+function dynamicArg(name: string, description: string): CommandArg {
+  return { name, description, type: 'string', dynamic: true };
+}
+
+const NATIVE_OVERLAY: CommandEntry[] = [
+  {
+    name: 'new',
+    description: 'Reset the session',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: false,
+  },
+  {
+    name: 'reset',
+    description: 'Reset the session',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: false,
+  },
+  {
+    name: 'abort',
+    description: 'Abort the active run',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: false,
+  },
+  {
+    name: 'agent',
+    description: 'Switch agent (or open picker)',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: true,
+    args: [dynamicArg('id', 'Agent id')],
+  },
+  {
+    name: 'agents',
+    description: 'Open agent picker',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: false,
+  },
+  {
+    name: 'session',
+    description: 'Switch session (or open picker)',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: true,
+    args: [dynamicArg('key', 'Session key')],
+  },
+  {
+    name: 'sessions',
+    description: 'Open session picker',
+    source: 'native',
+    scope: 'text',
+    category: 'session',
+    acceptsArgs: false,
+  },
   {
     name: 'model',
     description: 'Set model (or open picker)',
-    argHint: '<provider/model>',
-    category: 'model',
-    pickerType: 'model',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [dynamicArg('model', 'Model id')],
   },
-  { name: 'models', description: 'Open model picker', argHint: undefined, category: 'model' },
+  {
+    name: 'models',
+    description: 'Open model picker',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: false,
+  },
   {
     name: 'think',
     description: 'Set thinking level',
-    argHint: 'off|minimal|low|medium|high|adaptive',
-    category: 'model',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [enumArg('level', 'Thinking level', ['off', 'minimal', 'low', 'medium', 'high', 'adaptive'])],
   },
-  { name: 'fast', description: 'Set fast mode', argHint: 'status|on|off', category: 'model' },
-  { name: 'verbose', description: 'Set verbose on/off', argHint: 'on|off', category: 'model' },
-  { name: 'reasoning', description: 'Set reasoning on/off', argHint: 'on|off|stream', category: 'model' },
-  { name: 'usage', description: 'Toggle per-response usage line', argHint: 'off|tokens|full|cost', category: 'model' },
-
-  { name: 'elevated', description: 'Set elevated permission level', argHint: 'on|off|ask|full', category: 'access' },
-  { name: 'elev', description: 'Alias for /elevated', argHint: 'on|off|ask|full', category: 'access' },
-  { name: 'activation', description: 'Set group activation mode', argHint: 'mention|always', category: 'access' },
-
-  { name: 'help', description: 'Show slash command help', argHint: undefined, category: 'info' },
-  { name: 'status', description: 'Show gateway status summary', argHint: undefined, category: 'info' },
-  { name: 'settings', description: 'Open settings', argHint: undefined, category: 'info' },
+  {
+    name: 'fast',
+    description: 'Set fast mode',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [enumArg('mode', 'Fast mode', ['status', 'on', 'off'])],
+  },
+  {
+    name: 'verbose',
+    description: 'Set verbose on/off',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [enumArg('state', 'Verbose state', ['on', 'off'])],
+  },
+  {
+    name: 'reasoning',
+    description: 'Set reasoning on/off',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [enumArg('state', 'Reasoning state', ['on', 'off', 'stream'])],
+  },
+  {
+    name: 'usage',
+    description: 'Toggle per-response usage line',
+    source: 'native',
+    scope: 'text',
+    category: 'options',
+    acceptsArgs: true,
+    args: [enumArg('mode', 'Usage mode', ['off', 'tokens', 'full', 'cost'])],
+  },
+  {
+    name: 'elevated',
+    description: 'Set elevated permission level',
+    textAliases: ['elev'],
+    source: 'native',
+    scope: 'text',
+    category: 'management',
+    acceptsArgs: true,
+    args: [enumArg('level', 'Elevated level', ['on', 'off', 'ask', 'full'])],
+  },
+  {
+    name: 'activation',
+    description: 'Set group activation mode',
+    source: 'native',
+    scope: 'text',
+    category: 'management',
+    acceptsArgs: true,
+    args: [enumArg('mode', 'Activation mode', ['mention', 'always'])],
+  },
+  {
+    name: 'help',
+    description: 'Show slash command help',
+    source: 'native',
+    scope: 'text',
+    category: 'status',
+    acceptsArgs: false,
+  },
+  {
+    name: 'status',
+    description: 'Show gateway status summary',
+    source: 'native',
+    scope: 'text',
+    category: 'status',
+    acceptsArgs: false,
+  },
+  {
+    name: 'settings',
+    description: 'Open settings',
+    source: 'native',
+    scope: 'text',
+    category: 'management',
+    acceptsArgs: false,
+  },
 ];
 
-const CATEGORY_ORDER: SlashCommandCategory[] = ['session', 'model', 'access', 'info'];
+const OVERLAY_BY_NAME = new Map<string, CommandEntry>();
+for (const overlay of NATIVE_OVERLAY) {
+  OVERLAY_BY_NAME.set(overlay.name, overlay);
+  if (overlay.nativeName) OVERLAY_BY_NAME.set(overlay.nativeName, overlay);
+  for (const alias of overlay.textAliases ?? []) OVERLAY_BY_NAME.set(alias, overlay);
+}
 
-export const CATEGORY_I18N_KEYS: Record<SlashCommandCategory, string> = {
-  session: 'slashDashboard.categorySession',
-  model: 'slashDashboard.categoryModel',
-  access: 'slashDashboard.categoryAccess',
-  info: 'slashDashboard.categoryInfo',
-};
+function mergeWithOverlay(entry: CommandEntry): CommandEntry {
+  if (entry.source !== 'native') return entry;
+  const overlay = OVERLAY_BY_NAME.get(entry.nativeName ?? entry.name);
+  if (!overlay) return entry;
+  const gwFirst = entry.args?.[0];
+  const ovFirst = overlay.args?.[0];
+  if (!gwFirst || !ovFirst) return entry;
+  const gwHasChoices = (gwFirst.choices?.length ?? 0) > 0;
+  const ovHasChoices = (ovFirst.choices?.length ?? 0) > 0;
+  if (gwHasChoices || !ovHasChoices) return entry;
+  return {
+    ...entry,
+    args: [{ ...gwFirst, choices: ovFirst.choices }, ...(entry.args ?? []).slice(1)],
+  };
+}
+
+export function getCommandsForGateway(catalog: CommandEntry[] | undefined): SlashCommandView[] {
+  if (!catalog || catalog.length === 0) return NATIVE_OVERLAY.map(commandEntryToView);
+  return catalog.map(mergeWithOverlay).map(commandEntryToView);
+}
 
 export function groupCommandsByCategory(
-  commands: SlashCommand[] = STATIC_SLASH_COMMANDS,
-): { category: SlashCommandCategory; commands: SlashCommand[] }[] {
-  const groups = new Map<SlashCommandCategory, SlashCommand[]>();
+  commands: SlashCommandView[],
+): { category: CommandCategory; commands: SlashCommandView[] }[] {
+  const groups = new Map<CommandCategory, SlashCommandView[]>();
   for (const cmd of commands) {
-    const cat = cmd.category ?? 'info';
-    const arr = groups.get(cat);
+    const arr = groups.get(cmd.category);
     if (arr) arr.push(cmd);
-    else groups.set(cat, [cmd]);
+    else groups.set(cmd.category, [cmd]);
   }
   return CATEGORY_ORDER.filter((c) => groups.has(c)).map((c) => ({
     category: c,
@@ -91,27 +298,12 @@ export function groupCommandsByCategory(
   }));
 }
 
-/**
- * Filter slash commands by the text the user has typed after the `/`.
- * Returns all commands when query is empty (bare "/" input).
- */
-export function filterSlashCommands(query: string, commands: SlashCommand[] = STATIC_SLASH_COMMANDS): SlashCommand[] {
+export function filterSlashCommands(query: string, commands: SlashCommandView[]): SlashCommandView[] {
   const q = query.toLowerCase();
   if (!q) return commands;
-  return commands.filter((cmd) => cmd.name.startsWith(q));
+  return commands.filter((cmd) => cmd.aliases.some((a) => a.toLowerCase().startsWith(q)));
 }
 
-/**
- * Parse the textarea value to determine if slash-command autocomplete should show.
- *
- * Rules:
- * - The cursor must be on the *first* line.
- * - The line must start with `/`.
- * - There must be no whitespace-separated second token yet (i.e. we haven't
- *   entered the argument phase).
- *
- * Returns `{ active: true, query }` or `{ active: false }`.
- */
 export function parseSlashQuery(
   value: string,
   selectionStart: number,
@@ -124,16 +316,13 @@ export function parseSlashQuery(
   return { active: true, query: afterSlash };
 }
 
-export function getEnumOptions(cmd: SlashCommand): string[] | null {
-  if (!cmd.argHint) return null;
-  if (cmd.argHint.includes('<')) return null;
-  if (!cmd.argHint.includes('|')) return null;
-  return cmd.argHint
-    .split('|')
-    .map((s) => s.trim())
-    .filter(Boolean);
+export function hasArgPicker(cmd: SlashCommandView): boolean {
+  return cmd.pickerType !== 'free';
 }
 
-export function hasArgPicker(cmd: SlashCommand): boolean {
-  return cmd.pickerType === 'model' || getEnumOptions(cmd) !== null;
+export function getChoiceOptions(cmd: SlashCommandView): { value: string; label: string }[] | null {
+  if (cmd.pickerType !== 'choices') return null;
+  const first = cmd.args[0];
+  if (!first?.choices) return null;
+  return first.choices;
 }

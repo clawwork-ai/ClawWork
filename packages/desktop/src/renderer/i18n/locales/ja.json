@@ -661,11 +661,19 @@
     "argOptions": "/{{command}} のオプション"
   },
   "slashDashboard": {
-    "categoryAccess": "アクセス & セキュリティ",
-    "categoryInfo": "情報 & ヘルプ",
-    "categoryModel": "モデル & 品質",
+    "categoryDocks": "Docks",
+    "categoryManagement": "権限 & 管理",
+    "categoryMedia": "メディア",
+    "categoryOptions": "オプション & 品質",
     "categorySession": "セッション & エージェント",
+    "categoryStatus": "ステータス & 情報",
+    "categoryTools": "ツール",
     "description": "現在のセッションで利用可能なすべてのコマンド",
+    "empty": "一致するコマンドがありません",
+    "searchPlaceholder": "コマンドを検索",
+    "sourceNative": "ネイティブ",
+    "sourcePlugin": "プラグイン",
+    "sourceSkill": "スキル",
     "title": "スラッシュコマンド",
     "tooltip": "コマンド"
   },

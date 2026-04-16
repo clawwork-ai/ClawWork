@@ -1,4 +1,4 @@
-import type { IpcResult } from '@clawwork/shared';
+import type { CommandsListParams, IpcResult } from '@clawwork/shared';
 
 export interface GatewayEvent {
   event: string;
@@ -84,6 +84,7 @@ export interface GatewayTransportPort {
   syncSessions: () => Promise<SyncResult>;
   listGateways: () => Promise<GatewayListItem[]>;
   listModels: (gatewayId: string) => Promise<IpcResult>;
+  listCommands: (gatewayId: string, params?: CommandsListParams) => Promise<IpcResult>;
   listAgents: (gatewayId: string) => Promise<IpcResult>;
   getToolsCatalog: (gatewayId: string, agentId?: string) => Promise<IpcResult>;
   getSkillsStatus: (gatewayId: string, agentId?: string) => Promise<IpcResult>;

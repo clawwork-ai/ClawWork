@@ -4,6 +4,8 @@ import type {
   ToolCallStatus,
   ModelListResponse,
   AgentListResponse,
+  CommandEntry,
+  CommandsListResponse,
   SkillStatusReport,
   ToolsCatalog,
 } from '@clawwork/shared';
@@ -115,6 +117,7 @@ export interface GatewayDispatcherDeps {
   setAgentCatalogForGateway: (gatewayId: string, agents: unknown[], defaultId: string) => void;
   setToolsCatalogForGateway: (gatewayId: string, catalog: ToolsCatalog) => void;
   setSkillsStatusForGateway: (gatewayId: string, report: SkillStatusReport) => void;
+  setCommandCatalogForGateway: (gatewayId: string, commands: CommandEntry[]) => void;
 
   onPerformerCandidate?: (taskId: string, sessionKey: string, gatewayId: string) => void;
   lookupTaskIdBySubagentKey?: (subagentKey: string) => string | undefined;
@@ -590,11 +593,12 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
 
   async function fetchCatalogs(gatewayId: string): Promise<void> {
     try {
-      const [modelsRes, agentsRes, toolsRes, skillsRes] = await Promise.all([
+      const [modelsRes, agentsRes, toolsRes, skillsRes, commandsRes] = await Promise.all([
         deps.gateway.listModels(gatewayId),
         deps.gateway.listAgents(gatewayId),
         deps.gateway.getToolsCatalog(gatewayId),
         deps.gateway.getSkillsStatus(gatewayId),
+        deps.gateway.listCommands(gatewayId, { scope: 'text', includeArgs: true }),
       ]);
       if (modelsRes.ok && modelsRes.result) {
         const data = modelsRes.result as unknown as ModelListResponse;
@@ -612,8 +616,14 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         const data = skillsRes.result as unknown as SkillStatusReport;
         if (Array.isArray(data.skills)) deps.setSkillsStatusForGateway(gatewayId, data);
       }
+      if (commandsRes.ok && commandsRes.result) {
+        const data = commandsRes.result as unknown as CommandsListResponse;
+        if (Array.isArray(data.commands)) {
+          deps.setCommandCatalogForGateway(gatewayId, data.commands);
+        }
+      }
     } catch (err) {
-      console.warn('[catalogs] Failed to fetch model/agent/tools/skills catalogs for gateway', gatewayId, err);
+      console.warn('[catalogs] Failed to fetch catalogs for gateway', gatewayId, err);
     }
   }
 

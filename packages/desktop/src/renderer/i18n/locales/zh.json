@@ -661,11 +661,19 @@
     "argOptions": "/{{command}} 的可选项"
   },
   "slashDashboard": {
-    "categoryAccess": "权限与安全",
-    "categoryInfo": "信息与帮助",
-    "categoryModel": "模型与质量",
+    "categoryDocks": "Docks",
+    "categoryManagement": "权限与管理",
+    "categoryMedia": "媒体",
+    "categoryOptions": "选项与质量",
     "categorySession": "会话与 Agent",
+    "categoryStatus": "状态与信息",
+    "categoryTools": "工具",
     "description": "当前会话可用的全部命令",
+    "empty": "没有匹配的命令",
+    "searchPlaceholder": "搜索命令",
+    "sourceNative": "原生",
+    "sourcePlugin": "插件",
+    "sourceSkill": "Skill",
     "title": "斜杠命令",
     "tooltip": "命令面板"
   },

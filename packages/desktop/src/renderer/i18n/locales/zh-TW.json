@@ -661,11 +661,19 @@
     "argOptions": "/{{command}} 的選項"
   },
   "slashDashboard": {
-    "categoryAccess": "存取與安全",
-    "categoryInfo": "資訊與說明",
-    "categoryModel": "模型與品質",
+    "categoryDocks": "Docks",
+    "categoryManagement": "權限與管理",
+    "categoryMedia": "媒體",
+    "categoryOptions": "選項與品質",
     "categorySession": "工作階段與代理",
+    "categoryStatus": "狀態與資訊",
+    "categoryTools": "工具",
     "description": "目前工作階段可用的所有指令",
+    "empty": "沒有符合的指令",
+    "searchPlaceholder": "搜尋指令",
+    "sourceNative": "原生",
+    "sourcePlugin": "外掛",
+    "sourceSkill": "Skill",
     "title": "斜線指令",
     "tooltip": "指令"
   },

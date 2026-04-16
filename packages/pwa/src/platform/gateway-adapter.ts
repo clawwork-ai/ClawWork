@@ -324,6 +324,24 @@ export function createBrowserGatewayTransport(
       }
     },
 
+    async listCommands(gatewayId, params) {
+      const client = getClient(gatewayId);
+      if (!client?.isConnected)
+        return { ok: false, error: 'gateway not connected', errorCode: 'GATEWAY_NOT_CONNECTED' };
+      const req: Record<string, unknown> = {
+        scope: params?.scope ?? 'text',
+        includeArgs: params?.includeArgs ?? true,
+      };
+      if (params?.agentId) req.agentId = params.agentId;
+      if (params?.provider) req.provider = params.provider;
+      try {
+        const result = await client.listCommands(req);
+        return { ok: true, result };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'listCommands failed' };
+      }
+    },
+
     async listAgents(gatewayId) {
       const client = getClient(gatewayId);
       if (!client?.isConnected)
