@@ -200,7 +200,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload draft as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: release-notes-${{ env.RELEASE_TAG }}
           path: /tmp/release-notes.md
