@@ -1,6 +1,6 @@
 import { app, shell, BrowserWindow, Menu, ipcMain, globalShortcut, dialog, protocol } from 'electron';
 import { join } from 'path';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { electronApp, is } from '@electron-toolkit/utils';
 import { nativeTheme } from 'electron';
 import { initAllGateways, destroyAllGateways } from './ws/index.js';
 import { getMainWindow, setMainWindow } from './window-manager.js';
@@ -34,6 +34,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 let isQuitting = false;
+let devModeEnabled = false;
 
 process.stdout?.on?.('error', () => {});
 process.stderr?.on?.('error', () => {});
@@ -97,8 +98,8 @@ function buildAppMenu(devMode = false): Menu {
 
 function createWindow(): BrowserWindow {
   getDebugLogger().info({ domain: 'app', event: 'app.window.create' });
-  const devMode = readConfig()?.devMode === true;
-  Menu.setApplicationMenu(buildAppMenu(devMode));
+  devModeEnabled = readConfig()?.devMode === true;
+  Menu.setApplicationMenu(buildAppMenu(devModeEnabled));
 
   const win = new BrowserWindow({
     width: 1280,
@@ -136,13 +137,21 @@ function createWindow(): BrowserWindow {
     win.show();
   });
 
-  win.webContents.on('before-input-event', (_event, input) => {
-    if (!(input.meta || input.control) || input.type !== 'keyDown') return;
-    if (input.key === '-' || input.key === '_') {
+  win.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+
+    if ((input.meta || input.control) && (input.key === '-' || input.key === '_')) {
       const level = win.webContents.getZoomLevel() - 0.5;
       win.webContents.setZoomLevel(level);
       updateConfig({ zoomLevel: level });
+      event.preventDefault();
+      return;
     }
+
+    if (is.dev || devModeEnabled) return;
+
+    const isReload = input.key === 'F5' || ((input.meta || input.control) && input.code === 'KeyR');
+    if (isReload) event.preventDefault();
   });
 
   win.on('blur', () => {
@@ -192,10 +201,6 @@ if (!gotLock) {
     getDebugLogger().info({ domain: 'app', event: 'app.start', data: { userData: app.getPath('userData') } });
     electronApp.setAppUserModelId('com.clawwork.app');
 
-    app.on('browser-window-created', (_, window) => {
-      optimizer.watchWindowShortcuts(window);
-    });
-
     registerWsHandlers();
     registerArtifactHandlers();
     registerInboxHandlers();
@@ -217,8 +222,8 @@ if (!gotLock) {
     registerHubHandlers();
 
     ipcMain.handle('app:rebuild-menu', () => {
-      const dm = readConfig()?.devMode === true;
-      Menu.setApplicationMenu(buildAppMenu(dm));
+      devModeEnabled = readConfig()?.devMode === true;
+      Menu.setApplicationMenu(buildAppMenu(devModeEnabled));
     });
 
     ipcMain.on('ui:set-window-button-visibility', (_event, visible: boolean) => {
