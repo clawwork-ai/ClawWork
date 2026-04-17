@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import electronUpdater from 'electron-updater';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
+import { CancellationToken } from 'builder-util-runtime';
 import { is } from '@electron-toolkit/utils';
 import { getDebugLogger } from './debug/index.js';
 import { readConfig } from './workspace/config.js';
@@ -31,6 +32,7 @@ let initialized = false;
 let state: UpdaterState = 'idle';
 let inFlightCheck: Promise<UpdateCheckResult> | null = null;
 let installingUpdate = false;
+let currentDownloadToken: CancellationToken | null = null;
 
 function broadcast(channel: string, data: unknown): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -156,15 +158,32 @@ export async function downloadUpdate(): Promise<{ ok: boolean; error?: string }>
     return { ok: false, error: 'no-update-available' };
   }
   state = 'downloading';
+  const token = new CancellationToken();
+  currentDownloadToken = token;
   try {
-    await autoUpdater.downloadUpdate();
+    await autoUpdater.downloadUpdate(token);
     return { ok: true };
   } catch (err) {
+    const cancelled = token.cancelled || (err as { isCancelled?: boolean })?.isCancelled === true;
+    if (cancelled) {
+      state = 'available';
+      return { ok: false, error: 'cancelled' };
+    }
     state = 'error';
     const message = err instanceof Error ? err.message : String(err);
     broadcast('update:error', { message, code: classifyError(err) });
     return { ok: false, error: message };
+  } finally {
+    if (currentDownloadToken === token) currentDownloadToken = null;
   }
+}
+
+export function cancelUpdateDownload(): { ok: boolean; error?: string } {
+  if (state !== 'downloading' || !currentDownloadToken) {
+    return { ok: false, error: 'no-download-in-progress' };
+  }
+  currentDownloadToken.cancel();
+  return { ok: true };
 }
 
 export function installUpdate(): { ok: boolean; error?: string } {

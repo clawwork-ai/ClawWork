@@ -451,6 +451,7 @@
     "alreadyLatest": "最新バージョンです",
     "appearance": "外観",
     "authMethod": "認証方式",
+    "cancelDownload": "ダウンロードをキャンセル",
     "cannotDeleteMain": "メインエージェントは削除できません",
     "channelBeta": "ベータ版",
     "channelStable": "安定版",

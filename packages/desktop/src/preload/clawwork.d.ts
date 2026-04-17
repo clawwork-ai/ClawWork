@@ -369,6 +369,7 @@ export interface ClawWorkAPI {
   getAppVersion: () => Promise<string>;
   checkForUpdates: () => Promise<UpdateCheckResult>;
   downloadUpdate: () => Promise<{ ok: boolean; error?: string }>;
+  cancelUpdateDownload: () => Promise<{ ok: boolean; error?: string }>;
   installUpdate: () => Promise<{ ok: boolean; error?: string }>;
   onUpdateDownloadProgress: (callback: (progress: UpdateDownloadProgress) => void) => () => void;
   onUpdateDownloaded: (callback: (info: UpdateDownloadedInfo) => void) => () => void;

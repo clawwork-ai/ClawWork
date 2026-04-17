@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Star, Bug, RefreshCw, Loader2, Download, RotateCcw } from 'lucide-react';
+import { Star, Bug, RefreshCw, Loader2, Download, RotateCcw, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -171,9 +171,17 @@ export default function AboutSection() {
     setUpdateState('downloading');
     setDownloadPercent(0);
     const result = await window.clawwork.downloadUpdate();
-    if (!result.ok) {
+    if (!result.ok && result.error !== 'cancelled') {
       setUpdateState('error');
       setErrorMessage(result.error ?? 'Download failed');
+    }
+  }, []);
+
+  const handleCancelDownload = useCallback(async () => {
+    const result = await window.clawwork.cancelUpdateDownload();
+    if (result.ok) {
+      setUpdateState('available');
+      setDownloadPercent(0);
     }
   }, []);
 
@@ -262,9 +270,20 @@ export default function AboutSection() {
         {updateState === 'downloading' && (
           <div className="px-5 py-4">
             <div className="rounded-lg px-4 py-3 bg-[var(--bg-tertiary)] border border-[var(--border)]">
-              <p className="type-body mb-2 text-[var(--text-secondary)]">
-                {t('settings.downloadProgress', { percent: downloadPercent })}
-              </p>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="type-body text-[var(--text-secondary)]">
+                  {t('settings.downloadProgress', { percent: downloadPercent })}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelDownload}
+                  className="gap-1.5 h-7 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <X size={14} />
+                  {t('settings.cancelDownload')}
+                </Button>
+              </div>
               <div className="h-2 rounded-full bg-[var(--bg-hover)] overflow-hidden">
                 <div
                   className="h-full rounded-full bg-[var(--accent)] transition-all duration-300"

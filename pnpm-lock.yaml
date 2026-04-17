@@ -115,6 +115,9 @@ importers:
       better-sqlite3:
         specifier: ^12.6.2
         version: 12.6.2
+      builder-util-runtime:
+        specifier: 9.5.1
+        version: 9.5.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

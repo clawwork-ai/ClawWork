@@ -181,6 +181,7 @@ function buildApi(): ClawWorkAPI {
     getAppVersion: () => ipcRenderer.invoke('app:get-version'),
     checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates'),
     downloadUpdate: () => ipcRenderer.invoke('app:download-update'),
+    cancelUpdateDownload: () => ipcRenderer.invoke('app:cancel-update-download'),
     installUpdate: () => ipcRenderer.invoke('app:install-update'),
     onUpdateDownloadProgress: (callback) => {
       const listener = (_event: Electron.IpcRendererEvent, data: unknown): void => {

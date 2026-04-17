@@ -6,6 +6,7 @@ import {
   downloadUpdate,
   installUpdate,
   getUpdateChannel,
+  cancelUpdateDownload,
 } from '../auto-updater.js';
 
 interface ReleaseInfo {
@@ -108,5 +109,12 @@ export function registerUpdateHandlers(): void {
       return { ok: false, error: 'dev-not-supported' };
     }
     return installUpdate();
+  });
+
+  ipcMain.handle('app:cancel-update-download', (): { ok: boolean; error?: string } => {
+    if (!isAutoUpdaterAvailable()) {
+      return { ok: false, error: 'dev-not-supported' };
+    }
+    return cancelUpdateDownload();
   });
 }

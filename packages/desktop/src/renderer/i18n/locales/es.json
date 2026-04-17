@@ -451,6 +451,7 @@
     "alreadyLatest": "Ya tienes la versión más reciente",
     "appearance": "Apariencia",
     "authMethod": "Autenticación",
+    "cancelDownload": "Cancelar descarga",
     "cannotDeleteMain": "El agente principal no se puede eliminar",
     "channelBeta": "Beta",
     "channelStable": "Estable",
