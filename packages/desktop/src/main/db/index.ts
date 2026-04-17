@@ -8,6 +8,7 @@ import { initFTS } from './fts.js';
 
 let db: ReturnType<typeof drizzle> | null = null;
 let sqlite: Database.Database | null = null;
+let initializedWorkspacePath: string | null = null;
 
 const CREATE_TABLES_SQL = `
 CREATE TABLE IF NOT EXISTS tasks (
@@ -107,12 +108,19 @@ function openDatabaseAt(workspacePath: string): void {
 }
 
 export function initDatabase(workspacePath: string): void {
-  if (db) return;
+  if (db) {
+    if (initializedWorkspacePath !== workspacePath) {
+      throw new Error('initDatabase called with different workspace path; use reinitDatabase to switch');
+    }
+    return;
+  }
+  initializedWorkspacePath = workspacePath;
   openDatabaseAt(workspacePath);
 }
 
 export function reinitDatabase(workspacePath: string): void {
   closeDatabase();
+  initializedWorkspacePath = workspacePath;
   openDatabaseAt(workspacePath);
 }
 
@@ -133,4 +141,5 @@ export function closeDatabase(): void {
   sqlite?.close();
   sqlite = null;
   db = null;
+  initializedWorkspacePath = null;
 }
