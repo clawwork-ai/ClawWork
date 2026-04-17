@@ -5,11 +5,14 @@ import {
   checkForUpdatesViaUpdater,
   downloadUpdate,
   installUpdate,
+  getUpdateChannel,
 } from '../auto-updater.js';
 
 interface ReleaseInfo {
   tag_name: string;
   html_url: string;
+  prerelease?: boolean;
+  draft?: boolean;
 }
 
 interface UpdateCheckResult {
@@ -20,24 +23,29 @@ interface UpdateCheckResult {
   releaseNotes?: string | null;
 }
 
-let cachedFallbackResult: UpdateCheckResult | null = null;
-let fallbackCacheExpiresAt = 0;
+const fallbackCache = new Map<string, { result: UpdateCheckResult; expiresAt: number }>();
 const CACHE_TTL_MS = 30 * 60 * 1000;
-let fallbackInFlight: Promise<UpdateCheckResult> | null = null;
+const fallbackInFlight = new Map<string, Promise<UpdateCheckResult>>();
 
-async function githubApiFallback(): Promise<UpdateCheckResult> {
-  if (fallbackInFlight) return fallbackInFlight;
+async function githubApiFallback(channel: 'stable' | 'beta'): Promise<UpdateCheckResult> {
+  const existing = fallbackInFlight.get(channel);
+  if (existing) return existing;
 
   const promise = (async (): Promise<UpdateCheckResult> => {
     const now = Date.now();
-    if (cachedFallbackResult && now < fallbackCacheExpiresAt) {
-      return cachedFallbackResult;
+    const cached = fallbackCache.get(channel);
+    if (cached && now < cached.expiresAt) {
+      return cached.result;
     }
 
     const currentVersion = app.getVersion();
+    const endpoint =
+      channel === 'beta'
+        ? 'https://api.github.com/repos/clawwork-ai/clawwork/releases?per_page=10'
+        : 'https://api.github.com/repos/clawwork-ai/clawwork/releases/latest';
 
     try {
-      const resp = await net.fetch('https://api.github.com/repos/clawwork-ai/clawwork/releases/latest', {
+      const resp = await net.fetch(endpoint, {
         headers: { 'User-Agent': `ClawWork/${currentVersion}` },
       });
 
@@ -45,20 +53,34 @@ async function githubApiFallback(): Promise<UpdateCheckResult> {
         throw new Error(`GitHub API returned ${resp.status}`);
       }
 
-      const data = (await resp.json()) as ReleaseInfo;
-      const latestVersion = data.tag_name.replace(/^v/, '');
-      const releaseUrl = data.html_url;
-      const hasUpdate = latestVersion !== currentVersion;
+      const payload = (await resp.json()) as ReleaseInfo | ReleaseInfo[];
+      const release =
+        channel === 'beta' && Array.isArray(payload)
+          ? payload.find((r) => !r.draft)
+          : Array.isArray(payload)
+            ? payload[0]
+            : payload;
 
-      cachedFallbackResult = { currentVersion, latestVersion, hasUpdate, releaseUrl };
-      fallbackCacheExpiresAt = now + CACHE_TTL_MS;
-      return cachedFallbackResult;
+      if (!release) {
+        throw new Error('no release found');
+      }
+
+      const latestVersion = release.tag_name.replace(/^v/, '');
+      const result: UpdateCheckResult = {
+        currentVersion,
+        latestVersion,
+        hasUpdate: latestVersion !== currentVersion,
+        releaseUrl: release.html_url,
+      };
+
+      fallbackCache.set(channel, { result, expiresAt: now + CACHE_TTL_MS });
+      return result;
     } finally {
-      fallbackInFlight = null;
+      fallbackInFlight.delete(channel);
     }
   })();
 
-  fallbackInFlight = promise;
+  fallbackInFlight.set(channel, promise);
   return promise;
 }
 
@@ -71,7 +93,7 @@ export function registerUpdateHandlers(): void {
     if (isAutoUpdaterAvailable()) {
       return checkForUpdatesViaUpdater();
     }
-    return githubApiFallback();
+    return githubApiFallback(getUpdateChannel());
   });
 
   ipcMain.handle('app:download-update', async (): Promise<{ ok: boolean; error?: string }> => {

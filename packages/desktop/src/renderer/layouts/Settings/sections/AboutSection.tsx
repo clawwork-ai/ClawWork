@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import SettingRow from '@/components/semantic/SettingRow';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import InlineNotice from '@/components/semantic/InlineNotice';
+import SegmentedControl from '../components/SegmentedControl';
 import { useUiStore } from '@/stores/uiStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 const linkClass = cn(
   'type-label flex h-9 items-center justify-center gap-2 rounded-lg px-4 transition-colors',
@@ -16,6 +18,7 @@ const linkClass = cn(
 );
 
 type UpdateState = 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'error';
+type UpdateChannel = 'stable' | 'beta';
 
 interface VersionInfo {
   currentVersion: string;
@@ -38,8 +41,16 @@ export default function AboutSection() {
 
   const devMode = useUiStore((s) => s.devMode);
   const setDevMode = useUiStore((s) => s.setDevMode);
+  const updateChannel = useSettingsStore((s) => (s.settings?.updateChannel ?? 'stable') as UpdateChannel);
+  const loadSettings = useSettingsStore((s) => s.load);
+  const settingsLoaded = useSettingsStore((s) => s.loaded);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    if (!settingsLoaded) loadSettings().catch(() => {});
+  }, [settingsLoaded, loadSettings]);
 
   const handleVersionClick = useCallback(() => {
     if (devMode) return;
@@ -170,6 +181,15 @@ export default function AboutSection() {
     await window.clawwork.installUpdate();
   }, []);
 
+  const handleChannelChange = useCallback(
+    async (next: UpdateChannel) => {
+      if (next === updateChannel) return;
+      await updateSettings({ updateChannel: next });
+      handleCheckForUpdates();
+    },
+    [updateChannel, updateSettings, handleCheckForUpdates],
+  );
+
   const isChecking = updateState === 'checking';
 
   return (
@@ -184,6 +204,18 @@ export default function AboutSection() {
             >
               {currentVersion ? `v${currentVersion}` : '—'}
             </span>
+          </SettingRow>
+          <SettingRow label={t('settings.updateChannel')} description={t('settings.updateChannelHint')}>
+            <SegmentedControl<UpdateChannel>
+              value={updateChannel}
+              onChange={handleChannelChange}
+              options={[
+                { value: 'stable', label: t('settings.channelStable') },
+                { value: 'beta', label: t('settings.channelBeta') },
+              ]}
+              layoutId="update-channel"
+              ariaLabel={t('settings.updateChannel')}
+            />
           </SettingRow>
           {devMode && (
             <SettingRow label={t('settings.devMode')}>

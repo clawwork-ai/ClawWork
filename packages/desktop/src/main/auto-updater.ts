@@ -3,6 +3,13 @@ import electronUpdater from 'electron-updater';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { getDebugLogger } from './debug/index.js';
+import { readConfig } from './workspace/config.js';
+
+type UpdateChannel = 'stable' | 'beta';
+
+export function getUpdateChannel(): UpdateChannel {
+  return readConfig()?.updateChannel === 'beta' ? 'beta' : 'stable';
+}
 
 const { autoUpdater } = electronUpdater;
 
@@ -102,6 +109,7 @@ export async function checkForUpdatesViaUpdater(): Promise<UpdateCheckResult> {
   const promise = (async (): Promise<UpdateCheckResult> => {
     const currentVersion = app.getVersion();
     state = 'checking';
+    autoUpdater.allowPrerelease = getUpdateChannel() === 'beta';
     try {
       const result = await autoUpdater.checkForUpdates();
       if (!result || !result.updateInfo) {

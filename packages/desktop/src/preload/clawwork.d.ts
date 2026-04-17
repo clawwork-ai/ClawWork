@@ -133,6 +133,7 @@ interface AppSettings {
   rightPanelShortcut?: 'Period' | 'BracketRight';
   devMode?: boolean;
   teamHubRegistries?: Array<{ id: string; url: string; isOfficial: boolean }>;
+  updateChannel?: 'stable' | 'beta';
 }
 
 export type VoicePermissionStatus = 'granted' | 'not-determined' | 'denied' | 'unsupported';

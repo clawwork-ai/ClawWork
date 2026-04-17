@@ -55,6 +55,7 @@ export interface AppConfig {
   zoomLevel?: number;
   devMode?: boolean;
   teamHubRegistries?: TeamHubRegistryConfig[];
+  updateChannel?: 'stable' | 'beta';
 }
 
 function configFilePath(): string {
