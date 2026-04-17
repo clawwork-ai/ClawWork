@@ -29,7 +29,8 @@ export function registerSettingsHandlers(): void {
   });
 
   ipcMain.handle('settings:add-gateway', async (_event, gateway: GatewayServerConfig) => {
-    const config = readConfig() ?? { workspacePath: '', gateways: [] };
+    const config = readConfig();
+    if (!config) return { ok: false, error: 'no config' };
     config.gateways.push(gateway);
     if (gateway.isDefault || config.gateways.length === 1) {
       config.defaultGatewayId = gateway.id;

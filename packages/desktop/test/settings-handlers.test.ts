@@ -114,4 +114,24 @@ describe('registerSettingsHandlers', () => {
     expect(connectMock).not.toHaveBeenCalled();
     expect(destroyMock).not.toHaveBeenCalled();
   });
+
+  it('settings:add-gateway returns error when no config exists', async () => {
+    const { registerSettingsHandlers } = await import('../src/main/ipc/settings-handlers.js');
+    const configModule = await import('../src/main/workspace/config.js');
+
+    registerSettingsHandlers();
+
+    const handler = handleMap.get('settings:add-gateway');
+    expect(handler).toBeTypeOf('function');
+
+    const result = (await handler?.(
+      {},
+      { id: 'gw1', name: 'gw', url: 'wss://gw.example.com', auth: { token: 'tok' } },
+    )) as {
+      ok: boolean;
+      error: string;
+    };
+    expect(result).toEqual({ ok: false, error: 'no config' });
+    expect(configModule.writeConfig).not.toHaveBeenCalled();
+  });
 });
