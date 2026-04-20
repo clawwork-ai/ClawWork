@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import { sanitizeForLog } from '@clawwork/shared';
 import type { DebugEvent, LogEventInput } from '@clawwork/shared';
 import type { DebugLogger } from './logger.js';
 import { createDebugLogger } from './logger.js';
@@ -13,7 +14,7 @@ function createNoopLogger(): DebugLogger {
 
   const flushToLogger = (logger: DebugLogger): void => {
     for (const event of preInitBuffer) {
-      logger.log({ ...event, level: event.level as LogEventInput['level'] });
+      logger.log(event);
     }
     preInitBuffer.length = 0;
   };
@@ -21,30 +22,15 @@ function createNoopLogger(): DebugLogger {
   const makeBufferedLog =
     (level: 'debug' | 'info' | 'warn' | 'error') =>
     (input: LogEventInput): DebugEvent => {
-      const event: DebugEvent = {
+      const event = sanitizeForLog({
+        ...input,
         ts: new Date().toISOString(),
         level,
-        domain: input.domain,
-        event: input.event,
-        traceId: input.traceId,
-        feature: input.feature,
-        message: input.message,
-        gatewayId: input.gatewayId,
-        sessionKey: input.sessionKey,
-        taskId: input.taskId,
-        runId: input.runId,
-        requestId: input.requestId,
-        wsFrameId: input.wsFrameId,
-        seq: input.seq,
-        attempt: input.attempt,
-        durationMs: input.durationMs,
-        ok: input.ok,
-        error: input.error,
-        data: input.data,
-      };
+      } as DebugEvent);
 
-      if (preInitBuffer.length < MAX_PRE_INIT_BUFFER) {
-        preInitBuffer.push(event);
+      preInitBuffer.push(event);
+      if (preInitBuffer.length > MAX_PRE_INIT_BUFFER) {
+        preInitBuffer.shift();
       }
 
       console.warn(
