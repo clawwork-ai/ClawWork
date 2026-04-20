@@ -5,17 +5,19 @@
 <td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="ClawWork PWA" height="420" /></td>
 </tr></table>
 
+**English** · [简体中文](./README.zh.md) · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md)
+
 # ClawWork
 
-**A workspace for [OpenClaw](https://github.com/openclaw/openclaw) — desktop and mobile.**
+**The local-first workspace for the Agent OS era.**
 
-Parallel tasks, structured artifacts, scheduled automation — and files you can actually find later.
+Desktop client for [OpenClaw](https://github.com/openclaw/openclaw) — run agent tasks in parallel, keep artifacts durable, and find your files later.
 
 [![GitHub release](https://img.shields.io/github/v/release/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork/releases/latest)
 [![License](https://img.shields.io/github/license/clawwork-ai/clawwork?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork)
 
-[Download](#download) · [**PWA**](https://cpwa.pages.dev) · [Quick start](#quick-start) · [Teams](#teams) · [What you get](#what-you-get) · [What it stores](#what-clawwork-stores) · [How it works](#how-it-works) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
+[Download](#download) · [**PWA**](https://cpwa.pages.dev) · [Quick start](#quick-start) · [Teams](#teams) · [What you get](#what-you-get) · [Data & architecture](#data--architecture) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
 
 </div>
 
@@ -27,6 +29,12 @@ Parallel tasks, structured artifacts, scheduled automation — and files you can
 > Official Website: https://clawwork-ai.github.io/ClawWork/
 
 ## Why ClawWork
+
+**Agents are multiplying. The bottleneck is no longer capability — it's the operator surface.**
+
+As agent runtimes proliferate, users end up juggling sessions across chat windows, web UIs, and terminals, each with its own context and no shared memory. Just as IDEs became the operator layer for code and terminals for Unix, the Agent OS needs a workspace layer. ClawWork is building that layer — starting as the best-in-class client for OpenClaw, extensible toward a multi-runtime future.
+
+### Today: OpenClaw, without the chat-history mud
 
 OpenClaw is powerful. Plain chat is a bad container for the kind of work it can do.
 
@@ -68,15 +76,6 @@ teams/clawwork-dev/
 
 Once installed, pick a team when creating a task. The coordinator takes over from there.
 
-## Why it feels better
-
-- Each task runs in its own OpenClaw session, so you can switch between parallel jobs without mixing context.
-- Streaming replies, thinking traces, tool call cards, and artifacts live in one place instead of being buried in chat history.
-- Gateway, agent, model, and thinking settings are scoped per task.
-- Files produced by the agent are saved to a local workspace and stay easy to browse later.
-- Risky exec actions can stop for approval before they run.
-- Scheduled tasks run on their own cadence without you watching.
-
 ## Download
 
 ### Homebrew (macOS)
@@ -92,7 +91,7 @@ Prebuilt macOS, Windows, and Linux builds are available on the [Releases page](h
 
 ### PWA (browser)
 
-No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any modern browser. Works on desktop and mobile, installable to your home screen. See [#206](https://github.com/clawwork-ai/ClawWork/issues/206) for details and feedback.
+No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any modern browser. Works on desktop and mobile, installable to your home screen.
 
 ## Quick start
 
@@ -101,7 +100,6 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 3. Create a task, pick a gateway and agent, and describe the work.
 4. Chat: send messages, attach images, `@` files for context, or use `/` commands.
 5. Follow the task as it runs, inspect tool activity, and keep the output files.
-6. Use search, artifacts, and cron when the work stops being small.
 
 ## What you get
 
@@ -153,18 +151,14 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 - Export a debug bundle (logs, gateway status, sanitized config) when something goes wrong — useful for bug reports
 - See which Gateway server version you're connected to right in Settings
 
-## What ClawWork stores
+## Data & architecture
 
-Everything lives in a local workspace directory you choose. No cloud sync, no external database.
+ClawWork talks to OpenClaw through a single Gateway WebSocket connection. Each task gets its own session key for isolation, and everything lives in a local workspace directory you choose — no cloud sync, no external database.
 
 - **Tasks** — each one maps to an independent OpenClaw session, so parallel work never collides.
 - **Messages** — user, assistant, and system messages, including tool calls and image attachments, all persisted locally.
 - **Artifacts** — code blocks, images, and files the agent produces. Automatically extracted from assistant output so nothing gets lost.
 - **Full-text search** — search across all of the above. Find that one code snippet from three weeks ago without remembering which task it came from.
-
-## How it works
-
-ClawWork talks to OpenClaw through a single Gateway WebSocket connection. Each task gets its own session key, which keeps concurrent work isolated. Everything — tasks, messages, artifacts, search indexes — is stored locally in your workspace directory.
 
 <div align="center">
 <img src="./docs/architecture.svg" alt="ClawWork Architecture" width="840" />
@@ -199,34 +193,36 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 
 ## Roadmap
 
-✅ Already shipping:
+### ✅ Shipped
 
-- Multi-task parallel execution
-- Multi-gateway with token, password, and pairing code auth
-- Tool call cards and approval dialogs
-- Slash commands and thinking controls
-- File context, artifact browsing, and auto-extract
-- Agent management and tools catalog
-- Scheduled (cron) tasks
-- Usage and cost dashboard
-- Native desktop notifications
-- Folder watcher with auto-reindex
-- Session export and debug bundle export
-- Auto-update
-- Tray, quick launch, and voice input
-- Gateway server version display
+- Multi-task parallel execution with per-task session isolation
+- Multi-gateway auth (token, password, pairing code)
+- Scheduled (cron) tasks with run history
+- Usage and cost dashboard across gateways and sessions
+- Full-text search across tasks, messages, and artifacts
+- Teams and TeamsHub — build, share, and install multi-agent ensembles
+- Skills via ClawHub — discovery and install
+- AI Builder — LLM-assisted team creation
 - PWA with offline support and mobile UI ([cpwa.pages.dev](https://cpwa.pages.dev))
-- Linux packages (AppImage + deb)
-- Teams: create, manage, and orchestrate multi-agent ensembles
-- TeamsHub: Git-native marketplace for discovering and installing team definitions
-- Skills: ClawHub-powered skill discovery and install
-- AI Builder: LLM-assisted team creation
+- Cross-platform: macOS, Windows, Linux (AppImage + deb), with auto-update
 
-🔮 Next up:
+### 🔮 Next up
 
 - Conversation branching
 - Artifact diff view
 - Custom themes
+- Session templates for recurring workflows
+- Extension API documentation for Skills, Teams, and Adapters
+
+### 🌐 Vision — the Workspace layer of the Agent OS
+
+ClawWork today is optimized for OpenClaw. We're building toward a future where the workspace layer is runtime-agnostic — one operator surface for every agent you touch.
+
+- **Multi-runtime adapters** — bring agents from other runtimes into the same task / session / artifact model
+- **Richer team orchestration** — coordination patterns beyond coordinator / worker
+- **Enterprise-friendly local-first** — stronger data boundaries and team collaboration patterns without giving up local data ownership
+
+Items move up into _Next up_ as they get scoped. Nothing in this section is a promise of timing.
 
 ## Star History
 
@@ -234,7 +230,7 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 
 ## Contributing
 
-The project is early and moving fast. If you want to help:
+To contribute:
 
 - Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup and project structure
 - Check [Issues](https://github.com/clawwork-ai/clawwork/issues)
