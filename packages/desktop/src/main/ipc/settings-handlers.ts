@@ -11,17 +11,22 @@ export function registerSettingsHandlers(): void {
     return readConfig();
   });
 
-  ipcMain.handle('settings:update', (_event, partial: Partial<AppConfig>): { ok: boolean; config: AppConfig } => {
-    const { gateways: _g, defaultGatewayId: _d, ...safePartial } = partial;
-    if (
-      safePartial.language !== undefined &&
-      !(SUPPORTED_LANGUAGE_CODES as readonly string[]).includes(safePartial.language)
-    ) {
-      delete safePartial.language;
-    }
-    const config = updateConfig(safePartial);
-    return { ok: true, config };
-  });
+  ipcMain.handle(
+    'settings:update',
+    (_event, partial: Partial<AppConfig>): { ok: boolean; config?: AppConfig; error?: string } => {
+      if ('gateways' in partial || 'defaultGatewayId' in partial) {
+        return { ok: false, error: 'use dedicated gateway handlers' };
+      }
+      if (
+        partial.language !== undefined &&
+        !(SUPPORTED_LANGUAGE_CODES as readonly string[]).includes(partial.language)
+      ) {
+        return { ok: false, error: 'unsupported language code' };
+      }
+      const config = updateConfig(partial);
+      return { ok: true, config };
+    },
+  );
 
   ipcMain.handle('settings:add-gateway', async (_event, gateway: GatewayServerConfig) => {
     const config = readConfig() ?? { workspacePath: '', gateways: [] };
