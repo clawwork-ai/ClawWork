@@ -44,7 +44,11 @@ export function registerSettingsHandlers(): void {
     if (!config) return { ok: false, error: 'no config' };
     config.gateways = config.gateways.filter((g) => g.id !== gatewayId);
     if (config.defaultGatewayId === gatewayId) {
-      config.defaultGatewayId = config.gateways[0]?.id;
+      const nextDefault = config.gateways[0]?.id;
+      config.defaultGatewayId = nextDefault;
+      for (const gw of config.gateways) {
+        gw.isDefault = gw.id === nextDefault;
+      }
     }
     writeConfig(config);
     removeGateway(gatewayId);
