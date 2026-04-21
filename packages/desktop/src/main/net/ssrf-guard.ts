@@ -20,15 +20,17 @@ function isPrivateIPv4(ip: string): boolean {
 
 function isPrivateIPv6(ip: string): boolean {
   const lower = ip.toLowerCase();
-  const v4Match = lower.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  const zoneIndex = lower.indexOf('%');
+  const addr = zoneIndex === -1 ? lower : lower.slice(0, zoneIndex);
+  const v4Match = addr.match(/::ffff:(\d+\.\d+\.\d+\.\d+)$/);
   if (v4Match) return isPrivateIPv4(v4Match[1]);
-  const hexMatch = lower.match(/::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  const hexMatch = addr.match(/::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
   if (hexMatch) {
     const hi = parseInt(hexMatch[1], 16);
     const lo = parseInt(hexMatch[2], 16);
     return isPrivateIPv4(`${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`);
   }
-  const groups = parseIPv6Groups(lower);
+  const groups = parseIPv6Groups(addr);
   if (!groups) return false;
   const first = groups[0];
   if (groups.every((group) => group === 0)) return true;

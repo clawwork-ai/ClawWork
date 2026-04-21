@@ -66,6 +66,10 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('::1')).toBe(true);
   });
 
+  it('blocks zone-scoped IPv6 loopback', () => {
+    expect(isPrivateIP('::1%lo0')).toBe(true);
+  });
+
   it('blocks IPv6 unspecified ::', () => {
     expect(isPrivateIP('::')).toBe(true);
   });
@@ -90,6 +94,10 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('fd12:3456::1')).toBe(true);
   });
 
+  it('blocks zone-scoped IPv6 ULA', () => {
+    expect(isPrivateIP('fd12::1%en0')).toBe(true);
+  });
+
   it('blocks IPv6 ULA fc00::1', () => {
     expect(isPrivateIP('fc00::1')).toBe(true);
   });
@@ -100,6 +108,10 @@ describe('isPrivateIP', () => {
 
   it('blocks IPv6 link-local fe80::1', () => {
     expect(isPrivateIP('fe80::1')).toBe(true);
+  });
+
+  it('blocks zone-scoped IPv6 link-local', () => {
+    expect(isPrivateIP('fe80::1%lo0')).toBe(true);
   });
 
   it('blocks IPv6 uncompressed link-local', () => {
