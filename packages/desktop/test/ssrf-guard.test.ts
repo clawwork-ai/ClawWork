@@ -70,6 +70,22 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('::')).toBe(true);
   });
 
+  it('blocks IPv6 uncompressed loopback', () => {
+    expect(isPrivateIP('0000:0000:0000:0000:0000:0000:0000:0001')).toBe(true);
+  });
+
+  it('blocks IPv6 loopback with stripped zeros', () => {
+    expect(isPrivateIP('0:0:0:0:0:0:0:1')).toBe(true);
+  });
+
+  it('blocks IPv6 alternate loopback compression', () => {
+    expect(isPrivateIP('0::1')).toBe(true);
+  });
+
+  it('blocks IPv6 uncompressed unspecified', () => {
+    expect(isPrivateIP('0000:0000:0000:0000:0000:0000:0000:0000')).toBe(true);
+  });
+
   it('blocks IPv6 ULA fd12:3456::1', () => {
     expect(isPrivateIP('fd12:3456::1')).toBe(true);
   });
@@ -78,12 +94,24 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('fc00::1')).toBe(true);
   });
 
+  it('blocks IPv6 uncompressed ULA', () => {
+    expect(isPrivateIP('fc00:0000:0000:0000:0000:0000:0000:0001')).toBe(true);
+  });
+
   it('blocks IPv6 link-local fe80::1', () => {
     expect(isPrivateIP('fe80::1')).toBe(true);
   });
 
+  it('blocks IPv6 uncompressed link-local', () => {
+    expect(isPrivateIP('fe80:0000:0000:0000:0000:0000:0000:0001')).toBe(true);
+  });
+
   it('allows public IPv6 2001:4860:4860::8888', () => {
     expect(isPrivateIP('2001:4860:4860::8888')).toBe(false);
+  });
+
+  it('allows public IPv6 uncompressed 2001:4860:4860:0000:0000:0000:0000:8888', () => {
+    expect(isPrivateIP('2001:4860:4860:0000:0000:0000:0000:8888')).toBe(false);
   });
 
   it('blocks IPv4-mapped IPv6 ::ffff:10.0.0.1', () => {
