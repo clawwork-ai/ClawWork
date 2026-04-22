@@ -583,18 +583,24 @@ function ClawHubTab({ gatewayId, onInstalled }: { gatewayId: string; onInstalled
   const handleInstall = useCallback(
     async (slug: string) => {
       setInstallingSlugs((prev) => new Set(prev).add(slug));
-      const res = await window.clawwork.installSkill(gatewayId, { source: 'clawhub', slug });
-      if (res.ok && res.result?.ok) {
-        toast.success(t('settings.skillHubInstalled'));
-        onInstalled();
-      } else {
-        toast.error(res.error ?? res.result?.message ?? t('settings.skillHubInstallFailed'));
+      try {
+        const res = await window.clawwork.installSkill(gatewayId, { source: 'clawhub', slug });
+        if (res.ok && res.result?.ok) {
+          toast.success(t('settings.skillHubInstalled'));
+          onInstalled();
+        } else {
+          toast.error(res.error ?? res.result?.message ?? t('settings.skillHubInstallFailed'));
+        }
+      } catch (err) {
+        console.error('[SkillsSection] install failed:', err);
+        toast.error(t('settings.skillHubInstallFailed'));
+      } finally {
+        setInstallingSlugs((prev) => {
+          const next = new Set(prev);
+          next.delete(slug);
+          return next;
+        });
       }
-      setInstallingSlugs((prev) => {
-        const next = new Set(prev);
-        next.delete(slug);
-        return next;
-      });
     },
     [gatewayId, onInstalled, t],
   );
@@ -738,22 +744,28 @@ export default function SkillsSection() {
     async (skill: SkillStatusEntry) => {
       if (!selectedGatewayId) return;
       setTogglingKeys((prev) => new Set(prev).add(skill.skillKey));
-      const newEnabled = skill.disabled;
-      const res = await window.clawwork.updateSkill(selectedGatewayId, {
-        skillKey: skill.skillKey,
-        enabled: newEnabled,
-      });
-      if (res.ok) {
-        toast.success(newEnabled ? t('settings.skillEnabled') : t('settings.skillDisabledToast'));
-        await refreshSkills();
-      } else {
+      try {
+        const newEnabled = skill.disabled;
+        const res = await window.clawwork.updateSkill(selectedGatewayId, {
+          skillKey: skill.skillKey,
+          enabled: newEnabled,
+        });
+        if (res.ok) {
+          toast.success(newEnabled ? t('settings.skillEnabled') : t('settings.skillDisabledToast'));
+          await refreshSkills();
+        } else {
+          toast.error(t('settings.skillUpdateFailed'));
+        }
+      } catch (err) {
+        console.error('[SkillsSection] toggle failed:', err);
         toast.error(t('settings.skillUpdateFailed'));
+      } finally {
+        setTogglingKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(skill.skillKey);
+          return next;
+        });
       }
-      setTogglingKeys((prev) => {
-        const next = new Set(prev);
-        next.delete(skill.skillKey);
-        return next;
-      });
     },
     [selectedGatewayId, refreshSkills, t],
   );
