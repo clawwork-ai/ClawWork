@@ -138,6 +138,22 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('::ffff:8.8.8.8')).toBe(false);
   });
 
+  it('allows public IPv6 that ends with an IPv4-mapped-looking tail', () => {
+    expect(isPrivateIP('2001:db8::ffff:127.0.0.1')).toBe(false);
+  });
+
+  it('blocks uncompressed IPv4-mapped IPv6 loopback', () => {
+    expect(isPrivateIP('0000:0000:0000:0000:0000:ffff:127.0.0.1')).toBe(true);
+  });
+
+  it('blocks uncompressed IPv4-mapped IPv6 loopback in hex form', () => {
+    expect(isPrivateIP('0000:0000:0000:0000:0000:ffff:7f00:1')).toBe(true);
+  });
+
+  it('allows uncompressed IPv4-mapped IPv6 public address', () => {
+    expect(isPrivateIP('0000:0000:0000:0000:0000:ffff:8.8.8.8')).toBe(false);
+  });
+
   it('returns false for non-IP strings', () => {
     expect(isPrivateIP('example.com')).toBe(false);
     expect(isPrivateIP('10.cdn.example.com')).toBe(false);
