@@ -480,34 +480,46 @@ export default function GatewaysSection() {
       return;
     }
     setTesting(true);
-    const auth = {
-      token: form.token || undefined,
-      password: form.password || undefined,
-    };
-    const res = await window.clawwork.testGateway(form.url, auth);
-    setTesting(false);
-    if (res.ok) {
-      toast.success(t('settings.testSuccess'));
-    } else if (res.pairingRequired) {
-      setShowPairingDialog(true);
-    } else {
-      toast.error(t('settings.testFailed'), { description: res.error });
+    try {
+      const auth = {
+        token: form.token || undefined,
+        password: form.password || undefined,
+      };
+      const res = await window.clawwork.testGateway(form.url, auth);
+      if (res.ok) {
+        toast.success(t('settings.testSuccess'));
+      } else if (res.pairingRequired) {
+        setShowPairingDialog(true);
+      } else {
+        toast.error(t('settings.testFailed'), { description: res.error });
+      }
+    } catch (err) {
+      console.error('[GatewaysSection] test failed:', err);
+      toast.error(t('errors.failed'));
+    } finally {
+      setTesting(false);
     }
   }, [form, t]);
 
   const handlePairingRetry = useCallback(async () => {
     setPairingRetrying(true);
-    const auth = {
-      token: form.token || undefined,
-      password: form.password || undefined,
-    };
-    const res = await window.clawwork.testGateway(form.url, auth);
-    setPairingRetrying(false);
-    if (res.ok) {
-      setShowPairingDialog(false);
-      toast.success(t('pairing.approved'));
-    } else {
-      toast.error(t('pairing.stillPending'), { description: res.error });
+    try {
+      const auth = {
+        token: form.token || undefined,
+        password: form.password || undefined,
+      };
+      const res = await window.clawwork.testGateway(form.url, auth);
+      if (res.ok) {
+        setShowPairingDialog(false);
+        toast.success(t('pairing.approved'));
+      } else {
+        toast.error(t('pairing.stillPending'), { description: res.error });
+      }
+    } catch (err) {
+      console.error('[GatewaysSection] pairing retry failed:', err);
+      toast.error(t('errors.failed'));
+    } finally {
+      setPairingRetrying(false);
     }
   }, [form.url, form.token, form.password, t]);
 
@@ -527,43 +539,49 @@ export default function GatewaysSection() {
     }
 
     setSaving(true);
-    if (editingId) {
-      const res = await window.clawwork.updateGateway(editingId, {
-        name: form.name.trim(),
-        url: form.url.trim(),
-        token: form.token.trim() || undefined,
-        password: form.password.trim() || undefined,
-        pairingCode: form.pairingCode.trim() || undefined,
-        authMode,
-      });
-      if (res.ok) {
-        toast.success(t('settings.gatewayUpdated'));
-        closeForm();
-        await loadGateways();
+    try {
+      if (editingId) {
+        const res = await window.clawwork.updateGateway(editingId, {
+          name: form.name.trim(),
+          url: form.url.trim(),
+          token: form.token.trim() || undefined,
+          password: form.password.trim() || undefined,
+          pairingCode: form.pairingCode.trim() || undefined,
+          authMode,
+        });
+        if (res.ok) {
+          toast.success(t('settings.gatewayUpdated'));
+          closeForm();
+          await loadGateways();
+        } else {
+          toast.error(res.error ?? t('errors.failed'));
+        }
       } else {
-        toast.error(res.error ?? t('errors.failed'));
+        const newGw: GatewayServerConfig = {
+          id: crypto.randomUUID(),
+          name: form.name.trim(),
+          url: form.url.trim(),
+          token: form.token.trim() || undefined,
+          password: form.password.trim() || undefined,
+          pairingCode: form.pairingCode.trim() || undefined,
+          authMode,
+          type: 'openclaw',
+        };
+        const res = await window.clawwork.addGateway(newGw);
+        if (res.ok) {
+          toast.success(t('settings.gatewayAdded'));
+          closeForm();
+          await loadGateways();
+        } else {
+          toast.error(res.error ?? t('errors.failed'));
+        }
       }
-    } else {
-      const newGw: GatewayServerConfig = {
-        id: crypto.randomUUID(),
-        name: form.name.trim(),
-        url: form.url.trim(),
-        token: form.token.trim() || undefined,
-        password: form.password.trim() || undefined,
-        pairingCode: form.pairingCode.trim() || undefined,
-        authMode,
-        type: 'openclaw',
-      };
-      const res = await window.clawwork.addGateway(newGw);
-      if (res.ok) {
-        toast.success(t('settings.gatewayAdded'));
-        closeForm();
-        await loadGateways();
-      } else {
-        toast.error(res.error ?? t('errors.failed'));
-      }
+    } catch (err) {
+      console.error('[GatewaysSection] save failed:', err);
+      toast.error(t('errors.failed'));
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }, [form, editingId, closeForm, loadGateways, t]);
 
   const handleRemove = useCallback(
