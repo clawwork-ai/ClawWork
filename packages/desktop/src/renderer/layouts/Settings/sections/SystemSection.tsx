@@ -65,20 +65,33 @@ export default function SystemSection() {
   );
 
   const handleChangeWorkspace = useCallback(async () => {
-    const selected = await window.clawwork.browseWorkspace();
+    let selected: string | null = null;
+    try {
+      selected = await window.clawwork.browseWorkspace();
+    } catch (err) {
+      console.error('[SystemSection] browseWorkspace failed:', err);
+      toast.error(t('errors.failed'));
+      return;
+    }
     if (!selected || selected === workspacePath) return;
     const oldPath = workspacePath;
     setChangingWorkspace(true);
-    const result = await window.clawwork.changeWorkspace(selected);
-    setChangingWorkspace(false);
-    if (result.ok) {
-      await refreshSettings().catch(() => {});
-      toast.success(t('settings.workspaceChanged'), {
-        description: t('settings.workspaceOldPathHint', { path: oldPath }),
-        duration: 8000,
-      });
-    } else {
-      toast.error(t('settings.workspaceChangeFailed', { error: result.error }));
+    try {
+      const result = await window.clawwork.changeWorkspace(selected);
+      if (result.ok) {
+        await refreshSettings().catch(() => {});
+        toast.success(t('settings.workspaceChanged'), {
+          description: t('settings.workspaceOldPathHint', { path: oldPath }),
+          duration: 8000,
+        });
+      } else {
+        toast.error(t('settings.workspaceChangeFailed', { error: result.error }));
+      }
+    } catch (err) {
+      console.error('[SystemSection] changeWorkspace failed:', err);
+      toast.error(t('settings.workspaceChangeFailed', { error: String(err) }));
+    } finally {
+      setChangingWorkspace(false);
     }
   }, [refreshSettings, workspacePath, t]);
 
