@@ -204,10 +204,12 @@ export function ensureDeviceId(): string {
   const config = readConfig();
   if (config?.deviceId) return config.deviceId;
   const deviceId = randomUUID();
-  if (config) {
-    config.deviceId = deviceId;
-    writeConfig(config);
-  }
+  const updated = config ?? {
+    workspacePath: getDefaultWorkspacePath(),
+    gateways: [],
+  };
+  updated.deviceId = deviceId;
+  writeConfig(updated);
   return deviceId;
 }
 
