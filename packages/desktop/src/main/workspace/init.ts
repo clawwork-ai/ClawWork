@@ -12,7 +12,7 @@ export async function migrateWorkspace(oldPath: string, newPath: string): Promis
   if (!existsSync(oldPath)) throw new Error(`Source workspace does not exist: ${oldPath}`);
   const resolvedOld = resolve(oldPath);
   const resolvedNew = resolve(newPath);
-  if (resolvedNew.startsWith(resolvedOld + '/') || resolvedNew === resolvedOld) {
+  if (resolvedNew.startsWith(resolvedOld + sep) || resolvedNew === resolvedOld) {
     throw new Error('New workspace path must not be inside or equal to the current workspace');
   }
   await cp(resolvedOld, resolvedNew, {
