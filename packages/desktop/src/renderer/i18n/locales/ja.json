@@ -324,6 +324,10 @@
     "dashboard": "ダッシュボード",
     "emptyHint": "「新規タスク」をクリックして開始",
     "expandNav": "サイドバーを展開",
+    "groupLast7Days": "過去 7 日",
+    "groupOlder": "以前",
+    "groupToday": "今日",
+    "groupYesterday": "昨日",
     "scheduledTasks": "スケジュール",
     "searchTasks": "タスクを検索…",
     "updateAvailable": "アップデートがあります"

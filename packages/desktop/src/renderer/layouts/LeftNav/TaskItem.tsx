@@ -1,6 +1,6 @@
 import { type MouseEvent, useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { MessageSquare, Circle } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
@@ -115,7 +115,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
         'group titlebar-no-drag w-full rounded-md text-left transition-all relative',
         'focus-visible:outline-none glow-focus',
         active
-          ? 'glow-selected bg-[var(--bg-elevated)]'
+          ? 'bg-[var(--state-selected)]'
           : isStreaming
             ? 'bg-[var(--accent-dim)]'
             : isCompleted
@@ -124,10 +124,6 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
       )}
     >
       <div className="flex items-center gap-2 px-3 h-9">
-        {hasUnread && !active && (
-          <Circle size={6} className="flex-shrink-0 fill-[var(--accent)] text-[var(--accent)]" />
-        )}
-
         <div className="flex-1 min-w-0">
           {editing ? (
             <input

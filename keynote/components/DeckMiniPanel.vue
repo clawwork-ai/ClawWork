@@ -18,7 +18,11 @@ withDefaults(
 </script>
 
 <template>
-  <div class="cw-mini-panel" :class="{ 'cw-mini-panel--neutral': neutral, 'cw-mini-panel--compact': compact }" :data-tone="tone">
+  <div
+    class="cw-mini-panel"
+    :class="{ 'cw-mini-panel--neutral': neutral, 'cw-mini-panel--compact': compact }"
+    :data-tone="tone"
+  >
     <strong class="cw-mini-panel-title">{{ t(title) }}</strong>
     <p v-if="body" class="cw-mini-panel-copy">{{ t(body) }}</p>
     <p v-else-if="$slots.default" class="cw-mini-panel-copy"><slot /></p>

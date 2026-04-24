@@ -324,6 +324,10 @@
     "dashboard": "Dashboard",
     "emptyHint": "Click \"New Task\" to start",
     "expandNav": "Expand sidebar",
+    "groupLast7Days": "Previous 7 Days",
+    "groupOlder": "Older",
+    "groupToday": "Today",
+    "groupYesterday": "Yesterday",
     "scheduledTasks": "Scheduled",
     "searchTasks": "Search tasks…",
     "updateAvailable": "Update available"

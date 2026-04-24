@@ -42,8 +42,36 @@ import {
 } from '@/components/ui/dialog';
 import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import TaskItem from './TaskItem';
-import type { TaskStatus } from '@clawwork/shared';
+import type { Task, TaskStatus } from '@clawwork/shared';
 import EmptyState from '@/components/semantic/EmptyState';
+
+function groupTasksByTime(tasks: Task[]): {
+  today: Task[];
+  yesterday: Task[];
+  last7Days: Task[];
+  older: Task[];
+} {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const startOfTodayMs = startOfToday.getTime();
+  const startOfYesterdayMs = startOfTodayMs - MS_PER_DAY;
+  const startOf7DaysAgoMs = startOfTodayMs - 7 * MS_PER_DAY;
+
+  const today: Task[] = [];
+  const yesterday: Task[] = [];
+  const last7Days: Task[] = [];
+  const older: Task[] = [];
+
+  for (const task of tasks) {
+    const t = new Date(task.updatedAt).getTime();
+    if (t >= startOfTodayMs) today.push(task);
+    else if (t >= startOfYesterdayMs) yesterday.push(task);
+    else if (t >= startOf7DaysAgoMs) last7Days.push(task);
+    else older.push(task);
+  }
+  return { today, yesterday, last7Days, older };
+}
 
 type ConfirmAction = 'reset' | 'delete' | null;
 
@@ -261,6 +289,26 @@ export default function LeftNav() {
   const visibleTasks = useMemo(() => tasks.filter((t) => t.status !== 'archived'), [tasks]);
   const activeTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'active'), [visibleTasks]);
   const completedTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'completed'), [visibleTasks]);
+  const activeGroups = useMemo(() => groupTasksByTime(activeTasks), [activeTasks]);
+
+  const renderTaskGroup = (groupTasks: Task[], label: string) => {
+    if (groupTasks.length === 0) return null;
+    return (
+      <>
+        <p className="type-meta px-3 py-1.5 text-[var(--text-muted)] mt-2">{label}</p>
+        {groupTasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            active={task.id === activeTaskId}
+            onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
+            editing={editingTaskId === task.id}
+            onEditDone={() => setEditingTaskId(null)}
+          />
+        ))}
+      </>
+    );
+  };
 
   const CollapseToggleButton = (
     <Tooltip>
@@ -501,37 +549,11 @@ export default function LeftNav() {
               className="px-3 py-1"
             >
               {visibleTasks.length === 0 && <EmptyState title={t('leftNav.emptyHint')} className="py-8" />}
-              {activeTasks.length > 0 && (
-                <>
-                  {activeTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      active={task.id === activeTaskId}
-                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                      editing={editingTaskId === task.id}
-                      onEditDone={() => setEditingTaskId(null)}
-                    />
-                  ))}
-                </>
-              )}
-              {completedTasks.length > 0 && (
-                <>
-                  <p className="type-meta px-3 py-1.5 text-[var(--text-muted)] mt-2">
-                    {t('common.completed')} ({completedTasks.length})
-                  </p>
-                  {completedTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      active={task.id === activeTaskId}
-                      onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
-                      editing={editingTaskId === task.id}
-                      onEditDone={() => setEditingTaskId(null)}
-                    />
-                  ))}
-                </>
-              )}
+              {renderTaskGroup(activeGroups.today, t('leftNav.groupToday'))}
+              {renderTaskGroup(activeGroups.yesterday, t('leftNav.groupYesterday'))}
+              {renderTaskGroup(activeGroups.last7Days, t('leftNav.groupLast7Days'))}
+              {renderTaskGroup(activeGroups.older, t('leftNav.groupOlder'))}
+              {renderTaskGroup(completedTasks, `${t('common.completed')} (${completedTasks.length})`)}
             </motion.div>
           </ScrollArea>
         </div>

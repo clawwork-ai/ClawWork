@@ -324,6 +324,10 @@
     "dashboard": "儀表板",
     "emptyHint": "點擊「新任務」開始",
     "expandNav": "展開側邊欄",
+    "groupLast7Days": "前 7 天",
+    "groupOlder": "更早",
+    "groupToday": "今天",
+    "groupYesterday": "昨天",
     "scheduledTasks": "排程任務",
     "searchTasks": "搜尋任務…",
     "updateAvailable": "有可用更新"

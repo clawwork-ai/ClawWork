@@ -324,6 +324,10 @@
     "dashboard": "Panel",
     "emptyHint": "Haz clic en “Nueva tarea” para comenzar",
     "expandNav": "Expandir barra lateral",
+    "groupLast7Days": "Últimos 7 días",
+    "groupOlder": "Anterior",
+    "groupToday": "Hoy",
+    "groupYesterday": "Ayer",
     "scheduledTasks": "Programadas",
     "searchTasks": "Buscar tareas…",
     "updateAvailable": "Actualización disponible"

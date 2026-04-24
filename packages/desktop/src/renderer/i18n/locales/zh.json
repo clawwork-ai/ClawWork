@@ -324,6 +324,10 @@
     "dashboard": "仪表盘",
     "emptyHint": "点击「新任务」开始",
     "expandNav": "展开侧栏",
+    "groupLast7Days": "前 7 天",
+    "groupOlder": "更早",
+    "groupToday": "今天",
+    "groupYesterday": "昨天",
     "scheduledTasks": "定时任务",
     "searchTasks": "搜索任务…",
     "updateAvailable": "有新版本可用"

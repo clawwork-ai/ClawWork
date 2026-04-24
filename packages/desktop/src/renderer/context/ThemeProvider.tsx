@@ -17,6 +17,13 @@ function resolveThemeMode(theme: Theme): 'dark' | 'light' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function coerceTheme(raw: unknown): Theme {
+  if (raw === 'dark' || raw === 'light' || raw === 'auto') return raw;
+  if (raw === 'aurora-dark' || raw === 'polish-dark' || raw === 'liquid-dark') return 'dark';
+  if (raw === 'aurora' || raw === 'polish' || raw === 'liquid') return 'light';
+  return 'auto';
+}
+
 export function ThemeProvider({ children }: PropsWithChildren) {
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
@@ -41,8 +48,9 @@ export function ThemeProvider({ children }: PropsWithChildren) {
 
     let waitingForHydration = false;
     if (settingsTheme) {
-      if (theme !== settingsTheme) {
-        setTheme(settingsTheme);
+      const safeTheme = coerceTheme(settingsTheme);
+      if (theme !== safeTheme) {
+        setTheme(safeTheme);
         waitingForHydration = true;
       }
     }

@@ -324,6 +324,10 @@
     "dashboard": "Dashboard",
     "emptyHint": "Klicken Sie auf \"Neue Aufgabe\"",
     "expandNav": "Seitenleiste ausklappen",
+    "groupLast7Days": "Letzte 7 Tage",
+    "groupOlder": "Älter",
+    "groupToday": "Heute",
+    "groupYesterday": "Gestern",
     "scheduledTasks": "Geplant",
     "searchTasks": "Aufgaben suchen…",
     "updateAvailable": "Update verfuegbar"

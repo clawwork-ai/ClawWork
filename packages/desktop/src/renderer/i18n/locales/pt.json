@@ -324,6 +324,10 @@
     "dashboard": "Painel",
     "emptyHint": "Clique em \"Nova Tarefa\" para começar",
     "expandNav": "Expandir barra lateral",
+    "groupLast7Days": "Últimos 7 dias",
+    "groupOlder": "Anterior",
+    "groupToday": "Hoje",
+    "groupYesterday": "Ontem",
     "scheduledTasks": "Agendadas",
     "searchTasks": "Buscar tarefas…",
     "updateAvailable": "Atualização disponível"
