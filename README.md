@@ -218,7 +218,7 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 
 ClawWork today is optimized for OpenClaw. We're building toward a future where the workspace layer is runtime-agnostic — one operator surface for every agent you touch.
 
-- **Multi-runtime adapters** — bring agents from other runtimes into the same task / session / artifact model
+- **Multi-runtime adapters** — bring agents from other runtimes into the same task / session / artifact model · [design direction →](./website/src/docs/en/2026-04-24-next-multi-runtime-control-plane.md)
 - **Richer team orchestration** — coordination patterns beyond coordinator / worker
 - **Enterprise-friendly local-first** — stronger data boundaries and team collaboration patterns without giving up local data ownership
 
