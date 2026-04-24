@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 540" width="840" height="540">
+  <defs>
+    <marker id="ah-cy" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#67e8f9"/>
+    </marker>
+    <marker id="ah-pl" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#c4b5fd"/>
+    </marker>
+    <style>
+      .bg { fill: #0a0b14; }
+      .rect { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .s-cy { stroke: #67e8f9; }
+      .s-pl { stroke: #c4b5fd; }
+      .s-gn { stroke: #86efac; }
+      .s-nt { stroke: #d4dae4; }
+      .f-cy { fill: #67e8f9; fill-opacity: 0.09; }
+      .f-pl { fill: #c4b5fd; fill-opacity: 0.09; }
+      .f-gn { fill: #86efac; fill-opacity: 0.08; }
+      .arr { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+      .ink, .ink-d, .ink-cy, .ink-pl, .ink-gn {
+        font-family: 'Kalam','Caveat','Virgil','Bradley Hand','Chalkduster','Segoe Print','Comic Sans MS',cursive;
+      }
+      .ink { fill: #e8ecf3; }
+      .ink-d { fill: #9aa4b8; }
+      .ink-cy { fill: #67e8f9; }
+      .ink-pl { fill: #c4b5fd; }
+      .ink-gn { fill: #86efac; }
+      .mono { font-family: 'JetBrains Mono','Menlo',monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="840" height="540"/>
+
+  <path class="rect s-nt f-pl"
+    d="M 64,182
+       C 102,178 168,178 236,184
+       C 240,232 240,308 234,360
+       C 172,362 104,362 58,358
+       C 56,302 60,232 64,182 Z"/>
+
+  <path class="rect s-nt f-cy"
+    d="M 464,202
+       C 498,200 554,200 602,204
+       C 606,244 606,302 600,340
+       C 554,342 502,344 460,340
+       C 456,300 460,244 464,202 Z"/>
+
+  <path class="rect s-nt f-gn"
+    d="M 688,96
+       C 720,94 762,94 818,98
+       C 820,118 820,146 816,166
+       C 762,168 720,168 686,164
+       C 684,144 686,114 688,96 Z"/>
+  <path class="rect s-nt f-gn"
+    d="M 688,236
+       C 720,234 762,234 818,238
+       C 820,258 820,286 816,306
+       C 762,308 720,308 686,304
+       C 684,284 686,254 688,236 Z"/>
+  <path class="rect s-nt f-gn"
+    d="M 688,376
+       C 720,374 762,374 818,378
+       C 820,398 820,426 816,446
+       C 762,448 720,448 686,444
+       C 684,424 686,394 688,376 Z"/>
+
+  <path class="arr s-cy" marker-end="url(#ah-cy)"
+    d="M 244,270 Q 298,262 352,272 Q 410,282 454,270"/>
+
+  <path class="arr s-pl" marker-end="url(#ah-pl)"
+    d="M 602,226 Q 638,186 680,134"/>
+  <path class="arr s-pl" marker-end="url(#ah-pl)"
+    d="M 602,270 Q 640,270 680,270"/>
+  <path class="arr s-pl" marker-end="url(#ah-pl)"
+    d="M 602,314 Q 638,356 680,408"/>
+
+  <text x="150" y="258" class="ink" font-size="26" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="150" y="286" class="ink-d" font-size="15" text-anchor="middle">Desktop · PWA</text>
+
+  <text x="350" y="244" class="ink-cy" font-size="18" font-weight="600" text-anchor="middle">1 × WebSocket</text>
+  <text x="350" y="306" class="ink-d" font-size="13" text-anchor="middle">persistent pipe</text>
+
+  <text x="532" y="260" class="ink" font-size="22" font-weight="600" text-anchor="middle">Gateway</text>
+  <text x="532" y="290" class="ink-d mono" font-size="15" text-anchor="middle">:18789</text>
+
+  <text x="753" y="122" class="ink-pl mono" font-size="12" text-anchor="middle">agent:a1:…:task:t1</text>
+  <text x="753" y="150" class="ink-gn" font-size="15" font-weight="600" text-anchor="middle">Task · Bug Fix</text>
+
+  <text x="753" y="262" class="ink-pl mono" font-size="12" text-anchor="middle">agent:a1:…:task:t2</text>
+  <text x="753" y="290" class="ink-gn" font-size="15" font-weight="600" text-anchor="middle">Task · Translate</text>
+
+  <text x="753" y="402" class="ink-pl mono" font-size="12" text-anchor="middle">agent:a2:…:task:t3</text>
+  <text x="753" y="430" class="ink-gn" font-size="15" font-weight="600" text-anchor="middle">Task · PR Review</text>
+
+  <text x="420" y="500" class="ink-d" font-size="16" text-anchor="middle">one pipe  ·  N sessions  ·  routed by sessionKey</text>
+</svg>

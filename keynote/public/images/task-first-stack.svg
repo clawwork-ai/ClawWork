@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 540" width="840" height="540">
+  <defs>
+    <marker id="ah-nt" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#d4dae4"/>
+    </marker>
+    <style>
+      .bg { fill: #0a0b14; }
+      .rect { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .s-cy { stroke: #67e8f9; }
+      .s-pl { stroke: #c4b5fd; }
+      .s-gn { stroke: #86efac; }
+      .s-yl { stroke: #fde68a; }
+      .s-nt { stroke: #d4dae4; }
+      .f-cy { fill: #67e8f9; fill-opacity: 0.09; }
+      .f-pl { fill: #c4b5fd; fill-opacity: 0.09; }
+      .f-gn { fill: #86efac; fill-opacity: 0.08; }
+      .f-yl { fill: #fde68a; fill-opacity: 0.08; }
+      .arr { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+      .ink, .ink-d, .ink-cy, .ink-pl, .ink-gn, .ink-yl {
+        font-family: 'Kalam','Caveat','Virgil','Bradley Hand','Chalkduster','Segoe Print','Comic Sans MS',cursive;
+      }
+      .ink { fill: #e8ecf3; }
+      .ink-d { fill: #9aa4b8; }
+      .ink-cy { fill: #67e8f9; }
+      .ink-pl { fill: #c4b5fd; }
+      .ink-gn { fill: #86efac; }
+      .ink-yl { fill: #fde68a; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="840" height="540"/>
+
+  <text x="420" y="40" class="ink" font-size="28" font-weight="600" text-anchor="middle">🧭  Task</text>
+  <text x="420" y="62" class="ink-d" font-size="14" text-anchor="middle">what the user asked for</text>
+  <path class="arr s-nt" marker-end="url(#ah-nt)" d="M 420,76 Q 422,88 420,100"/>
+
+  <path class="rect s-gn f-gn"
+    d="M 78,112
+       C 232,108 476,108 762,114
+       C 766,138 766,162 762,186
+       C 560,188 280,190 78,186
+       C 74,162 74,136 78,112 Z"/>
+  <text x="104" y="142" class="ink-gn" font-size="19" font-weight="600">🧑  Product Layer</text>
+  <text x="104" y="172" class="ink-d" font-size="14">Task · Message · Artifact · Team · Approval</text>
+
+  <path class="arr s-nt" marker-end="url(#ah-nt)" d="M 420,198 Q 418,210 420,222"/>
+
+  <path class="rect s-cy f-cy"
+    d="M 78,234
+       C 232,230 476,230 762,236
+       C 766,260 766,284 762,308
+       C 560,310 280,312 78,308
+       C 74,284 74,258 78,234 Z"/>
+  <text x="104" y="264" class="ink-cy" font-size="19" font-weight="600">⚙️  Execution Control Plane</text>
+  <text x="104" y="294" class="ink-d" font-size="14">Execution · Placement · Policy · Events · Recovery</text>
+
+  <path class="arr s-nt" marker-end="url(#ah-nt)" d="M 420,320 Q 422,332 420,344"/>
+
+  <path class="rect s-pl f-pl"
+    d="M 78,356
+       C 232,352 476,352 762,358
+       C 766,382 766,406 762,430
+       C 560,432 280,434 78,430
+       C 74,406 74,380 78,356 Z"/>
+  <text x="104" y="386" class="ink-pl" font-size="19" font-weight="600">🔌  Runtime Adapter Layer</text>
+  <text x="104" y="416" class="ink-d" font-size="14">OpenClaw · Managed · ACP · Codex · Claude Code · Hermes</text>
+
+  <path class="arr s-nt" marker-end="url(#ah-nt)" d="M 420,442 Q 418,454 420,466"/>
+
+  <path class="rect s-yl f-yl"
+    d="M 108,478
+       C 148,476 192,476 224,480
+       C 226,492 226,506 224,516
+       C 192,518 148,518 108,516
+       C 106,504 106,488 108,478 Z"/>
+  <text x="166" y="502" class="ink-yl" font-size="13" text-anchor="middle">OpenClaw</text>
+
+  <path class="rect s-yl f-yl"
+    d="M 276,478
+       C 330,476 378,476 414,480
+       C 416,492 416,506 414,516
+       C 378,518 330,518 276,516
+       C 274,504 274,488 276,478 Z"/>
+  <text x="345" y="502" class="ink-yl" font-size="13" text-anchor="middle">Codex worker</text>
+
+  <path class="rect s-yl f-yl"
+    d="M 464,478
+       C 518,476 566,476 602,480
+       C 604,492 604,506 602,516
+       C 566,518 518,518 464,516
+       C 462,504 462,488 464,478 Z"/>
+  <text x="533" y="502" class="ink-yl" font-size="13" text-anchor="middle">Claude Code</text>
+
+  <path class="rect s-yl f-yl"
+    d="M 648,478
+       C 686,476 722,476 732,480
+       C 734,492 734,506 732,516
+       C 722,518 686,518 648,516
+       C 646,504 646,488 648,478 Z"/>
+  <text x="690" y="502" class="ink-yl" font-size="13" text-anchor="middle">Hermes</text>
+
+  <text x="420" y="534" class="ink-d" font-size="13" text-anchor="middle">one Task · many runtimes underneath</text>
+</svg>

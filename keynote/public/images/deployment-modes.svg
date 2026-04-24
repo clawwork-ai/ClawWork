@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 540" width="840" height="540">
+  <defs>
+    <marker id="ah-gn" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#86efac"/>
+    </marker>
+    <marker id="ah-cy" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#67e8f9"/>
+    </marker>
+    <marker id="ah-pl" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#c4b5fd"/>
+    </marker>
+    <style>
+      .bg { fill: #0a0b14; }
+      .rect { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .s-cy { stroke: #67e8f9; }
+      .s-pl { stroke: #c4b5fd; }
+      .s-gn { stroke: #86efac; }
+      .s-nt { stroke: #d4dae4; }
+      .f-cy { fill: #67e8f9; fill-opacity: 0.09; }
+      .f-pl { fill: #c4b5fd; fill-opacity: 0.09; }
+      .f-gn { fill: #86efac; fill-opacity: 0.08; }
+      .arr { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+      .divider { fill: none; stroke: #d4dae4; stroke-width: 1.2; stroke-linecap: round; opacity: 0.18; }
+      .ink, .ink-d, .ink-cy, .ink-pl, .ink-gn {
+        font-family: 'Kalam','Caveat','Virgil','Bradley Hand','Chalkduster','Segoe Print','Comic Sans MS',cursive;
+      }
+      .ink { fill: #e8ecf3; }
+      .ink-d { fill: #9aa4b8; }
+      .ink-cy { fill: #67e8f9; }
+      .ink-pl { fill: #c4b5fd; }
+      .ink-gn { fill: #86efac; }
+      .mono { font-family: 'JetBrains Mono','Menlo',monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="840" height="540"/>
+
+  <text x="40" y="74" class="ink-gn" font-size="19" font-weight="600">🎯  Direct</text>
+  <text x="40" y="96" class="ink-d" font-size="13">local · single</text>
+
+  <path class="rect s-gn f-gn"
+    d="M 192,52
+       C 232,48 274,48 304,54
+       C 306,76 306,102 304,124
+       C 274,126 232,126 192,124
+       C 190,102 190,76 192,52 Z"/>
+  <text x="248" y="82" class="ink" font-size="15" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="248" y="104" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
+
+  <path class="arr s-gn" marker-end="url(#ah-gn)" d="M 310,88 Q 342,86 372,88"/>
+
+  <path class="rect s-gn f-gn"
+    d="M 380,52
+       C 424,48 488,48 528,54
+       C 530,76 530,102 528,124
+       C 488,126 424,126 380,124
+       C 378,102 378,76 380,52 Z"/>
+  <text x="454" y="82" class="ink-gn" font-size="14" font-weight="600" text-anchor="middle">OpenClaw Gateway</text>
+  <text x="454" y="104" class="ink-d mono" font-size="11" text-anchor="middle">:18789</text>
+
+  <path class="arr s-gn" marker-end="url(#ah-gn)" d="M 534,88 Q 566,86 594,88"/>
+
+  <path class="rect s-gn f-gn"
+    d="M 602,52
+       C 638,48 676,48 710,54
+       C 712,76 712,102 710,124
+       C 676,126 638,126 602,124
+       C 600,102 600,76 602,52 Z"/>
+  <text x="656" y="82" class="ink" font-size="15" font-weight="600" text-anchor="middle">OpenClaw</text>
+  <text x="656" y="104" class="ink-d" font-size="11" text-anchor="middle">1 instance</text>
+
+  <text x="780" y="92" class="ink-d" font-size="12" text-anchor="middle">zero</text>
+  <text x="780" y="108" class="ink-d" font-size="12" text-anchor="middle">extra layer</text>
+
+  <path class="divider" d="M 36,166 Q 420,164 802,166"/>
+
+  <text x="40" y="236" class="ink-cy" font-size="19" font-weight="600">🛡  Managed</text>
+  <text x="40" y="258" class="ink-d" font-size="13">quota · audit</text>
+
+  <path class="rect s-cy f-cy"
+    d="M 178,214
+       C 208,210 244,210 272,216
+       C 274,238 274,262 272,284
+       C 244,286 208,286 178,284
+       C 176,262 176,236 178,214 Z"/>
+  <text x="225" y="244" class="ink" font-size="14" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="225" y="266" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
+
+  <path class="arr s-cy" marker-end="url(#ah-cy)" d="M 278,250 Q 304,248 324,250"/>
+
+  <path class="rect s-cy f-cy"
+    d="M 332,214
+       C 368,210 420,210 464,216
+       C 466,238 466,262 464,284
+       C 420,286 368,286 332,284
+       C 330,262 330,236 332,214 Z"/>
+  <text x="398" y="242" class="ink-cy" font-size="14" font-weight="600" text-anchor="middle">managed-agents</text>
+  <text x="398" y="264" class="ink-d" font-size="11" text-anchor="middle">quotas · isolation · audit</text>
+
+  <path class="arr s-cy" marker-end="url(#ah-cy)" d="M 470,250 Q 496,248 518,250"/>
+
+  <path class="rect s-cy f-cy"
+    d="M 526,214
+       C 560,210 602,210 638,216
+       C 640,238 640,262 638,284
+       C 602,286 560,286 526,284
+       C 524,262 524,236 526,214 Z"/>
+  <text x="582" y="242" class="ink" font-size="14" font-weight="600" text-anchor="middle">OpenClaw</text>
+  <text x="582" y="264" class="ink-d" font-size="11" text-anchor="middle">per-tenant</text>
+
+  <path class="arr s-cy" marker-end="url(#ah-cy)" d="M 644,250 Q 672,248 696,250"/>
+
+  <text x="748" y="254" class="ink-d" font-size="13" text-anchor="middle">runtime</text>
+
+  <path class="divider" d="M 36,326 Q 420,324 802,326"/>
+
+  <text x="40" y="420" class="ink-pl" font-size="19" font-weight="600">🧬  Mixed</text>
+  <text x="40" y="442" class="ink-d" font-size="13">capability routing</text>
+
+  <path class="rect s-pl f-pl"
+    d="M 178,394
+       C 208,390 244,390 272,396
+       C 274,418 274,442 272,464
+       C 244,466 208,466 178,464
+       C 176,442 176,416 178,394 Z"/>
+  <text x="225" y="424" class="ink" font-size="14" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="225" y="446" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
+
+  <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 278,430 Q 304,428 324,430"/>
+
+  <path class="rect s-pl f-pl"
+    d="M 332,394
+       C 372,390 420,390 462,396
+       C 464,418 464,442 462,464
+       C 420,466 372,466 332,464
+       C 330,442 330,416 332,394 Z"/>
+  <text x="396" y="422" class="ink-pl" font-size="14" font-weight="600" text-anchor="middle">Control Plane</text>
+  <text x="396" y="444" class="ink-d" font-size="11" text-anchor="middle">capability router</text>
+
+  <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 468,408 Q 516,376 566,362"/>
+  <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 468,424 Q 516,418 566,414"/>
+  <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 468,436 Q 516,452 566,466"/>
+  <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 468,450 Q 516,488 566,518"/>
+
+  <path class="rect s-pl f-pl"
+    d="M 574,346
+       C 608,344 658,344 694,348
+       C 696,360 696,374 694,384
+       C 658,386 608,386 574,384
+       C 572,372 572,356 574,346 Z"/>
+  <text x="634" y="370" class="ink" font-size="12" text-anchor="middle">OpenClaw</text>
+
+  <path class="rect s-pl f-pl"
+    d="M 574,398
+       C 608,396 658,396 694,400
+       C 696,412 696,426 694,436
+       C 658,438 608,438 574,436
+       C 572,424 572,408 574,398 Z"/>
+  <text x="634" y="422" class="ink" font-size="12" text-anchor="middle">Codex</text>
+
+  <path class="rect s-pl f-pl"
+    d="M 574,450
+       C 608,448 658,448 694,452
+       C 696,464 696,478 694,488
+       C 658,490 608,490 574,488
+       C 572,476 572,460 574,450 Z"/>
+  <text x="634" y="474" class="ink" font-size="12" text-anchor="middle">Claude Code</text>
+
+  <path class="rect s-pl f-pl"
+    d="M 574,502
+       C 608,500 658,500 694,504
+       C 696,514 696,524 694,530
+       C 658,532 608,532 574,530
+       C 572,520 572,510 574,502 Z"/>
+  <text x="634" y="522" class="ink" font-size="12" text-anchor="middle">Hermes</text>
+
+  <text x="740" y="446" class="ink-d" font-size="22" font-weight="600">…</text>
+</svg>

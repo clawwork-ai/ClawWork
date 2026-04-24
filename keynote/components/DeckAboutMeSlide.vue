@@ -12,12 +12,6 @@ import { t } from '../composables/i18n';
           t({
             en: '(Captain)',
             zh: '(船长)',
-            ja: '(キャプテン)',
-            ko: '(캡틴)',
-            fr: '(Capitaine)',
-            de: '(Kapitän)',
-            es: '(Capitán)',
-            pt: '(Capitão)',
           })
         }}
       </div>
@@ -28,12 +22,6 @@ import { t } from '../composables/i18n';
           t({
             en: 'Inference scheduling<br />Multi-model routing<br />Production LLMOps<br />Cloud-native AI',
             zh: '推理调度<br />多模型路由<br />生产级 LLMOps<br />云原生 AI',
-            ja: '推論スケジューリング<br />マルチモデルルーティング<br />本番 LLMOps<br />クラウドネイティブ AI',
-            ko: '추론 스케줄링<br />멀티모델 라우팅<br />프로덕션 LLMOps<br />클라우드 네이티브 AI',
-            fr: 'Planification d’inférence<br />Routage multi-modèle<br />LLMOps en production<br />IA cloud-native',
-            de: 'Inferenz-Scheduling<br />Multi-Model-Routing<br />Produktions-LLMOps<br />Cloud-native AI',
-            es: 'Programación de inferencia<br />Enrutamiento multi-modelo<br />LLMOps en producción<br />IA cloud-native',
-            pt: 'Agendamento de inferência<br />Roteamento multi-modelo<br />LLMOps em produção<br />IA cloud-native',
           })
         "
       ></div>
@@ -48,12 +36,6 @@ import { t } from '../composables/i18n';
               t({
                 en: 'Author of ClawWork',
                 zh: 'ClawWork 作者',
-                ja: 'ClawWork 作者',
-                ko: 'ClawWork 개발자',
-                fr: 'Auteur de ClawWork',
-                de: 'Autor von ClawWork',
-                es: 'Autor de ClawWork',
-                pt: 'Autor do ClawWork',
               })
             }}</span>
             <span class="text-[13px] op-50"><GhStars repo="clawwork-ai/ClawWork" /></span>
@@ -63,12 +45,6 @@ import { t } from '../composables/i18n';
               t({
                 en: 'Open Source OpenClaw Desktop Client. Parallel tasks, structured artifacts, scheduled automation.',
                 zh: '开源 OpenClaw 桌面客户端。并行任务、结构化产物、定时自动化。',
-                ja: 'オープンソース OpenClaw デスクトップクライアント。並列タスク、構造化アーティファクト、スケジュール自動化。',
-                ko: '오픈소스 OpenClaw 데스크톱 클라이언트. 병렬 태스크, 구조화된 아티팩트, 예약 자동화.',
-                fr: 'Client de bureau OpenClaw open source. Tâches parallèles, artefacts structurés, automatisation planifiée.',
-                de: 'Open-Source-OpenClaw-Desktop-Client. Parallele Aufgaben, strukturierte Artefakte, geplante Automatisierung.',
-                es: 'Cliente de escritorio OpenClaw de código abierto. Tareas paralelas, artefactos estructurados, automatización programada.',
-                pt: 'Cliente desktop OpenClaw de código aberto. Tarefas paralelas, artefatos estruturados, automação agendada.',
               })
             }}
           </div>
@@ -82,12 +58,6 @@ import { t } from '../composables/i18n';
               t({
                 en: 'Open Source',
                 zh: '开源贡献',
-                ja: 'オープンソース',
-                ko: '오픈소스',
-                fr: 'Open Source',
-                de: 'Open Source',
-                es: 'Código abierto',
-                pt: 'Código aberto',
               })
             }}
           </div>
@@ -127,12 +97,6 @@ import { t } from '../composables/i18n';
               t({
                 en: 'Side Projects',
                 zh: '个人项目',
-                ja: '個人プロジェクト',
-                ko: '사이드 프로젝트',
-                fr: 'Projets perso',
-                de: 'Nebenprojekte',
-                es: 'Proyectos paralelos',
-                pt: 'Projetos paralelos',
               })
             }}
           </div>

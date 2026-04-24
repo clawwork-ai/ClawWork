@@ -1,8 +1,8 @@
 import { ref, watch } from 'vue';
 
-export const LANGS = ['en', 'zh', 'ja', 'ko', 'fr', 'de', 'es', 'pt'] as const;
+export const LANGS = ['en', 'zh'] as const;
 export type Lang = (typeof LANGS)[number];
-export type I18nText = { en: string } & { [K in Exclude<Lang, 'en'>]?: string };
+export type I18nText = { en: string; zh?: string };
 export type Tone = 'green' | 'cyan' | 'purple' | 'yellow' | 'red';
 
 const STORAGE_KEY = 'cw-lang';
@@ -10,12 +10,6 @@ const STORAGE_KEY = 'cw-lang';
 export const LANG_LABELS: Record<Lang, string> = {
   en: 'EN',
   zh: '中',
-  ja: '日',
-  ko: '한',
-  fr: 'FR',
-  de: 'DE',
-  es: 'ES',
-  pt: 'PT',
 };
 
 function isKnown(l: string): l is Lang {

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 540" width="840" height="540">
+  <defs>
+    <marker id="ah-cy" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#67e8f9"/>
+    </marker>
+    <marker id="ah-yl" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#fde047"/>
+    </marker>
+    <marker id="ah-rd" viewBox="0 0 10 10" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M 0,0 L 10,5 L 0,10 L 3,5 Z" fill="#fca5a5"/>
+    </marker>
+    <style>
+      .bg { fill: #0a0b14; }
+      .rect { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .s-cy { stroke: #67e8f9; }
+      .s-yl { stroke: #fde047; }
+      .s-gn { stroke: #86efac; }
+      .s-rd { stroke: #fca5a5; }
+      .s-nt { stroke: #d4dae4; }
+      .f-cy { fill: #67e8f9; fill-opacity: 0.1; }
+      .f-yl { fill: #fde047; fill-opacity: 0.1; }
+      .f-gn { fill: #86efac; fill-opacity: 0.1; }
+      .f-rd { fill: #fca5a5; fill-opacity: 0.08; }
+      .arr { fill: none; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+      .ink, .ink-d, .ink-cy, .ink-yl, .ink-gn, .ink-rd {
+        font-family: 'Kalam','Caveat','Virgil','Bradley Hand','Chalkduster','Segoe Print','Comic Sans MS',cursive;
+      }
+      .ink { fill: #e8ecf3; }
+      .ink-d { fill: #9aa4b8; }
+      .ink-cy { fill: #67e8f9; }
+      .ink-yl { fill: #fde047; }
+      .ink-gn { fill: #86efac; }
+      .ink-rd { fill: #fca5a5; }
+      .mono { font-family: 'JetBrains Mono','Menlo',monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="840" height="540"/>
+
+  <text x="420" y="56" class="ink" font-size="22" font-weight="600" text-anchor="middle">Message Persistence</text>
+  <text x="420" y="82" class="ink-d" font-size="14" text-anchor="middle">3 states · mutually exclusive · single writer per role</text>
+
+  <path class="rect s-cy f-cy"
+    d="M 74,134
+       C 118,132 178,132 240,136
+       C 244,162 244,204 238,234
+       C 178,236 118,238 72,234
+       C 68,204 70,162 74,134 Z"/>
+  <path class="rect s-yl f-yl"
+    d="M 336,134
+       C 380,132 440,132 502,136
+       C 506,162 506,204 500,234
+       C 440,236 380,238 334,234
+       C 330,204 332,162 336,134 Z"/>
+  <path class="rect s-gn f-gn"
+    d="M 598,134
+       C 642,132 702,132 764,136
+       C 768,162 768,204 762,234
+       C 702,236 642,238 596,234
+       C 592,204 594,162 598,134 Z"/>
+
+  <path class="arr s-cy" marker-end="url(#ah-cy)"
+    d="M 248,184 Q 290,180 328,186"/>
+  <path class="arr s-yl" marker-end="url(#ah-yl)"
+    d="M 510,184 Q 552,180 590,186"/>
+
+  <text x="156" y="180" class="ink-cy" font-size="22" font-weight="600" text-anchor="middle">streaming</text>
+  <text x="156" y="208" class="ink-d" font-size="12" text-anchor="middle">tokens arriving</text>
+
+  <text x="418" y="180" class="ink-yl" font-size="22" font-weight="600" text-anchor="middle">pending</text>
+  <text x="418" y="208" class="ink-d" font-size="12" text-anchor="middle">buffered in memory</text>
+
+  <text x="680" y="180" class="ink-gn" font-size="22" font-weight="600" text-anchor="middle">canonical</text>
+  <text x="680" y="208" class="ink-d" font-size="12" text-anchor="middle">persisted in SQLite</text>
+
+  <text x="288" y="170" class="ink" font-size="12" text-anchor="middle">stream done</text>
+  <text x="550" y="170" class="ink" font-size="12" text-anchor="middle">DB insert</text>
+
+  <text x="80" y="290" class="ink-d" font-size="13">writers by role</text>
+
+  <circle cx="96" cy="318" r="5" fill="#67e8f9" fill-opacity="0.85"/>
+  <text x="114" y="322" class="ink mono" font-size="13">user</text>
+  <text x="192" y="322" class="ink-d" font-size="13">→</text>
+  <text x="212" y="322" class="ink-cy mono" font-size="13">ChatInput</text>
+
+  <circle cx="96" cy="348" r="5" fill="#fde047" fill-opacity="0.85"/>
+  <text x="114" y="352" class="ink mono" font-size="13">assistant</text>
+  <text x="192" y="352" class="ink-d" font-size="13">→</text>
+  <text x="212" y="352" class="ink-yl mono" font-size="13">session-sync.ts</text>
+
+  <circle cx="96" cy="378" r="5" fill="#86efac" fill-opacity="0.85"/>
+  <text x="114" y="382" class="ink mono" font-size="13">system</text>
+  <text x="192" y="382" class="ink-d" font-size="13">→</text>
+  <text x="212" y="382" class="ink-gn mono" font-size="13">addMessage()</text>
+
+  <path class="arr s-rd" marker-end="url(#ah-rd)" opacity="0.7"
+    d="M 360,352 Q 450,380 520,414"/>
+
+  <path class="rect s-rd f-rd"
+    d="M 450,412
+       C 500,410 580,410 680,412
+       C 730,413 740,416 742,420
+       C 744,450 742,474 736,482
+       C 640,486 520,486 448,482
+       C 440,470 440,444 450,412 Z"/>
+
+  <text x="596" y="442" class="ink-rd mono" font-size="14" text-anchor="middle">SQLite · messages</text>
+  <text x="596" y="466" class="ink-d mono" font-size="12" text-anchor="middle">UNIQUE ( taskId, msgId )</text>
+
+  <text x="420" y="514" class="ink-rd" font-size="14" font-weight="600" text-anchor="middle">⚠  any dual-write path rejected at INSERT</text>
+</svg>
