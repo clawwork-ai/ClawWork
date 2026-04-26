@@ -117,6 +117,12 @@ export default function PairMobileDialog({
       } catch (err) {
         console.error('[PairMobileDialog] handleGenerate failed:', err);
         toast.error(t('settings.pairGenerateFailed'));
+        setQrData(null);
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        setCountdown(0);
       } finally {
         setGenerating(false);
       }
