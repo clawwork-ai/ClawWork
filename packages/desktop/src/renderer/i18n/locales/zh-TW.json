@@ -515,6 +515,7 @@
     "pairExpiresIn": "{{seconds}} 秒後過期",
     "pairFailed": "產生配對碼失敗",
     "pairGenerate": "產生 QR Code",
+    "pairGenerateFailed": "產生 QR 碼失敗，請重試。",
     "pairingCode": "配對碼",
     "pairingCodePlaceholder": "貼上配對碼",
     "pairingCodeRequired": "請輸入配對碼",

@@ -515,6 +515,7 @@
     "pairExpiresIn": "Laeuft in {{seconds}}s ab",
     "pairFailed": "Kopplungscode konnte nicht erzeugt werden",
     "pairGenerate": "QR-Code erzeugen",
+    "pairGenerateFailed": "QR-Code konnte nicht generiert werden. Bitte versuche es erneut.",
     "pairingCode": "Kopplungscode",
     "pairingCodePlaceholder": "Kopplungscode einfuegen",
     "pairingCodeRequired": "Kopplungscode ist erforderlich",

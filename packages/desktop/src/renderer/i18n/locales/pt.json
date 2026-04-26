@@ -515,6 +515,7 @@
     "pairExpiresIn": "Expira em {{seconds}}s",
     "pairFailed": "Falha ao gerar o codigo de pareamento",
     "pairGenerate": "Gerar codigo QR",
+    "pairGenerateFailed": "Falha ao gerar o QR code. Tente novamente.",
     "pairingCode": "Código de Pareamento",
     "pairingCodePlaceholder": "Cole o código de pareamento",
     "pairingCodeRequired": "O código de pareamento é obrigatório",

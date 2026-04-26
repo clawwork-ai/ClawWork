@@ -515,6 +515,7 @@
     "pairExpiresIn": "Expires in {{seconds}}s",
     "pairFailed": "Failed to generate pairing code",
     "pairGenerate": "Generate QR Code",
+    "pairGenerateFailed": "Failed to generate QR code. Please try again.",
     "pairingCode": "Pairing Code",
     "pairingCodePlaceholder": "Paste pairing code",
     "pairingCodeRequired": "Pairing code is required",

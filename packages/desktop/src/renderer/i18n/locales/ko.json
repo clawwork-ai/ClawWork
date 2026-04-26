@@ -515,6 +515,7 @@
     "pairExpiresIn": "{{seconds}}초 후 만료",
     "pairFailed": "페어링 코드를 생성하지 못했습니다",
     "pairGenerate": "QR 코드 생성",
+    "pairGenerateFailed": "QR 코드 생성에 실패했습니다. 다시 시도해 주세요.",
     "pairingCode": "페어링 코드",
     "pairingCodePlaceholder": "페어링 코드를 붙여넣으세요",
     "pairingCodeRequired": "페어링 코드를 입력해 주세요",

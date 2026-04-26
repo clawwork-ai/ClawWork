@@ -515,6 +515,7 @@
     "pairExpiresIn": "{{seconds}} 秒后过期",
     "pairFailed": "生成配对码失败",
     "pairGenerate": "生成二维码",
+    "pairGenerateFailed": "生成二维码失败，请重试。",
     "pairingCode": "配对码",
     "pairingCodePlaceholder": "粘贴配对码",
     "pairingCodeRequired": "配对码不能为空",

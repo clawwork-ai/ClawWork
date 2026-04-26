@@ -515,6 +515,7 @@
     "pairExpiresIn": "{{seconds}}秒後に期限切れ",
     "pairFailed": "ペアリングコードを生成できませんでした",
     "pairGenerate": "QR コードを生成",
+    "pairGenerateFailed": "QR コードの生成に失敗しました。もう一度お試しください。",
     "pairingCode": "ペアリングコード",
     "pairingCodePlaceholder": "ペアリングコードを貼り付け",
     "pairingCodeRequired": "ペアリングコードは必須です",

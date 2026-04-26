@@ -515,6 +515,7 @@
     "pairExpiresIn": "Expira en {{seconds}}s",
     "pairFailed": "No se pudo generar el codigo de vinculacion",
     "pairGenerate": "Generar codigo QR",
+    "pairGenerateFailed": "No se pudo generar el código QR. Inténtalo de nuevo.",
     "pairingCode": "Código de vinculación",
     "pairingCodePlaceholder": "Pega el código de vinculación",
     "pairingCodeRequired": "El código de vinculación es obligatorio",
