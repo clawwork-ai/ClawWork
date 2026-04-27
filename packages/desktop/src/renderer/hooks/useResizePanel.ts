@@ -5,9 +5,16 @@ interface UseResizePanelOptions {
   minWidth: number;
   maxWidth: number;
   storageKey?: string;
+  side?: 'left' | 'right';
 }
 
-export function useResizePanel({ defaultWidth, minWidth, maxWidth, storageKey }: UseResizePanelOptions) {
+export function useResizePanel({
+  defaultWidth,
+  minWidth,
+  maxWidth,
+  storageKey,
+  side = 'right',
+}: UseResizePanelOptions) {
   const [width, setWidth] = useState(() => {
     if (storageKey) {
       const saved = localStorage.getItem(storageKey);
@@ -25,11 +32,11 @@ export function useResizePanel({ defaultWidth, minWidth, maxWidth, storageKey }:
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      const delta = startXRef.current - e.clientX;
+      const delta = side === 'right' ? startXRef.current - e.clientX : e.clientX - startXRef.current;
       const next = Math.round(Math.min(maxWidth, Math.max(minWidth, startWidthRef.current + delta)));
       setWidth(next);
     },
-    [minWidth, maxWidth],
+    [minWidth, maxWidth, side],
   );
 
   const handleMouseUp = useCallback(() => {

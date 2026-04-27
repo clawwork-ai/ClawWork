@@ -6,6 +6,7 @@ import type { Team } from '@clawwork/shared';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ConfirmDialog from '@/components/semantic/ConfirmDialog';
+import { useResizePanel } from '@/hooks/useResizePanel';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 import TeamFileTree, { type TreeFile } from './TeamFileTree';
@@ -124,6 +125,17 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
   }, [team.agents, skillsMap]);
 
   const isDirty = editingContent !== null && editingContent !== fileContent;
+  const {
+    width: fileTreeWidth,
+    isDragging: isFileTreeDragging,
+    handleMouseDown: handleFileTreeResizeStart,
+  } = useResizePanel({
+    defaultWidth: 220,
+    minWidth: 192,
+    maxWidth: 420,
+    storageKey: 'clawwork:team-file-tree-width',
+    side: 'left',
+  });
 
   const loadFile = useCallback(
     async (file: TreeFile) => {
@@ -250,6 +262,9 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
           skills={allSkills}
           selectedFileId={selectedFile?.id ?? null}
           onSelectFile={handleSelectFile}
+          width={fileTreeWidth}
+          isDragging={isFileTreeDragging}
+          onResizeStart={handleFileTreeResizeStart}
         />
 
         <div className="flex flex-1 flex-col min-w-0">

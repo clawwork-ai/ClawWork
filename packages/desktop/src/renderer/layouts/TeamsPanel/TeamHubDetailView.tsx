@@ -6,6 +6,7 @@ import type { TeamHubEntry, ParsedTeam, AgentFileSet } from '@clawwork/shared';
 import { extractSkillSlugs } from '@clawwork/core';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useResizePanel } from '@/hooks/useResizePanel';
 import { useUiStore } from '@/stores/uiStore';
 import { useTeamStore } from '@/stores/teamStore';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,17 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
     id: 'team-md',
     label: 'TEAM.md',
     kind: 'team-md',
+  });
+  const {
+    width: fileTreeWidth,
+    isDragging: isFileTreeDragging,
+    handleMouseDown: handleFileTreeResizeStart,
+  } = useResizePanel({
+    defaultWidth: 220,
+    minWidth: 192,
+    maxWidth: 420,
+    storageKey: 'clawwork:team-file-tree-width',
+    side: 'left',
   });
 
   const installed = useMemo(
@@ -267,6 +279,9 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
               skills={allSkills}
               selectedFileId={selectedFile?.id ?? null}
               onSelectFile={setSelectedFile}
+              width={fileTreeWidth}
+              isDragging={isFileTreeDragging}
+              onResizeStart={handleFileTreeResizeStart}
             />
 
             <div className="flex flex-1 flex-col min-w-0">
