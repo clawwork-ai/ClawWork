@@ -53,7 +53,8 @@ export default function WelcomeScreen() {
   const [activeTab, setActiveTab] = useState<WelcomeTab>(() => {
     const ensemble = activeTaskEnsemble ?? pendingNewTask?.ensemble;
     const teamId = activeTaskTeamId ?? pendingNewTask?.teamId;
-    if (ensemble) return teamId ? 'team' : 'orchestrate';
+    if (teamId) return 'team';
+    if (ensemble) return 'orchestrate';
     return 'agent';
   });
 

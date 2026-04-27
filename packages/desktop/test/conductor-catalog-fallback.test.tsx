@@ -86,7 +86,9 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('@clawwork/core', () => ({
+  deriveSessionActivity: () => 'idle',
   extractDescription: (content: string) => content.slice(0, 50),
+  getTaskSessionKeys: (task: { sessionKey: string }) => [task.sessionKey],
 }));
 
 /* Build mock store functions that support both hook calls and .getState() */
