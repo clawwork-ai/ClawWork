@@ -830,7 +830,9 @@ export default function AgentsSection() {
       });
       if (res.ok) {
         if (isNewUpload) {
-          window.clawwork.saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar).catch(() => {});
+          window.clawwork
+            .saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar)
+            .catch((err) => console.error('[AgentsSection] saveAgentAvatar (update) failed:', err));
         }
         const parsed = parseIdentityMd(form.identityRaw);
         const newContent = serializeIdentityMd(form.description.trim() || undefined, parsed.body, form.identityRaw);
@@ -865,7 +867,9 @@ export default function AgentsSection() {
         const created = res.result as Record<string, unknown> | undefined;
         const newAgentId = (created?.agentId as string) ?? '';
         if (isNewUpload && newAgentId) {
-          window.clawwork.saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar).catch(() => {});
+          window.clawwork
+            .saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar)
+            .catch((err) => console.error('[AgentsSection] saveAgentAvatar (create) failed:', err));
         }
         if (newAgentId && form.description.trim()) {
           const content = serializeIdentityMd(form.description.trim(), '');
@@ -894,7 +898,9 @@ export default function AgentsSection() {
       deleteFiles,
     });
     if (res.ok) {
-      window.clawwork.deleteAgentAvatar(selectedGatewayId, deletingAgentId).catch(() => {});
+      window.clawwork
+        .deleteAgentAvatar(selectedGatewayId, deletingAgentId)
+        .catch((err) => console.error('[AgentsSection] deleteAgentAvatar failed:', err));
       toast.success(t('settings.agentDeleted'));
       if (expandedFilesAgentId === deletingAgentId) {
         setExpandedFilesAgentId(null);
