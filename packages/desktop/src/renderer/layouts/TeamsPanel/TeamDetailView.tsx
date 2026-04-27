@@ -11,11 +11,9 @@ import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 import TeamFileTree, { type TreeFile } from './TeamFileTree';
 
-interface SkillStatusEntry {
+interface SkillEntry {
   id: string;
   name: string;
-  description?: string;
-  eligible?: boolean;
 }
 
 interface TeamDetailViewProps {
@@ -34,21 +32,18 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
   );
   const [selectedFile, setSelectedFile] = useState<TreeFile | null>(null);
   const [agentFilesMap, setAgentFilesMap] = useState<Record<string, { name: string }[]>>({});
-  const [skillsMap, setSkillsMap] = useState<Record<string, SkillStatusEntry[]>>({});
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingContent, setLoadingContent] = useState(false);
   const [discardTarget, setDiscardTarget] = useState<TreeFile | null>(null);
   const fetchedFiles = useRef(new Set<string>());
-  const fetchedSkills = useRef(new Set<string>());
   const loadSeq = useRef(0);
 
   useEffect(() => {
     setSelectedFile({ id: 'team-md', label: 'TEAM.md', kind: 'team-md' });
     setEditingContent(null);
     fetchedFiles.current.clear();
-    fetchedSkills.current.clear();
   }, [team.id]);
 
   useEffect(() => {
@@ -73,22 +68,6 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
     }
   }, [team.agents, team.gatewayId]);
 
-  useEffect(() => {
-    for (const agent of team.agents) {
-      if (fetchedSkills.current.has(agent.agentId)) continue;
-      fetchedSkills.current.add(agent.agentId);
-      const agentId = agent.agentId;
-      window.clawwork.getSkillsStatus(team.gatewayId, agentId).then((res) => {
-        if (!res.ok || !res.result) {
-          fetchedSkills.current.delete(agentId);
-          return;
-        }
-        const data = res.result as { skills?: SkillStatusEntry[] };
-        setSkillsMap((prev) => ({ ...prev, [agentId]: data.skills ?? [] }));
-      });
-    }
-  }, [team.agents, team.gatewayId]);
-
   const agentNodes = useMemo(
     () =>
       team.agents.map((a) => {
@@ -105,24 +84,24 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
             kind: 'agent-file' as const,
             agentId: a.agentId,
           })),
-          skillCount: (skillsMap[a.agentId] ?? []).length,
+          skillCount: (a.skills ?? []).length,
         };
       }),
-    [team.agents, agentFilesMap, skillsMap, catalogById],
+    [team.agents, agentFilesMap, catalogById],
   );
 
   const allSkills = useMemo(() => {
     const seen = new Set<string>();
-    const result: { id: string; name: string }[] = [];
+    const result: SkillEntry[] = [];
     for (const agent of team.agents) {
-      for (const skill of skillsMap[agent.agentId] ?? []) {
-        if (seen.has(skill.id)) continue;
-        seen.add(skill.id);
-        result.push({ id: skill.id, name: skill.name || skill.id });
+      for (const skill of agent.skills ?? []) {
+        if (seen.has(skill)) continue;
+        seen.add(skill);
+        result.push({ id: skill, name: skill });
       }
     }
     return result;
-  }, [team.agents, skillsMap]);
+  }, [team.agents]);
 
   const isDirty = editingContent !== null && editingContent !== fileContent;
   const {
@@ -202,16 +181,15 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
     }
   }, [selectedFile, editingContent, team.gatewayId, t]);
 
-  const agentSkills =
-    selectedFile?.kind === 'agent-skills' && selectedFile.agentId ? (skillsMap[selectedFile.agentId] ?? []) : [];
+  const agentSkills = useMemo<SkillEntry[]>(() => {
+    if (selectedFile?.kind !== 'agent-skills' || !selectedFile.agentId) return [];
+    const agent = team.agents.find((a) => a.agentId === selectedFile.agentId);
+    return (agent?.skills ?? []).map((skill) => ({ id: skill, name: skill }));
+  }, [selectedFile, team.agents]);
   const skillDetail = useMemo(() => {
     if (selectedFile?.kind !== 'skill-item' || !selectedFile.skillId) return null;
-    for (const skills of Object.values(skillsMap)) {
-      const found = skills.find((s) => s.id === selectedFile.skillId);
-      if (found) return found;
-    }
-    return null;
-  }, [selectedFile, skillsMap]);
+    return allSkills.find((skill) => skill.id === selectedFile.skillId) ?? null;
+  }, [selectedFile, allSkills]);
 
   const isEditable = selectedFile?.kind === 'agent-file';
   const isEditing = editingContent !== null;
@@ -344,9 +322,6 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
                       <Puzzle size={14} className="mt-0.5 flex-shrink-0 text-[var(--text-muted)]" />
                       <div className="min-w-0">
                         <p className="type-support font-medium text-[var(--text-primary)]">{skill.name || skill.id}</p>
-                        {skill.description && (
-                          <p className="type-meta text-[var(--text-secondary)]">{skill.description}</p>
-                        )}
                       </div>
                     </div>
                   ))
@@ -362,9 +337,6 @@ export default function TeamDetailView({ team, onBack, onStartChat, onEdit }: Te
                     {skillDetail.name || skillDetail.id}
                   </h3>
                 </div>
-                {skillDetail.description && (
-                  <p className="type-body text-[var(--text-secondary)]">{skillDetail.description}</p>
-                )}
                 <div className="type-meta text-[var(--text-muted)]">
                   ID: <span className="type-code-inline">{skillDetail.id}</span>
                 </div>

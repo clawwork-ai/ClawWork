@@ -727,7 +727,6 @@
     "title": "Equipes",
     "wizard": {
       "addAgent": "Adicionar agente",
-      "addSkill": "Adicionar Skill",
       "agentCount": "{{count}} agentes",
       "agentMdPlaceholder": "Instruções do agente...",
       "agentName": "Nome do agente",
@@ -757,7 +756,6 @@
       "saving": "Salvando...",
       "selectExisting": "Selecionar existente",
       "skills": "Skills",
-      "skillSlugPlaceholder": "ClawHub skill slug",
       "soulMdPlaceholder": "Personalidade do agente...",
       "teamInfo": "Info da equipe",
       "teamMdPlaceholder": "Missão da equipe, modelo de colaboração...",

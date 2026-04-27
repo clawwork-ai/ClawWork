@@ -727,7 +727,6 @@
     "title": "团队",
     "wizard": {
       "addAgent": "添加 Agent",
-      "addSkill": "添加技能",
       "agentCount": "{{count}} 个 Agent",
       "agentMdPlaceholder": "Agent 指令...",
       "agentName": "Agent 名称",
@@ -757,7 +756,6 @@
       "saving": "保存中...",
       "selectExisting": "选择已有",
       "skills": "Skills",
-      "skillSlugPlaceholder": "ClawHub skill slug",
       "soulMdPlaceholder": "Agent 人格...",
       "teamInfo": "团队信息",
       "teamMdPlaceholder": "团队目标、协作模式...",

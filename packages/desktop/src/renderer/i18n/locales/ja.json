@@ -727,7 +727,6 @@
     "title": "チーム",
     "wizard": {
       "addAgent": "エージェント追加",
-      "addSkill": "スキルを追加",
       "agentCount": "{{count}} エージェント",
       "agentMdPlaceholder": "エージェント指示...",
       "agentName": "エージェント名",
@@ -757,7 +756,6 @@
       "saving": "保存中...",
       "selectExisting": "既存を選択",
       "skills": "Skills",
-      "skillSlugPlaceholder": "ClawHub skill slug",
       "soulMdPlaceholder": "エージェントの性格...",
       "teamInfo": "チーム情報",
       "teamMdPlaceholder": "チームのミッション、コラボレーションモデル...",

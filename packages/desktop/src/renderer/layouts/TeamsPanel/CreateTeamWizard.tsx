@@ -85,8 +85,9 @@ export default function CreateTeamWizard({ open, onOpenChange, defaultGatewayId,
               model: info?.model?.primary ?? '',
               agentMd: '',
               soulMd: '',
-              skills: [],
+              skills: a.skills ?? [],
               existingAgentId: a.agentId,
+              lockedExisting: true,
             };
           }),
         );
@@ -153,7 +154,10 @@ export default function CreateTeamWizard({ open, onOpenChange, defaultGatewayId,
 
   return (
     <Dialog open={open} onOpenChange={guardedOpenChange}>
-      <DialogContent className="max-w-[var(--dialog-max-width)] flex max-h-screen flex-col" {...contentProps}>
+      <DialogContent
+        className="flex max-h-full max-w-[var(--dialog-max-width)] flex-col overflow-hidden"
+        {...contentProps}
+      >
         <DialogHeader>
           <DialogTitle>{isEdit ? t('teams.editTeam') : t('teams.createTeam')}</DialogTitle>
           <DialogDescription>
@@ -188,7 +192,12 @@ export default function CreateTeamWizard({ open, onOpenChange, defaultGatewayId,
                 />
               )}
               {step === 2 && (
-                <AgentConfigStep agents={agents} onChange={handleAgentsChange} gatewayId={teamInfo.gatewayId} />
+                <AgentConfigStep
+                  agents={agents}
+                  onChange={handleAgentsChange}
+                  gatewayId={teamInfo.gatewayId}
+                  editMode={isEdit}
+                />
               )}
               {step === 3 && (
                 <InstallStep

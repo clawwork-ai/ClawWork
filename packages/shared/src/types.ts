@@ -63,6 +63,7 @@ export interface TeamAgent {
   agentId: string;
   role: string;
   isManager: boolean;
+  skills: string[];
 }
 
 export interface Team {

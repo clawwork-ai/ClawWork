@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronRight, Trash2, Plus, X, Crown, Loader2 } from 'lucide-react';
-import type { AgentInfo } from '@clawwork/shared';
+import { ChevronDown, ChevronRight, Trash2, X, Crown, Loader2, Search, Check } from 'lucide-react';
+import type { AgentInfo, SkillSearchResultEntry, SkillStatusEntry, SkillStatusReport } from '@clawwork/shared';
 import { parseIdentityMd } from '@clawwork/core';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useUiStore } from '@/platform';
@@ -12,6 +11,13 @@ import type { AgentDraft } from './types';
 import { inputClass } from './utils';
 
 const EMPTY_MODELS: { id: string; name?: string; provider?: string }[] = [];
+
+interface SkillPickItem {
+  id: string;
+  title: string;
+  description?: string;
+  source: 'installed' | 'clawhub';
+}
 
 function modelLabel(modelId: string, models: { id: string; name?: string; provider?: string }[]): string {
   if (!modelId) return '';
@@ -27,6 +33,7 @@ interface AgentDraftCardProps {
   canRemove: boolean;
   gatewayId: string;
   availableExisting: AgentInfo[];
+  lockExisting?: boolean;
   onUpdate: (patch: Partial<AgentDraft>) => void;
   onRemove: () => void;
 }
@@ -38,24 +45,32 @@ export default function AgentDraftCard({
   canRemove,
   gatewayId,
   availableExisting,
+  lockExisting,
   onUpdate,
   onRemove,
 }: AgentDraftCardProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(index < 2);
+  const [expanded, setExpanded] = useState(agent.expandedByDefault ?? index < 2);
   const [activeTab, setActiveTab] = useState(agent.existingAgentId ? 'skills' : 'agent-md');
   const [skillInput, setSkillInput] = useState('');
+  const [skillResults, setSkillResults] = useState<SkillSearchResultEntry[]>([]);
+  const [skillSearching, setSkillSearching] = useState(false);
+  const [skillSearched, setSkillSearched] = useState(false);
+  const [loadingSkills, setLoadingSkills] = useState(false);
   const [pickOpen, setPickOpen] = useState(false);
-  const [existingSkillNames, setExistingSkillNames] = useState<string[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsLoadedFor, setDetailsLoadedFor] = useState<string | null>(null);
+  const skillSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skillSearchEpoch = useRef(0);
   const modelCatalogByGateway = useUiStore((s) => s.modelCatalogByGateway);
+  const skillsStatus = useUiStore((s) => (gatewayId ? s.skillsStatusByGateway[gatewayId] : undefined));
+  const setSkillsStatusForGateway = useUiStore((s) => s.setSkillsStatusForGateway);
   const models = (gatewayId ? modelCatalogByGateway[gatewayId] : null) ?? EMPTY_MODELS;
   const isExisting = !!agent.existingAgentId;
+  const canSwitchMode = !lockExisting;
 
   const switchToNew = () => {
     onUpdate({ existingAgentId: undefined, name: '', description: '', model: '', agentMd: '', soulMd: '', skills: [] });
-    setExistingSkillNames([]);
     setDetailsLoadedFor(null);
     setActiveTab('agent-md');
   };
@@ -70,7 +85,6 @@ export default function AgentDraftCard({
       soulMd: '',
       skills: [],
     });
-    setExistingSkillNames([]);
     setDetailsLoadedFor(null);
     setActiveTab('agent-md');
     setPickOpen(false);
@@ -86,8 +100,7 @@ export default function AgentDraftCard({
     Promise.allSettled([
       window.clawwork.getAgentFile(gatewayId, agent.existingAgentId, 'IDENTITY.md'),
       window.clawwork.getAgentFile(gatewayId, agent.existingAgentId, 'SOUL.md'),
-      window.clawwork.getSkillsStatus(gatewayId, agent.existingAgentId),
-    ]).then(([identityRes, soulRes, skillsRes]) => {
+    ]).then(([identityRes, soulRes]) => {
       if (abortController.signal.aborted) return;
       const patch: Partial<AgentDraft> = {};
       if (identityRes.status === 'fulfilled' && identityRes.value.ok && identityRes.value.result) {
@@ -102,11 +115,6 @@ export default function AgentDraftCard({
         const data = soulRes.value.result as Record<string, unknown>;
         if (typeof data.content === 'string') patch.soulMd = data.content;
       }
-      if (skillsRes.status === 'fulfilled' && skillsRes.value.ok && skillsRes.value.result) {
-        const data = skillsRes.value.result as Record<string, unknown>;
-        const skills = data.skills as Array<{ name: string }> | undefined;
-        if (skills) setExistingSkillNames(skills.map((s) => s.name));
-      }
       if (Object.keys(patch).length > 0) onUpdate(patch);
       setDetailsLoadedFor(agent.existingAgentId!);
       setLoadingDetails(false);
@@ -115,118 +123,190 @@ export default function AgentDraftCard({
     return () => abortController.abort();
   }, [agent.existingAgentId, gatewayId, detailsLoadedFor, onUpdate]);
 
-  const addSkill = () => {
-    const slug = skillInput.trim();
-    if (slug && !agent.skills.includes(slug)) {
+  const addSkill = useCallback(
+    (slug: string) => {
+      if (!slug || agent.skills.includes(slug)) return;
       onUpdate({ skills: [...agent.skills, slug] });
-      setSkillInput('');
-    }
-  };
+    },
+    [agent.skills, onUpdate],
+  );
 
   const removeSkill = (slug: string) => {
     onUpdate({ skills: agent.skills.filter((s) => s !== slug) });
   };
 
+  useEffect(() => {
+    if (activeTab !== 'skills' || !gatewayId || skillsStatus) return;
+    let cancelled = false;
+    setLoadingSkills(true);
+    window.clawwork.getSkillsStatus(gatewayId).then((res) => {
+      if (cancelled) return;
+      if (res.ok && res.result) setSkillsStatusForGateway(gatewayId, res.result as unknown as SkillStatusReport);
+      setLoadingSkills(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, gatewayId, skillsStatus, setSkillsStatusForGateway]);
+
+  const runSkillSearch = useCallback(
+    async (query: string) => {
+      if (!gatewayId) return;
+      const epoch = ++skillSearchEpoch.current;
+      setSkillSearching(true);
+      setSkillSearched(true);
+      const res = await window.clawwork.searchSkills(gatewayId, { query, limit: 20 });
+      if (epoch !== skillSearchEpoch.current) return;
+      setSkillResults(res.ok && res.result ? res.result.results : []);
+      setSkillSearching(false);
+    },
+    [gatewayId],
+  );
+
+  const handleSkillQueryChange = useCallback(
+    (value: string) => {
+      setSkillInput(value);
+      if (skillSearchTimer.current) clearTimeout(skillSearchTimer.current);
+      const query = value.trim();
+      if (!query) {
+        skillSearchEpoch.current += 1;
+        setSkillResults([]);
+        setSkillSearching(false);
+        setSkillSearched(false);
+        return;
+      }
+      skillSearchTimer.current = setTimeout(() => runSkillSearch(query), 250);
+    },
+    [runSkillSearch],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (skillSearchTimer.current) clearTimeout(skillSearchTimer.current);
+    };
+  }, []);
+
+  const installedSkillItems = useMemo<SkillPickItem[]>(
+    () =>
+      (skillsStatus?.skills ?? []).map((skill: SkillStatusEntry) => ({
+        id: skill.skillKey || skill.name,
+        title: skill.name || skill.skillKey,
+        description: skill.description,
+        source: 'installed',
+      })),
+    [skillsStatus],
+  );
+
+  const searchSkillItems = useMemo<SkillPickItem[]>(
+    () =>
+      skillResults.map((skill) => ({
+        id: skill.slug,
+        title: skill.displayName || skill.slug,
+        description: skill.summary,
+        source: 'clawhub',
+      })),
+    [skillResults],
+  );
+
+  const skillPickItems = skillInput.trim() ? searchSkillItems : installedSkillItems;
+
   const displayModel = modelLabel(agent.model, models);
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--bg-hover)] cursor-pointer"
-      >
-        {expanded ? (
-          <ChevronDown size={14} className="text-[var(--text-muted)]" />
-        ) : (
-          <ChevronRight size={14} className="text-[var(--text-muted)]" />
-        )}
-        <span className="type-body font-medium text-[var(--text-primary)] flex-1 text-left truncate">
-          {agent.name || t('teams.wizard.agentNamePlaceholder')}
-        </span>
-        {agent.role === 'coordinator' && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 type-meta text-[var(--accent)]">
-            <Crown size={10} />
-            {t('teams.wizard.coordinator')}
+    <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]">
+      <div className="flex items-center transition-colors hover:bg-[var(--bg-hover)]">
+        <button
+          type="button"
+          onClick={() => setExpanded(!expanded)}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-4 py-3"
+        >
+          {expanded ? (
+            <ChevronDown size={14} className="text-[var(--text-muted)]" />
+          ) : (
+            <ChevronRight size={14} className="text-[var(--text-muted)]" />
+          )}
+          <span className="type-body flex-1 truncate text-left font-medium text-[var(--text-primary)]">
+            {agent.name || t('teams.wizard.agentNamePlaceholder')}
           </span>
-        )}
-        {displayModel && <span className="type-meta text-[var(--text-muted)] truncate max-w-32">{displayModel}</span>}
+          {agent.role === 'coordinator' && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-tertiary)] px-2 py-0.5 type-meta text-[var(--accent)]">
+              <Crown size={10} />
+              {t('teams.wizard.coordinator')}
+            </span>
+          )}
+          {displayModel && <span className="max-w-32 truncate type-meta text-[var(--text-muted)]">{displayModel}</span>}
+          {isExisting && loadingDetails && <Loader2 size={12} className="animate-spin text-[var(--text-muted)]" />}
+        </button>
         {canRemove && !isFirst && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove();
-            }}
-            className="flex h-6 w-6 items-center justify-center rounded text-[var(--text-muted)] hover:text-[var(--text-danger)] hover:bg-[var(--bg-hover)] cursor-pointer"
+            type="button"
+            onClick={onRemove}
+            className="mr-3 flex h-6 w-6 cursor-pointer items-center justify-center rounded text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-danger)]"
           >
             <Trash2 size={12} />
           </button>
         )}
-      </button>
+      </div>
 
       {expanded && (
         <div className="border-t border-[var(--border)] px-4 py-3 space-y-3">
-          <div className="flex items-center gap-1 rounded-lg bg-[var(--bg-tertiary)] p-1 w-fit">
-            <button
-              onClick={switchToNew}
-              className={cn(
-                'type-label px-3 py-1 rounded-md transition-all',
-                !isExisting
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-              )}
-            >
-              {t('teams.wizard.createNew')}
-            </button>
-            <Popover open={pickOpen} onOpenChange={setPickOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  className={cn(
-                    'type-label px-3 py-1 rounded-md transition-all',
-                    isExisting
-                      ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
-                  )}
-                >
-                  {isExisting ? agent.name : t('teams.wizard.selectExisting')}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="start" className="w-64 p-1">
-                {availableExisting.length === 0 ? (
-                  <div className="px-3 py-2 type-body text-[var(--text-muted)]">{t('teams.noAgents')}</div>
-                ) : (
-                  <div className="max-h-48 overflow-y-auto">
-                    {availableExisting.map((info) => (
-                      <button
-                        key={info.id}
-                        onClick={() => pickExisting(info)}
-                        className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 transition-colors hover:bg-[var(--bg-hover)] cursor-pointer"
-                      >
-                        {info.identity?.emoji && <span className="emoji-sm">{info.identity.emoji}</span>}
-                        <span className="type-body text-[var(--text-primary)] truncate">{info.name ?? info.id}</span>
-                      </button>
-                    ))}
-                  </div>
+          {canSwitchMode && (
+            <div className="flex items-center gap-1 rounded-lg bg-[var(--bg-tertiary)] p-1 w-fit">
+              <button
+                onClick={switchToNew}
+                className={cn(
+                  'type-label px-3 py-1 rounded-md transition-all',
+                  !isExisting
+                    ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
                 )}
-              </PopoverContent>
-            </Popover>
-          </div>
+              >
+                {t('teams.wizard.createNew')}
+              </button>
+              <Popover open={pickOpen} onOpenChange={setPickOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className={cn(
+                      'type-label px-3 py-1 rounded-md transition-all',
+                      isExisting
+                        ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-[var(--shadow-card)]'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+                    )}
+                  >
+                    {isExisting ? agent.name : t('teams.wizard.selectExisting')}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-64 p-1">
+                  {availableExisting.length === 0 ? (
+                    <div className="px-3 py-2 type-body text-[var(--text-muted)]">{t('teams.noAgents')}</div>
+                  ) : (
+                    <div className="max-h-48 overflow-y-auto">
+                      {availableExisting.map((info) => (
+                        <button
+                          key={info.id}
+                          onClick={() => pickExisting(info)}
+                          className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 transition-colors hover:bg-[var(--bg-hover)] cursor-pointer"
+                        >
+                          {info.identity?.emoji && <span className="emoji-sm">{info.identity.emoji}</span>}
+                          <span className="type-body text-[var(--text-primary)] truncate">{info.name ?? info.id}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
 
           {isExisting ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2">
-                <span className="type-body text-[var(--text-primary)] flex-1">{agent.name}</span>
-                {displayModel && <span className="type-meta text-[var(--text-muted)]">{displayModel}</span>}
-                {loadingDetails && <Loader2 size={12} className="animate-spin text-[var(--text-muted)]" />}
+            agent.description ? (
+              <div className="space-y-1">
+                <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.description')}</label>
+                <p className="type-body rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2 text-[var(--text-secondary)]">
+                  {agent.description}
+                </p>
               </div>
-              {agent.description && (
-                <div className="space-y-1">
-                  <label className="type-meta text-[var(--text-muted)]">{t('teams.wizard.description')}</label>
-                  <p className="type-body rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2 text-[var(--text-secondary)]">
-                    {agent.description}
-                  </p>
-                </div>
-              )}
-            </div>
+            ) : null
           ) : (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3">
@@ -284,8 +364,7 @@ export default function AgentDraftCard({
               <TabsTrigger value="soul-md">SOUL.md</TabsTrigger>
               <TabsTrigger value="skills">
                 {t('teams.wizard.skills')}
-                {agent.skills.length + existingSkillNames.length > 0 &&
-                  ` (${agent.skills.length + existingSkillNames.length})`}
+                {agent.skills.length > 0 && ` (${agent.skills.length})`}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -312,41 +391,65 @@ export default function AgentDraftCard({
 
           {activeTab === 'skills' && (
             <div className="space-y-2">
-              {existingSkillNames.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {existingSkillNames.map((name) => (
-                    <span
-                      key={name}
-                      className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 type-meta text-[var(--text-muted)]"
-                    >
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border)] px-3 py-2">
+                <Search size={14} className="flex-shrink-0 text-[var(--text-muted)]" />
                 <input
                   type="text"
                   value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
+                  onChange={(e) => handleSkillQueryChange(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      addSkill();
+                      const first = skillPickItems.find((skill) => !agent.skills.includes(skill.id));
+                      if (first) addSkill(first.id);
                     }
                   }}
-                  placeholder={t('teams.wizard.skillSlugPlaceholder')}
-                  className={cn(inputClass, 'flex-1')}
+                  placeholder={t('settings.skillHubSearchPlaceholder')}
+                  className="min-w-0 flex-1 bg-transparent text-[var(--text-primary)] placeholder:text-[var(--text-muted)] type-label outline-none"
                 />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={addSkill}
-                  disabled={!skillInput.trim()}
-                  aria-label={t('teams.wizard.addSkill')}
-                >
-                  <Plus size={14} />
-                </Button>
+                {(skillSearching || loadingSkills) && (
+                  <Loader2 size={14} className="animate-spin text-[var(--text-muted)]" />
+                )}
+              </div>
+              <div className="max-h-44 space-y-1 overflow-y-auto rounded-md border border-[var(--border)] bg-[var(--bg-primary)] p-1">
+                {skillPickItems.length > 0 ? (
+                  skillPickItems.map((skill) => {
+                    const selected = agent.skills.includes(skill.id);
+                    return (
+                      <button
+                        key={`${skill.source}-${skill.id}`}
+                        type="button"
+                        onClick={() => addSkill(skill.id)}
+                        disabled={selected}
+                        className={cn(
+                          'flex w-full items-start gap-2 rounded-md px-2 py-2 text-left transition-colors',
+                          selected ? 'cursor-default opacity-70' : 'cursor-pointer hover:bg-[var(--bg-hover)]',
+                        )}
+                      >
+                        <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center text-[var(--text-muted)]">
+                          {selected ? <Check size={13} /> : <Search size={12} />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="type-support block truncate text-[var(--text-primary)]">{skill.title}</span>
+                          <span className="type-mono-data block truncate text-[var(--text-muted)]">{skill.id}</span>
+                          {skill.description && (
+                            <span className="type-meta mt-0.5 line-clamp-2 block text-[var(--text-secondary)]">
+                              {skill.description}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="type-support px-2 py-2 text-[var(--text-muted)]">
+                    {skillSearching
+                      ? t('settings.skillHubSearching')
+                      : skillInput.trim() && skillSearched
+                        ? t('settings.skillHubNoResults')
+                        : t('settings.skillHubPrompt')}
+                  </p>
+                )}
               </div>
               {agent.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">

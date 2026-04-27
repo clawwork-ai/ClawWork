@@ -220,6 +220,33 @@ describe('installTeam', () => {
     expect(events.map((e) => e.type)).toContain('done');
   });
 
+  it('persists skill bindings on team agents', async () => {
+    const parsed = makeParsed();
+    const files: Record<string, AgentFileSet> = {
+      manager: {
+        skillsJson: JSON.stringify({ version: 1, skills: { plan: { source: 'x', sourceType: 'clawhub' } } }),
+      },
+      dev: {
+        skillsJson: JSON.stringify({
+          version: 1,
+          skills: {
+            code: { source: 'x', sourceType: 'clawhub' },
+            review: { source: 'x', sourceType: 'clawhub' },
+          },
+        }),
+      },
+    };
+    const deps = makeDeps();
+
+    await collect(installTeam(parsed, files, 'gw-1', '/w', deps));
+
+    const persistCall = (deps.persistTeam as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(persistCall.agents).toEqual([
+      { agentId: 'agent-1', role: 'coordinator', isManager: true, skills: ['plan'] },
+      { agentId: 'agent-2', role: 'worker', isManager: false, skills: ['code', 'review'] },
+    ]);
+  });
+
   it('progress total includes file and skill operations', async () => {
     const parsed = makeParsed();
     const files: Record<string, AgentFileSet> = {

@@ -727,7 +727,6 @@
     "title": "팀",
     "wizard": {
       "addAgent": "에이전트 추가",
-      "addSkill": "스킬 추가",
       "agentCount": "{{count}}개 에이전트",
       "agentMdPlaceholder": "에이전트 지시사항...",
       "agentName": "에이전트 이름",
@@ -757,7 +756,6 @@
       "saving": "저장 중...",
       "selectExisting": "기존 선택",
       "skills": "Skills",
-      "skillSlugPlaceholder": "ClawHub skill slug",
       "soulMdPlaceholder": "에이전트 성격...",
       "teamInfo": "팀 정보",
       "teamMdPlaceholder": "팀 미션, 협업 모델...",

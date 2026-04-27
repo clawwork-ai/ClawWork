@@ -156,9 +156,12 @@ function openDatabaseAt(workspacePath: string): void {
       agent_id TEXT NOT NULL,
       role TEXT DEFAULT '',
       is_manager INTEGER DEFAULT 0,
+      skills_json TEXT DEFAULT '[]',
       PRIMARY KEY (team_id, agent_id)
     )
   `);
+
+  migrateAddColumn(sqlite, "ALTER TABLE team_agents ADD COLUMN skills_json TEXT DEFAULT '[]'");
 
   initFTS(sqlite);
 

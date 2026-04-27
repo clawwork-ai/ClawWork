@@ -26,7 +26,7 @@ export interface InstallerDeps {
     source?: string;
     version?: string;
     hubSlug?: string;
-    agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
+    agents: Array<{ agentId: string; role?: string; isManager?: boolean; skills?: string[] }>;
     createdAt: string;
     updatedAt: string;
   }) => Promise<IpcResult>;
@@ -175,6 +175,7 @@ export async function* installTeam(
       agentId: agentMap.get(a.id)!,
       role: a.role,
       isManager: a.role === 'coordinator',
+      skills: (skillsByAgent.get(a.id) ?? []).map((skill) => skill.id),
     }));
 
   if (teamAgents.length === 0) {

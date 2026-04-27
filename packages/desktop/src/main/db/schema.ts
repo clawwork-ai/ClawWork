@@ -77,6 +77,7 @@ export const teamAgents = sqliteTable(
     agentId: text('agent_id').notNull(),
     role: text('role').default(''),
     isManager: integer('is_manager', { mode: 'boolean' }).default(false),
+    skillsJson: text('skills_json').default('[]'),
   },
   (table) => [primaryKey({ columns: [table.teamId, table.agentId] })],
 );

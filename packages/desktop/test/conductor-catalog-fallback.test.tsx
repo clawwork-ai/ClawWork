@@ -32,9 +32,9 @@ const mocks = vi.hoisted(() => {
     source: 'local',
     version: '1',
     agents: [
-      { agentId: 'manager-agent', role: 'manager', isManager: true },
-      { agentId: 'worker-a', role: 'coder', isManager: false },
-      { agentId: 'worker-b', role: 'reviewer', isManager: false },
+      { agentId: 'manager-agent', role: 'manager', isManager: true, skills: [] },
+      { agentId: 'worker-a', role: 'coder', isManager: false, skills: [] },
+      { agentId: 'worker-b', role: 'reviewer', isManager: false, skills: [] },
     ],
     createdAt: '2026-04-10T00:00:00.000Z',
     updatedAt: '2026-04-10T00:00:00.000Z',

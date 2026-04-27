@@ -11,9 +11,10 @@ interface AgentConfigStepProps {
   agents: AgentDraft[];
   onChange: (agents: AgentDraft[]) => void;
   gatewayId: string;
+  editMode?: boolean;
 }
 
-export default function AgentConfigStep({ agents, onChange, gatewayId }: AgentConfigStepProps) {
+export default function AgentConfigStep({ agents, onChange, gatewayId, editMode }: AgentConfigStepProps) {
   const { t } = useTranslation();
   const [existingAgents, setExistingAgents] = useState<AgentInfo[]>([]);
 
@@ -31,7 +32,7 @@ export default function AgentConfigStep({ agents, onChange, gatewayId }: AgentCo
   }, [gatewayId]);
 
   const addAgent = useCallback(() => {
-    onChange([...agents, createAgentDraft('worker')]);
+    onChange([...agents, { ...createAgentDraft('worker'), expandedByDefault: true }]);
   }, [agents, onChange]);
 
   const updateAgent = useCallback(
@@ -74,6 +75,7 @@ export default function AgentConfigStep({ agents, onChange, gatewayId }: AgentCo
             canRemove={agents.length > 2}
             gatewayId={gatewayId}
             availableExisting={availableExisting}
+            lockExisting={editMode && agent.lockedExisting}
             onUpdate={(patch) => updateAgent(agent.uid, patch)}
             onRemove={() => removeAgent(agent.uid)}
           />

@@ -9,6 +9,18 @@ function ipcError(err: unknown): { ok: false; error: string } {
   return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
 }
 
+function parseTeamAgentSkills(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string' && item.length > 0)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
 export function registerDataHandlers(): void {
   ipcMain.handle(
     'data:create-task',
@@ -358,7 +370,7 @@ export function registerDataHandlers(): void {
       const agentRows = db.select().from(teamAgents).all();
       const agentsByTeam = new Map<
         string,
-        Array<{ agentId: string; role: string | null; isManager: boolean | null }>
+        Array<{ agentId: string; role: string | null; isManager: boolean | null; skillsJson: string | null }>
       >();
       for (const a of agentRows) {
         let list = agentsByTeam.get(a.teamId);
@@ -366,7 +378,7 @@ export function registerDataHandlers(): void {
           list = [];
           agentsByTeam.set(a.teamId, list);
         }
-        list.push({ agentId: a.agentId, role: a.role, isManager: a.isManager });
+        list.push({ agentId: a.agentId, role: a.role, isManager: a.isManager, skillsJson: a.skillsJson });
       }
       return {
         ok: true,
@@ -376,6 +388,7 @@ export function registerDataHandlers(): void {
             agentId: a.agentId,
             role: a.role ?? '',
             isManager: a.isManager ?? false,
+            skills: parseTeamAgentSkills(a.skillsJson),
           })),
         })),
       };
@@ -396,7 +409,12 @@ export function registerDataHandlers(): void {
         .from(teamAgents)
         .where(eq(teamAgents.teamId, params.id))
         .all()
-        .map((a) => ({ agentId: a.agentId, role: a.role ?? '', isManager: a.isManager ?? false }));
+        .map((a) => ({
+          agentId: a.agentId,
+          role: a.role ?? '',
+          isManager: a.isManager ?? false,
+          skills: parseTeamAgentSkills(a.skillsJson),
+        }));
       return { ok: true, result: { ...row, agents } };
     } catch (err) {
       console.error('[data] team-get failed:', err);
@@ -417,7 +435,7 @@ export function registerDataHandlers(): void {
         source?: string;
         version?: string;
         hubSlug?: string;
-        agents: Array<{ agentId: string; role?: string; isManager?: boolean }>;
+        agents: Array<{ agentId: string; role?: string; isManager?: boolean; skills?: string[] }>;
         createdAt: string;
         updatedAt: string;
       },
@@ -461,6 +479,7 @@ export function registerDataHandlers(): void {
                 agentId: agent.agentId,
                 role: agent.role ?? '',
                 isManager: agent.isManager ?? false,
+                skillsJson: JSON.stringify(agent.skills ?? []),
               })
               .run();
           }

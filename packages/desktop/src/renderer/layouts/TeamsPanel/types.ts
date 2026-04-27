@@ -8,6 +8,8 @@ export interface AgentDraft {
   soulMd: string;
   skills: string[];
   existingAgentId?: string;
+  lockedExisting?: boolean;
+  expandedByDefault?: boolean;
 }
 
 export interface TeamInfo {

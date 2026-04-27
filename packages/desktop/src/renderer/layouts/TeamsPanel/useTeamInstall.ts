@@ -189,6 +189,7 @@ export function useTeamInstall(onDone?: () => void) {
           agentId: a.existingAgentId!,
           role: a.role,
           isManager: a.role === 'coordinator',
+          skills: a.skills,
         }));
 
         const now = new Date().toISOString();
