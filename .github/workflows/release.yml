@@ -60,10 +60,12 @@ jobs:
           - os: macos-latest
             platform: mac
             arch: arm64
+            expected_macho_arch: arm64
             build_args: '--mac --arm64'
-          - os: macos-latest
+          - os: macos-15-intel
             platform: mac
             arch: x64
+            expected_macho_arch: x86_64
             build_args: '--mac --x64'
           - os: windows-latest
             platform: win
@@ -129,6 +131,13 @@ jobs:
 
       - name: Build Electron app
         run: pnpm --filter @clawwork/desktop build
+
+      - name: Verify macOS native addon architecture
+        if: matrix.platform == 'mac'
+        run: |
+          ADDON="packages/desktop/node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+          file "$ADDON"
+          file "$ADDON" | grep -q "${{ matrix.expected_macho_arch }}"
 
       - name: Package and publish (${{ matrix.platform }})
         if: matrix.platform != 'mac'
