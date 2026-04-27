@@ -281,7 +281,7 @@ const ChatMessage = memo(function ChatMessage({
         {isUser && parsedFiles && (parsedFiles.files.length > 0 || parsedFiles.text) ? (
           <div
             className={cn(
-              'inline-block max-w-full leading-relaxed rounded-2xl px-4 py-3',
+              'inline-block max-w-full text-left leading-relaxed rounded-2xl px-4 py-3',
               'bg-[var(--bg-tertiary)] text-[var(--text-primary)]',
             )}
           >

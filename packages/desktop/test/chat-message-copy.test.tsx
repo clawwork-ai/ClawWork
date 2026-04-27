@@ -121,6 +121,22 @@ describe('chat message copy actions', () => {
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith(message.content);
   });
 
+  it('keeps pasted multiline user text left-aligned inside the right-aligned bubble', () => {
+    const message = buildMessage({
+      role: 'user',
+      content: 'Codex model usage\n\n- current model: `gpt-5.5`\n- total: **$16.92**',
+    });
+
+    const { container, unmount } = render(<ChatMessage message={message} />);
+    cleanups.push(unmount);
+
+    const messageColumn = container.querySelector('.text-right');
+    const bubble = messageColumn?.querySelector('.inline-block');
+
+    expect(messageColumn).not.toBeNull();
+    expect(bubble?.className).toContain('text-left');
+  });
+
   it('shows a copy button for fenced code blocks and copies only the code', async () => {
     const { container, unmount } = render(
       <StreamingMessage content={'```ts\nconst alpha = 1;\nconst beta = alpha + 1;\n```'} />,
