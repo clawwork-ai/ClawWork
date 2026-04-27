@@ -282,7 +282,7 @@ export function createMessageStore(deps: MessageStoreDeps) {
         const content = turn.streamingText;
         const thinkingContent = turn.streamingThinking || undefined;
 
-        if (!content && !thinkingContent) {
+        if (!content && !thinkingContent && turn.toolCalls.length === 0) {
           return {
             activeTurnBySession: {
               ...s.activeTurnBySession,

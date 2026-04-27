@@ -68,4 +68,30 @@ describe('message store tool call persistence', () => {
       }),
     );
   });
+
+  it('finalizes tool-call-only active turns', async () => {
+    const { useMessageStore } = await loadStore();
+    const sessionKey = 'agent:main:clawwork:task:task-1';
+
+    useMessageStore.setState({
+      messagesByTask: {},
+      activeTurnBySession: {},
+      processingBySession: new Set(),
+      highlightedMessageId: null,
+    });
+
+    useMessageStore.getState().upsertToolCall(sessionKey, 'task-1', {
+      id: 'exec-1',
+      name: 'exec',
+      status: 'done',
+      startedAt: '2026-03-16T10:00:00.000Z',
+      completedAt: '2026-03-16T10:00:02.000Z',
+    });
+    useMessageStore.getState().finalizeStream(sessionKey);
+
+    expect(useMessageStore.getState().activeTurnBySession[sessionKey]).toEqual(
+      expect.objectContaining({ finalized: true, toolCalls: [expect.objectContaining({ id: 'exec-1' })] }),
+    );
+    expect(window.clawwork.persistMessage).not.toHaveBeenCalled();
+  });
 });

@@ -6,8 +6,10 @@ import { cn } from '@/lib/utils';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useRoomStore } from '@/stores/roomStore';
 import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { deriveSessionActivity, getTaskSessionKeys } from '@clawwork/core';
 import type { Task } from '@clawwork/shared';
 import ActivityBars from '@/components/ActivityBars';
 
@@ -53,10 +55,11 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
   const clearUnread = useUiStore((s) => s.clearUnread);
   const hasUnread = useUiStore((s) => s.unreadTaskIds.has(task.id));
   const setMainView = useUiStore((s) => s.setMainView);
-  const isStreaming = useMessageStore((s) => {
-    const turn = s.activeTurnBySession[task.sessionKey];
-    return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
-  });
+  const room = useRoomStore((s) => s.rooms[task.id]);
+  const activity = useMessageStore((s) =>
+    deriveSessionActivity(getTaskSessionKeys(task, room), s.activeTurnBySession, s.processingBySession),
+  );
+  const isRunning = activity !== 'idle';
   const isCompleted = task.status === 'completed';
 
   const handleClick = (): void => {
@@ -92,10 +95,8 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
             >
               {task.title ? task.title[0].toUpperCase() : <MessageSquare size={14} />}
             </span>
-            {isStreaming && <ActivityBars className="absolute top-0 right-0.5 scale-50 origin-top-right" />}
-            {hasUnread && !isStreaming && (
-              <span className="absolute top-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />
-            )}
+            {isRunning && <ActivityBars className="absolute top-0 right-0.5 scale-50 origin-top-right" />}
+            {hasUnread && <span className="absolute bottom-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />}
           </motion.button>
         </TooltipTrigger>
         <TooltipContent side="right">{task.title || t('common.newTask')}</TooltipContent>
@@ -116,7 +117,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
         'focus-visible:outline-none glow-focus',
         active
           ? 'bg-[var(--state-selected)]'
-          : isStreaming
+          : isRunning
             ? 'bg-[var(--accent-dim)]'
             : isCompleted
               ? ''
@@ -149,6 +150,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
             <span
               className={cn(
                 'block truncate type-body',
+                hasUnread && 'font-medium',
                 active
                   ? 'text-[var(--text-primary)]'
                   : isCompleted
@@ -161,7 +163,8 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
           )}
         </div>
 
-        {isStreaming && <ActivityBars className="flex-shrink-0 scale-75 origin-center" />}
+        {isRunning && <ActivityBars className="flex-shrink-0 scale-75 origin-center" />}
+        {hasUnread && <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[var(--accent)]" />}
       </div>
     </motion.button>
   );

@@ -6,7 +6,9 @@ import { cn } from '@/lib/utils';
 import { useUiStore } from '@/stores/uiStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
+import { useRoomStore } from '@/stores/roomStore';
 import { commandPaletteMotion, safeMotion, STAGGER_STEP } from '@/styles/design-tokens';
+import { deriveSessionActivity, getTaskSessionKeys } from '@clawwork/core';
 import ActivityBars from './ActivityBars';
 
 interface PaletteItem {
@@ -43,15 +45,18 @@ export default function CommandPalette() {
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
   const tasks = useTaskStore((s) => s.tasks);
   const activeTurnBySession = useMessageStore((s) => s.activeTurnBySession);
+  const processingBySession = useMessageStore((s) => s.processingBySession);
+  const rooms = useRoomStore((s) => s.rooms);
 
-  const isTaskStreaming = useCallback(
+  const isTaskRunning = useCallback(
     (taskId: string) => {
       const t = tasks.find((task) => task.id === taskId);
       if (!t) return false;
-      const turn = activeTurnBySession[t.sessionKey];
-      return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
+      return (
+        deriveSessionActivity(getTaskSessionKeys(t, rooms[t.id]), activeTurnBySession, processingBySession) !== 'idle'
+      );
     },
-    [activeTurnBySession, tasks],
+    [activeTurnBySession, processingBySession, rooms, tasks],
   );
 
   const exec = useCallback(
@@ -127,8 +132,8 @@ export default function CommandPalette() {
           id: `recent:${task.id}`,
           kind: 'task',
           label: task.title || t('common.noTitle'),
-          secondary: isTaskStreaming(task.id) ? t('commandPalette.running') : undefined,
-          running: isTaskStreaming(task.id),
+          secondary: isTaskRunning(task.id) ? t('commandPalette.running') : undefined,
+          running: isTaskRunning(task.id),
           onSelect: () =>
             exec(() => {
               setActiveTask(task.id);
@@ -152,7 +157,7 @@ export default function CommandPalette() {
           id: `active:${task.id}`,
           kind: 'task',
           label: task.title || t('common.noTitle'),
-          running: isTaskStreaming(task.id),
+          running: isTaskRunning(task.id),
           onSelect: () =>
             exec(() => {
               setActiveTask(task.id);
@@ -165,7 +170,7 @@ export default function CommandPalette() {
     }
 
     return result;
-  }, [query, recentTasks, activeTasks, actionItems, t, exec, setActiveTask, setMainView, isTaskStreaming]);
+  }, [query, recentTasks, activeTasks, actionItems, t, exec, setActiveTask, setMainView, isTaskRunning]);
 
   const flatItems = useMemo(() => sections.flatMap((s) => s.items), [sections]);
 

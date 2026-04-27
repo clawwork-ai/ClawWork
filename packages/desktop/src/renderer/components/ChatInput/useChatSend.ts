@@ -21,7 +21,7 @@ import type {
   FileReadResult,
 } from '@clawwork/shared';
 import type { PendingNewTask } from '@clawwork/core';
-import { extractDescription } from '@clawwork/core';
+import { deriveSessionActivity, extractDescription, getTaskSessionKeys } from '@clawwork/core';
 import { useTaskStore } from '../../stores/taskStore';
 import { useMessageStore } from '../../stores/messageStore';
 import { useUiStore } from '../../stores/uiStore';
@@ -80,19 +80,12 @@ export function useChatSend(opts: UseChatSendOpts) {
   const setProcessing = useMessageStore((s) => s.setProcessing);
 
   const activeRoom = useRoomStore((s) => (activeTask?.ensemble ? s.rooms[activeTask.id] : undefined));
-  const sessionKeys = useMemo(() => {
-    if (!activeTask?.sessionKey) return [];
-    return [activeTask.sessionKey, ...(activeRoom?.performers.map((p) => p.sessionKey) ?? [])];
-  }, [activeTask?.sessionKey, activeRoom?.performers]);
-
-  const isProcessing = useMessageStore((s) => sessionKeys.some((sk) => s.processingBySession.has(sk)));
-  const isStreaming = useMessageStore((s) =>
-    sessionKeys.some((sk) => {
-      const turn = s.activeTurnBySession[sk];
-      return !!turn && !turn.finalized && (!!turn.streamingText || !!turn.streamingThinking);
-    }),
+  const activity = useMessageStore((s) =>
+    activeTask
+      ? deriveSessionActivity(getTaskSessionKeys(activeTask, activeRoom), s.activeTurnBySession, s.processingBySession)
+      : 'idle',
   );
-  const isGenerating = isProcessing || isStreaming;
+  const isGenerating = activity !== 'idle';
 
   const isOffline = useUiStore((s) => {
     const gwId = activeTask?.gatewayId ?? pendingNewTask?.gatewayId;
@@ -134,14 +127,14 @@ export function useChatSend(opts: UseChatSendOpts) {
 
   useEffect(() => {
     if (!activeTask) return;
-    if (isStreaming) {
+    if (activity === 'responding' || activity === 'tooling') {
       const timer = responseTimers.current.get(activeTask.id);
       if (timer) {
         clearTimeout(timer);
         responseTimers.current.delete(activeTask.id);
       }
     }
-  }, [isStreaming, activeTask]);
+  }, [activity, activeTask]);
 
   useEffect(() => {
     const timers = responseTimers.current;

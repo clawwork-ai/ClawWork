@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { parseAgentIdFromSessionKey } from '@clawwork/shared';
+import { deriveSessionActivity, getTaskSessionKeys } from '@clawwork/core';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -427,10 +428,10 @@ function ChatContent() {
   const [previewFile, setPreviewFile] = useState<{ path: string; content: string } | null>(null);
   const closeFilePreview = useCallback(() => setPreviewFile(null), []);
   const handleHighlightDone = useCallback(() => setHighlightedMessage(null), [setHighlightedMessage]);
-  const sessionKeys = useMemo(() => {
-    if (!activeTask?.sessionKey) return [];
-    return [activeTask.sessionKey, ...(activeRoom?.performers.map((performer) => performer.sessionKey) ?? [])];
-  }, [activeRoom?.performers, activeTask?.sessionKey]);
+  const sessionKeys = useMemo(
+    () => (activeTask ? getTaskSessionKeys(activeTask, activeRoom) : []),
+    [activeRoom, activeTask],
+  );
   const activeTurns = useMemo(
     () =>
       sessionKeys.reduce<Array<{ sessionKey: string; turn: (typeof activeTurnBySession)[string] }>>(
@@ -443,9 +444,9 @@ function ChatContent() {
       ),
     [activeTurnBySession, sessionKeys],
   );
-  const isProcessing = useMemo(
-    () => sessionKeys.some((sessionKey) => processingBySession.has(sessionKey)),
-    [processingBySession, sessionKeys],
+  const activity = useMemo(
+    () => deriveSessionActivity(sessionKeys, activeTurnBySession, processingBySession),
+    [activeTurnBySession, processingBySession, sessionKeys],
   );
   const timelineItems = useMemo(() => {
     const messageItems = messages.map((message) => ({
@@ -651,7 +652,9 @@ function ChatContent() {
 
               return null;
             })}
-            <AnimatePresence>{isProcessing && !hasRenderableActiveTurn && <ThinkingIndicator />}</AnimatePresence>
+            <AnimatePresence>
+              {activity === 'waiting' && !hasRenderableActiveTurn && <ThinkingIndicator />}
+            </AnimatePresence>
           </div>
         </ScrollArea>
         {showScrollButton && (
