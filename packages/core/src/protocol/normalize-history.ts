@@ -33,9 +33,51 @@ function appendSegment(base: string, segment: string): string {
   return `${base}\n\n${trimmed}`;
 }
 
-export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): NormalizedAssistantTurn[] {
-  const toolResultMap = new Map<string, string>();
+function normalizeSignatureValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(normalizeSignatureValue);
+  if (typeof value !== 'object' || value === null) return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, entry]) => [key, normalizeSignatureValue(entry)]),
+  );
+}
+
+function rawHistoryMessageKey(msg: RawHistoryMessage): string {
+  return JSON.stringify({
+    role: msg.role,
+    timestamp: msg.timestamp ?? null,
+    content: normalizeSignatureValue(msg.content ?? []),
+  });
+}
+
+function deduplicateRawHistoryMessages(rawMsgs: RawHistoryMessage[]): RawHistoryMessage[] {
+  const seen = new Set<string>();
+  const deduped: RawHistoryMessage[] = [];
+
   for (const msg of rawMsgs) {
+    const key = rawHistoryMessageKey(msg);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(msg);
+  }
+
+  return deduped;
+}
+
+function shouldStartVisibleAssistantTurn(
+  turn: NormalizedAssistantTurn | null,
+  timestamp: string,
+  canMergeToolFinal: boolean,
+): boolean {
+  return Boolean(turn?.content && turn.timestamp !== timestamp && !canMergeToolFinal);
+}
+
+export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): NormalizedAssistantTurn[] {
+  const messages = deduplicateRawHistoryMessages(rawMsgs);
+  const toolResultMap = new Map<string, string>();
+  for (const msg of messages) {
     if (msg.role !== 'toolResult') continue;
     for (const block of msg.content ?? []) {
       if (block.type === 'toolResult' && block.id && block.result !== undefined) {
@@ -46,18 +88,23 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
 
   const turns: NormalizedAssistantTurn[] = [];
   let current: NormalizedAssistantTurn | null = null;
+  let canMergeToolFinal = false;
 
-  function ensureCurrent(timestamp: string): NormalizedAssistantTurn {
-    if (!current) {
-      current = { content: '', toolCalls: [], timestamp };
-      turns.push(current);
-    }
+  function startCurrent(timestamp: string): NormalizedAssistantTurn {
+    current = { content: '', toolCalls: [], timestamp };
+    turns.push(current);
     return current;
   }
 
-  for (const msg of rawMsgs) {
+  function ensureCurrent(timestamp: string): NormalizedAssistantTurn {
+    if (!current) return startCurrent(timestamp);
+    return current;
+  }
+
+  for (const msg of messages) {
     if (msg.role === 'user') {
       current = null;
+      canMergeToolFinal = false;
       continue;
     }
     if (msg.role !== 'assistant') continue;
@@ -95,14 +142,20 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
         turn.content = appendSegment(turn.content, visibleText);
       }
       turn.timestamp = timestamp;
+      canMergeToolFinal = true;
       continue;
     }
 
     if (!visibleText) continue;
 
+    if (shouldStartVisibleAssistantTurn(current, timestamp, canMergeToolFinal)) {
+      startCurrent(timestamp);
+    }
+
     const turn = ensureCurrent(timestamp);
     turn.content = appendSegment(turn.content, visibleText);
     turn.timestamp = timestamp;
+    canMergeToolFinal = false;
   }
 
   return turns.filter((turn) => turn.content || turn.toolCalls.length > 0);
