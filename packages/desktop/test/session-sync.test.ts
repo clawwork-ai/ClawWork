@@ -255,6 +255,89 @@ describe('session sync startup flow', () => {
     expect(mockApi.persistMessage).not.toHaveBeenCalled();
   });
 
+  it('does not backfill split assistant turns before a legacy collapsed local row during runtime sync', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+    const sessionKey = 'agent:main:clawwork:task:task-legacy';
+
+    taskStore.useTaskStore.setState({
+      tasks: [
+        {
+          id: 'task-legacy',
+          sessionKey,
+          sessionId: 'session-legacy',
+          title: 'Legacy split test',
+          status: 'active',
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: 'tasks/task-legacy',
+          gatewayId: 'gw-1',
+        },
+      ],
+      activeTaskId: 'task-legacy',
+      hydrated: true,
+    });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {
+        'task-legacy': [
+          {
+            id: 'u1',
+            taskId: 'task-legacy',
+            role: 'user',
+            content: 'Check status',
+            artifacts: [],
+            toolCalls: [],
+            timestamp: '2026-03-16T10:00:00.000Z',
+          },
+          {
+            id: 'a1',
+            taskId: 'task-legacy',
+            role: 'assistant',
+            content: 'Intro\n\nFinal status',
+            artifacts: [],
+            toolCalls: [],
+            sessionKey,
+            agentId: 'main',
+            timestamp: '2026-03-16T10:00:03.000Z',
+          },
+        ],
+      },
+      activeTurnBySession: {},
+      processingBySession: new Set(),
+      highlightedMessageId: null,
+    });
+
+    mockApi.chatHistory.mockResolvedValue({
+      ok: true,
+      result: {
+        messages: [
+          {
+            role: 'user',
+            timestamp: Date.parse('2026-03-16T10:00:00.000Z'),
+            content: [{ type: 'text', text: 'Check status' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:01.000Z'),
+            content: [{ type: 'text', text: 'Intro' }],
+          },
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:03.000Z'),
+            content: [{ type: 'text', text: 'Final status' }],
+          },
+        ],
+      },
+    });
+
+    await sessionSync.syncSessionMessages('task-legacy');
+
+    const msgs = messageStore.useMessageStore.getState().messagesByTask['task-legacy'];
+    expect(msgs).toHaveLength(2);
+    expect(msgs[1].content).toBe('Intro\n\nFinal status');
+    expect(mockApi.persistMessage).not.toHaveBeenCalled();
+  });
+
   it('syncs only new assistant messages for existing tasks (single-writer)', async () => {
     const { sessionSync, taskStore, messageStore } = await loadModules();
 

@@ -156,13 +156,22 @@ export function createSessionSync(deps: SessionSyncDeps) {
 
     const messageStore = deps.getMessageStore();
     const localMsgs = messageStore.messagesByTask[taskId] ?? [];
+    const localAssistantMsgs = localMsgs.filter((m) => m.role === 'assistant');
     const localAssistantKeys = new Set(
-      localMsgs.filter((m) => m.role === 'assistant').map((m) => `${m.sessionKey ?? task.sessionKey}|${m.timestamp}`),
+      localAssistantMsgs.map((m) => `${m.sessionKey ?? task.sessionKey}|${m.timestamp}`),
+    );
+    const latestLocalAssistantTimestamp = localAssistantMsgs.reduce<string | undefined>(
+      (latest, message) => (!latest || message.timestamp > latest ? message.timestamp : latest),
+      undefined,
     );
 
     const gatewayAssistant = normalizeAssistantTurns(rawMsgs);
 
-    const newest = gatewayAssistant.filter((m) => !localAssistantKeys.has(`${sessionKey}|${m.timestamp}`));
+    const newest = gatewayAssistant.filter(
+      (m) =>
+        !localAssistantKeys.has(`${sessionKey}|${m.timestamp}`) &&
+        (!latestLocalAssistantTimestamp || m.timestamp > latestLocalAssistantTimestamp),
+    );
     if (newest.length === 0) {
       messageStore.clearActiveTurn(sessionKey);
       return;
