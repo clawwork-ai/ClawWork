@@ -17,7 +17,6 @@ interface UseGatewaySelectorResult {
   defaultAgentId: string;
   effectiveAgentId: string;
   setSelectedAgentId: (id: string) => void;
-  hasMultipleGw: boolean;
   hasMultipleAgents: boolean;
 }
 
@@ -46,10 +45,13 @@ export function useGatewaySelector(options: UseGatewaySelectorOptions = {}): Use
   );
 
   useEffect(() => {
-    if (!selectedGwId) {
-      const fallback = defaultGatewayId ?? gateways[0]?.id ?? '';
-      if (fallback) setSelectedGwId(fallback);
-    }
+    if (!gateways.length) return;
+    if (gateways.some((gw) => gw.id === selectedGwId)) return;
+    const fallback =
+      defaultGatewayId && gateways.some((gw) => gw.id === defaultGatewayId)
+        ? defaultGatewayId
+        : (gateways[0]?.id ?? '');
+    if (fallback && fallback !== selectedGwId) setSelectedGwId(fallback);
   }, [defaultGatewayId, gateways, selectedGwId]);
 
   useEffect(() => {
@@ -64,7 +66,6 @@ export function useGatewaySelector(options: UseGatewaySelectorOptions = {}): Use
     defaultAgentId,
     effectiveAgentId,
     setSelectedAgentId,
-    hasMultipleGw: gateways.length > 1,
     hasMultipleAgents: agentCatalog.length > 1,
   };
 }

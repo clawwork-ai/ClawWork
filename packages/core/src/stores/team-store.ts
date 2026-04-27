@@ -23,6 +23,7 @@ export interface TeamStoreDeps {
 export interface TeamState {
   teams: Record<string, Team>;
   loading: boolean;
+  loadedOnce: boolean;
   loadTeams(): Promise<void>;
   createTeam(params: Omit<Team, 'id' | 'createdAt' | 'updatedAt'>): Promise<string>;
   updateTeam(id: string, updates: Partial<Team>): Promise<void>;
@@ -36,6 +37,7 @@ export function createTeamStore(deps: TeamStoreDeps) {
   const store = createStore<TeamState>((set, get) => ({
     teams: {},
     loading: false,
+    loadedOnce: false,
 
     loadTeams: async () => {
       set({ loading: true });
@@ -51,7 +53,7 @@ export function createTeamStore(deps: TeamStoreDeps) {
       } catch (err) {
         console.error('[team-store] loadTeams failed:', err);
       } finally {
-        set({ loading: false });
+        set({ loading: false, loadedOnce: true });
       }
     },
 

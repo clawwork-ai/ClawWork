@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bot, ChevronDown, ChevronRight, Server, Sparkles, Users, Compass } from 'lucide-react';
+import { Bot, ChevronRight, Sparkles, Users, Compass } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Team } from '@clawwork/shared';
 import { useTaskStore } from '@/stores/taskStore';
@@ -9,13 +9,8 @@ import { cn } from '@/lib/utils';
 import { motion as animationPresets } from '@/styles/design-tokens';
 import { motion } from 'framer-motion';
 import AgentIcon from '@/components/AgentIcon';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
 import { useGatewaySelector } from '@/hooks/useGatewaySelector';
+import GatewayInstanceSelector from '@/components/GatewayInstanceSelector';
 import logo from '@/assets/logo.png';
 
 type WelcomeTab = 'agent' | 'team' | 'orchestrate';
@@ -37,9 +32,10 @@ export default function WelcomeScreen() {
   });
   const updateTaskMetadata = useTaskStore((s) => s.updateTaskMetadata);
   const teamsMap = useTeamStore((s) => s.teams);
+  const teamsLoadedOnce = useTeamStore((s) => s.loadedOnce);
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
-  const teams = Object.values(teamsMap);
+  const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
   const hasTeams = teams.length > 0;
   const {
     gateways,
@@ -49,7 +45,6 @@ export default function WelcomeScreen() {
     defaultAgentId,
     effectiveAgentId,
     setSelectedAgentId,
-    hasMultipleGw,
     hasMultipleAgents,
   } = useGatewaySelector({
     initialGatewayId: pendingNewTask?.gatewayId,
@@ -68,6 +63,11 @@ export default function WelcomeScreen() {
   );
   const [agentExpanded, setAgentExpanded] = useState(false);
 
+  const teamsForSelectedGateway = useMemo(
+    () => teams.filter((team) => team.gatewayId === selectedGwId),
+    [teams, selectedGwId],
+  );
+
   useEffect(() => {
     loadTeams();
   }, [loadTeams]);
@@ -84,17 +84,35 @@ export default function WelcomeScreen() {
           return;
         useTaskStore.getState().setPending({ gatewayId: selectedGwId, agentId: effectiveAgentId });
       }
-    } else if (activeTab === 'team' && selectedTeamId) {
-      const team = teamsMap[selectedTeamId];
-      if (!team) return;
+    } else if (activeTab === 'team') {
+      if (!teamsLoadedOnce) return;
+      const currentTeamValid = selectedTeamId && teamsMap[selectedTeamId]?.gatewayId === selectedGwId;
+      const effectiveTeamId = currentTeamValid ? selectedTeamId : (teamsForSelectedGateway[0]?.id ?? null);
+
+      if (effectiveTeamId !== selectedTeamId) {
+        setSelectedTeamId(effectiveTeamId);
+      }
+
+      if (!effectiveTeamId) {
+        if (!defaultAgentId) return;
+        if (activeTaskId) return;
+        const prev = useTaskStore.getState().pendingNewTask;
+        if (prev?.gatewayId === selectedGwId && prev?.agentId === defaultAgentId && !prev?.ensemble && !prev?.teamId)
+          return;
+        useTaskStore.getState().setPending({ gatewayId: selectedGwId, agentId: defaultAgentId });
+        return;
+      }
+
+      const team = teamsMap[effectiveTeamId];
+      if (!team || team.gatewayId !== selectedGwId) return;
       const manager = team.agents.find((a) => a.isManager);
       const agentId = manager?.agentId ?? team.agents[0]?.agentId ?? '';
       const needsEnsemble = team.agents.length >= 2;
       if (activeTaskId) {
-        if (!!activeTaskEnsemble !== needsEnsemble || activeTaskTeamId !== selectedTeamId) {
+        if (!!activeTaskEnsemble !== needsEnsemble || activeTaskTeamId !== effectiveTeamId) {
           updateTaskMetadata(activeTaskId, {
             ensemble: needsEnsemble,
-            teamId: selectedTeamId,
+            teamId: effectiveTeamId,
           });
         }
       } else {
@@ -103,14 +121,14 @@ export default function WelcomeScreen() {
           prev?.gatewayId === team.gatewayId &&
           prev?.agentId === agentId &&
           !!prev?.ensemble === needsEnsemble &&
-          prev?.teamId === selectedTeamId
+          prev?.teamId === effectiveTeamId
         )
           return;
         useTaskStore.getState().setPending({
           gatewayId: team.gatewayId,
           agentId,
           ensemble: needsEnsemble,
-          teamId: selectedTeamId,
+          teamId: effectiveTeamId,
         });
       }
     } else if (activeTab === 'orchestrate') {
@@ -119,18 +137,17 @@ export default function WelcomeScreen() {
           updateTaskMetadata(activeTaskId, { ensemble: true, teamId: null });
         }
       } else {
-        const defaultAgent = defaultAgentId;
         const prev = useTaskStore.getState().pendingNewTask;
         if (
           prev?.gatewayId === selectedGwId &&
-          prev?.agentId === defaultAgent &&
+          prev?.agentId === defaultAgentId &&
           prev?.ensemble === true &&
           !prev?.teamId
         )
           return;
         useTaskStore.getState().setPending({
           gatewayId: selectedGwId,
-          agentId: defaultAgent,
+          agentId: defaultAgentId,
           ensemble: true,
         });
       }
@@ -141,12 +158,14 @@ export default function WelcomeScreen() {
     effectiveAgentId,
     selectedTeamId,
     teamsMap,
+    teamsLoadedOnce,
     defaultAgentId,
     agentCatalog,
     activeTaskId,
     activeTaskEnsemble,
     activeTaskTeamId,
     updateTaskMetadata,
+    teamsForSelectedGateway,
   ]);
 
   const handleSelectGateway = useCallback(
@@ -171,19 +190,18 @@ export default function WelcomeScreen() {
   const hiddenAgentCount = agentCatalog.length - MAX_VISIBLE;
 
   const visibleTabs = useMemo(() => {
-    const all: { id: WelcomeTab; label: string; icon: typeof Bot; showGwDropdown: boolean; visible: boolean }[] = [
-      { id: 'agent', label: t('mainArea.tabAgent'), icon: Bot, showGwDropdown: hasMultipleGw, visible: true },
-      { id: 'team', label: t('mainArea.tabTeam'), icon: Users, showGwDropdown: false, visible: true },
+    const all: { id: WelcomeTab; label: string; icon: typeof Bot; visible: boolean }[] = [
+      { id: 'agent', label: t('mainArea.tabAgent'), icon: Bot, visible: true },
+      { id: 'team', label: t('mainArea.tabTeam'), icon: Users, visible: true },
       {
         id: 'orchestrate',
         label: t('mainArea.tabOrchestrate'),
         icon: Sparkles,
-        showGwDropdown: hasMultipleGw,
         visible: hasMultipleAgents,
       },
     ];
     return all.filter((tab) => tab.visible);
-  }, [t, hasMultipleGw, hasMultipleAgents]);
+  }, [t, hasMultipleAgents]);
 
   return (
     <motion.div
@@ -204,16 +222,20 @@ export default function WelcomeScreen() {
               active={activeTab === tab.id}
               icon={tab.icon}
               label={tab.label}
-              showGwDropdown={tab.showGwDropdown}
-              gateways={gateways}
-              selectedGwId={selectedGwId}
               onSelectTab={() => setActiveTab(tab.id)}
-              onSelectGateway={handleSelectGateway}
             />
           ))}
         </div>
 
-        <div className="mt-6">
+        <GatewayInstanceSelector
+          gateways={gateways}
+          selectedGatewayId={selectedGwId}
+          onSelectGateway={handleSelectGateway}
+          showLabel={false}
+          className="mt-5"
+        />
+
+        <div className="mt-4">
           {activeTab === 'agent' && (
             <AgentTabContent
               agents={visibleAgents}
@@ -231,7 +253,7 @@ export default function WelcomeScreen() {
 
           {activeTab === 'team' && (
             <TeamTabContent
-              teams={teams}
+              teams={teamsForSelectedGateway}
               selectedTeamId={selectedTeamId}
               onSelect={handleSelectTeam}
               onBrowseHub={handleBrowseHub}
@@ -258,22 +280,13 @@ function TabButton({
   active,
   icon: Icon,
   label,
-  showGwDropdown,
-  gateways,
-  selectedGwId,
   onSelectTab,
-  onSelectGateway,
 }: {
   active: boolean;
   icon: typeof Bot;
   label: string;
-  showGwDropdown: boolean;
-  gateways: { id: string; name: string }[];
-  selectedGwId: string;
   onSelectTab: () => void;
-  onSelectGateway: (id: string) => void;
 }) {
-  const { t } = useTranslation();
   const baseClass = cn(
     'type-body inline-flex items-center gap-2 rounded-full transition-all',
     active
@@ -281,46 +294,11 @@ function TabButton({
       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]',
   );
 
-  if (!showGwDropdown || !active) {
-    return (
-      <button onClick={onSelectTab} className={cn(baseClass, 'px-6 py-2.5 cursor-pointer')}>
-        <Icon size={15} />
-        <span>{label}</span>
-        {showGwDropdown && <ChevronDown size={11} className="opacity-40 -ml-1" />}
-      </button>
-    );
-  }
-
   return (
-    <div className={cn(baseClass, 'pl-6 pr-1.5 py-1')}>
-      <span className="inline-flex items-center gap-2 py-1.5">
-        <Icon size={15} />
-        <span>{label}</span>
-      </span>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-label={t('settings.selectGateway')}
-            className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] cursor-pointer transition-colors ml-1"
-          >
-            <ChevronDown size={12} className="opacity-60" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center">
-          {gateways.map((gw) => (
-            <DropdownMenuItem
-              key={gw.id}
-              onClick={() => onSelectGateway(gw.id)}
-              className={cn(gw.id === selectedGwId && 'text-[var(--accent)]')}
-            >
-              <Server size={13} />
-              <span className="max-w-32 truncate">{gw.name}</span>
-              {gw.id === selectedGwId && <span className="ml-auto">✓</span>}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <button onClick={onSelectTab} className={cn(baseClass, 'px-6 py-2.5 cursor-pointer')}>
+      <Icon size={15} />
+      <span>{label}</span>
+    </button>
   );
 }
 

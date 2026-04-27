@@ -9,8 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useResizePanel } from '@/hooks/useResizePanel';
 import { useUiStore } from '@/stores/uiStore';
 import { useTeamStore } from '@/stores/teamStore';
-import { cn } from '@/lib/utils';
-import { inputClass } from './utils';
+import GatewayInstanceSelector from '@/components/GatewayInstanceSelector';
 import TeamFileTree, { type TreeFile } from './TeamFileTree';
 import InstallStep from './InstallStep';
 import { useTeamHubInstall } from './useTeamHubInstall';
@@ -27,8 +26,8 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
   const teamsMap = useTeamStore((s) => s.teams);
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
-  const gateways = useMemo(() => Object.entries(gatewayInfoMap), [gatewayInfoMap]);
-  const [gatewayId, setGatewayId] = useState(() => gateways[0]?.[0] ?? '');
+  const gateways = useMemo(() => Object.values(gatewayInfoMap), [gatewayInfoMap]);
+  const [gatewayId, setGatewayId] = useState(() => gateways[0]?.id ?? '');
 
   const [parsedData, setParsedData] = useState<{ parsed: ParsedTeam; agentFiles: Record<string, AgentFileSet> } | null>(
     null,
@@ -60,6 +59,11 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
     loadTeams();
     toast.success(t('teamshub.installSuccess'));
   });
+
+  useEffect(() => {
+    if (gatewayId && gateways.some((gateway) => gateway.id === gatewayId)) return;
+    setGatewayId(gateways[0]?.id ?? '');
+  }, [gatewayId, gateways]);
 
   useEffect(() => {
     let cancelled = false;
@@ -249,19 +253,14 @@ export default function TeamHubDetailView({ entry, onBack }: TeamHubDetailViewPr
                   </span>
                 ) : (
                   <>
-                    {gateways.length > 1 && (
-                      <select
-                        value={gatewayId}
-                        onChange={(e) => setGatewayId(e.target.value)}
-                        className={cn(inputClass, 'h-7 max-w-36 type-meta')}
-                      >
-                        {gateways.map(([id, gw]) => (
-                          <option key={id} value={id}>
-                            {gw.name}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+                    <GatewayInstanceSelector
+                      gateways={gateways}
+                      selectedGatewayId={gatewayId}
+                      onSelectGateway={setGatewayId}
+                      showLabel={false}
+                      align="end"
+                      buttonClassName="h-8 rounded-lg px-2.5 py-1 type-meta"
+                    />
                     <Button size="sm" variant="soft" onClick={handleInstall} disabled={!gatewayId || !parsedData}>
                       <Download size={14} />
                       {t('teamshub.install')}
