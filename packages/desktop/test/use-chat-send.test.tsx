@@ -22,6 +22,8 @@ const mocks = vi.hoisted(() => {
 
   return {
     abort: vi.fn(async () => {}),
+    applySlashCommand: vi.fn(async () => ({ ok: true })),
+    send: vi.fn(async () => ({ ok: true, taskId: 'task-1' })),
     taskState: {
       tasks: [activeTask],
       activeTaskId: 'task-1',
@@ -59,6 +61,8 @@ vi.mock('sonner', () => ({
 vi.mock('../src/renderer/platform', () => ({
   composer: {
     abort: mocks.abort,
+    applySlashCommand: mocks.applySlashCommand,
+    send: mocks.send,
   },
   useTaskStore: <T,>(selector?: (state: typeof mocks.taskState) => T) =>
     selector ? selector(mocks.taskState) : mocks.taskState,
@@ -92,7 +96,7 @@ function render(ui: ReactElement): { container: HTMLDivElement; unmount: () => v
   };
 }
 
-function Harness() {
+function Harness({ initialValue = '' }: { initialValue?: string }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chat = useChatSend({
     textareaRef,
@@ -112,9 +116,12 @@ function Harness() {
 
   return (
     <>
-      <textarea ref={textareaRef} />
+      <textarea ref={textareaRef} defaultValue={initialValue} />
       <button type="button" onClick={() => void chat.handleAbort()}>
         abort
+      </button>
+      <button type="button" onClick={() => void chat.handleSend()}>
+        send
       </button>
       <div data-testid="aborting">{chat.aborting ? 'aborting' : 'idle'}</div>
     </>
@@ -126,6 +133,8 @@ describe('useChatSend abort flow', () => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
     mocks.abort.mockClear();
+    mocks.applySlashCommand.mockClear();
+    mocks.send.mockClear();
     (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
@@ -156,5 +165,18 @@ describe('useChatSend abort flow', () => {
     });
 
     expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it('routes model slash input through the local command path', async () => {
+    const { container } = render(<Harness initialValue="/model public/deepseek-v4-pro" />);
+    const buttons = container.querySelectorAll('button');
+
+    await act(async () => {
+      buttons[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(mocks.applySlashCommand).toHaveBeenCalledWith('task-1', 'model', 'public/deepseek-v4-pro');
+    expect(mocks.send).not.toHaveBeenCalled();
   });
 });

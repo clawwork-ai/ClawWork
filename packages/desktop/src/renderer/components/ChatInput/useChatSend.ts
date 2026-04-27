@@ -406,6 +406,14 @@ export function useChatSend(opts: UseChatSendOpts) {
       }));
       const allAttachments = [...gatewayAttachments, ...extraAttachments];
 
+      const slashMatch = finalContent.trim().match(/^\/(model|think)\s+(.+)$/);
+      if (slashMatch && allAttachments.length === 0 && !msgAttachments?.length) {
+        const command = slashMatch[1] as 'model' | 'think';
+        const result = await composer.applySlashCommand(task.id, command, slashMatch[2].trim());
+        if (!result.ok) toast.error(t('errors.sendFailed'));
+        return;
+      }
+
       const titleHint =
         content ||
         (localFileMentions.length ? `[@${localFileMentions[0].fileName}]` : '') ||

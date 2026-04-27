@@ -12,7 +12,7 @@ interface TaskRef {
 }
 
 export interface ChatComposerDeps {
-  gateway: Pick<GatewayTransportPort, 'sendMessage' | 'abortChat'>;
+  gateway: Pick<GatewayTransportPort, 'sendMessage' | 'abortChat' | 'patchSession'>;
 
   getTaskStore: () => {
     tasks: TaskRef[];
@@ -164,14 +164,28 @@ export function createChatComposer(deps: ChatComposerDeps) {
 
       if (!isMentionSend) {
         if (options.presetModel) {
-          await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/model ${options.presetModel}`);
+          const modelRes = await deps.gateway.patchSession(task.gatewayId, task.sessionKey, {
+            model: options.presetModel,
+          });
+          if (!modelRes.ok) {
+            store.setProcessing(task.sessionKey, false);
+            emitError(task.id, 'gateway', 'send', modelRes.error || deps.translate('errors.sendFailed'));
+            return { ok: false, taskId: task.id };
+          }
           deps.getTaskStore().updateTaskMetadata(task.id, {
             model: options.presetModel,
             modelProvider: deps.getModelProvider?.(task.gatewayId, options.presetModel),
           });
         }
         if (options.presetThinking && options.presetThinking !== 'off') {
-          await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/think ${options.presetThinking}`);
+          const thinkingRes = await deps.gateway.patchSession(task.gatewayId, task.sessionKey, {
+            thinkingLevel: options.presetThinking,
+          });
+          if (!thinkingRes.ok) {
+            store.setProcessing(task.sessionKey, false);
+            emitError(task.id, 'gateway', 'send', thinkingRes.error || deps.translate('errors.sendFailed'));
+            return { ok: false, taskId: task.id };
+          }
           deps.getTaskStore().updateTaskMetadata(task.id, { thinkingLevel: options.presetThinking });
         }
       }
@@ -323,7 +337,8 @@ export function createChatComposer(deps: ChatComposerDeps) {
       }
       case 'model': {
         if (!arg) return { ok: false };
-        await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/model ${arg}`);
+        const res = await deps.gateway.patchSession(task.gatewayId, task.sessionKey, { model: arg });
+        if (!res.ok) return { ok: false };
         deps.getTaskStore().updateTaskMetadata(taskId, {
           model: arg,
           modelProvider: deps.getModelProvider?.(task.gatewayId, arg),
@@ -332,7 +347,8 @@ export function createChatComposer(deps: ChatComposerDeps) {
       }
       case 'think': {
         if (!arg) return { ok: false };
-        await deps.gateway.sendMessage(task.gatewayId, task.sessionKey, `/think ${arg}`);
+        const res = await deps.gateway.patchSession(task.gatewayId, task.sessionKey, { thinkingLevel: arg });
+        if (!res.ok) return { ok: false };
         deps.getTaskStore().updateTaskMetadata(taskId, { thinkingLevel: arg });
         return { ok: true };
       }
