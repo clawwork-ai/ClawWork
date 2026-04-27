@@ -830,9 +830,14 @@ export default function AgentsSection() {
       });
       if (res.ok) {
         if (isNewUpload) {
-          window.clawwork
-            .saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar)
-            .catch((err) => console.error('[AgentsSection] saveAgentAvatar (update) failed:', err));
+          try {
+            const avatarRes = await window.clawwork.saveAgentAvatar(selectedGatewayId, editingAgentId, form.avatar);
+            if (!avatarRes.ok) {
+              console.error('[AgentsSection] saveAgentAvatar (update) failed:', avatarRes.error);
+            }
+          } catch (err) {
+            console.error('[AgentsSection] saveAgentAvatar (update) rejected:', err);
+          }
         }
         const parsed = parseIdentityMd(form.identityRaw);
         const newContent = serializeIdentityMd(form.description.trim() || undefined, parsed.body, form.identityRaw);
@@ -867,9 +872,14 @@ export default function AgentsSection() {
         const created = res.result as Record<string, unknown> | undefined;
         const newAgentId = (created?.agentId as string) ?? '';
         if (isNewUpload && newAgentId) {
-          window.clawwork
-            .saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar)
-            .catch((err) => console.error('[AgentsSection] saveAgentAvatar (create) failed:', err));
+          try {
+            const avatarRes = await window.clawwork.saveAgentAvatar(selectedGatewayId, newAgentId, form.avatar);
+            if (!avatarRes.ok) {
+              console.error('[AgentsSection] saveAgentAvatar (create) failed:', avatarRes.error);
+            }
+          } catch (err) {
+            console.error('[AgentsSection] saveAgentAvatar (create) rejected:', err);
+          }
         }
         if (newAgentId && form.description.trim()) {
           const content = serializeIdentityMd(form.description.trim(), '');
@@ -898,9 +908,14 @@ export default function AgentsSection() {
       deleteFiles,
     });
     if (res.ok) {
-      window.clawwork
-        .deleteAgentAvatar(selectedGatewayId, deletingAgentId)
-        .catch((err) => console.error('[AgentsSection] deleteAgentAvatar failed:', err));
+      try {
+        const avatarRes = await window.clawwork.deleteAgentAvatar(selectedGatewayId, deletingAgentId);
+        if (!avatarRes.ok) {
+          console.error('[AgentsSection] deleteAgentAvatar failed:', avatarRes.error);
+        }
+      } catch (err) {
+        console.error('[AgentsSection] deleteAgentAvatar rejected:', err);
+      }
       toast.success(t('settings.agentDeleted'));
       if (expandedFilesAgentId === deletingAgentId) {
         setExpandedFilesAgentId(null);
