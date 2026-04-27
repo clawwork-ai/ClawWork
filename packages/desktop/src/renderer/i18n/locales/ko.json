@@ -694,6 +694,8 @@
     "description": "설명",
     "detail": {
       "agents": "에이전트",
+      "agentSkillCount": "스킬 {{count}}개",
+      "agentSkillsLabel": "{{name}} 스킬",
       "fileSaved": "파일이 저장되었습니다",
       "fileSaveFailed": "파일 저장에 실패했습니다",
       "noDescription": "설명 없음",

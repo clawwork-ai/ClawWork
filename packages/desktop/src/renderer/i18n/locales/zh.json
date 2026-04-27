@@ -694,6 +694,8 @@
     "description": "描述",
     "detail": {
       "agents": "智能体",
+      "agentSkillCount": "{{count}} 个技能",
+      "agentSkillsLabel": "{{name}} 技能",
       "fileSaved": "文件已保存",
       "fileSaveFailed": "文件保存失败",
       "noDescription": "暂无描述",

@@ -694,6 +694,8 @@
     "description": "説明",
     "detail": {
       "agents": "エージェント",
+      "agentSkillCount": "{{count}} 個のスキル",
+      "agentSkillsLabel": "{{name}} のスキル",
       "fileSaved": "ファイルを保存しました",
       "fileSaveFailed": "ファイルの保存に失敗しました",
       "noDescription": "説明なし",

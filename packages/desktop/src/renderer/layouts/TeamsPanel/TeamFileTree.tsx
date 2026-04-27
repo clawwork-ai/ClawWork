@@ -168,14 +168,14 @@ export default function TeamFileTree({
               ))}
               {agent.skillCount > 0 && (
                 <TreeItem
-                  label={`${agent.skillCount} skills`}
+                  label={t('teams.detail.agentSkillCount', { count: agent.skillCount })}
                   icon={<Puzzle size={12} className={ICON_CLS} />}
                   depth={2}
                   selected={selectedFileId === `agent-skills-${agent.agentId}`}
                   onClick={() =>
                     onSelectFile({
                       id: `agent-skills-${agent.agentId}`,
-                      label: `${agent.name} Skills`,
+                      label: t('teams.detail.agentSkillsLabel', { name: agent.name }),
                       kind: 'agent-skills',
                       agentId: agent.agentId,
                       agentName: agent.name,

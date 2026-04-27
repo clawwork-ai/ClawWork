@@ -694,6 +694,8 @@
     "description": "Descrição",
     "detail": {
       "agents": "Agentes",
+      "agentSkillCount": "{{count}} habilidades",
+      "agentSkillsLabel": "Habilidades de {{name}}",
       "fileSaved": "Arquivo salvo",
       "fileSaveFailed": "Falha ao salvar o arquivo",
       "noDescription": "Sem descrição",
