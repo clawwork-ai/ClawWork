@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTaskStore } from '../stores/taskStore';
-import { useUiStore } from '../stores/uiStore';
 import { useMessageStore } from '../stores/messageStore';
+import { useUiStore } from '../stores/uiStore';
 import i18n from '../i18n';
 
 function formatDuration(updatedAt: string): string {
@@ -15,19 +15,16 @@ function formatDuration(updatedAt: string): string {
 export function useTraySync(): void {
   const tasks = useTaskStore((s) => s.tasks);
   const processingBySession = useMessageStore((s) => s.processingBySession);
-  const gatewayStatusMap = useUiStore((s) => s.gatewayStatusMap);
   const unreadTaskIds = useUiStore((s) => s.unreadTaskIds);
 
   const prevRef = useRef<{ status: string; taskIds: string }>({ status: '', taskIds: '' });
 
   useEffect(() => {
-    const anyDisconnected = Object.values(gatewayStatusMap).some((s) => s === 'disconnected');
     const isRunning = processingBySession.size > 0;
     const hasUnread = unreadTaskIds.size > 0;
 
-    let status: 'idle' | 'running' | 'unread' | 'disconnected';
-    if (anyDisconnected) status = 'disconnected';
-    else if (isRunning) status = 'running';
+    let status: 'idle' | 'running' | 'unread';
+    if (isRunning) status = 'running';
     else if (hasUnread) status = 'unread';
     else status = 'idle';
 
@@ -49,5 +46,5 @@ export function useTraySync(): void {
     });
 
     window.clawwork.updateTrayStatus(status, activeTasks);
-  }, [tasks, processingBySession, gatewayStatusMap, unreadTaskIds]);
+  }, [tasks, processingBySession, unreadTaskIds]);
 }

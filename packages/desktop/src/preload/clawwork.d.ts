@@ -468,7 +468,7 @@ export interface ClawWorkAPI {
   compactSession: (gatewayId: string, sessionKey: string, maxLines?: number) => Promise<IpcResult>;
 
   updateTrayStatus: (
-    status: 'idle' | 'running' | 'unread' | 'disconnected',
+    status: 'idle' | 'running' | 'unread',
     tasks?: { taskId: string; title: string; snippet: string; duration: string }[],
   ) => void;
   getTrayEnabled: () => Promise<boolean>;

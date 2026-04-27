@@ -5,7 +5,7 @@ import { getDebugLogger } from './debug/index.js';
 import { readConfig, updateConfig } from './workspace/config.js';
 import { getMainWindow } from './window-manager.js';
 
-export type TrayStatus = 'idle' | 'running' | 'unread' | 'disconnected';
+export type TrayStatus = 'idle' | 'running' | 'unread';
 
 export interface TrayTaskInfo {
   taskId: string;
@@ -148,10 +148,6 @@ export function updateTrayStatus(state: TrayState): void {
     case 'unread':
       tray.setTitle('●');
       tray.setToolTip('ClawWork — new results');
-      break;
-    case 'disconnected':
-      tray.setTitle('⚠');
-      tray.setToolTip('ClawWork — disconnected');
       break;
     default:
       tray.setTitle('');
