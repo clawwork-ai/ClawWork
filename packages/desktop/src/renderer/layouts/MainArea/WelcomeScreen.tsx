@@ -36,7 +36,6 @@ export default function WelcomeScreen() {
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
-  const hasTeams = teams.length > 0;
   const {
     gateways,
     selectedGwId,
@@ -55,7 +54,7 @@ export default function WelcomeScreen() {
     const ensemble = activeTaskEnsemble ?? pendingNewTask?.ensemble;
     const teamId = activeTaskTeamId ?? pendingNewTask?.teamId;
     if (ensemble) return teamId ? 'team' : 'orchestrate';
-    return hasTeams ? 'team' : 'agent';
+    return 'agent';
   });
 
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(
