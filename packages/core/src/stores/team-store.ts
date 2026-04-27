@@ -48,12 +48,12 @@ export function createTeamStore(deps: TeamStoreDeps) {
           for (const t of res.result) {
             map[t.id] = t;
           }
-          set({ teams: map });
+          set({ teams: map, loadedOnce: true });
         }
       } catch (err) {
         console.error('[team-store] loadTeams failed:', err);
       } finally {
-        set({ loading: false, loadedOnce: true });
+        set({ loading: false });
       }
     },
 
