@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
+import { useFileStore } from '@/stores/fileStore';
 import { useTaskContextMenu, TaskContextMenuPopover, type SessionActions } from '@/components/ContextMenu';
 import SearchResults, { type SearchResult } from '@/components/SearchResults';
 import { cn } from '@/lib/utils';
@@ -162,6 +163,7 @@ export default function LeftNav() {
   const setHighlightedMessage = useMessageStore((s) => s.setHighlightedMessage);
   const mainView = useUiStore((s) => s.mainView);
   const setMainView = useUiStore((s) => s.setMainView);
+  const setSelectedArtifact = useFileStore((s) => s.setSelectedArtifact);
   const settingsOpen = useUiStore((s) => s.settingsOpen);
   const setSettingsOpen = useUiStore((s) => s.setSettingsOpen);
   const gwStatusMap = useUiStore((s) => s.gatewayStatusMap);
@@ -272,6 +274,7 @@ export default function LeftNav() {
     setSearchQuery('');
     setSearchResults([]);
     if (result.type === 'artifact') {
+      setSelectedArtifact(result.id);
       setMainView('files');
     } else {
       const targetId = result.type === 'task' ? result.id : result.taskId;

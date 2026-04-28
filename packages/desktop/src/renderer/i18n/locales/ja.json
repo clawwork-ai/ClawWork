@@ -19,6 +19,15 @@
   "archived": {
     "empty": "アーカイブ済みチャットはありません"
   },
+  "artifactKinds": {
+    "code": "コードスニペット",
+    "data": "データ成果物",
+    "file": "ファイル",
+    "image": "画像",
+    "link": "リンク",
+    "markdown": "Markdown ドキュメント",
+    "text": "テキストファイル"
+  },
   "chatInput": {
     "abortFailed": "生成の停止に失敗しました",
     "addContextFolder": "@ ファイル参照用のコンテキストフォルダを追加",
@@ -303,11 +312,12 @@
     "exportedToFiles": "ファイルにエクスポートしました"
   },
   "fileBrowser": {
-    "allTasks": "すべてのタスク",
+    "allTypes": "すべての種類",
     "searchFiles": "ファイルを検索…",
-    "sortByDate": "日付順",
-    "sortByName": "名前順",
-    "sortByType": "種類順"
+    "typeCode": "コード",
+    "typeFiles": "ファイル",
+    "typeImages": "画像",
+    "typeOther": "その他"
   },
   "filePreview": {
     "cannotPreview": "このファイル形式はプレビューできません",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}} ツール"
   },
   "search": {
+    "fileMatch": "ファイル一致",
     "files": "ファイル",
     "messages": "メッセージ",
     "noResults": "結果が見つかりません",

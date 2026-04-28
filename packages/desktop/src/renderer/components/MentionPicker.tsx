@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Task, Artifact, FileIndexEntry } from '@clawwork/shared';
 import { useFileStore } from '@/stores/fileStore';
 import { cn, formatFileSize } from '@/lib/utils';
+import { getArtifactLabel } from '@/lib/artifact-labels';
 import AgentIcon from './AgentIcon';
 import { MENTION_ALL_AGENT_ID } from './ChatInput/constants';
 
@@ -272,7 +273,7 @@ export default function MentionPicker({
                   onMouseEnter={() => onHoverIndex(i)}
                 >
                   <span className="flex-shrink-0">{artifactIcon(a.type, 14)}</span>
-                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{a.name}</span>
+                  <span className="flex-1 min-w-0 truncate text-[var(--text-primary)]">{getArtifactLabel(a, t)}</span>
                   <span className="type-support flex-shrink-0 text-[var(--text-muted)]">{formatFileSize(a.size)}</span>
                 </button>
               );

@@ -4,7 +4,8 @@ import { FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
-import { cn, formatRelativeTime } from '@/lib/utils';
+import { cn, formatRelativeTime, formatFileSize } from '@/lib/utils';
+import { getArtifactLabel } from '@/lib/artifact-labels';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { STAGGER_STEP, motionDuration } from '@/styles/design-tokens';
 import type { Artifact } from '@clawwork/shared';
@@ -24,11 +25,6 @@ const listItemVariants = {
 
 function sortArtifacts(artifacts: Artifact[]) {
   return [...artifacts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-}
-
-function formatArtifactSubtitle(localPath: string) {
-  const [, ...segments] = localPath.split('/');
-  return segments.join('/') || localPath;
 }
 
 export default function RightPanel() {
@@ -84,14 +80,14 @@ export default function RightPanel() {
                       'group block w-full min-w-0 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-left',
                       'transition-all duration-150 hover:border-[var(--border)] hover:bg-[var(--bg-hover)]',
                     )}
-                    title={a.localPath}
+                    title={getArtifactLabel(a, t)}
                   >
                     <ListItem
                       leading={
                         <ArtifactThumbnail artifact={a} className="h-10 w-10 border border-[var(--border-subtle)]" />
                       }
-                      title={a.name}
-                      subtitle={formatArtifactSubtitle(a.localPath)}
+                      title={getArtifactLabel(a, t)}
+                      subtitle={formatFileSize(a.size)}
                       meta={formatRelativeTime(new Date(a.createdAt))}
                       className="rounded-xl px-3 py-2.5"
                     />

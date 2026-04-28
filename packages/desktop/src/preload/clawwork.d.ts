@@ -324,7 +324,10 @@ export interface ClawWorkAPI {
     fileName?: string;
   }) => Promise<IpcResult>;
   saveImageFromUrl: (params: { taskId: string; messageId: string; url: string; alt?: string }) => Promise<IpcResult>;
-  searchArtifacts: (query: string) => Promise<IpcResult>;
+  searchArtifacts: (
+    query: string,
+    options?: { kind?: 'all' | 'image' | 'code' | 'file' | 'other' },
+  ) => Promise<IpcResult>;
   openArtifactFile: (localPath: string) => Promise<IpcResult>;
   showArtifactInFolder: (localPath: string) => Promise<IpcResult>;
   saveInboxAttachment: (params: {

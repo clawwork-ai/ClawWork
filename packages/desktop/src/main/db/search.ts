@@ -23,8 +23,8 @@ SELECT * FROM (
   JOIN messages m ON m.rowid = messages_fts.rowid
   WHERE messages_fts MATCH ?
   UNION ALL
-  SELECT 'artifact' AS type, a.id, a.name AS title,
-    snippet(artifacts_fts, 0, '<<', '>>', '…', 32) AS snippet,
+  SELECT 'artifact' AS type, a.id, a.type AS title,
+    snippet(artifacts_fts, 1, '<<', '>>', '…', 32) AS snippet,
     a.task_id, artifacts_fts.rank
   FROM artifacts_fts
   JOIN artifacts a ON a.rowid = artifacts_fts.rowid
@@ -59,11 +59,10 @@ export function globalSearch(db: Database.Database, query: string): SearchResult
 
 const ARTIFACT_SEARCH_SQL = `
 SELECT a.id, a.task_id, a.name, a.type, a.local_path, a.mime_type, a.size, a.created_at, a.file_path, a.message_id,
-  snippet(artifacts_fts, 0, '<mark>', '</mark>', '…', 20) AS name_snippet,
   snippet(artifacts_fts, 1, '<mark>', '</mark>', '…', 32) AS content_snippet
 FROM artifacts_fts
 JOIN artifacts a ON a.rowid = artifacts_fts.rowid
-WHERE artifacts_fts MATCH ?
+WHERE __WHERE__
 ORDER BY artifacts_fts.rank
 LIMIT 50;
 `;
@@ -82,13 +81,35 @@ interface ArtifactSearchResult {
   contentSnippet?: string;
 }
 
-export function searchArtifacts(db: Database.Database, query: string): ArtifactSearchResult[] {
+type ArtifactSearchKind = 'all' | 'image' | 'code' | 'file' | 'other';
+
+interface ArtifactSearchOptions {
+  kind?: ArtifactSearchKind;
+}
+
+function artifactKindClause(kind: ArtifactSearchKind | undefined): string | null {
+  if (!kind || kind === 'all') return null;
+  if (kind === 'image') return "(a.type = 'image' OR a.mime_type LIKE 'image/%')";
+  if (kind === 'code') return "a.type = 'code'";
+  if (kind === 'file') return "a.type = 'file'";
+  return "(a.type NOT IN ('image', 'code', 'file') AND a.mime_type NOT LIKE 'image/%')";
+}
+
+export function searchArtifacts(
+  db: Database.Database,
+  query: string,
+  options: ArtifactSearchOptions = {},
+): ArtifactSearchResult[] {
   const q = query.trim();
   if (!q) return [];
   const ftsQuery = q.replace(/[^\w\u4e00-\u9fff]/g, ' ').trim() + '*';
   if (ftsQuery === '*') return [];
-  const stmt = db.prepare(ARTIFACT_SEARCH_SQL);
-  const rows = stmt.all(ftsQuery) as Array<{
+  const clauses = ['artifacts_fts MATCH ?'];
+  const params: string[] = [ftsQuery];
+  const kindClause = artifactKindClause(options.kind);
+  if (kindClause) clauses.push(kindClause);
+  const stmt = db.prepare(ARTIFACT_SEARCH_SQL.replace('__WHERE__', clauses.join(' AND ')));
+  const rows = stmt.all(...params) as Array<{
     id: string;
     task_id: string;
     name: string;
@@ -99,7 +120,6 @@ export function searchArtifacts(db: Database.Database, query: string): ArtifactS
     created_at: string;
     file_path: string;
     message_id: string;
-    name_snippet: string;
     content_snippet: string;
   }>;
   return rows.map((r) => ({
@@ -113,6 +133,6 @@ export function searchArtifacts(db: Database.Database, query: string): ArtifactS
     createdAt: r.created_at,
     filePath: r.file_path,
     messageId: r.message_id,
-    contentSnippet: r.content_snippet || r.name_snippet || undefined,
+    contentSnippet: r.content_snippet || undefined,
   }));
 }

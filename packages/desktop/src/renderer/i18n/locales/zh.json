@@ -19,6 +19,15 @@
   "archived": {
     "empty": "暂无归档对话"
   },
+  "artifactKinds": {
+    "code": "代码片段",
+    "data": "数据产物",
+    "file": "文件",
+    "image": "图片",
+    "link": "链接",
+    "markdown": "Markdown 文档",
+    "text": "文本文件"
+  },
   "chatInput": {
     "abortFailed": "停止生成失败",
     "addContextFolder": "为 @ 文件引用添加上下文文件夹",
@@ -303,11 +312,12 @@
     "exportedToFiles": "已导出到文件管理"
   },
   "fileBrowser": {
-    "allTasks": "全部任务",
+    "allTypes": "全部类型",
     "searchFiles": "搜索文件…",
-    "sortByDate": "按时间",
-    "sortByName": "按名称",
-    "sortByType": "按类型"
+    "typeCode": "代码",
+    "typeFiles": "文件",
+    "typeImages": "图片",
+    "typeOther": "其他"
   },
   "filePreview": {
     "cannotPreview": "无法预览此文件类型",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}} 个工具"
   },
   "search": {
+    "fileMatch": "文件匹配",
     "files": "文件",
     "messages": "消息",
     "noResults": "未找到结果",

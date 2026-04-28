@@ -19,6 +19,15 @@
   "archived": {
     "empty": "沒有已封存的對話"
   },
+  "artifactKinds": {
+    "code": "程式碼片段",
+    "data": "資料產物",
+    "file": "檔案",
+    "image": "圖片",
+    "link": "連結",
+    "markdown": "Markdown 文件",
+    "text": "文字檔"
+  },
   "chatInput": {
     "abortFailed": "無法停止生成",
     "addContextFolder": "新增上下文資料夾以使用 @ 檔案參照",
@@ -303,11 +312,12 @@
     "exportedToFiles": "已匯出為檔案"
   },
   "fileBrowser": {
-    "allTasks": "所有任務",
+    "allTypes": "所有類型",
     "searchFiles": "搜尋檔案…",
-    "sortByDate": "依日期",
-    "sortByName": "依名稱",
-    "sortByType": "依類型"
+    "typeCode": "程式碼",
+    "typeFiles": "檔案",
+    "typeImages": "圖片",
+    "typeOther": "其他"
   },
   "filePreview": {
     "cannotPreview": "無法預覽此檔案類型",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}} 個工具"
   },
   "search": {
+    "fileMatch": "檔案符合",
     "files": "檔案",
     "messages": "訊息",
     "noResults": "找不到結果",

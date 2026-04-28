@@ -255,16 +255,19 @@ export function registerArtifactHandlers(): void {
     }
   });
 
-  ipcMain.handle('artifact:search', async (_event, params: { query: string }) => {
-    const sqlite = getSqlite();
-    if (!sqlite) return { ok: false, error: 'db not ready' };
-    try {
-      const results = searchArtifacts(sqlite, params.query);
-      return { ok: true, result: results };
-    } catch (err) {
-      return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
-    }
-  });
+  ipcMain.handle(
+    'artifact:search',
+    async (_event, params: { query: string; kind?: 'all' | 'image' | 'code' | 'file' | 'other' }) => {
+      const sqlite = getSqlite();
+      if (!sqlite) return { ok: false, error: 'db not ready' };
+      try {
+        const results = searchArtifacts(sqlite, params.query, { kind: params.kind });
+        return { ok: true, result: results };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
+      }
+    },
+  );
 
   ipcMain.handle('session:export-markdown', async (_event, params: { taskId: string }) => {
     const workspacePath = getWorkspacePath();

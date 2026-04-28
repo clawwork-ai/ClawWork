@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import type { Artifact } from '@clawwork/shared';
-
-type SortBy = 'date' | 'name' | 'type';
+import type { ArtifactKindFilter } from '@/lib/artifact-labels';
 
 export interface ArtifactSearchResult {
   id: string;
   taskId: string;
   name: string;
-  type: string;
+  type: Artifact['type'];
   localPath: string;
   mimeType: string;
   size: number;
@@ -19,32 +18,29 @@ export interface ArtifactSearchResult {
 
 interface FileState {
   artifacts: Artifact[];
-  filterTaskId: string | null;
-  sortBy: SortBy;
   selectedArtifactId: string | null;
   searchQuery: string;
   searchResults: ArtifactSearchResult[] | null;
   isSearching: boolean;
+  typeFilter: ArtifactKindFilter;
 
   setArtifacts: (artifacts: Artifact[]) => void;
   addArtifact: (artifact: Artifact) => void;
   addArtifactIfNew: (artifact: Artifact) => void;
-  setFilterTaskId: (taskId: string | null) => void;
-  setSortBy: (sortBy: SortBy) => void;
   setSelectedArtifact: (id: string | null) => void;
   setSearchQuery: (query: string) => void;
   setSearchResults: (results: ArtifactSearchResult[] | null) => void;
   setIsSearching: (v: boolean) => void;
+  setTypeFilter: (filter: ArtifactKindFilter) => void;
 }
 
 export const useFileStore = create<FileState>((set) => ({
   artifacts: [],
-  filterTaskId: null,
-  sortBy: 'date',
   selectedArtifactId: null,
   searchQuery: '',
   searchResults: null,
   isSearching: false,
+  typeFilter: 'all',
 
   setArtifacts: (artifacts) => set({ artifacts }),
 
@@ -56,10 +52,6 @@ export const useFileStore = create<FileState>((set) => ({
       return { artifacts: [artifact, ...s.artifacts] };
     }),
 
-  setFilterTaskId: (taskId) => set({ filterTaskId: taskId }),
-
-  setSortBy: (sortBy) => set({ sortBy }),
-
   setSelectedArtifact: (id) => set({ selectedArtifactId: id }),
 
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -67,4 +59,6 @@ export const useFileStore = create<FileState>((set) => ({
   setSearchResults: (results) => set({ searchResults: results }),
 
   setIsSearching: (v) => set({ isSearching: v }),
+
+  setTypeFilter: (filter) => set({ typeFilter: filter }),
 }));

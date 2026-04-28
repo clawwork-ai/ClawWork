@@ -19,6 +19,15 @@
   "archived": {
     "empty": "No hay chats archivados"
   },
+  "artifactKinds": {
+    "code": "Fragmento de código",
+    "data": "Artefacto de datos",
+    "file": "Archivo",
+    "image": "Imagen",
+    "link": "Enlace",
+    "markdown": "Documento Markdown",
+    "text": "Archivo de texto"
+  },
   "chatInput": {
     "abortFailed": "No se pudo detener la generación",
     "addContextFolder": "Agregar carpeta de contexto para referencias de archivos con @",
@@ -303,11 +312,12 @@
     "exportedToFiles": "Exportado a archivos"
   },
   "fileBrowser": {
-    "allTasks": "Todas las tareas",
+    "allTypes": "Todos los tipos",
     "searchFiles": "Buscar archivos…",
-    "sortByDate": "Por fecha",
-    "sortByName": "Por nombre",
-    "sortByType": "Por tipo"
+    "typeCode": "Código",
+    "typeFiles": "Archivos",
+    "typeImages": "Imágenes",
+    "typeOther": "Otros"
   },
   "filePreview": {
     "cannotPreview": "No se puede previsualizar este tipo de archivo",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}} herramientas"
   },
   "search": {
+    "fileMatch": "Coincidencia de archivo",
     "files": "Archivos",
     "messages": "Mensajes",
     "noResults": "No se encontraron resultados",

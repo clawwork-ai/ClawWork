@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { cn, formatFileSize } from '@/lib/utils';
 import { copyTextToClipboard } from '@/lib/clipboard';
+import { getArtifactLabel } from '@/lib/artifact-labels';
 import MarkdownContent from './MarkdownContent';
 
 interface FilePreviewProps {
@@ -93,6 +94,7 @@ export default function FilePreview({ artifact, onNavigateToTask, onClose }: Fil
   const [error, setError] = useState<string | null>(null);
 
   const ext = extFromName(artifact.name);
+  const title = getArtifactLabel(artifact, t);
   const isCode = encoding === 'utf-8' && !isMarkdown(artifact.name) && !isImage(artifact.mimeType);
 
   useEffect(() => {
@@ -120,7 +122,7 @@ export default function FilePreview({ artifact, onNavigateToTask, onClose }: Fil
               {ext}
             </span>
           )}
-          <h3 className="type-label min-w-0 truncate text-[var(--text-primary)]">{artifact.name}</h3>
+          <h3 className="type-label min-w-0 truncate text-[var(--text-primary)]">{title}</h3>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="type-meta text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
@@ -150,7 +152,13 @@ export default function FilePreview({ artifact, onNavigateToTask, onClose }: Fil
         )}
         {error && <p className="type-support px-4 py-8 text-center text-[var(--danger)]">{error}</p>}
         {!loading && !error && content !== null && (
-          <PreviewContent content={content} encoding={encoding} mimeType={artifact.mimeType} name={artifact.name} />
+          <PreviewContent
+            content={content}
+            encoding={encoding}
+            mimeType={artifact.mimeType}
+            name={artifact.name}
+            alt={title}
+          />
         )}
       </ScrollArea>
 
@@ -195,11 +203,13 @@ function PreviewContent({
   encoding,
   mimeType,
   name,
+  alt,
 }: {
   content: string;
   encoding: string;
   mimeType: string;
   name: string;
+  alt: string;
 }) {
   const { t } = useTranslation();
 
@@ -208,7 +218,7 @@ function PreviewContent({
       <div className="flex items-center justify-center p-4">
         <img
           src={`data:${mimeType};base64,${content}`}
-          alt={name}
+          alt={alt}
           className="max-w-full max-h-96 rounded-lg object-contain"
         />
       </div>

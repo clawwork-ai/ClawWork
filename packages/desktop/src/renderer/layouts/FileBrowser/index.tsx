@@ -7,6 +7,7 @@ import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
+import { getArtifactKindFilter, getArtifactLabel, type ArtifactKindFilter } from '@/lib/artifact-labels';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileCard from '@/components/FileCard';
@@ -20,16 +21,8 @@ import ListItem from '@/components/semantic/ListItem';
 import SectionCard from '@/components/semantic/SectionCard';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 
-function sortArtifacts(list: Artifact[], sortBy: 'date' | 'name' | 'type'): Artifact[] {
-  const sorted = [...list];
-  switch (sortBy) {
-    case 'date':
-      return sorted.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    case 'name':
-      return sorted.sort((a, b) => a.name.localeCompare(b.name));
-    case 'type':
-      return sorted.sort((a, b) => a.type.localeCompare(b.type));
-  }
+function sortArtifacts(list: Artifact[]): Artifact[] {
+  return [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function SnippetHighlight({ snippet }: { snippet: string }) {
@@ -54,15 +47,13 @@ type FileMenuState = { artifact: Artifact; position: { x: number; y: number } } 
 export default function FileBrowser() {
   const { t } = useTranslation();
   const artifacts = useFileStore((s) => s.artifacts);
-  const filterTaskId = useFileStore((s) => s.filterTaskId);
-  const sortBy = useFileStore((s) => s.sortBy);
+  const typeFilter = useFileStore((s) => s.typeFilter);
   const selectedId = useFileStore((s) => s.selectedArtifactId);
   const searchQuery = useFileStore((s) => s.searchQuery);
   const searchResults = useFileStore((s) => s.searchResults);
   const isSearching = useFileStore((s) => s.isSearching);
   const setArtifacts = useFileStore((s) => s.setArtifacts);
-  const setFilterTaskId = useFileStore((s) => s.setFilterTaskId);
-  const setSortBy = useFileStore((s) => s.setSortBy);
+  const setTypeFilter = useFileStore((s) => s.setTypeFilter);
   const setSelectedArtifact = useFileStore((s) => s.setSelectedArtifact);
   const setSearchQuery = useFileStore((s) => s.setSearchQuery);
   const setSearchResults = useFileStore((s) => s.setSearchResults);
@@ -152,7 +143,9 @@ export default function FileBrowser() {
     const requestId = ++searchRequestIdRef.current;
     debounceRef.current = setTimeout(() => {
       window.clawwork
-        .searchArtifacts(searchQuery)
+        .searchArtifacts(searchQuery, {
+          kind: typeFilter,
+        })
         .then((res) => {
           if (searchRequestIdRef.current !== requestId) return;
           setIsSearching(false);
@@ -171,7 +164,7 @@ export default function FileBrowser() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [searchQuery, setSearchResults, setIsSearching]);
+  }, [searchQuery, setSearchResults, setIsSearching, typeFilter]);
 
   const taskMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -180,11 +173,13 @@ export default function FileBrowser() {
   }, [tasks, t]);
 
   const filteredArtifacts = useMemo(() => {
-    if (filterTaskId) return artifacts.filter((a) => a.taskId === filterTaskId);
-    return artifacts;
-  }, [artifacts, filterTaskId]);
+    return artifacts.filter((a) => {
+      if (typeFilter !== 'all' && getArtifactKindFilter(a) !== typeFilter) return false;
+      return true;
+    });
+  }, [artifacts, typeFilter]);
 
-  const sorted = useMemo(() => sortArtifacts(filteredArtifacts, sortBy), [filteredArtifacts, sortBy]);
+  const sorted = useMemo(() => sortArtifacts(filteredArtifacts), [filteredArtifacts]);
 
   const selectedArtifact = useMemo(
     () => (selectedId ? (artifacts.find((a) => a.id === selectedId) ?? null) : null),
@@ -200,12 +195,6 @@ export default function FileBrowser() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedArtifact, setSelectedArtifact]);
 
-  const taskIdsWithArtifacts = useMemo(() => {
-    const ids = new Set<string>();
-    for (const a of artifacts) ids.add(a.taskId);
-    return Array.from(ids);
-  }, [artifacts]);
-
   const {
     width: panelWidth,
     isDragging,
@@ -218,6 +207,13 @@ export default function FileBrowser() {
   });
 
   const isSearchMode = searchQuery.trim().length > 0;
+  const typeFilterOptions: Array<{ value: ArtifactKindFilter; label: string }> = [
+    { value: 'all', label: t('fileBrowser.allTypes') },
+    { value: 'image', label: t('fileBrowser.typeImages') },
+    { value: 'code', label: t('fileBrowser.typeCode') },
+    { value: 'file', label: t('fileBrowser.typeFiles') },
+    { value: 'other', label: t('fileBrowser.typeOther') },
+  ];
 
   return (
     <div className="relative flex h-full overflow-hidden">
@@ -225,35 +221,20 @@ export default function FileBrowser() {
         <WindowTitlebar
           left={<h2 className="type-section-title text-[var(--text-primary)]">{t('common.fileManager')}</h2>}
           right={
-            <>
-              <select
-                value={filterTaskId ?? ''}
-                onChange={(e) => setFilterTaskId(e.target.value || null)}
-                className={cn(
-                  'glow-focus h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                  'type-label text-[var(--text-secondary)] cursor-pointer',
-                )}
-              >
-                <option value="">{t('fileBrowser.allTasks')}</option>
-                {taskIdsWithArtifacts.map((id) => (
-                  <option key={id} value={id}>
-                    {taskMap.get(id) ?? id}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'date' | 'name' | 'type')}
-                className={cn(
-                  'glow-focus h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
-                  'type-label text-[var(--text-secondary)] cursor-pointer',
-                )}
-              >
-                <option value="date">{t('fileBrowser.sortByDate')}</option>
-                <option value="name">{t('fileBrowser.sortByName')}</option>
-                <option value="type">{t('fileBrowser.sortByType')}</option>
-              </select>
-            </>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as ArtifactKindFilter)}
+              className={cn(
+                'glow-focus h-7 px-2 rounded-md bg-[var(--bg-tertiary)] border border-[var(--border)]',
+                'type-label text-[var(--text-secondary)] cursor-pointer',
+              )}
+            >
+              {typeFilterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           }
         />
 
@@ -315,7 +296,7 @@ export default function FileBrowser() {
                       )}
                     >
                       <ListItem
-                        title={r.name}
+                        title={getArtifactLabel(r, t)}
                         subtitle={r.contentSnippet ? <SnippetHighlight snippet={r.contentSnippet} /> : undefined}
                         meta={taskMap.get(r.taskId) ?? r.taskId}
                         active={r.id === selectedId}

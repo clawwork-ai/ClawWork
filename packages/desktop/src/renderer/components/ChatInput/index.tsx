@@ -32,6 +32,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { cn } from '@/lib/utils';
+import { getArtifactLabel } from '@/lib/artifact-labels';
 import { createWhisperSttSession } from '@/lib/voice/whisper-stt';
 import { useRoomStore } from '@/stores/roomStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -617,7 +618,7 @@ export default function ChatInput() {
                       <SelectionTag
                         key={a.id}
                         icon={<File size={14} />}
-                        label={a.name}
+                        label={getArtifactLabel(a, t)}
                         variant="muted"
                         onRemove={() => removeSelectedArtifact(a.id)}
                       />

@@ -19,6 +19,15 @@
   "archived": {
     "empty": "Nenhuma conversa arquivada"
   },
+  "artifactKinds": {
+    "code": "Trecho de codigo",
+    "data": "Artefato de dados",
+    "file": "Arquivo",
+    "image": "Imagem",
+    "link": "Link",
+    "markdown": "Documento Markdown",
+    "text": "Arquivo de texto"
+  },
   "chatInput": {
     "abortFailed": "Falha ao parar a geração",
     "addContextFolder": "Adicionar pasta de contexto para referências de arquivo com @",
@@ -303,11 +312,12 @@
     "exportedToFiles": "Exportado para Arquivos"
   },
   "fileBrowser": {
-    "allTasks": "Todas as Tarefas",
+    "allTypes": "Todos os tipos",
     "searchFiles": "Buscar arquivos…",
-    "sortByDate": "Por data",
-    "sortByName": "Por nome",
-    "sortByType": "Por tipo"
+    "typeCode": "Codigo",
+    "typeFiles": "Arquivos",
+    "typeImages": "Imagens",
+    "typeOther": "Outros"
   },
   "filePreview": {
     "cannotPreview": "Não é possível pré-visualizar este tipo de arquivo",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}} ferramentas"
   },
   "search": {
+    "fileMatch": "Correspondencia de arquivo",
     "files": "Arquivos",
     "messages": "Mensagens",
     "noResults": "Nenhum resultado encontrado",

@@ -19,6 +19,15 @@
   "archived": {
     "empty": "보관된 대화가 없습니다"
   },
+  "artifactKinds": {
+    "code": "코드 스니펫",
+    "data": "데이터 산출물",
+    "file": "파일",
+    "image": "이미지",
+    "link": "링크",
+    "markdown": "Markdown 문서",
+    "text": "텍스트 파일"
+  },
   "chatInput": {
     "abortFailed": "생성 중지에 실패했습니다",
     "addContextFolder": "@ 파일 참조를 위한 컨텍스트 폴더 추가",
@@ -303,11 +312,12 @@
     "exportedToFiles": "파일로 내보냈습니다"
   },
   "fileBrowser": {
-    "allTasks": "모든 작업",
+    "allTypes": "모든 유형",
     "searchFiles": "파일 검색…",
-    "sortByDate": "날짜순",
-    "sortByName": "이름순",
-    "sortByType": "유형순"
+    "typeCode": "코드",
+    "typeFiles": "파일",
+    "typeImages": "이미지",
+    "typeOther": "기타"
   },
   "filePreview": {
     "cannotPreview": "이 파일 유형은 미리보기할 수 없습니다",
@@ -380,6 +390,7 @@
     "toolCount": "{{count}}개 도구"
   },
   "search": {
+    "fileMatch": "파일 일치",
     "files": "파일",
     "messages": "메시지",
     "noResults": "검색 결과가 없습니다",

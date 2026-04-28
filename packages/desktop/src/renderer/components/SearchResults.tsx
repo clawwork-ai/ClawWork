@@ -77,6 +77,8 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
             </p>
             {grouped[type].map((result, idx) => {
               const Icon = ICON_MAP[result.type];
+              const title = result.type === 'artifact' ? t('search.files') : result.title || t('common.noTitle');
+              const snippet = result.type === 'artifact' && !result.snippet ? t('search.fileMatch') : result.snippet;
               return (
                 <motion.button
                   key={result.id}
@@ -91,11 +93,9 @@ export default function SearchResults({ results, onSelect }: SearchResultsProps)
                 >
                   <Icon size={15} className="mt-0.5 flex-shrink-0 text-[var(--text-muted)]" />
                   <div className="min-w-0 flex-1">
-                    <p className="type-label truncate text-[var(--text-primary)]">
-                      {result.title || t('common.noTitle')}
-                    </p>
+                    <p className="type-label truncate text-[var(--text-primary)]">{title}</p>
                     <p className="type-support mt-0.5 truncate text-[var(--text-secondary)]">
-                      {highlightSnippet(result.snippet)}
+                      {highlightSnippet(snippet)}
                     </p>
                   </div>
                 </motion.button>

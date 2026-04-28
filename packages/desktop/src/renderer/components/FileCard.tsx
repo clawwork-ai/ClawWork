@@ -4,6 +4,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Artifact } from '@clawwork/shared';
 import { cn, formatRelativeTime, formatFileSize } from '@/lib/utils';
+import { getArtifactLabel } from '@/lib/artifact-labels';
 import { motion as motionPresets, motionDuration, motionEase } from '@/styles/design-tokens';
 import ArtifactThumbnail from './ArtifactThumbnail';
 
@@ -24,6 +25,7 @@ function extBadge(name: string): string {
 export default function FileCard({ artifact, taskTitle, selected, isNew, onClick, onContextMenu }: FileCardProps) {
   const { t } = useTranslation();
   const ext = extBadge(artifact.name);
+  const title = getArtifactLabel(artifact, t);
 
   return (
     <div className="relative">
@@ -51,7 +53,7 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
           onClick={onClick}
           onContextMenu={onContextMenu}
           className="absolute inset-0 z-0 rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--border-accent)]"
-          aria-label={artifact.name}
+          aria-label={title}
         />
         <button
           type="button"
@@ -72,7 +74,7 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
           <div className="flex items-start gap-2.5">
             <ArtifactThumbnail artifact={artifact} className="h-14 w-14" iconSize={20} />
             <div className="min-w-0 flex-1">
-              <p className="type-label truncate leading-snug text-[var(--text-primary)]">{artifact.name}</p>
+              <p className="type-label truncate leading-snug text-[var(--text-primary)]">{title}</p>
               <p className="type-support mt-0.5 text-[var(--text-muted)]">{formatFileSize(artifact.size)}</p>
             </div>
             {ext && (
