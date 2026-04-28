@@ -21,11 +21,39 @@ function isImageArtifact(artifact: Artifact): boolean {
   return artifact.type === 'image' || artifact.mimeType.startsWith('image/');
 }
 
-function readResult(value: unknown): { content: string; encoding: string } | null {
+function thumbnailResult(value: unknown): { dataUrl: string } | null {
   if (!value || typeof value !== 'object') return null;
-  const result = value as { content?: unknown; encoding?: unknown };
-  if (typeof result.content !== 'string' || typeof result.encoding !== 'string') return null;
-  return { content: result.content, encoding: result.encoding };
+  const result = value as { dataUrl?: unknown };
+  if (typeof result.dataUrl !== 'string') return null;
+  return { dataUrl: result.dataUrl };
+}
+
+const thumbnailCache = new Map<string, string | null>();
+const thumbnailRequests = new Map<string, Promise<string | null>>();
+
+function loadThumbnail(localPath: string): Promise<string | null> {
+  if (thumbnailCache.has(localPath)) return Promise.resolve(thumbnailCache.get(localPath) ?? null);
+  const existing = thumbnailRequests.get(localPath);
+  if (existing) return existing;
+
+  const request = window.clawwork
+    .readArtifactThumbnail(localPath, 128)
+    .then((res) => {
+      const data = res.ok ? thumbnailResult(res.result) : null;
+      const src = data?.dataUrl ?? null;
+      thumbnailCache.set(localPath, src);
+      return src;
+    })
+    .catch(() => {
+      thumbnailCache.set(localPath, null);
+      return null;
+    })
+    .finally(() => {
+      thumbnailRequests.delete(localPath);
+    });
+
+  thumbnailRequests.set(localPath, request);
+  return request;
 }
 
 export default function ArtifactThumbnail({ artifact, className, iconSize = 18 }: ArtifactThumbnailProps) {
@@ -42,22 +70,14 @@ export default function ArtifactThumbnail({ artifact, className, iconSize = 18 }
     let cancelled = false;
     setSrc(null);
 
-    window.clawwork
-      .readArtifactFile(artifact.localPath)
-      .then((res) => {
-        if (cancelled || !res.ok) return;
-        const data = readResult(res.result);
-        if (!data || data.encoding !== 'base64') return;
-        setSrc(`data:${artifact.mimeType};base64,${data.content}`);
-      })
-      .catch(() => {
-        if (!cancelled) setSrc(null);
-      });
+    loadThumbnail(artifact.localPath).then((thumbnailSrc) => {
+      if (!cancelled) setSrc(thumbnailSrc);
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [artifact.localPath, artifact.mimeType, image]);
+  }, [artifact.localPath, image]);
 
   return (
     <div className={cn('relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg', bg, className)}>

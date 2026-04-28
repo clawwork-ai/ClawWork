@@ -314,6 +314,7 @@ export interface ClawWorkAPI {
   listArtifacts: (taskId?: string) => Promise<IpcResult>;
   getArtifact: (id: string) => Promise<IpcResult>;
   readArtifactFile: (localPath: string) => Promise<IpcResult>;
+  readArtifactThumbnail: (localPath: string, size?: number) => Promise<IpcResult<{ dataUrl: string }>>;
   onArtifactSaved: (callback: (artifact: unknown) => void) => () => void;
   saveCodeBlock: (params: {
     taskId: string;

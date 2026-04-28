@@ -130,6 +130,8 @@ function buildApi(): ClawWorkAPI {
     listArtifacts: (taskId?: string) => ipcRenderer.invoke('artifact:list', { taskId }),
     getArtifact: (id: string) => ipcRenderer.invoke('artifact:get', { id }),
     readArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:read-file', { localPath }),
+    readArtifactThumbnail: (localPath: string, size?: number) =>
+      ipcRenderer.invoke('artifact:thumbnail', { localPath, size }),
     onArtifactSaved: (callback: (artifact: unknown) => void) => {
       const listener = (_event: Electron.IpcRendererEvent, artifact: unknown): void => {
         callback(artifact);

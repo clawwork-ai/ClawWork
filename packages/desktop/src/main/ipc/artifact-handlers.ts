@@ -1,5 +1,6 @@
-import { ipcMain, BrowserWindow, dialog, shell } from 'electron';
+import { ipcMain, BrowserWindow, dialog, shell, nativeImage, type NativeImage } from 'electron';
 import { readFileSync, realpathSync, writeFileSync } from 'fs';
+import { readFile, stat } from 'fs/promises';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'node:url';
 import { resolve, sep } from 'path';
@@ -17,6 +18,15 @@ interface SaveParams {
   messageId: string;
   fileName?: string;
   mediaType?: string;
+}
+
+const MAX_THUMBNAIL_SOURCE_BYTES = 10 * 1024 * 1024;
+
+function resizeThumbnailImage(image: NativeImage, size: number): NativeImage {
+  const { width, height } = image.getSize();
+  const maxDimension = Math.max(width, height);
+  if (maxDimension <= size) return image;
+  return width >= height ? image.resize({ width: size }) : image.resize({ height: size });
 }
 
 export function registerArtifactHandlers(): void {
@@ -89,6 +99,37 @@ export function registerArtifactHandlers(): void {
       const encoding = isTextFile(params.localPath) ? 'utf-8' : 'base64';
       const content = readFileSync(fullPath, encoding);
       return { ok: true, result: { content, encoding } };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown error';
+      return { ok: false, error: msg };
+    }
+  });
+
+  ipcMain.handle('artifact:thumbnail', async (_event, params: { localPath: string; size?: number }) => {
+    const workspacePath = getWorkspacePath();
+    if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+    try {
+      const fullPath = resolveArtifactPath(workspacePath, params.localPath);
+      if (!fullPath) return { ok: false, error: 'invalid path' };
+      const size = Math.min(Math.max(params.size ?? 128, 32), 256);
+      const image =
+        process.platform === 'darwin' || process.platform === 'win32'
+          ? await nativeImage.createThumbnailFromPath(fullPath, { width: size, height: size })
+          : nativeImage.createEmpty();
+      if (image.isEmpty()) {
+        const fileStat = await stat(fullPath);
+        if (!fileStat.isFile() || fileStat.size > MAX_THUMBNAIL_SOURCE_BYTES) {
+          return { ok: false, error: 'thumbnail unavailable' };
+        }
+        const buffer = await readFile(fullPath);
+        const decoded = nativeImage.createFromBuffer(buffer);
+        if (!decoded.isEmpty()) {
+          const resized = resizeThumbnailImage(decoded, size);
+          return { ok: true, result: { dataUrl: resized.toDataURL() } };
+        }
+      }
+      if (image.isEmpty()) return { ok: false, error: 'thumbnail unavailable' };
+      return { ok: true, result: { dataUrl: image.toDataURL() } };
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown error';
       return { ok: false, error: msg };
