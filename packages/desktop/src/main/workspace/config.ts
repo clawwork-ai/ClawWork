@@ -1,6 +1,6 @@
 import { app, safeStorage } from 'electron';
 import { join } from 'path';
-import { readFileSync, writeFileSync, existsSync, renameSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, renameSync, unlinkSync } from 'fs';
 import { homedir } from 'os';
 import { randomUUID } from 'node:crypto';
 import { CONFIG_FILE_NAME, DEFAULT_WORKSPACE_DIR } from '@clawwork/shared';
@@ -175,8 +175,20 @@ export function readConfig(): AppConfig | null {
 
 export function writeConfig(config: AppConfig): void {
   const cfgPath = configFilePath();
+  const tmpPath = cfgPath + '.tmp';
   const encrypted = encryptGatewayCredentials(config);
-  writeFileSync(cfgPath, JSON.stringify(encrypted, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  try {
+    writeFileSync(tmpPath, JSON.stringify(encrypted, null, 2), { encoding: 'utf-8', mode: 0o600 });
+    renameSync(tmpPath, cfgPath);
+  } catch (err) {
+    // best-effort cleanup of temp file before re-throwing
+    try {
+      if (existsSync(tmpPath)) unlinkSync(tmpPath);
+    } catch {
+      // ignore cleanup errors
+    }
+    throw err;
+  }
 }
 
 export function updateConfig(partial: Partial<AppConfig>): AppConfig {
