@@ -10,6 +10,7 @@ import { STAGGER_STEP, motionDuration } from '@/styles/design-tokens';
 import type { Artifact } from '@clawwork/shared';
 import ListItem from '@/components/semantic/ListItem';
 import PanelHeader from '@/components/semantic/PanelHeader';
+import ArtifactThumbnail from '@/components/ArtifactThumbnail';
 
 const listVariants = {
   hidden: {},
@@ -87,12 +88,7 @@ export default function RightPanel() {
                   >
                     <ListItem
                       leading={
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-                          <FileText
-                            size={15}
-                            className="text-[var(--text-muted)] transition-colors group-hover:text-[var(--text-secondary)]"
-                          />
-                        </div>
+                        <ArtifactThumbnail artifact={a} className="h-10 w-10 border border-[var(--border-subtle)]" />
                       }
                       title={a.name}
                       subtitle={formatArtifactSubtitle(a.localPath)}

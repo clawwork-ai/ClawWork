@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Loader2, Copy, Check } from 'lucide-react';
+import { ExternalLink, Loader2, Copy, Check, X } from 'lucide-react';
 import hljs from 'highlight.js';
 import { useTranslation } from 'react-i18next';
 import type { Artifact } from '@clawwork/shared';
@@ -14,6 +14,7 @@ import MarkdownContent from './MarkdownContent';
 interface FilePreviewProps {
   artifact: Artifact;
   onNavigateToTask: (taskId: string, messageId: string) => void;
+  onClose?: () => void;
 }
 
 function isImage(mime: string): boolean {
@@ -84,7 +85,7 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewProps) {
+export default function FilePreview({ artifact, onNavigateToTask, onClose }: FilePreviewProps) {
   const { t } = useTranslation();
   const [content, setContent] = useState<string | null>(null);
   const [encoding, setEncoding] = useState<'utf-8' | 'base64'>('utf-8');
@@ -124,6 +125,20 @@ export default function FilePreview({ artifact, onNavigateToTask }: FilePreviewP
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="type-meta text-[var(--text-muted)]">{formatFileSize(artifact.size)}</span>
           {isCode && content !== null && <CopyButton text={content} />}
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t('filePreview.close')}
+              title={t('filePreview.close')}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+                'text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]',
+              )}
+            >
+              <X size={14} />
+            </button>
+          ) : null}
         </div>
       </header>
 

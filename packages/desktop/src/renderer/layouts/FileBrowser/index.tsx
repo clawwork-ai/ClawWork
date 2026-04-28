@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useCallback, useRef, useState, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Loader2, ChevronRight, X } from 'lucide-react';
+import { Search, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFileStore } from '@/stores/fileStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore } from '@/stores/messageStore';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
-import { motion as motionPresets } from '@/styles/design-tokens';
+import { motionDuration, motionEase } from '@/styles/design-tokens';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileCard from '@/components/FileCard';
 import FilePreview from '@/components/FilePreview';
@@ -18,7 +18,6 @@ import type { ArtifactSearchResult } from '@/stores/fileStore';
 import EmptyState from '@/components/semantic/EmptyState';
 import ListItem from '@/components/semantic/ListItem';
 import SectionCard from '@/components/semantic/SectionCard';
-import ToolbarButton from '@/components/semantic/ToolbarButton';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';
 
 function sortArtifacts(list: Artifact[], sortBy: 'date' | 'name' | 'type'): Artifact[] {
@@ -192,6 +191,15 @@ export default function FileBrowser() {
     [selectedId, artifacts],
   );
 
+  useEffect(() => {
+    if (!selectedArtifact) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedArtifact(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedArtifact, setSelectedArtifact]);
+
   const taskIdsWithArtifacts = useMemo(() => {
     const ids = new Set<string>();
     for (const a of artifacts) ids.add(a.taskId);
@@ -212,7 +220,7 @@ export default function FileBrowser() {
   const isSearchMode = searchQuery.trim().length > 0;
 
   return (
-    <div className="flex h-full">
+    <div className="relative flex h-full overflow-hidden">
       <div className="flex flex-col flex-1 min-w-0">
         <WindowTitlebar
           left={<h2 className="type-section-title text-[var(--text-primary)]">{t('common.fileManager')}</h2>}
@@ -345,42 +353,36 @@ export default function FileBrowser() {
 
       <AnimatePresence>
         {selectedArtifact && (
-          <motion.div
-            {...motionPresets.slideIn}
-            initial={{ opacity: 0, x: 16 }}
-            exit={{ opacity: 0, x: 16 }}
-            className="relative flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)]"
-            style={{ width: panelWidth }}
-          >
-            <div
-              onMouseDown={handleMouseDown}
-              className={cn(
-                'absolute left-0 top-0 bottom-0 w-1 -translate-x-1/2 z-10 cursor-col-resize',
-                'group flex items-center justify-center',
-              )}
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-30 flex max-w-full justify-end">
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ duration: motionDuration.moderate, ease: motionEase.standard }}
+              className="pointer-events-auto relative h-full flex-shrink-0 border-l border-[var(--border)] bg-[var(--bg-secondary)] shadow-[var(--shadow-floating)]"
+              style={{ width: panelWidth, maxWidth: 'calc(100% - 48px)' }}
             >
               <div
+                onMouseDown={handleMouseDown}
                 className={cn(
-                  'w-1 h-8 rounded-full transition-colors duration-150',
-                  isDragging ? 'bg-[var(--accent)]' : 'bg-transparent group-hover:bg-[var(--text-muted)]',
+                  'absolute left-0 top-0 bottom-0 w-1 -translate-x-1/2 z-10 cursor-col-resize',
+                  'group flex items-center justify-center',
                 )}
+              >
+                <div
+                  className={cn(
+                    'w-1 h-8 rounded-full transition-colors duration-150',
+                    isDragging ? 'bg-[var(--accent)]' : 'bg-transparent group-hover:bg-[var(--text-muted)]',
+                  )}
+                />
+              </div>
+              <FilePreview
+                artifact={selectedArtifact}
+                onNavigateToTask={handleNavigateToTask}
+                onClose={() => setSelectedArtifact(null)}
               />
-            </div>
-            <ToolbarButton
-              onClick={() => setSelectedArtifact(null)}
-              title={t('filePreview.close')}
-              icon={<ChevronRight size={13} />}
-              className={cn(
-                'absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 z-10',
-                'w-5 h-12 justify-center p-0',
-                'bg-[var(--bg-secondary)] border border-r-0 border-[var(--border)]',
-                'rounded-l-lg cursor-pointer',
-                'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]',
-                'transition-colors duration-150',
-              )}
-            />
-            <FilePreview artifact={selectedArtifact} onNavigateToTask={handleNavigateToTask} />
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

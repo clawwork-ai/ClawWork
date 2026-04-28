@@ -1,10 +1,11 @@
 import { type MouseEvent } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, FileCode, Image, File, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { Artifact, ArtifactType } from '@clawwork/shared';
+import type { Artifact } from '@clawwork/shared';
 import { cn, formatRelativeTime, formatFileSize } from '@/lib/utils';
 import { motion as motionPresets, motionDuration, motionEase } from '@/styles/design-tokens';
+import ArtifactThumbnail from './ArtifactThumbnail';
 
 interface FileCardProps {
   artifact: Artifact;
@@ -15,14 +16,6 @@ interface FileCardProps {
   onContextMenu: (e: MouseEvent) => void;
 }
 
-function getTypeConfig(type: ArtifactType, name: string) {
-  if (type === 'image') return { Icon: Image, color: 'text-[var(--info)]', bg: 'bg-[var(--info)]/10' };
-  if (type === 'code') return { Icon: FileCode, color: 'text-[var(--accent)]', bg: 'bg-[var(--accent-dim)]' };
-  if (name.endsWith('.md') || name.endsWith('.txt'))
-    return { Icon: FileText, color: 'text-[var(--warning)]', bg: 'bg-[var(--warning)]/10' };
-  return { Icon: File, color: 'text-[var(--text-muted)]', bg: 'bg-[var(--bg-tertiary)]' };
-}
-
 function extBadge(name: string): string {
   const dot = name.lastIndexOf('.');
   return dot !== -1 ? name.slice(dot + 1).toUpperCase() : '';
@@ -30,7 +23,6 @@ function extBadge(name: string): string {
 
 export default function FileCard({ artifact, taskTitle, selected, isNew, onClick, onContextMenu }: FileCardProps) {
   const { t } = useTranslation();
-  const { Icon, color, bg } = getTypeConfig(artifact.type, artifact.name);
   const ext = extBadge(artifact.name);
 
   return (
@@ -78,9 +70,7 @@ export default function FileCard({ artifact, taskTitle, selected, isNew, onClick
         </button>
         <div className="pointer-events-none relative p-3">
           <div className="flex items-start gap-2.5">
-            <div className={cn('flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center', bg)}>
-              <Icon size={18} className={color} />
-            </div>
+            <ArtifactThumbnail artifact={artifact} className="h-14 w-14" iconSize={20} />
             <div className="min-w-0 flex-1">
               <p className="type-label truncate leading-snug text-[var(--text-primary)]">{artifact.name}</p>
               <p className="type-support mt-0.5 text-[var(--text-muted)]">{formatFileSize(artifact.size)}</p>
