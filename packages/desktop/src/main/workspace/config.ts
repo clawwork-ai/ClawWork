@@ -1,6 +1,6 @@
 import { app, safeStorage } from 'electron';
 import { join } from 'path';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, renameSync } from 'fs';
 import { homedir } from 'os';
 import { randomUUID } from 'node:crypto';
 import { CONFIG_FILE_NAME, DEFAULT_WORKSPACE_DIR } from '@clawwork/shared';
@@ -161,7 +161,14 @@ export function readConfig(): AppConfig | null {
     const config = JSON.parse(raw) as AppConfig;
     const migrated = migrateConfigIfNeeded(config);
     return decryptGatewayCredentials(migrated);
-  } catch {
+  } catch (err) {
+    console.error('[config] failed to read:', err);
+    const corruptedPath = `${cfgPath}.corrupted-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+    try {
+      renameSync(cfgPath, corruptedPath);
+    } catch {
+      // best-effort backup rename
+    }
     return null;
   }
 }
