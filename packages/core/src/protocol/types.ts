@@ -1,4 +1,4 @@
-import type { ToolCall } from '@clawwork/shared';
+import type { MessageAttachment, ToolCall } from '@clawwork/shared';
 
 export interface ChatMessage {
   role?: string;
@@ -21,6 +21,10 @@ export interface ChatEventPayload {
 export interface RawContentBlock {
   type: string;
   text?: string;
+  url?: string;
+  openUrl?: string;
+  alt?: string;
+  mimeType?: string;
   id?: string;
   name?: string;
   arguments?: Record<string, unknown> | string;
@@ -40,6 +44,7 @@ export interface RawHistoryMessage {
 export interface NormalizedAssistantTurn {
   content: string;
   toolCalls: ToolCall[];
+  attachments?: MessageAttachment[];
   timestamp: string;
 }
 
@@ -48,4 +53,5 @@ export interface DiscoveredMessageShape {
   content: string;
   timestamp: string;
   toolCalls?: ToolCall[];
+  attachments?: MessageAttachment[];
 }

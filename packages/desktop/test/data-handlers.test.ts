@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const handleMap = new Map<string, (...args: unknown[]) => unknown>();
-const getWorkspacePathMock = vi.fn(() => null);
+const getWorkspacePathMock = vi.fn<() => string | null>(() => null);
 const autoExtractArtifactsMock = vi.fn();
 const runMock = vi.fn();
 const conflictRunMock = vi.fn();
 const onConflictDoUpdateMock = vi.fn(() => ({ run: conflictRunMock }));
 const valuesMock = vi.fn(() => ({ onConflictDoUpdate: onConflictDoUpdateMock, run: runMock }));
 const insertMock = vi.fn(() => ({ values: valuesMock }));
-const selectGetMock = vi.fn(() => ({ sk: 'agent:main:clawwork:task:task-1' }));
+const selectGetMock = vi.fn<() => { sk?: string; id?: string }>(() => ({ sk: 'agent:main:clawwork:task:task-1' }));
 const selectWhereMock = vi.fn(() => ({ get: selectGetMock }));
 const selectFromMock = vi.fn(() => ({ where: selectWhereMock }));
 const selectMock = vi.fn(() => ({ from: selectFromMock }));
@@ -43,6 +43,8 @@ describe('registerDataHandlers', () => {
     autoExtractArtifactsMock.mockReset();
     runMock.mockReset();
     conflictRunMock.mockReset();
+    selectGetMock.mockReset();
+    selectGetMock.mockReturnValue({ sk: 'agent:main:clawwork:task:task-1' });
     onConflictDoUpdateMock.mockClear();
     valuesMock.mockClear();
     insertMock.mockClear();
@@ -112,5 +114,81 @@ describe('registerDataHandlers', () => {
         }),
       }),
     );
+  });
+
+  it('auto-extracts assistant image attachments even when content is empty', async () => {
+    const { registerDataHandlers } = await import('../src/main/ipc/data-handlers.js');
+
+    getWorkspacePathMock.mockReturnValue('/workspace');
+    autoExtractArtifactsMock.mockResolvedValue(undefined);
+    registerDataHandlers();
+
+    const createMessage = handleMap.get('data:create-message');
+    expect(createMessage).toBeTypeOf('function');
+
+    const attachments = [
+      {
+        fileName: 'result.png',
+        dataUrl: 'file:///Users/x/.openclaw/media/result.png',
+        mimeType: 'image/png',
+        sourcePath: '/Users/x/.openclaw/media/result.png',
+      },
+    ];
+
+    expect(
+      createMessage?.(
+        {},
+        {
+          id: 'msg-image-1',
+          taskId: 'task-1',
+          role: 'assistant',
+          content: '',
+          timestamp: '2026-03-16T00:00:01.000Z',
+          attachments,
+        },
+      ),
+    ).toEqual({ ok: true });
+
+    expect(autoExtractArtifactsMock).toHaveBeenCalledWith({
+      workspacePath: '/workspace',
+      taskId: 'task-1',
+      messageId: 'msg-image-1',
+      content: '',
+      attachments,
+    });
+  });
+
+  it('auto-extracts using the persisted message id after logical upsert', async () => {
+    const { registerDataHandlers } = await import('../src/main/ipc/data-handlers.js');
+
+    getWorkspacePathMock.mockReturnValue('/workspace');
+    autoExtractArtifactsMock.mockResolvedValue(undefined);
+    selectGetMock.mockReturnValueOnce({ id: 'existing-msg-1' });
+    registerDataHandlers();
+
+    const createMessage = handleMap.get('data:create-message');
+    expect(createMessage).toBeTypeOf('function');
+
+    expect(
+      createMessage?.(
+        {},
+        {
+          id: 'incoming-msg-2',
+          taskId: 'task-1',
+          role: 'assistant',
+          content: 'done',
+          timestamp: '2026-03-16T00:00:01.000Z',
+          sessionKey: 'agent:main:clawwork:task:task-1',
+        },
+      ),
+    ).toEqual({ ok: true });
+
+    expect(autoExtractArtifactsMock).toHaveBeenCalledWith({
+      workspacePath: '/workspace',
+      taskId: 'task-1',
+      messageId: 'existing-msg-1',
+      content: 'done',
+      attachments: undefined,
+    });
   });
 });

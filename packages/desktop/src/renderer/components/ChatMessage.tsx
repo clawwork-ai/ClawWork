@@ -136,12 +136,24 @@ function InlineImageBubble({
   single,
   onOpen,
 }: {
-  attachment: { fileName: string; dataUrl: string; mimeType?: string; localPath?: string };
+  attachment: { fileName: string; dataUrl: string; mimeType?: string; localPath?: string; sourcePath?: string };
   single: boolean;
   onOpen?: (src: string) => void;
 }) {
   const [src, setSrc] = useState(attachment.dataUrl);
   useEffect(() => {
+    if (attachment.sourcePath) {
+      let aborted = false;
+      window.clawwork.readMediaFile(attachment.sourcePath).then((res) => {
+        if (aborted) return;
+        if (res.ok && res.result) {
+          setSrc(`data:${attachment.mimeType ?? 'image/png'};base64,${res.result.content}`);
+        }
+      });
+      return () => {
+        aborted = true;
+      };
+    }
     if (!attachment.localPath) return;
     if (attachment.dataUrl.startsWith('data:')) return;
     let aborted = false;
@@ -154,7 +166,7 @@ function InlineImageBubble({
     return () => {
       aborted = true;
     };
-  }, [attachment.localPath, attachment.mimeType, attachment.dataUrl]);
+  }, [attachment.localPath, attachment.sourcePath, attachment.mimeType, attachment.dataUrl]);
   return (
     <img
       src={src}
@@ -208,7 +220,16 @@ const ChatMessage = memo(function ChatMessage({
     return () => window.clearTimeout(timer);
   }, [saveState]);
 
-  if (!isUser && !isSystem && !message.content && message.toolCalls.length === 0 && !message.thinkingContent) {
+  const attachments = message.attachments;
+
+  if (
+    !isUser &&
+    !isSystem &&
+    !message.content &&
+    !attachments?.length &&
+    message.toolCalls.length === 0 &&
+    !message.thinkingContent
+  ) {
     return null;
   }
 
@@ -222,7 +243,6 @@ const ChatMessage = memo(function ChatMessage({
     );
   }
 
-  const attachments = message.attachments;
   const canSaveMessage = Boolean(message.content.trim()) && Boolean(message.taskId) && Boolean(message.id);
 
   const handleCopy = (): void => {
@@ -306,8 +326,8 @@ const ChatMessage = memo(function ChatMessage({
             />
           </div>
         ) : null}
-        {isUser && attachments?.length ? (
-          <div className={cn('flex gap-2 mt-2 flex-wrap', 'justify-end')}>
+        {attachments?.length ? (
+          <div className={cn('flex gap-2 mt-2 flex-wrap', isUser ? 'justify-end' : 'justify-start')}>
             {attachments.map((attachment, i) => {
               const isImage = !attachment.mimeType || attachment.mimeType.startsWith('image/');
               return isImage ? (

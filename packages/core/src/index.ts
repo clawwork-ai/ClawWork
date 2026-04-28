@@ -43,6 +43,7 @@ export {
   INTERNAL_ASSISTANT_MARKERS,
   sanitizeModel,
   isVisibleAssistantContent,
+  normalizeContentBlocks,
   normalizeAssistantTurns,
   collapseDiscoveredMessages,
 } from './protocol/normalize-history.js';

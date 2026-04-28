@@ -27,6 +27,19 @@ describe('initDatabase', () => {
     expect(Database).toHaveBeenCalled();
   });
 
+  it('does not purge media-only assistant messages during startup cleanup', () => {
+    initDatabase('/tmp/workspace-a');
+
+    const cleanupSql = mockDbInstance.exec.mock.calls
+      .map(([sql]) => String(sql))
+      .find((sql) => sql.includes('DELETE FROM messages'));
+
+    expect(cleanupSql).toContain("COALESCE(image_attachments, '') = ''");
+    expect(cleanupSql).toContain("COALESCE(tool_calls, '') = ''");
+    expect(cleanupSql).toContain('NOT EXISTS');
+    expect(cleanupSql).toContain('artifacts.message_id = messages.id');
+  });
+
   it('returns early when called with same path', () => {
     initDatabase('/tmp/workspace-a');
     vi.clearAllMocks();

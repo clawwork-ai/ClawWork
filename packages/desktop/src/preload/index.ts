@@ -149,6 +149,7 @@ function buildApi(): ClawWorkAPI {
     readInboxFile: (localPath: string) => ipcRenderer.invoke('inbox:read-file', { localPath }),
     openInboxFile: (localPath: string) => ipcRenderer.invoke('inbox:open', { localPath }),
     showInboxInFolder: (localPath: string) => ipcRenderer.invoke('inbox:show-in-folder', { localPath }),
+    readMediaFile: (sourcePath: string) => ipcRenderer.invoke('media:read-file', { sourcePath }),
     exportSessionMarkdown: (taskId: string) => ipcRenderer.invoke('session:export-markdown', { taskId }),
     exportSessionMarkdownAs: (taskId: string) => ipcRenderer.invoke('session:export-markdown-as', { taskId }),
 

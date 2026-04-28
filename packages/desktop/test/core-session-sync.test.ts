@@ -6,7 +6,7 @@ function createHarness(params: {
   tasks: Array<{ id: string; gatewayId: string; sessionKey: string }>;
   loadMessagesRows: Record<
     string,
-    Array<{ id: string; taskId: string; role: string; content: string; timestamp: string }>
+    Array<{ id: string; taskId: string; role: string; content: string; timestamp: string; attachments?: unknown[] }>
   >;
   discovered: Array<{
     gatewayId: string;
@@ -21,7 +21,13 @@ function createHarness(params: {
     inputTokens?: number;
     outputTokens?: number;
     contextTokens?: number;
-    messages: { role: string; content: string; timestamp: string; toolCalls?: Message['toolCalls'] }[];
+    messages: {
+      role: string;
+      content: string;
+      timestamp: string;
+      attachments?: Message['attachments'];
+      toolCalls?: Message['toolCalls'];
+    }[];
   }>;
 }) {
   const persisted: Array<{
@@ -211,5 +217,109 @@ describe('core session sync startup flow', () => {
         toolCalls: [expect.objectContaining({ id: 'exec-1', name: 'exec', status: 'done', result: 'ok' })],
       }),
     );
+  });
+
+  it('normalizes persisted assistant MEDIA directives during local hydration', async () => {
+    const harness = createHarness({
+      tasks: [
+        {
+          id: 'task-media',
+          gatewayId: 'gw-1',
+          sessionKey: 'agent:main:clawwork:task:task-media',
+        },
+      ],
+      loadMessagesRows: {
+        'task-media': [
+          {
+            id: 'a1',
+            taskId: 'task-media',
+            role: 'assistant',
+            content: 'MEDIA:/Users/x/.openclaw/media/generated.png\n\nImage ready',
+            timestamp: '2026-03-16T10:00:01.000Z',
+          },
+        ],
+      },
+      discovered: [],
+    });
+
+    await harness.sessionSync.hydrateFromLocal();
+
+    expect(harness.messageStore.messagesByTask['task-media']).toEqual([
+      expect.objectContaining({
+        id: 'a1',
+        content: 'Image ready',
+        attachments: [
+          {
+            fileName: 'generated.png',
+            dataUrl: 'file:///Users/x/.openclaw/media/generated.png',
+            mimeType: 'image/png',
+            sourcePath: '/Users/x/.openclaw/media/generated.png',
+          },
+        ],
+      }),
+    ]);
+    expect(harness.persisted).toEqual([]);
+  });
+
+  it('backfills attachments for existing assistant messages with the same timestamp', async () => {
+    const attachment = {
+      fileName: 'generated.png',
+      dataUrl: 'file:///Users/x/.openclaw/media/generated.png',
+      mimeType: 'image/png',
+      sourcePath: '/Users/x/.openclaw/media/generated.png',
+    };
+    const harness = createHarness({
+      tasks: [
+        {
+          id: 'task-media',
+          gatewayId: 'gw-1',
+          sessionKey: 'agent:main:clawwork:task:task-media',
+        },
+      ],
+      loadMessagesRows: {
+        'task-media': [
+          {
+            id: 'a1',
+            taskId: 'task-media',
+            role: 'assistant',
+            content: 'Image ready',
+            timestamp: '2026-03-16T10:00:01.000Z',
+          },
+        ],
+      },
+      discovered: [
+        {
+          gatewayId: 'gw-1',
+          taskId: 'task-media',
+          sessionKey: 'agent:main:clawwork:task:task-media',
+          title: 'Media task',
+          updatedAt: '2026-03-16T10:00:01.000Z',
+          agentId: 'main',
+          messages: [
+            {
+              role: 'assistant',
+              content: 'Image ready',
+              timestamp: '2026-03-16T10:00:01.000Z',
+              attachments: [attachment],
+            },
+          ],
+        },
+      ],
+    });
+
+    await harness.sessionSync.syncFromGateway();
+
+    expect(harness.messageStore.messagesByTask['task-media']).toEqual([
+      expect.objectContaining({
+        id: 'a1',
+        attachments: [attachment],
+      }),
+    ]);
+    expect(harness.persisted).toEqual([
+      expect.objectContaining({
+        id: 'a1',
+        attachments: [attachment],
+      }),
+    ]);
   });
 });

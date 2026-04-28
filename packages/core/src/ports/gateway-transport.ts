@@ -1,4 +1,4 @@
-import type { CommandsListParams, IpcResult } from '@clawwork/shared';
+import type { CommandsListParams, IpcResult, MessageAttachment } from '@clawwork/shared';
 
 export interface GatewayEvent {
   event: string;
@@ -54,7 +54,7 @@ export interface DiscoveredSession {
   inputTokens?: number;
   outputTokens?: number;
   contextTokens?: number;
-  messages: { role: string; content: string; timestamp: string }[];
+  messages: { role: string; content: string; timestamp: string; attachments?: MessageAttachment[] }[];
 }
 
 export interface SyncResult {

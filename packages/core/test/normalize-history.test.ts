@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeAssistantTurns } from '../src/protocol/normalize-history';
+import {
+  collapseDiscoveredMessages,
+  normalizeAssistantTurns,
+  normalizeContentBlocks,
+} from '../src/protocol/normalize-history';
 import type { RawHistoryMessage } from '../src/protocol/types';
 
 describe('normalizeAssistantTurns', () => {
@@ -68,5 +72,93 @@ describe('normalizeAssistantTurns', () => {
       args: { path: 'README.md' },
       result: 'file contents',
     });
+  });
+
+  it('extracts line-start MEDIA directives as image attachments', () => {
+    const rawMsgs: RawHistoryMessage[] = [
+      {
+        role: 'assistant',
+        timestamp: 2000,
+        content: [{ type: 'text', text: 'MEDIA:/Users/x/.openclaw/media/out.png\n\nImage ready' }],
+      },
+    ];
+
+    const turns = normalizeAssistantTurns(rawMsgs);
+
+    expect(turns).toHaveLength(1);
+    expect(turns[0].content).toBe('Image ready');
+    expect(turns[0].attachments).toEqual([
+      {
+        fileName: 'out.png',
+        dataUrl: 'file:///Users/x/.openclaw/media/out.png',
+        mimeType: 'image/png',
+        sourcePath: '/Users/x/.openclaw/media/out.png',
+      },
+    ]);
+  });
+
+  it('decodes file URL media paths before reading from sourcePath', () => {
+    const normalized = normalizeContentBlocks([
+      { type: 'text', text: 'MEDIA:file:///Users/x/.openclaw/media/generated%20image.png' },
+    ]);
+
+    expect(normalized.attachments?.[0]).toMatchObject({
+      fileName: 'generated image.png',
+      dataUrl: 'file:///Users/x/.openclaw/media/generated%20image.png',
+      sourcePath: '/Users/x/.openclaw/media/generated image.png',
+    });
+  });
+
+  it('keeps prose MEDIA mentions as text', () => {
+    const normalized = normalizeContentBlocks([{ type: 'text', text: 'Use MEDIA:/tmp/out.png in a tool result' }]);
+
+    expect(normalized).toEqual({ content: 'Use MEDIA:/tmp/out.png in a tool result' });
+  });
+
+  it('extracts supported image content blocks', () => {
+    const normalized = normalizeContentBlocks([
+      { type: 'text', text: 'Image ready' },
+      { type: 'image', url: 'https://example.com/result.webp', alt: 'result.webp', mimeType: 'image/webp' },
+    ]);
+
+    expect(normalized).toEqual({
+      content: 'Image ready',
+      attachments: [{ fileName: 'result.webp', dataUrl: 'https://example.com/result.webp', mimeType: 'image/webp' }],
+    });
+  });
+
+  it('preserves media-only assistant turns', () => {
+    const rawMsgs: RawHistoryMessage[] = [
+      {
+        role: 'assistant',
+        timestamp: 2000,
+        content: [{ type: 'text', text: 'MEDIA:/Users/x/.openclaw/media/out.png' }],
+      },
+    ];
+
+    const turns = normalizeAssistantTurns(rawMsgs);
+
+    expect(turns).toHaveLength(1);
+    expect(turns[0].content).toBe('');
+    expect(turns[0].attachments?.[0]?.fileName).toBe('out.png');
+  });
+
+  it('carries discovered assistant attachments through collapse', () => {
+    const messages = collapseDiscoveredMessages(
+      [
+        {
+          role: 'assistant',
+          content: 'Image ready',
+          timestamp: '2026-04-27T17:03:05.234Z',
+          attachments: [{ fileName: 'out.png', dataUrl: 'file:///Users/x/out.png', mimeType: 'image/png' }],
+        },
+      ],
+      'task-1',
+    );
+
+    expect(messages).toHaveLength(1);
+    expect(messages[0].attachments).toEqual([
+      { fileName: 'out.png', dataUrl: 'file:///Users/x/out.png', mimeType: 'image/png' },
+    ]);
   });
 });

@@ -50,10 +50,11 @@ interface SaveArtifactParams {
   sourcePath: string;
   fileName?: string;
   mediaType?: string;
+  sourceKey?: string;
 }
 
 export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact> {
-  const { workspacePath, taskId, messageId, sourcePath, fileName, mediaType } = params;
+  const { workspacePath, taskId, messageId, sourcePath, fileName, mediaType, sourceKey } = params;
 
   const taskDir = ensureTaskDir(workspacePath, taskId);
   const originalName = fileName ?? basename(sourcePath);
@@ -77,6 +78,7 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
     localPath,
     mimeType,
     size: stat.size,
+    sourceKey: sourceKey ?? '',
     createdAt: now,
   };
 
@@ -93,6 +95,7 @@ export async function saveArtifact(params: SaveArtifactParams): Promise<Artifact
         localPath: artifact.localPath,
         mimeType: artifact.mimeType,
         size: artifact.size,
+        sourceKey: artifact.sourceKey ?? '',
         createdAt: artifact.createdAt,
       })
       .run();
@@ -116,10 +119,11 @@ interface SaveArtifactFromBufferParams {
   buffer: Buffer;
   artifactType: 'code' | 'image' | 'file';
   contentText?: string;
+  sourceKey?: string;
 }
 
 export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParams): Promise<Artifact> {
-  const { workspacePath, taskId, messageId, fileName, buffer, artifactType, contentText } = params;
+  const { workspacePath, taskId, messageId, fileName, buffer, artifactType, contentText, sourceKey } = params;
 
   const taskDir = ensureTaskDir(workspacePath, taskId);
   const { finalName, destPath } = resolveArtifactDestination(taskDir, fileName);
@@ -141,6 +145,7 @@ export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParam
     localPath,
     mimeType,
     size: buffer.length,
+    sourceKey: sourceKey ?? '',
     contentText: contentText ?? '',
     createdAt: now,
   };
@@ -158,6 +163,7 @@ export async function saveArtifactFromBuffer(params: SaveArtifactFromBufferParam
         localPath: artifact.localPath,
         mimeType: artifact.mimeType,
         size: artifact.size,
+        sourceKey: artifact.sourceKey ?? '',
         createdAt: artifact.createdAt,
         contentText: contentText ?? '',
       })

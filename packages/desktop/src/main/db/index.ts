@@ -61,6 +61,8 @@ CREATE TABLE IF NOT EXISTS artifacts (
   local_path TEXT NOT NULL,
   mime_type TEXT NOT NULL DEFAULT '',
   size INTEGER NOT NULL DEFAULT 0,
+  source_key TEXT NOT NULL DEFAULT '',
+  content_text TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
 );
 `;
@@ -130,9 +132,25 @@ function openDatabaseAt(workspacePath: string): void {
     )
   `);
 
-  sqlite.exec("DELETE FROM messages WHERE role = 'assistant' AND (content = '' OR TRIM(content) = 'NO_REPLY')");
+  sqlite.exec(`
+    DELETE FROM messages
+    WHERE role = 'assistant'
+      AND (content = '' OR TRIM(content) = 'NO_REPLY')
+      AND COALESCE(image_attachments, '') = ''
+      AND COALESCE(tool_calls, '') = ''
+      AND NOT EXISTS (
+        SELECT 1 FROM artifacts WHERE artifacts.message_id = messages.id
+      )
+  `);
 
   migrateAddColumn(sqlite, "ALTER TABLE artifacts ADD COLUMN content_text TEXT NOT NULL DEFAULT ''");
+  migrateAddColumn(sqlite, "ALTER TABLE artifacts ADD COLUMN source_key TEXT NOT NULL DEFAULT ''");
+
+  sqlite.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS artifacts_source_dedup
+    ON artifacts(message_id, source_key)
+    WHERE source_key <> ''
+  `);
 
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS teams (

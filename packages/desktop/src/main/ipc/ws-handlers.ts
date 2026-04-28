@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
 import { readConfig, ensureDeviceId } from '../workspace/config.js';
 import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
-import { parseToolArgs } from '@clawwork/core';
+import { normalizeContentBlocks, parseToolArgs } from '@clawwork/core';
 import type {
   ApprovalDecision,
   ChatAttachment,
@@ -71,9 +71,13 @@ interface ChatHistoryMessage {
     type: string;
     text?: string;
     thinking?: string;
+    url?: string;
+    openUrl?: string;
+    alt?: string;
+    mimeType?: string;
     id?: string;
     name?: string;
-    arguments?: unknown;
+    arguments?: Record<string, unknown> | string;
     result?: unknown;
   }[];
   timestamp?: number;
@@ -267,7 +271,13 @@ export function registerWsHandlers(): void {
       inputTokens?: number;
       outputTokens?: number;
       contextTokens?: number;
-      messages: { role: string; content: string; timestamp: string; toolCalls: ParsedToolCall[] }[];
+      messages: {
+        role: string;
+        content: string;
+        timestamp: string;
+        attachments?: unknown[];
+        toolCalls: ParsedToolCall[];
+      }[];
     }[] = [];
 
     for (const [gatewayId, gw] of clients) {
@@ -299,10 +309,15 @@ export function registerWsHandlers(): void {
           const msgs = rawMsgs
             .filter((m) => m.role === 'user' || m.role === 'assistant')
             .map((m) => {
-              const textContent = (m.content ?? [])
-                .filter((b) => b.type === 'text' && b.text)
-                .map((b) => b.text!)
-                .join('');
+              const normalizedContent =
+                m.role === 'assistant'
+                  ? normalizeContentBlocks(m.content ?? [])
+                  : {
+                      content: (m.content ?? [])
+                        .filter((b) => b.type === 'text' && b.text)
+                        .map((b) => b.text!)
+                        .join(''),
+                    };
 
               const toolCalls: ParsedToolCall[] = (m.content ?? [])
                 .filter((b) => b.type === 'toolCall' && b.id && b.name)
@@ -332,13 +347,14 @@ export function registerWsHandlers(): void {
 
               return {
                 role: m.role,
-                content: textContent,
+                content: normalizedContent.content,
+                attachments: normalizedContent.attachments,
                 timestamp: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
                 toolCalls,
               };
             })
             .filter((m) => {
-              if (!m.content && m.toolCalls.length === 0) return false;
+              if (!m.content && m.toolCalls.length === 0 && !m.attachments?.length) return false;
               if (m.role === 'assistant' && INTERNAL_ASSISTANT_MARKERS.has(m.content.trim())) return false;
               return true;
             });

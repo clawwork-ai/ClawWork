@@ -334,6 +334,7 @@ export interface ClawWorkAPI {
   readInboxFile: (localPath: string) => Promise<IpcResult<{ content: string; encoding: 'base64' }>>;
   openInboxFile: (localPath: string) => Promise<IpcResult>;
   showInboxInFolder: (localPath: string) => Promise<IpcResult>;
+  readMediaFile: (sourcePath: string) => Promise<IpcResult<{ content: string; encoding: 'base64' }>>;
   exportSessionMarkdown: (taskId: string) => Promise<IpcResult>;
   exportSessionMarkdownAs: (taskId: string) => Promise<IpcResult>;
 

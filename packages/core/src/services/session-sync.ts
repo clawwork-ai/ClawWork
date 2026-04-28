@@ -3,7 +3,21 @@ import type { Message, MessageRole, ToolCall, IpcResult } from '@clawwork/shared
 import type { RawHistoryMessage } from '../protocol/types.js';
 import type { ActiveTurn, MessageState } from '../stores/message-store.js';
 import { mergeCanonicalMessageWithActiveTurn } from '../stores/message-store.js';
-import { sanitizeModel, normalizeAssistantTurns, collapseDiscoveredMessages } from '../protocol/normalize-history.js';
+import {
+  sanitizeModel,
+  normalizeContentBlocks,
+  normalizeAssistantTurns,
+  collapseDiscoveredMessages,
+  mergeMessageAttachments,
+} from '../protocol/normalize-history.js';
+
+type DiscoveredSyncMessage = {
+  role: string;
+  content: string;
+  timestamp: string;
+  attachments?: unknown[];
+  toolCalls?: ToolCall[];
+};
 
 export interface SessionSyncDeps {
   persistence: {
@@ -52,7 +66,7 @@ export interface SessionSyncDeps {
         inputTokens?: number;
         outputTokens?: number;
         contextTokens?: number;
-        messages: { role: string; content: string; timestamp: string; toolCalls?: ToolCall[] }[];
+        messages: DiscoveredSyncMessage[];
       }[];
     }>;
   };
@@ -101,9 +115,76 @@ export interface SessionSyncDeps {
 
 const RETRY_DELAYS = [2000, 4000, 8000];
 
+function normalizeLocalAssistantMessage(row: { role: string; content: string; attachments?: unknown[] }): {
+  content: string;
+  attachments?: Message['attachments'];
+} {
+  const existingAttachments = Array.isArray(row.attachments) ? (row.attachments as Message['attachments']) : undefined;
+  if (row.role !== 'assistant') return { content: row.content, attachments: existingAttachments };
+  const normalized = normalizeContentBlocks([{ type: 'text', text: row.content }]);
+  return {
+    content: normalized.content,
+    attachments: mergeMessageAttachments(existingAttachments, normalized.attachments),
+  };
+}
+
 export function createSessionSync(deps: SessionSyncDeps) {
   let hydrationPromise: Promise<void> | null = null;
   const syncChains = new Map<string, Promise<void>>();
+
+  function persistCanonicalMessage(message: Message): void {
+    deps.persistence
+      .persistMessage({
+        id: message.id,
+        taskId: message.taskId,
+        role: message.role,
+        content: message.content,
+        timestamp: message.timestamp,
+        sessionKey: message.sessionKey,
+        agentId: message.agentId,
+        runId: message.runId,
+        attachments: message.attachments as unknown[] | undefined,
+        toolCalls: message.toolCalls,
+      })
+      .catch((err) => console.error('[session-sync] persistMessage failed:', err));
+  }
+
+  function backfillAssistantAttachments(
+    taskId: string,
+    sessionKey: string,
+    incoming: Array<{ timestamp: string; attachments?: Message['attachments'] }>,
+  ): void {
+    const withAttachments = incoming.filter((message) => message.attachments?.length);
+    if (withAttachments.length === 0) return;
+
+    const byTimestamp = new Map(withAttachments.map((message) => [message.timestamp, message]));
+    const updated: Message[] = [];
+
+    deps.getMessageStore().setState((s) => {
+      const messages = s.messagesByTask[taskId] ?? [];
+      let changed = false;
+      const next = messages.map((message) => {
+        if (message.role !== 'assistant') return message;
+        if ((message.sessionKey ?? sessionKey) !== sessionKey) return message;
+        const match = byTimestamp.get(message.timestamp);
+        if (!match?.attachments?.length) return message;
+
+        const merged = mergeMessageAttachments(message.attachments, match.attachments);
+        if ((merged?.length ?? 0) === (message.attachments?.length ?? 0)) return message;
+
+        changed = true;
+        const nextMessage = { ...message, attachments: merged };
+        updated.push(nextMessage);
+        return nextMessage;
+      });
+
+      return changed ? { messagesByTask: { ...s.messagesByTask, [taskId]: next } } : {};
+    });
+
+    for (const message of updated) {
+      persistCanonicalMessage(message);
+    }
+  }
 
   async function hydrateFromLocal(): Promise<void> {
     if (!hydrationPromise) {
@@ -116,19 +197,22 @@ export function createSessionSync(deps: SessionSyncDeps) {
           try {
             const res = await deps.persistence.loadMessages(t.id);
             if (res.ok && res.rows && res.rows.length > 0) {
-              const msgs: Message[] = res.rows.map((r) => ({
-                id: r.id,
-                taskId: r.taskId,
-                role: r.role as MessageRole,
-                content: r.content,
-                artifacts: [],
-                toolCalls: Array.isArray(r.toolCalls) ? (r.toolCalls as ToolCall[]) : [],
-                timestamp: r.timestamp,
-                sessionKey: r.sessionKey,
-                agentId: r.agentId,
-                runId: r.runId,
-                attachments: r.attachments as Message['attachments'],
-              }));
+              const msgs: Message[] = res.rows.map((r) => {
+                const normalized = normalizeLocalAssistantMessage(r);
+                return {
+                  id: r.id,
+                  taskId: r.taskId,
+                  role: r.role as MessageRole,
+                  content: normalized.content,
+                  artifacts: [],
+                  toolCalls: Array.isArray(r.toolCalls) ? (r.toolCalls as ToolCall[]) : [],
+                  timestamp: r.timestamp,
+                  sessionKey: r.sessionKey,
+                  agentId: r.agentId,
+                  runId: r.runId,
+                  attachments: normalized.attachments,
+                };
+              });
               messageStore.bulkLoad(t.id, msgs);
             }
           } catch (err) {
@@ -166,6 +250,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
     );
 
     const gatewayAssistant = normalizeAssistantTurns(rawMsgs);
+    backfillAssistantAttachments(taskId, sessionKey, gatewayAssistant);
 
     const newest = gatewayAssistant.filter(
       (m) =>
@@ -186,6 +271,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
         content: gm.content,
         artifacts: [],
         toolCalls: gm.toolCalls,
+        attachments: gm.attachments,
         sessionKey,
         agentId: parseAgentIdFromSessionKey(sessionKey),
         timestamp: gm.timestamp,
@@ -207,19 +293,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
         }));
       }
 
-      deps.persistence
-        .persistMessage({
-          id: mergedCanonical.id,
-          taskId,
-          role: 'assistant',
-          content: mergedCanonical.content,
-          timestamp: mergedCanonical.timestamp,
-          sessionKey,
-          agentId: mergedCanonical.agentId,
-          runId: mergedCanonical.runId,
-          toolCalls: mergedCanonical.toolCalls,
-        })
-        .catch((err) => console.error('[session-sync] persistMessage failed:', err));
+      persistCanonicalMessage(mergedCanonical);
     }
   }
 
@@ -280,20 +354,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
     deps.getMessageStore().bulkLoad(params.taskId, nextMessages);
 
     for (const msg of mapped) {
-      deps.persistence
-        .persistMessage({
-          id: msg.id,
-          taskId: msg.taskId,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp,
-          sessionKey: msg.sessionKey,
-          agentId: msg.agentId,
-          runId: msg.runId,
-          attachments: msg.attachments as unknown[] | undefined,
-          toolCalls: msg.toolCalls,
-        })
-        .catch((err) => console.error('[session-sync] loadAndPersist persistMessage failed:', err));
+      persistCanonicalMessage(msg);
     }
   }
 
@@ -309,10 +370,11 @@ export function createSessionSync(deps: SessionSyncDeps) {
 
       for (const d of discovered) {
         const collapsedMessages = collapseDiscoveredMessages(
-          d.messages.map((message: { role: string; content: string; timestamp: string; toolCalls?: ToolCall[] }) => ({
+          d.messages.map((message: DiscoveredSyncMessage) => ({
             role: message.role,
             content: message.content,
             timestamp: message.timestamp,
+            attachments: message.attachments as Message['attachments'],
             toolCalls: message.toolCalls,
           })),
           d.taskId,
@@ -332,6 +394,11 @@ export function createSessionSync(deps: SessionSyncDeps) {
         const hasLocalData = local.length > 0;
 
         if (hasLocalData) {
+          backfillAssistantAttachments(
+            d.taskId,
+            d.sessionKey,
+            collapsedMessages.filter((message) => message.role === 'assistant'),
+          );
           const localTimestamps = new Set(local.filter((m) => m.role === 'assistant').map((m) => m.timestamp));
           const newAssistantMsgs = collapsedMessages.filter(
             (message) => message.role === 'assistant' && !localTimestamps.has(message.timestamp),

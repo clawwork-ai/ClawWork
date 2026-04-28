@@ -163,6 +163,7 @@ export interface MessageAttachment {
   dataUrl: string;
   mimeType?: string;
   localPath?: string;
+  sourcePath?: string;
   size?: number;
 }
 
@@ -191,6 +192,7 @@ export interface Artifact {
   localPath: string;
   mimeType: string;
   size: number;
+  sourceKey?: string;
   contentText?: string;
   createdAt: string;
 }

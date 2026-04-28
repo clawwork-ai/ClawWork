@@ -1,4 +1,4 @@
-import type { ToolCall, Message } from '@clawwork/shared';
+import type { Message, MessageAttachment, ToolCall } from '@clawwork/shared';
 import type { RawContentBlock, RawHistoryMessage, NormalizedAssistantTurn, DiscoveredMessageShape } from './types.js';
 import { safeJsonParse } from './parse-content.js';
 
@@ -15,11 +15,162 @@ export function isVisibleAssistantContent(content: string): boolean {
   return trimmed.length > 0 && !INTERNAL_ASSISTANT_MARKERS.has(trimmed);
 }
 
-function extractAssistantText(blocks: RawContentBlock[]): string {
-  return blocks
-    .filter((b) => b.type === 'text' && b.text)
-    .map((b) => b.text!)
-    .join('');
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif)(?:[?#].*)?$/i;
+const DATA_IMAGE_RE = /^data:image\/(png|jpe?g|gif|webp|avif);base64,/i;
+
+function cleanMediaCandidate(raw: string): string {
+  const trimmed = raw.trim();
+  const wrapped = trimmed.match(/^`([^`]+)`$/) ?? trimmed.match(/^"([^"]+)"$/) ?? trimmed.match(/^'([^']+)'$/);
+  return (wrapped?.[1] ?? trimmed).replace(/[`"'\\})\],]+$/, '').trim();
+}
+
+function hasUnsafePathSegment(value: string): boolean {
+  return value.split(/[\\/]+/).some((segment) => segment === '..');
+}
+
+function encodeFilePath(path: string): string {
+  return `file://${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+function filePathFromMediaCandidate(candidate: string): string | null {
+  if (!candidate.startsWith('file://')) return candidate;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== 'file:' || (url.hostname && url.hostname !== 'localhost')) return null;
+    return decodeURIComponent(url.pathname);
+  } catch {
+    return null;
+  }
+}
+
+function fileNameFromSource(source: string, fallback: string): string {
+  const withoutQuery = source.split(/[?#]/)[0] ?? source;
+  const normalized = withoutQuery.replaceAll('\\', '/');
+  const candidate = normalized.split('/').filter(Boolean).at(-1);
+  if (!candidate) return fallback;
+  try {
+    return decodeURIComponent(candidate);
+  } catch {
+    return candidate;
+  }
+}
+
+function mimeTypeFromSource(source: string, fallback?: string): string | undefined {
+  if (fallback?.startsWith('image/')) return fallback;
+  const lower = source.split(/[?#]/)[0]?.toLowerCase() ?? '';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.gif')) return 'image/gif';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  if (lower.endsWith('.avif')) return 'image/avif';
+  const dataMatch = source.match(/^data:(image\/[^;]+);/i);
+  return dataMatch?.[1] ?? fallback;
+}
+
+function attachmentFromMediaSource(source: string, alt?: string, mimeType?: string): MessageAttachment | null {
+  const candidate = cleanMediaCandidate(source);
+  if (!candidate || candidate.length > 4096 || hasUnsafePathSegment(candidate) || candidate.startsWith('~'))
+    return null;
+
+  if (DATA_IMAGE_RE.test(candidate)) {
+    return {
+      fileName: alt?.trim() || 'image.png',
+      dataUrl: candidate,
+      mimeType: mimeTypeFromSource(candidate, mimeType),
+    };
+  }
+
+  if (/^https:\/\//i.test(candidate) && IMAGE_EXT_RE.test(candidate)) {
+    return {
+      fileName: alt?.trim() || fileNameFromSource(candidate, 'image.png'),
+      dataUrl: candidate,
+      mimeType: mimeTypeFromSource(candidate, mimeType),
+    };
+  }
+
+  const filePath = filePathFromMediaCandidate(candidate);
+  if (!filePath) return null;
+  if (filePath.startsWith('/') && IMAGE_EXT_RE.test(filePath)) {
+    return {
+      fileName: alt?.trim() || fileNameFromSource(filePath, 'image.png'),
+      dataUrl: encodeFilePath(filePath),
+      mimeType: mimeTypeFromSource(filePath, mimeType),
+      sourcePath: filePath,
+    };
+  }
+
+  return null;
+}
+
+function splitTextMediaDirectives(text: string): { text: string; attachments: MessageAttachment[] } {
+  const attachments: MessageAttachment[] = [];
+  const kept: string[] = [];
+  let inFence = false;
+
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trimStart();
+    if (/^(```|~~~)/.test(trimmed)) {
+      inFence = !inFence;
+      kept.push(line);
+      continue;
+    }
+
+    if (!inFence && trimmed.toUpperCase().startsWith('MEDIA:')) {
+      const media = attachmentFromMediaSource(trimmed.slice('MEDIA:'.length));
+      if (media) {
+        attachments.push(media);
+        continue;
+      }
+    }
+
+    kept.push(line);
+  }
+
+  if (attachments.length > 0) {
+    while (kept[0]?.trim() === '') kept.shift();
+    while (kept.at(-1)?.trim() === '') kept.pop();
+  }
+
+  return { text: kept.join('\n'), attachments };
+}
+
+export function mergeMessageAttachments(
+  base: MessageAttachment[] | undefined,
+  incoming: MessageAttachment[] | undefined,
+): MessageAttachment[] | undefined {
+  const merged = [...(base ?? [])];
+  const seen = new Set(merged.map((attachment) => attachment.dataUrl));
+  for (const attachment of incoming ?? []) {
+    if (seen.has(attachment.dataUrl)) continue;
+    seen.add(attachment.dataUrl);
+    merged.push(attachment);
+  }
+  return merged.length ? merged : undefined;
+}
+
+export function normalizeContentBlocks(blocks: RawContentBlock[]): {
+  content: string;
+  attachments?: MessageAttachment[];
+} {
+  let content = '';
+  let attachments: MessageAttachment[] | undefined;
+
+  for (const block of blocks) {
+    if (block.type === 'text' && block.text) {
+      const parsed = splitTextMediaDirectives(block.text);
+      content += parsed.text;
+      attachments = mergeMessageAttachments(attachments, parsed.attachments);
+      continue;
+    }
+
+    if (block.type === 'image') {
+      const source = block.url ?? block.openUrl;
+      const attachment = source ? attachmentFromMediaSource(source, block.alt, block.mimeType) : null;
+      attachments = mergeMessageAttachments(attachments, attachment ? [attachment] : undefined);
+    }
+  }
+
+  return { content, attachments };
 }
 
 function toISOTimestamp(epoch: number | undefined): string {
@@ -71,7 +222,7 @@ function shouldStartVisibleAssistantTurn(
   timestamp: string,
   canMergeToolFinal: boolean,
 ): boolean {
-  return Boolean(turn?.content && turn.timestamp !== timestamp && !canMergeToolFinal);
+  return Boolean((turn?.content || turn?.attachments?.length) && turn.timestamp !== timestamp && !canMergeToolFinal);
 }
 
 export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): NormalizedAssistantTurn[] {
@@ -110,7 +261,8 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
     if (msg.role !== 'assistant') continue;
 
     const timestamp = toISOTimestamp(msg.timestamp);
-    const text = extractAssistantText(msg.content ?? []);
+    const normalizedContent = normalizeContentBlocks(msg.content ?? []);
+    const text = normalizedContent.content;
     const toolCalls = (msg.content ?? [])
       .filter((block: RawContentBlock) => block.type === 'toolCall' && block.id && block.name)
       .map(
@@ -130,7 +282,7 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
         }),
       );
 
-    if (!text.trim() && toolCalls.length === 0) continue;
+    if (!text.trim() && toolCalls.length === 0 && !normalizedContent.attachments?.length) continue;
 
     const visibleText = isVisibleAssistantContent(text) ? text.trim() : '';
 
@@ -141,8 +293,17 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
       if (visibleText) {
         turn.content = appendSegment(turn.content, visibleText);
       }
+      turn.attachments = mergeMessageAttachments(turn.attachments, normalizedContent.attachments);
       turn.timestamp = timestamp;
       canMergeToolFinal = true;
+      continue;
+    }
+
+    if (!visibleText && normalizedContent.attachments?.length) {
+      const turn = ensureCurrent(timestamp);
+      turn.attachments = mergeMessageAttachments(turn.attachments, normalizedContent.attachments);
+      turn.timestamp = timestamp;
+      canMergeToolFinal = false;
       continue;
     }
 
@@ -154,11 +315,12 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
 
     const turn = ensureCurrent(timestamp);
     turn.content = appendSegment(turn.content, visibleText);
+    turn.attachments = mergeMessageAttachments(turn.attachments, normalizedContent.attachments);
     turn.timestamp = timestamp;
     canMergeToolFinal = false;
   }
 
-  return turns.filter((turn) => turn.content || turn.toolCalls.length > 0);
+  return turns.filter((turn) => turn.content || turn.toolCalls.length > 0 || (turn.attachments?.length ?? 0) > 0);
 }
 
 export function collapseDiscoveredMessages(messages: DiscoveredMessageShape[], taskId: string): Message[] {
@@ -167,7 +329,11 @@ export function collapseDiscoveredMessages(messages: DiscoveredMessageShape[], t
 
   function flushAssistant(): void {
     if (!currentAssistant) return;
-    if (currentAssistant.content || currentAssistant.toolCalls.length > 0) {
+    if (
+      currentAssistant.content ||
+      currentAssistant.toolCalls.length > 0 ||
+      (currentAssistant.attachments?.length ?? 0) > 0
+    ) {
       collapsed.push(currentAssistant);
     }
     currentAssistant = null;
@@ -192,7 +358,7 @@ export function collapseDiscoveredMessages(messages: DiscoveredMessageShape[], t
 
     const visibleText = isVisibleAssistantContent(message.content) ? message.content.trim() : '';
     const toolCalls = message.toolCalls ?? [];
-    if (!visibleText && toolCalls.length === 0) continue;
+    if (!visibleText && toolCalls.length === 0 && !message.attachments?.length) continue;
 
     if (!currentAssistant) {
       currentAssistant = {
@@ -209,6 +375,7 @@ export function collapseDiscoveredMessages(messages: DiscoveredMessageShape[], t
     if (visibleText) {
       currentAssistant.content = appendSegment(currentAssistant.content, visibleText);
     }
+    currentAssistant.attachments = mergeMessageAttachments(currentAssistant.attachments, message.attachments);
     if (toolCalls.length > 0) {
       const existingIds = new Set(currentAssistant.toolCalls.map((toolCall) => toolCall.id));
       currentAssistant.toolCalls.push(...toolCalls.filter((toolCall) => !existingIds.has(toolCall.id)));
