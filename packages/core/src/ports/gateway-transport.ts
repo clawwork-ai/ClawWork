@@ -70,6 +70,7 @@ export interface ChatAttachment {
 }
 
 export interface GatewayTransportPort {
+  getHttpBase?: (gatewayId: string) => string | undefined | Promise<string | undefined>;
   sendMessage: (
     gatewayId: string,
     sessionKey: string,

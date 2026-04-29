@@ -110,6 +110,9 @@ export function createBrowserGatewayTransport(
   }
 
   const transport: GatewayTransportPort = {
+    getHttpBase(gatewayId) {
+      return getClient(gatewayId)?.httpBase;
+    },
     async sendMessage(gatewayId, sessionKey, content, attachments) {
       const client = getClient(gatewayId);
       if (!client?.isConnected)

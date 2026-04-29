@@ -5,6 +5,7 @@ import { tasks, messages, artifacts, taskRooms, taskRoomSessions, teams, teamAge
 import { autoExtractArtifacts } from '../artifact/auto-extract.js';
 import type { MessageAttachment } from '@clawwork/shared';
 import { getWorkspacePath } from '../workspace/config.js';
+import { getGatewayClient } from '../ws/index.js';
 
 function ipcError(err: unknown): { ok: false; error: string } {
   return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
@@ -188,12 +189,15 @@ export function registerDataHandlers(): void {
         if (msg.role === 'assistant' && (msg.content.length > 0 || (msg.attachments?.length ?? 0) > 0)) {
           const workspacePath = getWorkspacePath();
           if (workspacePath) {
+            const taskRow = db.select({ gid: tasks.gatewayId }).from(tasks).where(eq(tasks.id, msg.taskId)).get();
+            const gatewayHttpBase = taskRow ? getGatewayClient(taskRow.gid)?.httpBase : undefined;
             autoExtractArtifacts({
               workspacePath,
               taskId: msg.taskId,
               messageId: persistedMessageId,
               content: msg.content,
               attachments: msg.attachments as MessageAttachment[] | undefined,
+              gatewayHttpBase,
             }).catch((err: unknown) => console.error('[auto-extract]', err));
           }
         }

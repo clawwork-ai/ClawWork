@@ -17,6 +17,7 @@ interface AutoExtractParams {
   messageId: string;
   content: string;
   attachments?: MessageAttachment[];
+  gatewayHttpBase?: string;
 }
 
 const DATA_IMAGE_RE = /^data:(image\/(?:png|jpe?g|gif|webp|avif));base64,(.+)$/i;
@@ -58,7 +59,7 @@ function safeImageFileName(fileName: string | undefined, mimeType: string | unde
   return `${clean || 'image'}.${ext}`;
 }
 
-async function readAttachmentImage(attachment: MessageAttachment): Promise<Buffer | null> {
+async function readAttachmentImage(attachment: MessageAttachment, trustedOrigin?: string): Promise<Buffer | null> {
   if (attachment.sourcePath) {
     const base64 = await readOpenClawMediaFile(attachment.sourcePath);
     return base64 ? Buffer.from(base64, 'base64') : null;
@@ -67,15 +68,15 @@ async function readAttachmentImage(attachment: MessageAttachment): Promise<Buffe
   const dataMatch = attachment.dataUrl.match(DATA_IMAGE_RE);
   if (dataMatch) return Buffer.from(dataMatch[2], 'base64');
 
-  if (/^https:\/\//i.test(attachment.dataUrl)) {
-    return safeFetch(attachment.dataUrl);
+  if (/^https?:\/\//i.test(attachment.dataUrl)) {
+    return safeFetch(attachment.dataUrl, { trustedOrigin });
   }
 
   return null;
 }
 
 async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> {
-  const { workspacePath, taskId, messageId, content, attachments = [] } = params;
+  const { workspacePath, taskId, messageId, content, attachments = [], gatewayHttpBase } = params;
 
   const db = getDb();
   const existingForMsg = db.select().from(artifacts).where(eq(artifacts.messageId, messageId)).all();
@@ -164,7 +165,7 @@ async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> 
       if (attachment.mimeType && !attachment.mimeType.startsWith('image/')) continue;
       const key = sourceKey('attachment', attachment.sourcePath ?? attachment.dataUrl);
       if (existingSourceKeys.has(key)) continue;
-      const buffer = await readAttachmentImage(attachment);
+      const buffer = await readAttachmentImage(attachment, gatewayHttpBase);
       if (!buffer) continue;
       const fileName = safeImageFileName(attachment.fileName, attachment.mimeType);
       await saveExtracted({

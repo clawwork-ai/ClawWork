@@ -7,12 +7,23 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 interface SafeFetchOptions {
   maxSize?: number;
   timeoutMs?: number;
+  trustedOrigin?: string;
+}
+
+function isSameOrigin(parsed: URL, trustedOrigin?: string): boolean {
+  if (!trustedOrigin) return false;
+  try {
+    return parsed.origin === new URL(trustedOrigin).origin;
+  } catch {
+    return false;
+  }
 }
 
 export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promise<Buffer> {
   const parsed = new URL(url);
-  if (parsed.protocol !== 'https:') throw new Error('HTTPS required');
-  await assertNotPrivateHost(parsed.hostname);
+  const isTrustedOrigin = isSameOrigin(parsed, opts.trustedOrigin);
+  if (parsed.protocol !== 'https:' && !isTrustedOrigin) throw new Error('HTTPS required');
+  if (!isTrustedOrigin) await assertNotPrivateHost(parsed.hostname);
 
   const maxSize = opts.maxSize ?? DEFAULT_MAX_SIZE;
   const controller = new AbortController();

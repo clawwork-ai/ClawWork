@@ -36,6 +36,23 @@ describe('safeFetch', () => {
     expect(netFetchMock).not.toHaveBeenCalled();
   });
 
+  it('allows HTTP only for the configured trusted origin', async () => {
+    const body = new ArrayBuffer(4);
+    netFetchMock.mockResolvedValue(mockResponse(body));
+
+    await safeFetch('http://127.0.0.1:18789/media/test.png', { trustedOrigin: 'http://127.0.0.1:18789/' });
+    expect(assertNotPrivateHostMock).not.toHaveBeenCalled();
+    expect(netFetchMock).toHaveBeenCalled();
+  });
+
+  it('treats malformed trusted origins as untrusted', async () => {
+    await expect(
+      safeFetch('http://127.0.0.1:18789/media/test.png', { trustedOrigin: 'http://[invalid' }),
+    ).rejects.toThrow('HTTPS required');
+    expect(assertNotPrivateHostMock).not.toHaveBeenCalled();
+    expect(netFetchMock).not.toHaveBeenCalled();
+  });
+
   it('calls assertNotPrivateHost with parsed hostname', async () => {
     assertNotPrivateHostMock.mockResolvedValue(undefined);
     const body = new ArrayBuffer(4);

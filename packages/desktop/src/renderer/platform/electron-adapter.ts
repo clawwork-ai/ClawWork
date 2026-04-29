@@ -13,6 +13,7 @@ export function createElectronPorts(): PlatformPorts {
       deleteTask: api.deleteTask,
     },
     gateway: {
+      getHttpBase: api.getHttpBase,
       sendMessage: api.sendMessage,
       chatHistory: api.chatHistory,
       abortChat: api.abortChat,

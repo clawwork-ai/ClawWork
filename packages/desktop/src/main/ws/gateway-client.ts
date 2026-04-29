@@ -780,6 +780,12 @@ export class GatewayClient {
     return this.lastErrorCode;
   }
 
+  get httpBase(): string {
+    const parsed = new URL(this.wsUrl);
+    const protocol = parsed.protocol === 'wss:' ? 'https:' : 'http:';
+    return `${protocol}//${parsed.host}`;
+  }
+
   get version(): string | undefined {
     return this.serverVersion;
   }

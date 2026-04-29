@@ -127,6 +127,80 @@ describe('normalizeAssistantTurns', () => {
     });
   });
 
+  it('resolves OpenClaw relative image blocks through the gateway HTTP base', () => {
+    const normalized = normalizeContentBlocks(
+      [
+        {
+          type: 'image',
+          url: '/api/chat/media/outgoing/agent%3Amain%3Amain/11111111-1111-4111-8111-111111111111/full',
+          alt: 'generated.png',
+          mimeType: 'image/png',
+        },
+      ],
+      'http://127.0.0.1:18789',
+    );
+
+    expect(normalized.attachments).toEqual([
+      {
+        fileName: 'generated.png',
+        dataUrl:
+          'http://127.0.0.1:18789/api/chat/media/outgoing/agent%3Amain%3Amain/11111111-1111-4111-8111-111111111111/full',
+        mimeType: 'image/png',
+      },
+    ]);
+  });
+
+  it('treats OpenClaw same-origin MEDIA paths as gateway media instead of local files', () => {
+    const normalized = normalizeContentBlocks(
+      [{ type: 'text', text: 'MEDIA:/media/inbound/test-image.png' }],
+      'http://127.0.0.1:18789',
+    );
+
+    expect(normalized.attachments).toEqual([
+      {
+        fileName: 'test-image.png',
+        dataUrl: 'http://127.0.0.1:18789/media/inbound/test-image.png',
+        mimeType: 'image/png',
+      },
+    ]);
+  });
+
+  it('does not treat OpenClaw gateway media paths as local files without an HTTP base', () => {
+    const normalized = normalizeContentBlocks([{ type: 'text', text: 'MEDIA:/media/inbound/test-image.png' }]);
+
+    expect(normalized).toEqual({ content: 'MEDIA:/media/inbound/test-image.png' });
+  });
+
+  it('rejects third-party HTTP image blocks even when MIME says image', () => {
+    const normalized = normalizeContentBlocks([
+      { type: 'image', url: 'http://example.com/result.png', alt: 'result.png', mimeType: 'image/png' },
+    ]);
+
+    expect(normalized).toEqual({ content: '' });
+  });
+
+  it('allows HTTP image blocks only on the configured gateway origin', () => {
+    const normalized = normalizeContentBlocks(
+      [
+        {
+          type: 'image',
+          url: 'http://127.0.0.1:18789/media/inbound/test-image.png',
+          alt: 'test-image.png',
+          mimeType: 'image/png',
+        },
+      ],
+      'http://127.0.0.1:18789',
+    );
+
+    expect(normalized.attachments).toEqual([
+      {
+        fileName: 'test-image.png',
+        dataUrl: 'http://127.0.0.1:18789/media/inbound/test-image.png',
+        mimeType: 'image/png',
+      },
+    ]);
+  });
+
   it('preserves media-only assistant turns', () => {
     const rawMsgs: RawHistoryMessage[] = [
       {

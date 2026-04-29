@@ -17,6 +17,7 @@ export function isVisibleAssistantContent(content: string): boolean {
 
 const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif)(?:[?#].*)?$/i;
 const DATA_IMAGE_RE = /^data:image\/(png|jpe?g|gif|webp|avif);base64,/i;
+const GATEWAY_MEDIA_PATH_RE = /^\/(?:api\/chat\/media\/outgoing\/|media\/|__openclaw__\/media\/)/;
 
 function cleanMediaCandidate(raw: string): string {
   const trimmed = raw.trim();
@@ -55,6 +56,75 @@ function fileNameFromSource(source: string, fallback: string): string {
   }
 }
 
+function normalizeRemoteHostname(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
+    .replace(/\.+$/, '');
+  if (normalized.split('.').some((label) => label.length === 0)) return '';
+  return normalized;
+}
+
+function isPrivateIpv4(hostname: string): boolean {
+  const parts = hostname.split('.').map((part) => Number(part));
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+  const [a, b] = parts;
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    a >= 224 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 198 && (b === 18 || b === 19))
+  );
+}
+
+function isBlockedRemoteHostname(hostname: string): boolean {
+  const normalized = normalizeRemoteHostname(hostname);
+  if (!normalized || !normalized.includes('.')) return true;
+  if (
+    normalized === 'localhost' ||
+    normalized === 'localhost.localdomain' ||
+    normalized === 'metadata.google.internal' ||
+    normalized.endsWith('.localhost') ||
+    normalized.endsWith('.local') ||
+    normalized.endsWith('.internal')
+  ) {
+    return true;
+  }
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(normalized)) return isPrivateIpv4(normalized);
+  if (normalized.includes(':')) return true;
+  return false;
+}
+
+function isAllowedRemoteMediaUrl(candidate: string): boolean {
+  try {
+    const parsed = new URL(candidate);
+    return (
+      parsed.protocol === 'https:' && !parsed.username && !parsed.password && !isBlockedRemoteHostname(parsed.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function resolveGatewayMediaSource(candidate: string, httpBase?: string): string | null {
+  try {
+    const parsed = new URL(candidate);
+    const base = httpBase ? new URL(httpBase) : null;
+    if (base && parsed.origin === base.origin && GATEWAY_MEDIA_PATH_RE.test(parsed.pathname)) return parsed.toString();
+    return null;
+  } catch {
+    if (!candidate.startsWith('/') || !GATEWAY_MEDIA_PATH_RE.test(candidate)) return null;
+    if (!httpBase) return null;
+    return new URL(candidate, httpBase).toString();
+  }
+}
+
 function mimeTypeFromSource(source: string, fallback?: string): string | undefined {
   if (fallback?.startsWith('image/')) return fallback;
   const lower = source.split(/[?#]/)[0]?.toLowerCase() ?? '';
@@ -67,7 +137,12 @@ function mimeTypeFromSource(source: string, fallback?: string): string | undefin
   return dataMatch?.[1] ?? fallback;
 }
 
-function attachmentFromMediaSource(source: string, alt?: string, mimeType?: string): MessageAttachment | null {
+function attachmentFromMediaSource(
+  source: string,
+  alt?: string,
+  mimeType?: string,
+  httpBase?: string,
+): MessageAttachment | null {
   const candidate = cleanMediaCandidate(source);
   if (!candidate || candidate.length > 4096 || hasUnsafePathSegment(candidate) || candidate.startsWith('~'))
     return null;
@@ -80,7 +155,17 @@ function attachmentFromMediaSource(source: string, alt?: string, mimeType?: stri
     };
   }
 
-  if (/^https:\/\//i.test(candidate) && IMAGE_EXT_RE.test(candidate)) {
+  const gatewayMedia = resolveGatewayMediaSource(candidate, httpBase);
+  if (gatewayMedia && (IMAGE_EXT_RE.test(gatewayMedia) || mimeType?.startsWith('image/'))) {
+    return {
+      fileName: alt?.trim() || fileNameFromSource(gatewayMedia, 'image.png'),
+      dataUrl: gatewayMedia,
+      mimeType: mimeTypeFromSource(gatewayMedia, mimeType),
+    };
+  }
+  if (candidate.startsWith('/') && GATEWAY_MEDIA_PATH_RE.test(candidate)) return null;
+
+  if (isAllowedRemoteMediaUrl(candidate) && (IMAGE_EXT_RE.test(candidate) || mimeType?.startsWith('image/'))) {
     return {
       fileName: alt?.trim() || fileNameFromSource(candidate, 'image.png'),
       dataUrl: candidate,
@@ -102,7 +187,7 @@ function attachmentFromMediaSource(source: string, alt?: string, mimeType?: stri
   return null;
 }
 
-function splitTextMediaDirectives(text: string): { text: string; attachments: MessageAttachment[] } {
+function splitTextMediaDirectives(text: string, httpBase?: string): { text: string; attachments: MessageAttachment[] } {
   const attachments: MessageAttachment[] = [];
   const kept: string[] = [];
   let inFence = false;
@@ -116,7 +201,7 @@ function splitTextMediaDirectives(text: string): { text: string; attachments: Me
     }
 
     if (!inFence && trimmed.toUpperCase().startsWith('MEDIA:')) {
-      const media = attachmentFromMediaSource(trimmed.slice('MEDIA:'.length));
+      const media = attachmentFromMediaSource(trimmed.slice('MEDIA:'.length), undefined, undefined, httpBase);
       if (media) {
         attachments.push(media);
         continue;
@@ -148,7 +233,10 @@ export function mergeMessageAttachments(
   return merged.length ? merged : undefined;
 }
 
-export function normalizeContentBlocks(blocks: RawContentBlock[]): {
+export function normalizeContentBlocks(
+  blocks: RawContentBlock[],
+  httpBase?: string,
+): {
   content: string;
   attachments?: MessageAttachment[];
 } {
@@ -157,16 +245,18 @@ export function normalizeContentBlocks(blocks: RawContentBlock[]): {
 
   for (const block of blocks) {
     if (block.type === 'text' && block.text) {
-      const parsed = splitTextMediaDirectives(block.text);
+      const parsed = splitTextMediaDirectives(block.text, httpBase);
       content += parsed.text;
       attachments = mergeMessageAttachments(attachments, parsed.attachments);
       continue;
     }
 
     if (block.type === 'image') {
-      const source = block.url ?? block.openUrl;
-      const attachment = source ? attachmentFromMediaSource(source, block.alt, block.mimeType) : null;
-      attachments = mergeMessageAttachments(attachments, attachment ? [attachment] : undefined);
+      const rawSource = block.url ?? block.openUrl;
+      if (rawSource) {
+        const attachment = attachmentFromMediaSource(rawSource, block.alt, block.mimeType, httpBase);
+        attachments = mergeMessageAttachments(attachments, attachment ? [attachment] : undefined);
+      }
     }
   }
 
@@ -225,7 +315,7 @@ function shouldStartVisibleAssistantTurn(
   return Boolean((turn?.content || turn?.attachments?.length) && turn.timestamp !== timestamp && !canMergeToolFinal);
 }
 
-export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): NormalizedAssistantTurn[] {
+export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[], httpBase?: string): NormalizedAssistantTurn[] {
   const messages = deduplicateRawHistoryMessages(rawMsgs);
   const toolResultMap = new Map<string, string>();
   for (const msg of messages) {
@@ -261,7 +351,7 @@ export function normalizeAssistantTurns(rawMsgs: RawHistoryMessage[]): Normalize
     if (msg.role !== 'assistant') continue;
 
     const timestamp = toISOTimestamp(msg.timestamp);
-    const normalizedContent = normalizeContentBlocks(msg.content ?? []);
+    const normalizedContent = normalizeContentBlocks(msg.content ?? [], httpBase);
     const text = normalizedContent.content;
     const toolCalls = (msg.content ?? [])
       .filter((block: RawContentBlock) => block.type === 'toolCall' && block.id && block.name)

@@ -101,6 +101,12 @@ export class BrowserGatewayClient {
     return this.gatewayName;
   }
 
+  get httpBase(): string {
+    const parsed = new URL(this.url);
+    const protocol = parsed.protocol === 'wss:' ? 'https:' : 'http:';
+    return `${protocol}//${parsed.host}`;
+  }
+
   get isConnected(): boolean {
     return this.state === 'connected' && this.ws?.readyState === WebSocket.OPEN;
   }

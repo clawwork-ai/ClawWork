@@ -234,6 +234,7 @@ interface ListResult<T> {
 type ChatAttachment = SharedChatAttachment;
 
 export interface ClawWorkAPI {
+  getHttpBase: (gatewayId: string) => Promise<string | undefined>;
   sendMessage: (
     gatewayId: string,
     sessionKey: string,

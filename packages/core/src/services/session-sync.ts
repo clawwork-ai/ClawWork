@@ -50,6 +50,7 @@ export interface SessionSyncDeps {
     }) => Promise<IpcResult>;
   };
   gateway: {
+    getHttpBase?: (gatewayId: string) => string | undefined | Promise<string | undefined>;
     chatHistory: (gatewayId: string, sessionKey: string, limit?: number) => Promise<IpcResult>;
     syncSessions: () => Promise<{
       ok: boolean;
@@ -232,6 +233,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
     const sessionKey = sessionKeyOverride ?? task?.sessionKey;
     if (!task?.gatewayId || !sessionKey) return;
 
+    const httpBase = await deps.gateway.getHttpBase?.(task.gatewayId);
     const res = await deps.gateway.chatHistory(task.gatewayId, sessionKey);
     if (!res.ok || !res.result) return;
 
@@ -249,7 +251,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
       undefined,
     );
 
-    const gatewayAssistant = normalizeAssistantTurns(rawMsgs);
+    const gatewayAssistant = normalizeAssistantTurns(rawMsgs, httpBase);
     backfillAssistantAttachments(taskId, sessionKey, gatewayAssistant);
 
     const newest = gatewayAssistant.filter(

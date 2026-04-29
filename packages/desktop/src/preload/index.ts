@@ -17,6 +17,7 @@ import type { ClawWorkAPI, GatewayServerConfig } from './clawwork';
 
 function buildApi(): ClawWorkAPI {
   return {
+    getHttpBase: (gatewayId: string) => ipcRenderer.invoke('ws:get-http-base', { gatewayId }),
     sendMessage: (
       gatewayId: string,
       sessionKey: string,
