@@ -21,9 +21,12 @@ function notifyRenderer(folderPath: string): void {
   );
 }
 
-export function watchFolder(folderPath: string): void {
-  if (watchers.has(folderPath)) return;
-  if (watchers.size >= MAX_WATCHED_FOLDERS) return;
+export function watchFolder(folderPath: string): boolean {
+  if (watchers.has(folderPath)) return true;
+  if (watchers.size >= MAX_WATCHED_FOLDERS) {
+    console.warn('[file-watcher] max watched folders reached (%d), ignoring:', MAX_WATCHED_FOLDERS, folderPath);
+    return false;
+  }
 
   const startedAt = Date.now();
   try {
@@ -33,9 +36,11 @@ export function watchFolder(folderPath: string): void {
     });
 
     watchers.set(folderPath, watcher);
+    return true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[file-watcher] failed to watch folder:', folderPath, msg);
+    return false;
   }
 }
 
