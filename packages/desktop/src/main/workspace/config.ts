@@ -201,15 +201,10 @@ export function buildGatewayAuth(gw: GatewayServerConfig): GatewayAuth {
 }
 
 export function ensureDeviceId(): string {
-  const config = readConfig();
-  if (config?.deviceId) return config.deviceId;
+  const existing = readConfig()?.deviceId;
+  if (existing) return existing;
   const deviceId = randomUUID();
-  const updated = config ?? {
-    workspacePath: getDefaultWorkspacePath(),
-    gateways: [],
-  };
-  updated.deviceId = deviceId;
-  writeConfig(updated);
+  updateConfig({ deviceId });
   return deviceId;
 }
 
