@@ -61,7 +61,8 @@ function walkDir(dir: string, rootDir: string, results: FileIndexEntry[], depth:
     if (!stat.isFile()) continue;
     if (stat.size > MAX_FILE_SIZE) continue;
 
-    const ext = extname(name).toLowerCase();
+    const lowerName = name.toLowerCase();
+    const ext = ALLOWED_DOT_FILES.has(lowerName) ? lowerName : extname(name).toLowerCase();
     const tier = classifyTier(ext);
     if (tier === 'unsupported') continue;
 
