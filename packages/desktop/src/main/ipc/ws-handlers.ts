@@ -89,6 +89,7 @@ interface ChatHistoryPayload {
 }
 
 const INTERNAL_ASSISTANT_MARKERS = new Set(['NO_REPLY']);
+const RELATIVE_GATEWAY_MEDIA_PATH_RE = /^\/(?:api\/chat\/media\/outgoing\/|media\/|__openclaw__\/media\/)/;
 
 /** Parsed tool call for transport to renderer */
 interface ParsedToolCall {
@@ -109,10 +110,10 @@ function resolveRelativeImageUrls(messages: Record<string, unknown>[], httpBase:
       if (typeof block !== 'object' || block === null) continue;
       const imageBlock = block as Record<string, unknown>;
       if (imageBlock.type !== 'image') continue;
-      if (typeof imageBlock.url === 'string' && imageBlock.url.startsWith('/')) {
+      if (typeof imageBlock.url === 'string' && RELATIVE_GATEWAY_MEDIA_PATH_RE.test(imageBlock.url)) {
         imageBlock.url = new URL(imageBlock.url, httpBase).toString();
       }
-      if (typeof imageBlock.openUrl === 'string' && imageBlock.openUrl.startsWith('/')) {
+      if (typeof imageBlock.openUrl === 'string' && RELATIVE_GATEWAY_MEDIA_PATH_RE.test(imageBlock.openUrl)) {
         imageBlock.openUrl = new URL(imageBlock.openUrl, httpBase).toString();
       }
     }

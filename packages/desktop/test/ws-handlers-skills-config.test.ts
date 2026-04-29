@@ -10,9 +10,11 @@ const setConfigMock = vi.fn();
 const patchConfigMock = vi.fn();
 const getConfigSchemaMock = vi.fn();
 const lookupConfigSchemaMock = vi.fn();
+const getChatHistoryMock = vi.fn();
 
 const fakeGatewayClient = {
   isConnected: true,
+  httpBase: 'http://127.0.0.1:18789',
   installSkill: installSkillMock,
   updateSkill: updateSkillMock,
   getSkillBins: getSkillBinsMock,
@@ -21,6 +23,7 @@ const fakeGatewayClient = {
   patchConfig: patchConfigMock,
   getConfigSchema: getConfigSchemaMock,
   lookupConfigSchema: lookupConfigSchemaMock,
+  getChatHistory: getChatHistoryMock,
 };
 
 vi.mock('electron', () => ({
@@ -67,6 +70,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
   beforeEach(async () => {
     handleMap.clear();
     vi.clearAllMocks();
+    getChatHistoryMock.mockReset();
     fakeGatewayClient.isConnected = true;
 
     vi.resetModules();
@@ -122,6 +126,37 @@ describe('ws-handlers: skills + config IPC channels', () => {
         errorCode: 'INSTALL_ERROR',
         errorDetails: { bin: 'npm', reason: 'not found' },
       });
+    });
+  });
+
+  describe('ws:chat-history', () => {
+    it('resolves only OpenClaw media paths against the gateway origin', async () => {
+      getChatHistoryMock.mockResolvedValue({
+        messages: [
+          {
+            role: 'assistant',
+            content: [
+              { type: 'image', url: '/media/out.png', openUrl: '/api/chat/media/outgoing/open.png' },
+              { type: 'image', url: '/Users/x/out.png', openUrl: '/tmp/open.png' },
+              { type: 'image', url: '/__openclaw__/media/screenshot.png' },
+            ],
+          },
+        ],
+      });
+
+      const response = (await invoke('ws:chat-history', {
+        gatewayId: 'gw-1',
+        sessionKey: 'agent:main:clawwork:task:t1',
+      })) as { ok: boolean; result: { messages: { content: Record<string, unknown>[] }[] } };
+
+      expect(response.ok).toBe(true);
+      const content = response.result.messages[0].content;
+      expect(content[0]).toMatchObject({
+        url: 'http://127.0.0.1:18789/media/out.png',
+        openUrl: 'http://127.0.0.1:18789/api/chat/media/outgoing/open.png',
+      });
+      expect(content[1]).toMatchObject({ url: '/Users/x/out.png', openUrl: '/tmp/open.png' });
+      expect(content[2]).toMatchObject({ url: 'http://127.0.0.1:18789/__openclaw__/media/screenshot.png' });
     });
   });
 
