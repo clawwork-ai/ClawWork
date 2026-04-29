@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
-import { resolve, sep } from 'path';
+import { extname, resolve, sep } from 'path';
 import { extractImagesFromMarkdown, extractCodeBlocksFromMarkdown } from './extract.js';
 import { saveArtifactFromBuffer } from './save.js';
 import { getDb } from '../db/index.js';
@@ -145,7 +145,14 @@ async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> 
       } else {
         continue;
       }
-      const ext = img.src.split('.').pop()?.split('?')[0]?.toLowerCase() ?? 'png';
+      let ext = 'png';
+      try {
+        const pathname = new URL(img.src).pathname;
+        const parsed = extname(pathname).toLowerCase().replace('.', '');
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(parsed)) ext = parsed;
+      } catch {
+        // malformed URL — fall back to png
+      }
       const fileName = img.alt ? `${img.alt.replace(/[^a-zA-Z0-9_-]/g, '_')}.${ext}` : `image.${ext}`;
       await saveExtracted({
         fileName,

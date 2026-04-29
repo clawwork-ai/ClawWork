@@ -24,8 +24,14 @@ vi.mock('../src/main/artifact/save.js', () => ({
   saveArtifactFromBuffer: saveArtifactFromBufferMock,
 }));
 
+const safeFetchMock = vi.fn();
+
 vi.mock('../src/main/media/resolve.js', () => ({
   readOpenClawMediaFile: readOpenClawMediaFileMock,
+}));
+
+vi.mock('../src/main/net/safe-fetch.js', () => ({
+  safeFetch: safeFetchMock,
 }));
 
 describe('autoExtractArtifacts', () => {
@@ -44,6 +50,7 @@ describe('autoExtractArtifacts', () => {
       createdAt: '2026-03-16T00:00:00.000Z',
     });
     readOpenClawMediaFileMock.mockResolvedValue(Buffer.from('image').toString('base64'));
+    safeFetchMock.mockResolvedValue(Buffer.from('image'));
   });
 
   it('saves assistant image attachments as image artifacts', async () => {
@@ -163,5 +170,48 @@ describe('autoExtractArtifacts', () => {
 
     expect(saveArtifactFromBufferMock).toHaveBeenCalledTimes(1);
     expect(webContentsSendMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses fallback .png extension for image URLs without a file extension', async () => {
+    const { autoExtractArtifacts } = await import('../src/main/artifact/auto-extract.js');
+
+    await autoExtractArtifacts({
+      workspacePath: '/workspace',
+      taskId: 'task-1',
+      messageId: 'msg-1',
+      content: '![my image](https://example.com/image) ![another](https://cdn.example.com/path/photo?w=800)',
+      attachments: [],
+    });
+
+    // First call: 'my image' → 'my_image.png' (no extension in URL → .png)
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fileName: 'my_image.png' }),
+    );
+
+    // Second call: 'another' → 'another.png' (query params stripped, no extension → .png)
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fileName: 'another.png' }),
+    );
+
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves real extensions from markdown image URLs', async () => {
+    const { autoExtractArtifacts } = await import('../src/main/artifact/auto-extract.js');
+
+    await autoExtractArtifacts({
+      workspacePath: '/workspace',
+      taskId: 'task-1',
+      messageId: 'msg-1',
+      content: '![screenshot](https://example.com/screenshot.png) ![photo](https://cdn.example.com/photo.jpg?w=800)',
+      attachments: [],
+    });
+
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fileName: 'screenshot.png' }),
+    );
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fileName: 'photo.jpg' }),
+    );
   });
 });
