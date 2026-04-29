@@ -1,20 +1,8 @@
-- @samzong
+* @samzong
 
-/AGENTS.md @samzong
-/DEVELOPMENT.md @samzong
-/CLAUDE.md @samzong
-/CONTRIBUTING.md @samzong
-/docs/openclaw-desktop-design.md @samzong
+/OWNERS @samzong
+/.github/** @samzong
 
-/packages/shared/src/** @samzong
-/packages/desktop/src/main/ws/** @samzong
-/packages/desktop/src/main/ipc/** @samzong
-/packages/desktop/src/main/artifact/** @samzong
-/packages/desktop/src/main/workspace/** @samzong
-/packages/desktop/src/main/context/** @samzong
-/packages/desktop/src/preload/** @samzong
-/packages/desktop/src/renderer/styles/** @samzong
-
-/.github/workflows/** @samzong
-/.github/PULL_REQUEST_TEMPLATE.md @samzong
-/.github/ISSUE_TEMPLATE/** @samzong
+/packages/core/** @samzong
+/packages/desktop/** @samzong @HiddenPuppy @mvanhorn
+/packages/shared/** @samzong

@@ -57,6 +57,8 @@ env:
   REVIEWERS: |-
     samzong
     yankay
+    HiddenPuppy
+    mvanhorn
 
   APPROVERS: |-
     samzong
