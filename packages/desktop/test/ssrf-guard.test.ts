@@ -130,12 +130,28 @@ describe('isPrivateIP', () => {
     expect(isPrivateIP('::ffff:10.0.0.1')).toBe(true);
   });
 
+  it('blocks IPv4-compatible IPv6 ::127.0.0.1', () => {
+    expect(isPrivateIP('::127.0.0.1')).toBe(true);
+  });
+
+  it('blocks IPv4-compatible IPv6 hex loopback', () => {
+    expect(isPrivateIP('::7f00:1')).toBe(true);
+  });
+
+  it('blocks uncompressed IPv4-compatible IPv6 loopback', () => {
+    expect(isPrivateIP('0:0:0:0:0:0:127.0.0.1')).toBe(true);
+  });
+
   it('blocks IPv4-mapped IPv6 hex form ::ffff:a00:1', () => {
     expect(isPrivateIP('::ffff:a00:1')).toBe(true);
   });
 
   it('allows IPv4-mapped IPv6 public ::ffff:8.8.8.8', () => {
     expect(isPrivateIP('::ffff:8.8.8.8')).toBe(false);
+  });
+
+  it('allows IPv4-compatible IPv6 public address', () => {
+    expect(isPrivateIP('::8.8.8.8')).toBe(false);
   });
 
   it('allows public IPv6 that ends with an IPv4-mapped-looking tail', () => {
@@ -170,6 +186,11 @@ describe('isPrivateHost', () => {
     expect(isPrivateHost('10.0.0.1')).toBe(true);
   });
 
+  it('blocks bracketed IPv6 literals from URL.hostname', () => {
+    expect(isPrivateHost('[::1]')).toBe(true);
+    expect(isPrivateHost('[::7f00:1]')).toBe(true);
+  });
+
   it('allows public domains', () => {
     expect(isPrivateHost('example.com')).toBe(false);
   });
@@ -189,6 +210,12 @@ describe('assertNotPrivateHost', () => {
 
   it('rejects localhost immediately without DNS', async () => {
     await expect(assertNotPrivateHost('localhost')).rejects.toThrow('SSRF blocked');
+  });
+
+  it('rejects bracketed IPv6 loopback immediately without DNS', async () => {
+    await expect(assertNotPrivateHost('[::1]')).rejects.toThrow('SSRF blocked');
+    expect(mockResolve4).not.toHaveBeenCalled();
+    expect(mockResolve6).not.toHaveBeenCalled();
   });
 
   it('allows public IP without DNS', async () => {
