@@ -33,7 +33,10 @@ export function watchFolder(folderPath: string): void {
     });
 
     watchers.set(folderPath, watcher);
-  } catch {}
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[file-watcher] failed to watch folder:', folderPath, msg);
+  }
 }
 
 export function unwatchFolder(folderPath: string): void {
