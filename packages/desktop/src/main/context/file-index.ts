@@ -40,7 +40,7 @@ function walkDir(dir: string, rootDir: string, results: FileIndexEntry[], depth:
   }
 
   for (const name of entries) {
-    if (isHidden(name) && depth > 0) continue;
+    if (isHidden(name)) continue;
 
     const fullPath = join(dir, name);
     let stat;
