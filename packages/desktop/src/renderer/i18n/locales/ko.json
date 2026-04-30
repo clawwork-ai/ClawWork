@@ -34,6 +34,7 @@
     "attachFile": "파일 첨부",
     "attachmentSaveFailed": "첨부파일 {{fileName}} 저장 실패",
     "attachmentTooLarge": "{{fileName}}이(가) 100MB 제한을 초과했습니다",
+    "contextFolderWatchFailed": "컨텍스트 폴더 감시에 실패했습니다",
     "describeTask": "작업을 설명하세요…",
     "fileContextLimitExceeded": "전체 파일 컨텍스트가 500KB 제한을 초과했습니다",
     "linkLocalFolders": "로컬 디렉터리 연결",

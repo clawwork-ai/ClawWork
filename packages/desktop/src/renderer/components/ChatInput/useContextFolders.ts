@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import type { FileIndexEntry } from '@clawwork/shared';
 import { useTaskStore } from '../../stores/taskStore';
 
@@ -7,15 +9,27 @@ const hasApi = (method: string) =>
   typeof (window.clawwork as unknown as Record<string, unknown>)?.[method] === 'function';
 
 export function useContextFolders() {
+  const { t } = useTranslation();
   const [contextFolders, setContextFolders] = useState<string[]>([]);
   const [localFilesForPicker, setLocalFilesForPicker] = useState<FileIndexEntry[]>([]);
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const foldersByTaskRef = useRef<Record<string, string[]>>({});
   const prevTaskIdRef = useRef<string>('');
 
+  const watchContextFolder = useCallback(
+    async (path: string) => {
+      const res = await window.clawwork.watchContextFolder(path);
+      if (res.ok) return true;
+      toast.error(t('chatInput.contextFolderWatchFailed'), { description: res.error });
+      return false;
+    },
+    [t],
+  );
+
   useEffect(() => {
     const key = activeTaskId ?? '';
     const prevKey = prevTaskIdRef.current;
+    let cancelled = false;
 
     const prevFolders = foldersByTaskRef.current[prevKey] ?? [];
     if (hasApi('unwatchContextFolder')) {
@@ -24,12 +38,21 @@ export function useContextFolders() {
 
     const nextFolders = foldersByTaskRef.current[key] ?? [];
     if (hasApi('watchContextFolder')) {
-      for (const f of nextFolders) window.clawwork.watchContextFolder(f);
+      void Promise.all(nextFolders.map((f) => watchContextFolder(f))).then((results) => {
+        if (cancelled) return;
+        const watchedFolders = nextFolders.filter((_, index) => results[index]);
+        foldersByTaskRef.current[key] = watchedFolders;
+        setContextFolders(watchedFolders);
+      });
+    } else {
+      setContextFolders(nextFolders);
     }
-    setContextFolders(nextFolders);
 
     prevTaskIdRef.current = key;
-  }, [activeTaskId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTaskId, watchContextFolder]);
 
   useEffect(() => {
     const taskFolders = foldersByTaskRef.current;
@@ -49,15 +72,16 @@ export function useContextFolders() {
     const res = await window.clawwork.selectContextFolder();
     if (res.ok && res.result) {
       const path = res.result as unknown as string;
+      const watched = await watchContextFolder(path);
+      if (!watched) return;
       setContextFolders((prev) => {
         const next = prev.includes(path) ? prev : [...prev, path];
         const key = activeTaskId ?? '';
         foldersByTaskRef.current[key] = next;
         return next;
       });
-      await window.clawwork.watchContextFolder(path);
     }
-  }, [activeTaskId]);
+  }, [activeTaskId, watchContextFolder]);
 
   const handleRemoveContextFolder = useCallback(
     (path: string) => {

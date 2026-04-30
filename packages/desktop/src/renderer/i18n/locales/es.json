@@ -34,6 +34,7 @@
     "attachFile": "Adjuntar archivo",
     "attachmentSaveFailed": "No se pudo guardar el adjunto {{fileName}}",
     "attachmentTooLarge": "{{fileName}} excede el límite de 100MB",
+    "contextFolderWatchFailed": "No se pudo vigilar la carpeta de contexto",
     "describeTask": "Describe tu tarea…",
     "fileContextLimitExceeded": "El contexto total de archivos excede el límite de 500KB",
     "linkLocalFolders": "Vincular directorios locales",

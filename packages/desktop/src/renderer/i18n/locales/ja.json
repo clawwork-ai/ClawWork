@@ -34,6 +34,7 @@
     "attachFile": "ファイルを添付",
     "attachmentSaveFailed": "添付ファイル {{fileName}} の保存に失敗しました",
     "attachmentTooLarge": "{{fileName}} が 100MB の上限を超えています",
+    "contextFolderWatchFailed": "コンテキストフォルダの監視に失敗しました",
     "describeTask": "タスクを入力…",
     "fileContextLimitExceeded": "ファイルコンテキストの合計が 500KB の上限を超えています",
     "linkLocalFolders": "ローカルフォルダを関連付け",

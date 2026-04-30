@@ -34,6 +34,7 @@
     "attachFile": "附加文件",
     "attachmentSaveFailed": "保存附件 {{fileName}} 失败",
     "attachmentTooLarge": "{{fileName}} 超出 100MB 上限",
+    "contextFolderWatchFailed": "监听上下文文件夹失败",
     "describeTask": "描述你的任务…",
     "fileContextLimitExceeded": "文件上下文总量超过 500KB 限制",
     "linkLocalFolders": "关联目录",

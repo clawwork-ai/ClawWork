@@ -34,6 +34,7 @@
     "attachFile": "Attach file",
     "attachmentSaveFailed": "Failed to save attachment {{fileName}}",
     "attachmentTooLarge": "{{fileName}} exceeds 100MB limit",
+    "contextFolderWatchFailed": "Failed to watch context folder",
     "describeTask": "Describe your task…",
     "fileContextLimitExceeded": "Total file context exceeds 500KB limit",
     "linkLocalFolders": "Link local folders",
