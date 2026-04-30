@@ -699,14 +699,19 @@ export default function AgentsSection() {
     async (agentId: string) => {
       if (!selectedGatewayId) return;
       setLoadingFilesFor(agentId);
-      const res = await window.clawwork.listAgentFiles(selectedGatewayId, agentId);
-      setLoadingFilesFor(null);
-      if (res.ok && res.result) {
-        const data = res.result as unknown as { workspace?: string; files: AgentFileEntry[] };
-        setAgentFilesMap((prev) => (prev[agentId] ? prev : { ...prev, [agentId]: data.files ?? [] }));
-        if (data.workspace) {
-          setAgentWorkspaceMap((prev) => (prev[agentId] ? prev : { ...prev, [agentId]: data.workspace as string }));
+      try {
+        const res = await window.clawwork.listAgentFiles(selectedGatewayId, agentId);
+        if (res.ok && res.result) {
+          const data = res.result as unknown as { workspace?: string; files: AgentFileEntry[] };
+          setAgentFilesMap((prev) => (prev[agentId] ? prev : { ...prev, [agentId]: data.files ?? [] }));
+          if (data.workspace) {
+            setAgentWorkspaceMap((prev) => (prev[agentId] ? prev : { ...prev, [agentId]: data.workspace as string }));
+          }
         }
+      } catch (err) {
+        console.error('AgentsSection: fetchAgentMeta failed', { agentId, err });
+      } finally {
+        setLoadingFilesFor((current) => (current === agentId ? null : current));
       }
     },
     [selectedGatewayId],
@@ -751,7 +756,9 @@ export default function AgentsSection() {
   useEffect(() => {
     if (!selectedGatewayId || agents.length === 0) return;
     const ids = agents.map((a) => a.id);
-    Promise.all(ids.map((id) => fetchAgentMeta(id)));
+    void Promise.all(ids.map((id) => fetchAgentMeta(id))).catch((err) => {
+      console.error('AgentsSection: agent meta fetch batch failed', err);
+    });
   }, [selectedGatewayId, agents, fetchAgentMeta]);
 
   const openAddForm = useCallback(() => {
