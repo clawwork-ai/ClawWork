@@ -149,9 +149,9 @@ async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> 
       try {
         const pathname = new URL(img.src).pathname;
         const parsed = extname(pathname).toLowerCase().replace('.', '');
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(parsed)) ext = parsed;
+        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg'].includes(parsed)) ext = parsed;
       } catch {
-        // malformed URL — fall back to png
+        ext = 'png';
       }
       const fileName = img.alt ? `${img.alt.replace(/[^a-zA-Z0-9_-]/g, '_')}.${ext}` : `image.${ext}`;
       await saveExtracted({

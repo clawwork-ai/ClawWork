@@ -183,15 +183,9 @@ describe('autoExtractArtifacts', () => {
       attachments: [],
     });
 
-    // First call: 'my image' → 'my_image.png' (no extension in URL → .png)
-    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileName: 'my_image.png' }),
-    );
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: 'my_image.png' }));
 
-    // Second call: 'another' → 'another.png' (query params stripped, no extension → .png)
-    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileName: 'another.png' }),
-    );
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: 'another.png' }));
 
     expect(saveArtifactFromBufferMock).toHaveBeenCalledTimes(2);
   });
@@ -203,15 +197,13 @@ describe('autoExtractArtifacts', () => {
       workspacePath: '/workspace',
       taskId: 'task-1',
       messageId: 'msg-1',
-      content: '![screenshot](https://example.com/screenshot.png) ![photo](https://cdn.example.com/photo.jpg?w=800)',
+      content:
+        '![screenshot](https://example.com/screenshot.png) ![photo](https://cdn.example.com/photo.jpg?w=800) ![icon](https://cdn.example.com/icon.avif)',
       attachments: [],
     });
 
-    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileName: 'screenshot.png' }),
-    );
-    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(
-      expect.objectContaining({ fileName: 'photo.jpg' }),
-    );
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: 'screenshot.png' }));
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: 'photo.jpg' }));
+    expect(saveArtifactFromBufferMock).toHaveBeenCalledWith(expect.objectContaining({ fileName: 'icon.avif' }));
   });
 });
