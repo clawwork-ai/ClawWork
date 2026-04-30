@@ -16,6 +16,7 @@ Desktop client for [OpenClaw](https://github.com/openclaw/openclaw) — run agen
 [![GitHub release](https://img.shields.io/github/v/release/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork/releases/latest)
 [![License](https://img.shields.io/github/license/clawwork-ai/clawwork?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/clawwork-ai/clawwork?style=flat-square)](https://github.com/clawwork-ai/clawwork)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/n9fCgBMgm)
 
 [Download](#download) · [**PWA**](https://cpwa.pages.dev) · [Quick start](#quick-start) · [Teams](#teams) · [What you get](#what-you-get) · [Data & architecture](#data--architecture) · [Repo layout](#repo-layout) · [Roadmap](#roadmap) · [Contributing](#contributing) · [Keynote](https://clawwork-ai.github.io/ClawWork/keynote/)
 
