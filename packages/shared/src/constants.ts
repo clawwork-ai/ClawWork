@@ -80,7 +80,41 @@ export const DB_FILE_NAME = '.clawwork.db';
 export const TEAMSHUB_COMMUNITY_URL = 'https://github.com/clawwork-ai/teamshub-community';
 export const TEAMSHUB_COMMUNITY_ID = 'community';
 
+export const MAX_USER_TASK_CHARS = 4000;
+export const MAX_AGENT_CATALOG_CHARS = 8000;
+export const USER_TASK_FENCE_OPEN = '<<<USER_TASK';
+export const USER_TASK_FENCE_CLOSE = 'USER_TASK';
+
+const TRUNCATED_PROMPT_SUFFIX = '\n... [truncated]';
+
+function normalizePromptText(input: unknown): string {
+  return typeof input === 'string' ? input.replace(/\r\n?/g, '\n').trim() : '';
+}
+
+function truncatePromptText(input: string, maxChars: number): string {
+  if (input.length <= maxChars) return input;
+  const maxBodyChars = Math.max(0, maxChars - TRUNCATED_PROMPT_SUFFIX.length);
+  return `${input.slice(0, maxBodyChars).trimEnd()}${TRUNCATED_PROMPT_SUFFIX}`;
+}
+
+export function sanitizeAgentCatalog(input: unknown): string {
+  const normalized = normalizePromptText(input);
+  if (!normalized) return '';
+  return truncatePromptText(normalized, MAX_AGENT_CATALOG_CHARS);
+}
+
+export function sanitizeUserTask(input: unknown): string {
+  const normalized = normalizePromptText(input);
+  if (!normalized) return '';
+  const stripped = normalized
+    .split('\n')
+    .filter((line) => line.trim() !== USER_TASK_FENCE_OPEN && line.trim() !== USER_TASK_FENCE_CLOSE)
+    .join('\n');
+  return truncatePromptText(stripped, MAX_USER_TASK_CHARS);
+}
+
 export function buildConductorPrompt(agentCatalog: string): string {
+  const safeAgentCatalog = sanitizeAgentCatalog(agentCatalog);
   return [
     'You are a task coordinator. Your responsibilities:',
     "1. Analyze the user's task and determine if multi-agent collaboration is needed",
@@ -105,7 +139,7 @@ export function buildConductorPrompt(agentCatalog: string): string {
     'Worker sessions are reusable. You can send multiple messages to the same session for iterative work.',
     '',
     'Available agents:',
-    agentCatalog,
+    safeAgentCatalog,
   ].join('\n');
 }
 
