@@ -83,7 +83,7 @@ export const TEAMSHUB_COMMUNITY_ID = 'community';
 export const MAX_USER_TASK_CHARS = 4000;
 export const MAX_AGENT_CATALOG_CHARS = 8000;
 export const USER_TASK_FENCE_OPEN = '<<<USER_TASK';
-export const USER_TASK_FENCE_CLOSE = 'USER_TASK';
+export const USER_TASK_FENCE_CLOSE = '>>>USER_TASK';
 
 const TRUNCATED_PROMPT_SUFFIX = '\n... [truncated]';
 
@@ -100,7 +100,11 @@ function truncatePromptText(input: string, maxChars: number): string {
 export function sanitizeAgentCatalog(input: unknown): string {
   const normalized = normalizePromptText(input);
   if (!normalized) return '';
-  return truncatePromptText(normalized, MAX_AGENT_CATALOG_CHARS);
+  const stripped = normalized
+    .split('\n')
+    .filter((line) => line.trim() !== USER_TASK_FENCE_OPEN && line.trim() !== USER_TASK_FENCE_CLOSE)
+    .join('\n');
+  return truncatePromptText(stripped, MAX_AGENT_CATALOG_CHARS);
 }
 
 export function sanitizeUserTask(input: unknown): string {
