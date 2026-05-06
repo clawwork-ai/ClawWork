@@ -99,4 +99,12 @@ describe('safeFetch', () => {
 
     await expect(safeFetch('https://cdn.example.com/missing.png')).rejects.toThrow('404');
   });
+
+  it('passes redirect:error to net.fetch to prevent SSRF bypass via 3xx', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(undefined);
+    netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(4)));
+
+    await safeFetch('https://cdn.example.com/img.png');
+    expect(netFetchMock).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ redirect: 'error' }));
+  });
 });
