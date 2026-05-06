@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArrowLeft, Download, Check, Loader2, Package, User, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { TeamHubEntry, ParsedTeam, AgentFileSet } from '@clawwork/shared';
 import { extractSkillSlugs } from '@clawwork/core';
 import { Button } from '@/components/ui/button';

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Users, Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { Team, TeamHubEntry } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import WindowTitlebar from '@/components/semantic/WindowTitlebar';

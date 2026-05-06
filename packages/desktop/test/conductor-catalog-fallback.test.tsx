@@ -79,7 +79,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
-vi.mock('sonner', () => ({
+vi.mock('../src/renderer/lib/toast', () => ({
   toast: {
     error: vi.fn(),
   },
@@ -112,7 +112,7 @@ vi.mock('../src/renderer/platform', () => ({
   useTeamStore: makeStoreMock(mocks.teamState),
 }));
 
-import { toast } from 'sonner';
+import { toast } from '../src/renderer/lib/toast';
 import { useChatSend } from '../src/renderer/components/ChatInput/useChatSend';
 
 /* ---------- helpers ---------- */

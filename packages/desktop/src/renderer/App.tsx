@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Toaster } from 'sonner';
+import { Toaster, TOAST_DURATION_MS, TOAST_OPTIONS } from '@/lib/toast';
 import LeftNav from './layouts/LeftNav';
 import MainArea from './layouts/MainArea';
 import RightPanel from './layouts/RightPanel';
@@ -8,7 +8,7 @@ import Setup from './layouts/Setup';
 import Settings from './layouts/Settings';
 import ApprovalDialog from './components/ApprovalDialog';
 import CommandPalette from './components/CommandPalette';
-import { useUiStore } from './stores/uiStore';
+import { useUiStore, type Theme } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
 import { useFileStore } from './stores/fileStore';
 import { composer } from './platform';
@@ -19,6 +19,19 @@ import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
 import { useSettingsStore } from './stores/settingsStore';
+
+function AppToaster({ themeMode }: { themeMode: Theme }) {
+  return (
+    <Toaster
+      theme={themeMode === 'auto' ? 'system' : themeMode}
+      position="top-right"
+      closeButton
+      visibleToasts={3}
+      duration={TOAST_DURATION_MS}
+      toastOptions={TOAST_OPTIONS}
+    />
+  );
+}
 
 export default function App() {
   const [ready, setReady] = useState(false);
@@ -204,17 +217,7 @@ export default function App() {
             setReady(true);
           }}
         />
-        <Toaster
-          theme={themeMode === 'auto' ? 'system' : themeMode}
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: 'var(--bg-elevated)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            },
-          }}
-        />
+        <AppToaster themeMode={themeMode} />
       </TooltipProvider>
     );
   }
@@ -268,17 +271,7 @@ export default function App() {
             </>
           )}
         </AnimatePresence>
-        <Toaster
-          theme={themeMode === 'auto' ? 'system' : themeMode}
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: 'var(--bg-elevated)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
-            },
-          }}
-        />
+        <AppToaster themeMode={themeMode} />
         <ApprovalDialog />
       </div>
     </TooltipProvider>

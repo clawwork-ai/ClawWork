@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { parseTaskIdFromSessionKey } from '@clawwork/shared';
 import type { ApprovalDecision, ExecApprovalRequest } from '@clawwork/shared';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import i18n from '../i18n';
 import { useTaskStore } from './taskStore';
 import { useUiStore } from './uiStore';

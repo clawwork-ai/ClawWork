@@ -20,7 +20,7 @@ import type {
   SystemSessionState,
   SystemSessionService,
 } from '@clawwork/core';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { createElectronPorts } from './electron-adapter';
 import i18n from '../i18n';
 import { syncSettingsUpdate } from '../stores/settingsStore';

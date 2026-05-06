@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { PendingAttachment } from './types';
 import { MAX_ATTACHMENT_SIZE, GATEWAY_INJECTED_MODEL } from './constants';
 

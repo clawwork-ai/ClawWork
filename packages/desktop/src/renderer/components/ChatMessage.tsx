@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import type { Message } from '@clawwork/shared';
 import { Check, Copy, File, FileCode, Loader2, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets } from '@/styles/design-tokens';
 import { copyTextToClipboard } from '@/lib/clipboard';

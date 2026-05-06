@@ -16,7 +16,7 @@ import {
   Settings2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets, motionDuration } from '@/styles/design-tokens';
 import { useUiStore } from '@/stores/uiStore';

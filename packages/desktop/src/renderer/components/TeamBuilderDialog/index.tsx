@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { ModelCatalogEntry, InstallEvent } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

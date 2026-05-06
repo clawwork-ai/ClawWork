@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Plus, Search, RefreshCw, ChevronDown, Server, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useUiStore } from '@/stores/uiStore';
 import { cn } from '@/lib/utils';
 import { motion as motionPresets, STAGGER_STEP } from '@/styles/design-tokens';

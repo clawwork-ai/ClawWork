@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Settings, RefreshCw, Loader2, Store } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import type { TeamHubRegistry, TeamHubEntry } from '@clawwork/shared';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

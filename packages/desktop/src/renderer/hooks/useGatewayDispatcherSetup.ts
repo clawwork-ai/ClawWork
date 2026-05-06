@@ -1,7 +1,7 @@
 import { createGatewayDispatcher } from '@clawwork/core';
 import type { ExecApprovalRequest, ModelCatalogEntry, AgentInfo } from '@clawwork/shared';
 import { parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork/shared';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { hydrateFromLocal, retrySyncPending, syncFromGateway, syncSessionMessages } from '../lib/session-sync';
 import i18n from '../i18n';
 import { composer, composerBridge, ports, useMessageStore, useTaskStore, useUiStore, useRoomStore } from '../platform';

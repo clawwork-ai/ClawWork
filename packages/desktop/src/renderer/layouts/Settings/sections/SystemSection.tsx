@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MonitorDot, Zap, FolderOpen, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Toggle from '../components/Toggle';
