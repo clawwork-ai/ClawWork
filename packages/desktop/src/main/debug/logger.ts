@@ -84,7 +84,9 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
     const filePath = currentFilePath();
     // Open fd synchronously so the file exists immediately and is append-only
     const fd = openSync(filePath, 'a');
-    writeStream = createWriteStream(filePath, { fd, autoClose: true });
+    writeStream = createWriteStream(filePath, { fd, autoClose: true }).on('error', (err) => {
+      console.error('[debug] logger stream error:', err);
+    });
   }
 
   function log(input: LogEventInput & { level: DebugLevel }): DebugEvent {

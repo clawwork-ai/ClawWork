@@ -277,15 +277,25 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', (event) => {
+  if (isQuitting) return;
+  event.preventDefault();
   isQuitting = true;
-  getDebugLogger().info({ domain: 'app', event: 'app.before-quit', data: { installingUpdate: isInstallingUpdate() } });
-  // Flush pending debug log writes before exit
-  getDebugLogger().flush();
-  globalShortcut.unregisterAll();
-  unwatchAll();
-  destroyAllGateways();
-  destroyTray();
-  destroyQuickLaunch();
-  closeDatabase();
+
+  const logger = getDebugLogger();
+  logger.info({ domain: 'app', event: 'app.before-quit', data: { installingUpdate: isInstallingUpdate() } });
+
+  // Flush pending debug log writes before exit, then complete shutdown
+  logger
+    .flush()
+    .catch(() => {})
+    .finally(() => {
+      globalShortcut.unregisterAll();
+      unwatchAll();
+      destroyAllGateways();
+      destroyTray();
+      destroyQuickLaunch();
+      closeDatabase();
+      app.quit();
+    });
 });
