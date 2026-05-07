@@ -29,7 +29,7 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), opts.timeoutMs ?? DEFAULT_TIMEOUT_MS);
   try {
-    const res = await net.fetch(url, { signal: controller.signal });
+    const res = await net.fetch(url, { signal: controller.signal, redirect: 'error' });
     if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
     const cl = Number(res.headers.get('content-length') ?? '0');
     if (cl > maxSize) throw new Error('response too large');
