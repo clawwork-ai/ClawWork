@@ -34,6 +34,7 @@ let debugLogger: DebugLogger = {
   log: (input) => record(input.level, input),
   getRecentEvents: () => [],
   currentFilePath: () => '',
+  flush: () => Promise.resolve(),
 };
 
 export function initDebugLogger(debugDir: string): DebugLogger {
