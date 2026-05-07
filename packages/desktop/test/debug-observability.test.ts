@@ -42,7 +42,7 @@ describe('debug observability foundation', () => {
       rmSync(dir, { recursive: true, force: true });
     });
 
-    it('stores recent events and writes ndjson to disk', () => {
+    it('stores recent events and writes ndjson to disk', async () => {
       const seen: string[] = [];
       const logger = createDebugLogger({
         debugDir: dir,
@@ -55,6 +55,8 @@ describe('debug observability foundation', () => {
 
       logger.info({ domain: 'gateway', event: 'gateway.connect.start', gatewayId: 'gw-1' });
       logger.error({ domain: 'ipc', event: 'ipc.ws.send-message.failed', error: { message: 'not connected' } });
+
+      await logger.flush();
 
       const events = logger.getRecentEvents();
       expect(events).toHaveLength(2);

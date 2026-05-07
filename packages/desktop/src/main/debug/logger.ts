@@ -1,4 +1,4 @@
-import { appendFileSync, existsSync, mkdirSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, openSync, type WriteStream } from 'node:fs';
 import { join } from 'node:path';
 import type { DebugDomain, DebugEvent, DebugLevel } from '@clawwork/shared';
 import { sanitizeForLog } from '@clawwork/shared';
@@ -29,6 +29,7 @@ export interface DebugLogger {
   log: (input: LogEventInput & { level: DebugLevel }) => DebugEvent;
   getRecentEvents: (filter?: DebugLogFilter) => DebugEvent[];
   currentFilePath: () => string;
+  flush: () => Promise<void>;
 }
 
 export interface LogEventInput {
@@ -55,8 +56,36 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
   const maxEvents = options.maxEvents ?? 1000;
   const writeConsole = options.console ?? true;
   const recentEvents: DebugEvent[] = [];
+  const debugDir = options.debugDir;
 
-  ensureDir(options.debugDir);
+  // Write stream state — cached fd avoids open/write/close per event
+  let writeStream: WriteStream | null = null;
+  let currentLogDate = '';
+
+  ensureDir(debugDir);
+
+  function currentFilePath(): string {
+    const day = new Date().toISOString().slice(0, 10);
+    return join(debugDir, `debug-${day}.ndjson`);
+  }
+
+  function ensureStream(): void {
+    const today = new Date().toISOString().slice(0, 10);
+    if (writeStream && currentLogDate === today) return;
+
+    // Close previous day's stream
+    if (writeStream) {
+      writeStream.end();
+      writeStream = null;
+    }
+
+    ensureDir(debugDir);
+    currentLogDate = today;
+    const filePath = currentFilePath();
+    // Open fd synchronously so the file exists immediately and is append-only
+    const fd = openSync(filePath, 'a');
+    writeStream = createWriteStream(filePath, { fd, autoClose: true });
+  }
 
   function log(input: LogEventInput & { level: DebugLevel }): DebugEvent {
     const event: DebugEvent = sanitizeForLog({
@@ -69,7 +98,9 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
       recentEvents.splice(0, recentEvents.length - maxEvents);
     }
 
-    appendFileSync(currentFilePath(), `${JSON.stringify(event)}\n`, 'utf8');
+    // Async write via persistent stream — no more blocking the event loop
+    ensureStream();
+    writeStream!.write(`${JSON.stringify(event)}\n`, 'utf8');
 
     if (writeConsole) {
       const line = `[${event.level}] [${event.domain}] ${event.event}`;
@@ -82,6 +113,19 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
     return event;
   }
 
+  async function flush(): Promise<void> {
+    if (!writeStream || writeStream.closed || writeStream.destroyed) return;
+    // Write an empty chunk to serve as a flush marker.
+    // Writable maintains ordering — this callback fires only after
+    // all previously enqueued data has been written to the OS.
+    return new Promise<void>((resolve, reject) => {
+      writeStream!.write(Buffer.alloc(0), (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
   return {
     debug: (input) => log({ ...input, level: 'debug' }),
     info: (input) => log({ ...input, level: 'info' }),
@@ -90,12 +134,8 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
     log,
     getRecentEvents: (filter) => filterEvents(recentEvents, filter),
     currentFilePath,
+    flush,
   };
-
-  function currentFilePath(): string {
-    const day = new Date().toISOString().slice(0, 10);
-    return join(options.debugDir, `debug-${day}.ndjson`);
-  }
 }
 
 function filterEvents(events: DebugEvent[], filter?: DebugLogFilter): DebugEvent[] {

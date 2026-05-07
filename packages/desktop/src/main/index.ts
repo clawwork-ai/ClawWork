@@ -280,6 +280,8 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   isQuitting = true;
   getDebugLogger().info({ domain: 'app', event: 'app.before-quit', data: { installingUpdate: isInstallingUpdate() } });
+  // Flush pending debug log writes before exit
+  getDebugLogger().flush();
   globalShortcut.unregisterAll();
   unwatchAll();
   destroyAllGateways();
