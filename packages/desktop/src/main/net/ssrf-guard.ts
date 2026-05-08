@@ -1,5 +1,5 @@
 import { isIP } from 'node:net';
-import { resolve4, resolve6 } from 'node:dns/promises';
+import { lookup } from 'node:dns/promises';
 
 function isPrivateIPv4(ip: string): boolean {
   const p = parseIPv4(ip);
@@ -97,15 +97,22 @@ export function isPrivateHost(hostname: string): boolean {
   return normalized === 'localhost' || isPrivateIP(normalized);
 }
 
-export async function assertNotPrivateHost(hostname: string): Promise<void> {
+export async function assertNotPrivateHost(hostname: string): Promise<string | null> {
   const normalized = normalizeHostname(hostname);
   if (isPrivateHost(normalized)) throw new Error('SSRF blocked: private host');
-  if (isIP(normalized)) return;
-  const results = await Promise.allSettled([resolve4(normalized), resolve6(normalized)]);
+  if (isIP(normalized)) return null;
+  const results = await Promise.allSettled([lookup(normalized, { all: true, verbatim: true })]);
   for (const r of results) {
     if (r.status !== 'fulfilled') continue;
-    for (const ip of r.value) {
-      if (isPrivateIP(ip)) throw new Error('SSRF blocked: resolves to private IP');
+    for (const entry of r.value) {
+      if (isPrivateIP(entry.address)) throw new Error('SSRF blocked: resolves to private IP');
     }
   }
+  // Return the first resolved public IP so the caller can PIN it in the
+  // actual fetch, closing the DNS rebinding TOCTOU window.  (#405)
+  for (const r of results) {
+    if (r.status !== 'fulfilled') continue;
+    return r.value[0]?.address ?? null;
+  }
+  return null;
 }

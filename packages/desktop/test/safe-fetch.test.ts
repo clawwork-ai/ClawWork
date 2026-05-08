@@ -9,15 +9,32 @@ vi.mock('../src/main/net/ssrf-guard.js', () => ({
   assertNotPrivateHost: assertNotPrivateHostMock,
 }));
 
+// Track the URL net.fetch was called with so tests can verify IP pinning.
+let lastFetchUrl: string | undefined;
+let lastFetchOpts: Record<string, unknown> | undefined;
+
 vi.mock('electron', () => ({
   net: { fetch: netFetchMock },
 }));
 
 import { safeFetch } from '../src/main/net/safe-fetch.js';
 
+// Wrapper that always captures fetch arguments regardless of mockResolvedValue
+function mockFetchWithTracking() {
+  netFetchMock.mockImplementation((url: string, opts?: Record<string, unknown>) => {
+    lastFetchUrl = url;
+    lastFetchOpts = opts;
+    return Promise.resolve(mockResponse(new ArrayBuffer(4)));
+  });
+}
+
 beforeEach(() => {
   assertNotPrivateHostMock.mockReset();
+  assertNotPrivateHostMock.mockResolvedValue(null); // default: no pinning
   netFetchMock.mockReset();
+  mockFetchWithTracking();
+  lastFetchUrl = undefined;
+  lastFetchOpts = undefined;
 });
 
 function mockResponse(body: ArrayBuffer, status = 200, headers: Record<string, string> = {}): Response {
@@ -69,7 +86,7 @@ describe('safeFetch', () => {
   });
 
   it('returns buffer on success', async () => {
-    assertNotPrivateHostMock.mockResolvedValue(undefined);
+    assertNotPrivateHostMock.mockResolvedValue(null);
     const data = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
     netFetchMock.mockResolvedValue(mockResponse(data.buffer));
 
@@ -78,15 +95,44 @@ describe('safeFetch', () => {
     expect(buf.length).toBe(4);
   });
 
+  it('rewrites URL with pinned IP and preserves Host header', async () => {
+    assertNotPrivateHostMock.mockResolvedValue('93.184.216.34');
+    mockFetchWithTracking();
+
+    await safeFetch('https://cdn.example.com/img.png');
+    // The IP must be pinned in the actual fetch URL
+    expect(lastFetchUrl).toBe('https://93.184.216.34/img.png');
+    // The original hostname must be preserved as the Host header
+    expect(lastFetchOpts).toBeDefined();
+    expect((lastFetchOpts as Record<string, unknown>).headers).toEqual({ Host: 'cdn.example.com' });
+  });
+
+  it('does not rewrite for trusted origin', async () => {
+    mockFetchWithTracking();
+
+    await safeFetch('http://127.0.0.1:18789/media/test.png', { trustedOrigin: 'http://127.0.0.1:18789/' });
+    // Trusted origin should bypass both DNS check and IP rewrite
+    expect(assertNotPrivateHostMock).not.toHaveBeenCalled();
+    expect(lastFetchUrl).toBe('http://127.0.0.1:18789/media/test.png');
+  });
+
+  it('does not rewrite when pinnedIP is null (IP literal)', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    mockFetchWithTracking();
+
+    await safeFetch('https://1.1.1.1/path');
+    expect(lastFetchUrl).toBe('https://1.1.1.1/path');
+  });
+
   it('rejects when content-length exceeds maxSize', async () => {
-    assertNotPrivateHostMock.mockResolvedValue(undefined);
+    assertNotPrivateHostMock.mockResolvedValue(null);
     netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0), 200, { 'content-length': '999999999' }));
 
     await expect(safeFetch('https://cdn.example.com/huge.bin', { maxSize: 1024 })).rejects.toThrow('too large');
   });
 
   it('rejects when actual body exceeds maxSize', async () => {
-    assertNotPrivateHostMock.mockResolvedValue(undefined);
+    assertNotPrivateHostMock.mockResolvedValue(null);
     const big = new ArrayBuffer(2048);
     netFetchMock.mockResolvedValue(mockResponse(big));
 
@@ -94,7 +140,7 @@ describe('safeFetch', () => {
   });
 
   it('rejects on non-ok HTTP status', async () => {
-    assertNotPrivateHostMock.mockResolvedValue(undefined);
+    assertNotPrivateHostMock.mockResolvedValue(null);
     netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0), 404));
 
     await expect(safeFetch('https://cdn.example.com/missing.png')).rejects.toThrow('404');

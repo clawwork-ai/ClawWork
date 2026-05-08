@@ -1,19 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('node:dns/promises', () => ({
-  resolve4: vi.fn(),
-  resolve6: vi.fn(),
+  lookup: vi.fn(),
 }));
 
 import { isPrivateIP, isPrivateHost, assertNotPrivateHost } from '../src/main/net/ssrf-guard.js';
-import { resolve4, resolve6 } from 'node:dns/promises';
+import { lookup } from 'node:dns/promises';
 
-const mockResolve4 = vi.mocked(resolve4);
-const mockResolve6 = vi.mocked(resolve6);
+const mockLookup = vi.mocked(lookup);
 
 beforeEach(() => {
-  mockResolve4.mockReset();
-  mockResolve6.mockReset();
+  mockLookup.mockReset();
 });
 
 describe('isPrivateIP', () => {
@@ -205,7 +202,7 @@ describe('isPrivateHost', () => {
 describe('assertNotPrivateHost', () => {
   it('rejects private IP immediately without DNS', async () => {
     await expect(assertNotPrivateHost('10.0.0.1')).rejects.toThrow('SSRF blocked');
-    expect(mockResolve4).not.toHaveBeenCalled();
+    expect(mockLookup).not.toHaveBeenCalled();
   });
 
   it('rejects localhost immediately without DNS', async () => {
@@ -214,42 +211,44 @@ describe('assertNotPrivateHost', () => {
 
   it('rejects bracketed IPv6 loopback immediately without DNS', async () => {
     await expect(assertNotPrivateHost('[::1]')).rejects.toThrow('SSRF blocked');
-    expect(mockResolve4).not.toHaveBeenCalled();
-    expect(mockResolve6).not.toHaveBeenCalled();
+    expect(mockLookup).not.toHaveBeenCalled();
   });
 
-  it('allows public IP without DNS', async () => {
-    await expect(assertNotPrivateHost('8.8.8.8')).resolves.toBeUndefined();
-    expect(mockResolve4).not.toHaveBeenCalled();
+  it('returns null for public IP literal without DNS', async () => {
+    await expect(assertNotPrivateHost('8.8.8.8')).resolves.toBeNull();
+    expect(mockLookup).not.toHaveBeenCalled();
   });
 
   it('resolves domain and blocks if DNS points to private IP', async () => {
-    mockResolve4.mockResolvedValue(['10.0.0.1']);
-    mockResolve6.mockRejectedValue(new Error('ENOTFOUND'));
+    mockLookup.mockResolvedValue([{ address: '10.0.0.1', family: 4 }]);
     await expect(assertNotPrivateHost('evil.example.com')).rejects.toThrow('SSRF blocked');
   });
 
-  it('allows domain that resolves to public IP', async () => {
-    mockResolve4.mockResolvedValue(['93.184.216.34']);
-    mockResolve6.mockRejectedValue(new Error('ENOTFOUND'));
-    await expect(assertNotPrivateHost('example.com')).resolves.toBeUndefined();
+  it('returns pinned IP for domain that resolves to public IP', async () => {
+    mockLookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    await expect(assertNotPrivateHost('example.com')).resolves.toBe('93.184.216.34');
   });
 
   it('blocks if any resolved address is private', async () => {
-    mockResolve4.mockResolvedValue(['93.184.216.34', '10.0.0.1']);
-    mockResolve6.mockRejectedValue(new Error('ENOTFOUND'));
+    mockLookup.mockResolvedValue([
+      { address: '93.184.216.34', family: 4 },
+      { address: '10.0.0.1', family: 4 },
+    ]);
     await expect(assertNotPrivateHost('mixed.example.com')).rejects.toThrow('SSRF blocked');
   });
 
   it('blocks if IPv6 resolution returns private address', async () => {
-    mockResolve4.mockRejectedValue(new Error('ENOTFOUND'));
-    mockResolve6.mockResolvedValue(['fd12::1']);
+    mockLookup.mockResolvedValue([{ address: 'fd12::1', family: 6 }]);
     await expect(assertNotPrivateHost('v6only.example.com')).rejects.toThrow('SSRF blocked');
   });
 
-  it('allows domain when DNS fails entirely', async () => {
-    mockResolve4.mockRejectedValue(new Error('ENOTFOUND'));
-    mockResolve6.mockRejectedValue(new Error('ENOTFOUND'));
-    await expect(assertNotPrivateHost('broken-dns.example.com')).resolves.toBeUndefined();
+  it('returns the first public IP when both v4 and v6 resolve', async () => {
+    mockLookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    await expect(assertNotPrivateHost('example.com')).resolves.toBe('93.184.216.34');
+  });
+
+  it('returns null when DNS fails entirely', async () => {
+    mockLookup.mockRejectedValue(new Error('ENOTFOUND'));
+    await expect(assertNotPrivateHost('broken-dns.example.com')).resolves.toBeNull();
   });
 });

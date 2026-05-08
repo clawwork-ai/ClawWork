@@ -23,13 +23,32 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
   const parsed = new URL(url);
   const isTrustedOrigin = isSameOrigin(parsed, opts.trustedOrigin);
   if (parsed.protocol !== 'https:' && !isTrustedOrigin) throw new Error('HTTPS required');
-  if (!isTrustedOrigin) await assertNotPrivateHost(parsed.hostname);
+
+  // Resolve and pin the IP so the guard check and the actual fetch see the
+  // same DNS result, closing the DNS rebinding TOCTOU window.  (#405)
+  let fetchUrl = url;
+  if (!isTrustedOrigin) {
+    const pinnedIP = await assertNotPrivateHost(parsed.hostname);
+    if (pinnedIP) {
+      // Rewrite the URL with the pinned IP so net.fetch does NOT re-resolve DNS.
+      // The original hostname is preserved via the Host header for SNI support.
+      const rewritten = new URL(url);
+      rewritten.hostname = pinnedIP;
+      fetchUrl = rewritten.toString();
+    }
+  }
 
   const maxSize = opts.maxSize ?? DEFAULT_MAX_SIZE;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), opts.timeoutMs ?? DEFAULT_TIMEOUT_MS);
   try {
-    const res = await net.fetch(url, { signal: controller.signal });
+    // When the IP is pinned, pass the original hostname as the Host header
+    // so the server (and TLS SNI in Chromium) knows which virtual host to serve.
+    const fetchOpts: Record<string, unknown> = { signal: controller.signal };
+    if (fetchUrl !== url) {
+      fetchOpts.headers = { Host: parsed.hostname };
+    }
+    const res = await net.fetch(fetchUrl, fetchOpts);
     if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
     const cl = Number(res.headers.get('content-length') ?? '0');
     if (cl > maxSize) throw new Error('response too large');
