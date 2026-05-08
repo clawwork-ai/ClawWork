@@ -220,17 +220,17 @@ describe('assertNotPrivateHost', () => {
   });
 
   it('resolves domain and blocks if DNS points to private IP', async () => {
-    mockLookup.mockResolvedValue([{ address: '10.0.0.1', family: 4 }]);
+    (mockLookup as any).mockResolvedValue([{ address: '10.0.0.1', family: 4 }]);
     await expect(assertNotPrivateHost('evil.example.com')).rejects.toThrow('SSRF blocked');
   });
 
   it('returns pinned IP for domain that resolves to public IP', async () => {
-    mockLookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    (mockLookup as any).mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
     await expect(assertNotPrivateHost('example.com')).resolves.toBe('93.184.216.34');
   });
 
   it('blocks if any resolved address is private', async () => {
-    mockLookup.mockResolvedValue([
+    (mockLookup as any).mockResolvedValue([
       { address: '93.184.216.34', family: 4 },
       { address: '10.0.0.1', family: 4 },
     ]);
@@ -238,17 +238,17 @@ describe('assertNotPrivateHost', () => {
   });
 
   it('blocks if IPv6 resolution returns private address', async () => {
-    mockLookup.mockResolvedValue([{ address: 'fd12::1', family: 6 }]);
+    (mockLookup as any).mockResolvedValue([{ address: 'fd12::1', family: 6 }]);
     await expect(assertNotPrivateHost('v6only.example.com')).rejects.toThrow('SSRF blocked');
   });
 
   it('returns the first public IP when both v4 and v6 resolve', async () => {
-    mockLookup.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+    (mockLookup as any).mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
     await expect(assertNotPrivateHost('example.com')).resolves.toBe('93.184.216.34');
   });
 
   it('returns null when DNS fails entirely', async () => {
-    mockLookup.mockRejectedValue(new Error('ENOTFOUND'));
+    (mockLookup as any).mockRejectedValue(new Error('ENOTFOUND'));
     await expect(assertNotPrivateHost('broken-dns.example.com')).resolves.toBeNull();
   });
 });
