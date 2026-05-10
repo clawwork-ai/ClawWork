@@ -118,14 +118,14 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
 
-          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o $RUNNER_TEMP/certificate.p12
+          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o "$RUNNER_TEMP/certificate.p12"
 
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security import $RUNNER_TEMP/certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$RUNNER_TEMP/certificate.p12" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
 
           echo "✅ Certificate imported successfully"
 
@@ -212,6 +212,7 @@ jobs:
       pull-requests: read
     env:
       RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+      IS_PRERELEASE: ${{ needs.prepare-release.outputs.is_prerelease }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -257,11 +258,37 @@ jobs:
             echo "Release body already populated — leaving it alone"
           fi
 
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --draft=false --prerelease
+          else
+            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --draft=false --latest
+          fi
+
   update-homebrew:
-    needs: [prepare-release, release, verify-release]
+    needs: [prepare-release, publish-release-notes]
     if: ${{ needs.prepare-release.outputs.is_prerelease != 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Verify release is public
+        run: |
+          for attempt in {1..12}; do
+            is_draft="$(gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json isDraft --jq .isDraft 2>/dev/null || true)"
+            if [ "$is_draft" = "false" ]; then
+              exit 0
+            fi
+            echo "Release is not public yet; waiting ($attempt/12)"
+            sleep 5
+          done
+          gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json isDraft --jq .isDraft
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+
       - name: Trigger Homebrew tap update
         run: |
           gh workflow run update-homebrew.yml \
