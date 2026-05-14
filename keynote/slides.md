@@ -19,11 +19,33 @@ exportFilename: clawwork-keynote
 
 <DeckCoverSlide />
 
+<!--
+Hi everyone, I am Sam.
+
+English is not my first language, so I will keep this talk simple and direct.
+
+Today I want to share ClawWork.
+ClawWork is a desktop client for OpenClaw.
+
+The main idea is simple:
+agents should not only chat.
+They should help us run real tasks, in parallel.
+-->
+
 ---
 
 # 👋 {{ $t({ en: 'About Me', zh: '关于我' }) }}
 
 <DeckAboutMeSlide />
+
+<!--
+I am Sam.
+
+I work on ClawWork and use OpenClaw in my daily engineering work.
+
+This talk is about one problem I feel every day:
+how to make agent work more visible, more parallel, and easier to control.
+-->
 
 ---
 
@@ -37,6 +59,17 @@ exportFilename: clawwork-keynote
   </h1>
   <p class="cw-thanks-copy">{{ $t({ en: 'The problem with the current workflow.', zh: '当前工作流的问题。' }) }}</p>
 </div>
+
+<!--
+Let me start with the problem.
+
+OpenClaw is powerful.
+But in my daily work, I often feel one limitation:
+one window, one task, one context.
+
+Real work is not like that.
+Real work is parallel.
+-->
 
 ---
 
@@ -75,6 +108,24 @@ exportFilename: clawwork-keynote
   />
 </div>
 
+<!--
+There are four pain points.
+
+First, serial interaction.
+I need to wait for one task before starting another one.
+
+Second, scattered artifacts.
+The agent creates code, files, notes, and docs.
+But they are often spread across chats.
+
+Third, context switching.
+I need to move between tabs and windows to check what is running.
+
+Fourth, text-only control.
+For tool approval, just typing "yes" is not clear enough.
+I want direct and visible control.
+-->
+
 ---
 
 <div class="cw-grid"></div>
@@ -87,6 +138,14 @@ exportFilename: clawwork-keynote
   </h1>
   <p class="cw-thanks-copy">{{ $t({ en: 'Meet ClawWork.', zh: 'ClawWork 登场。' }) }}</p>
 </div>
+
+<!--
+So this is my answer:
+ClawWork.
+
+ClawWork is not another chat window.
+It is a task workbench for OpenClaw.
+-->
 
 ---
 
@@ -120,6 +179,20 @@ exportFilename: clawwork-keynote
   <span class="cw-badge-copy">{{ $t({ en: 'Connects via standard Gateway protocol', zh: '通过标准 Gateway 协议连接' }) }}</span>
 </div>
 
+<!--
+ClawWork is built for parallel work.
+
+In ClawWork, the main object is a Task.
+A Task has its own messages, artifacts, progress, and OpenClaw session.
+
+This means I can run many tasks at the same time.
+Each task has its own context.
+I can switch between them without losing my place.
+
+It connects through the standard OpenClaw Gateway protocol,
+so it does not need server changes.
+-->
+
 ---
 
 # 🖥 {{ $t({ en: 'Overview', zh: '一览' }) }}
@@ -129,6 +202,15 @@ exportFilename: clawwork-keynote
 <div style="display: flex; justify-content: center; margin-top: 16px;">
   <img src="/images/clawwork-screenshot.png" class="cw-shot cw-shot--hero" alt="ClawWork overview" />
 </div>
+
+<!--
+Here is the main UI.
+
+The goal is simple:
+I want to see what is happening without opening many windows.
+
+Tasks, messages, progress, and artifacts are all visible in one workbench.
+-->
 
 ---
 
@@ -143,6 +225,14 @@ exportFilename: clawwork-keynote
   <p class="cw-thanks-copy">{{ $t({ en: 'What it looks like inside.', zh: '看看里面长什么样。' }) }}</p>
 </div>
 
+<!--
+Now I will show the product quickly.
+
+I will not explain every detail.
+I want to show the workflow:
+start a task, watch progress, collect artifacts, and control tools.
+-->
+
 ---
 
 # 🧩 {{ $t({ en: 'Feature Matrix', zh: '功能大全' }) }}
@@ -150,6 +240,14 @@ exportFilename: clawwork-keynote
 <div class="cw-kicker">{{ $t({ en: 'Everything that has shipped. At a glance.', zh: '已经发布的一切。一目了然。' }) }}</div>
 
 <DeckFeatureMatrixSlide />
+
+<!--
+This is a quick map of what has shipped.
+
+The important point is not the number of features.
+The important point is that they all support the same workflow:
+task-first, visible, and controlled.
+-->
 
 ---
 layout: split-media
@@ -170,6 +268,16 @@ layout: split-media
 <DeckMiniPanel neutral tone="cyan" :title="{ en: 'Center', zh: '中央面板' }" :body="{ en: 'Chat with streaming, tool cards, approval prompts.', zh: '流式聊天、工具卡片、审批提示。' }" />
 
 <DeckMiniPanel neutral tone="purple" :title="{ en: 'Right Panel', zh: '右侧面板' }" :body="{ en: 'Progress tracking and artifact browser.', zh: '进度追踪和产物浏览。' }" />
+
+<!--
+The layout has three parts.
+
+The left side is for tasks and Gateway selection.
+The center is the chat and tool activity.
+The right side is for progress and artifacts.
+
+Everything important is visible at once.
+-->
 
 ---
 layout: split-media
@@ -206,6 +314,16 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>The minimum distance between idea and task.</strong>', zh: '<strong>想法与任务之间的最短距离。</strong>' })"></p>
 </div>
 
+<!--
+Quick Launch is for fast task creation.
+
+I press Alt Space.
+I type what I want.
+Then ClawWork starts a task.
+
+This reduces the distance between an idea and a running agent task.
+-->
+
 ---
 layout: split-media
 ---
@@ -224,6 +342,19 @@ layout: split-media
 <DeckMiniStatRow tone="cyan" :text="{ en: 'Animated spinners for active sessions', zh: '活跃会话的动画指示器' }" />
 <DeckMiniStatRow tone="purple" :text="{ en: 'Unread indicators per task', zh: '每个任务的未读提示' }" />
 <DeckMiniStatRow tone="yellow" :text="{ en: 'Relative timestamps', zh: '相对时间戳' }" />
+
+<!--
+This is the core feature.
+
+I can run three tasks at the same time.
+For example:
+one task fixes a bug,
+one task writes documentation,
+and one task reviews a pull request.
+
+Each task is isolated.
+But I can see all progress in one place.
+-->
 
 ---
 
@@ -252,11 +383,34 @@ layout: split-media
   </div>
 </div>
 
+<!--
+Artifacts are important.
+
+When an agent produces a file, ClawWork collects it automatically.
+I do not need to copy and paste from chat.
+
+I can browse artifacts, search them, filter them,
+and go back to the message that created them.
+
+This makes agent output easier to trust and reuse.
+-->
+
 ---
 
 # 📊 {{ $t({ en: 'Task Progress Tracking', zh: '任务进度追踪' }) }}
 
 <DeckTaskProgressSlide />
+
+<!--
+Task progress tracking makes long-running work easier to follow.
+
+When an agent is working,
+I want to know what stage it is in,
+what is done,
+and what is still running.
+
+This is much better than waiting in a plain chat window.
+-->
 
 ---
 layout: split-media
@@ -285,6 +439,16 @@ gap: mt-6
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Transparency is not a feature.</strong> It is respect for the user.', zh: '<strong>透明不是功能。</strong> 它是对用户的尊重。' })"></p>
 </div>
 
+<!--
+ClawWork also shows token usage, context usage, cost, and rate limits.
+
+For me, this is not only a feature.
+It is about transparency.
+
+If an agent is spending money or using context,
+the user should see it.
+-->
+
 ---
 layout: split-media
 ---
@@ -310,6 +474,17 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Your agents do not sleep.</strong> Let them work on a schedule.', zh: '<strong>你的 Agent 不会睡觉。</strong>让它们按时上班。' })"></p>
 </div>
 
+<!--
+Scheduled tasks are like cron for agents.
+
+I can schedule an agent task,
+run it again,
+and review the history later.
+
+This is useful for repeated work,
+like checking issues, creating reports, or watching a project.
+-->
+
 ---
 
 # 📈 {{ $t({ en: 'Usage Dashboard', zh: '用量看板' }) }}
@@ -325,6 +500,15 @@ layout: split-media
   <span class="cw-badge" data-tone="cyan">{{ $t({ en: '60s CACHE', zh: '60s 缓存' }) }}</span>
   <span class="cw-badge-copy">{{ $t({ en: 'Multi-dim slicing: model · agent · task · day', zh: '多维切片：模型 · Agent · 任务 · 日期' }) }}</span>
 </div>
+
+<!--
+The usage dashboard gives a bigger view.
+
+I can see cost, tokens, tasks, and agents over time.
+
+This helps users understand how they are using the system,
+not just what is happening in one task.
+-->
 
 ---
 layout: split-media
@@ -345,6 +529,20 @@ layout: split-media
 <DeckMiniPanel tone="yellow" :title="{ en: '120s Countdown', zh: '120 秒倒计时' }" :body="{ en: 'Progress bar, then auto-deny. No ambiguous timeouts.', zh: '进度条倒计时，到时自动拒绝。不存在模糊超时。' }" />
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Policy Memory', zh: '策略记忆' }" :body="{ en: 'Allow once vs allow always. Per tool, per project.', zh: 'Allow once 与 Allow always。按工具、按项目记住。' }" />
+
+<!--
+Tool approval is another important part.
+
+Some tool calls are safe.
+Some can change files or run commands.
+
+ClawWork shows the risk level,
+the countdown,
+and the approval policy.
+
+So approval is no longer just a text message.
+It becomes a clear UI action.
+-->
 
 ---
 layout: split-media
@@ -371,6 +569,16 @@ layout: split-media
 
 <DeckMiniPanel compact tone="yellow" :title="{ en: 'Fuzzy Search', zh: '模糊搜索' }" :body="{ en: 'Type a few chars, instant narrow. No prefix required.', zh: '敲几个字，即刻缩小范围。无需前缀匹配。' }" />
 
+<!--
+Slash commands help users run actions quickly.
+
+The command list is keyboard-first.
+It also shows where each command comes from:
+native, skill, or plugin.
+
+This makes the chat box feel more like a real control surface.
+-->
+
 ---
 layout: split-media
 ---
@@ -391,6 +599,18 @@ layout: split-media
   <li v-html="$t({ en: '<strong>State machine</strong>: running → success / error, with duration', zh: '<strong>状态机</strong>：running → success / error，附耗时' })"></li>
   <li v-html="$t({ en: '<strong>Never a wall of JSON</strong>: diffs for edits, trees for files', zh: '<strong>告别 JSON 大墙</strong>：编辑显示 diff，文件显示树' })"></li>
 </ul>
+
+<!--
+Every tool call is shown as a structured card.
+
+The user can see the tool name,
+the arguments,
+the result,
+and the state.
+
+This is easier to read than a wall of JSON.
+It also makes tool activity traceable.
+-->
 
 ---
 layout: split-media
@@ -413,6 +633,16 @@ layout: split-media
   <li v-html="$t({ en: '<strong>Real-time search</strong>: types narrow instantly, no server round-trip', zh: '<strong>实时搜索</strong>：输入即刻缩小，无需服务端往返' })"></li>
 </ul>
 
+<!--
+Mentions connect the chat box to the workspace.
+
+Users can mention agents, files, tasks, and artifacts.
+
+They can also use @All to talk to every member of a Team.
+
+This makes cross-task and multi-agent work easier.
+-->
+
 ---
 layout: split-media
 ---
@@ -432,6 +662,15 @@ layout: split-media
 <DeckMiniPanel tone="cyan" :title="{ en: 'ClawHub', zh: 'ClawHub' }" :body="{ en: 'An app store for agent skills. One click adds the capability.', zh: 'Agent 能力的应用商店。一键添加新技能。' }" />
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Schema-Driven', zh: 'Schema 驱动' }" :body="{ en: 'Skills self-describe their config. The UI generates the form.', zh: 'Skill 自描述配置，UI 自动生成表单。' }" />
+
+<!--
+Skills are reusable capabilities.
+
+A Skill extends what an Agent can do.
+ClawHub is a place to discover and install these capabilities.
+
+The goal is to make agent capability easy to share and easy to install.
+-->
 
 ---
 layout: split-media
@@ -454,6 +693,17 @@ layout: split-media
   <li v-html="$t({ en: '<strong>Skills status</strong>: see at a glance which skills are enabled per Agent', zh: '<strong>Skill 状态</strong>：一眼看清每个 Agent 启用了哪些 Skill' })"></li>
 </ul>
 
+<!--
+ClawWork also has an Agent Manager.
+
+Users can see agents,
+edit their config,
+and manage skills inside the app.
+
+I do not want users to jump between many config files.
+The product should make this work visible and editable.
+-->
+
 ---
 layout: split-media
 ---
@@ -474,6 +724,17 @@ layout: split-media
   <li v-html="$t({ en: '<strong>Tweak inline</strong> before saving — every field is editable', zh: '<strong>保存前内联微调</strong> —— 每个字段都可编辑' })"></li>
   <li v-html="$t({ en: '<strong>Save</strong> — Agent appears in the manager, ready for tasks', zh: '<strong>保存</strong> —— Agent 出现在管理面板，准备接任务' })"></li>
 </ul>
+
+<!--
+Agent Builder helps users create a new agent with natural language.
+
+The user describes what the agent should do.
+ClawWork drafts the agent config,
+picks skills,
+and sets the model.
+
+Then the user can edit everything before saving.
+-->
 
 ---
 layout: split-media
@@ -499,6 +760,19 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>No manual setup.</strong> ClawWork handles agent creation, skill installation, and model assignment for you.', zh: '<strong>无需手动配置。</strong>ClawWork 替你完成 Agent 创建、Skill 安装和模型分配。' })"></p>
 </div>
 
+<!--
+For bigger work, ClawWork supports Teams.
+
+A Team is a group of agents with roles, skills, and workflow.
+
+For example, one agent can be an architect,
+one can implement,
+and one can review.
+
+The user does not need to manually set up everything.
+ClawWork helps create and run the team.
+-->
+
 ---
 layout: split-media
 ---
@@ -518,6 +792,16 @@ layout: split-media
 <DeckMiniPanel tone="green" :title="{ en: 'Inline File Tree', zh: '内联文件树' }" :body="{ en: 'Edit TEAM/AGENT/SOUL.md inside the app.', zh: '在产品内直接编辑 TEAM/AGENT/SOUL.md。' }" />
 
 <DeckMiniPanel tone="cyan" :title="{ en: 'Team Chat Room', zh: '团队聊天室' }" :body="{ en: 'Live avatar bar: who speaks, who executes.', zh: '实时头像栏：谁在说话、谁在执行。' }" />
+
+<!--
+This is Teams in action.
+
+The user starts with a simple idea.
+ClawWork turns that idea into roles, skills, and workflow.
+
+Then the Team can run inside ClawWork,
+with visible agents and visible activity.
+-->
 
 ---
 layout: split-media
@@ -556,6 +840,16 @@ layout: split-media
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Multi-Source Registries', zh: '多源 Registry' }" :body="{ en: 'Community, private, team. Add as many registries as you want — all Git-based.', zh: '社区、私有、团队。想加多少 registry 就加多少 —— 全部基于 Git。' }" />
 
+<!--
+TeamsHub is about sharing Teams.
+
+A Team can be stored as a Git repo.
+Sharing a Team can be as simple as pushing to GitHub.
+Installing a Team can be one click.
+
+This makes agent workflows easier to reuse.
+-->
+
 ---
 layout: split-media
 ---
@@ -575,6 +869,17 @@ layout: split-media
 <DeckMiniPanel tone="green" :title="{ en: 'Serial & Parallel', zh: '串行与并行' }" :body="{ en: 'timeout:30 for serial handoff. timeout:0 for parallel fan-out. No external workers.', zh: 'timeout:30 串行交接，timeout:0 并行扇出。无外部 worker。' }" />
 
 <DeckMiniPanel tone="cyan" :title="{ en: 'Isolated by Design', zh: '隔离即设计' }" :body="{ en: 'Write isolated by sessionKey. Read aggregated by taskId. @All summons all; live avatar bar shows who is active.', zh: '写入按 sessionKey 隔离，展示按 taskId 聚合。@All 召集全员，实时头像栏显示谁在活动。' }" />
+
+<!--
+Multi-session orchestration is the technical base for Teams.
+
+One conductor can work with many performers.
+
+Each performer has its own session.
+The UI can still show everything under one task.
+
+This gives us multi-agent work without a separate runtime.
+-->
 
 ---
 
@@ -603,6 +908,17 @@ layout: split-media
   />
 </div>
 
+<!--
+ClawWork is not only a web page.
+
+It is built for desktop first:
+macOS, Windows, and Linux.
+
+The reason is simple:
+agent work often touches local files, local tools, and local projects.
+So native desktop matters.
+-->
+
 ---
 layout: split-media
 ---
@@ -626,6 +942,15 @@ layout: split-media
 
 <DeckMiniPanel tone="red" :title="{ en: 'Independent Identity', zh: '独立身份' }" :body="{ en: 'Ed25519 via WebCrypto. Private key never leaves the device.', zh: 'WebCrypto 生成 Ed25519。私钥永远不出设备。' }" />
 
+<!--
+There is also a PWA version.
+
+The idea is that users can watch and manage tasks from more places.
+
+This is not just remote control.
+It is a real mobile surface for ClawWork.
+-->
+
 ---
 
 <div class="cw-grid"></div>
@@ -638,6 +963,15 @@ layout: split-media
   </h1>
   <p class="cw-thanks-copy">{{ $t({ en: 'How it is built.', zh: '它是怎么构建的。' }) }}</p>
 </div>
+
+<!--
+Now I want to quickly show how it works under the hood.
+
+I will keep this part short.
+The key idea is:
+ClawWork keeps the product simple,
+and uses OpenClaw primitives underneath.
+-->
 
 ---
 layout: split-media
@@ -663,6 +997,18 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<code>check-architecture.mjs</code> blocks the build on any reverse import.', zh: '<code>check-architecture.mjs</code> 一旦发现反向引用就 CI 失败。' })"></p>
 </div>
 
+<!--
+ClawWork has a three-layer structure:
+shared, core, and desktop or PWA.
+
+Shared has protocol and domain types.
+Core has stores and services.
+Desktop and PWA are the product shells.
+
+This keeps product logic reusable.
+It also keeps the architecture easier to check in CI.
+-->
+
 ---
 layout: split-media
 ---
@@ -683,6 +1029,17 @@ layout: split-media
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Zero Server Changes', zh: '零服务端改动' }" :body="{ en: 'Standard OpenClaw Gateway protocol. Nothing to patch upstream.', zh: '标准 OpenClaw Gateway 协议。上游一行都不用改。' }" />
 
+<!--
+For OpenClaw connection,
+ClawWork uses one Gateway WebSocket.
+
+It does not need one WebSocket per task.
+Instead, it routes events by session key.
+
+This is important because ClawWork can support many sessions
+without changing the OpenClaw server.
+-->
+
 ---
 layout: split-media
 ---
@@ -702,6 +1059,16 @@ layout: split-media
 <DeckMiniPanel tone="cyan" :title="{ en: 'One Writer per Role', zh: '每角色一个写者' }" :body="{ en: 'user: ChatInput · assistant: session-sync · system: addMessage.', zh: 'user: ChatInput · assistant: session-sync · system: addMessage。' }" />
 
 <DeckMiniPanel tone="red" :title="{ en: 'DB Unique Index', zh: 'DB 唯一索引' }" :body="{ en: 'Belt-and-braces. Any dual-write path is rejected at INSERT.', zh: '双保险。任何双写路径在 INSERT 时被拒绝。' }" />
+
+<!--
+For messages, ClawWork uses a single-writer rule.
+
+User messages, assistant messages, and system messages
+each have a clear write path.
+
+This prevents duplicate messages.
+It also makes persistence easier to reason about.
+-->
 
 ---
 layout: split-media
@@ -732,6 +1099,19 @@ fs.writeFileSync(keyPath, privateKey,
 <DeckMiniPanel tone="green" :title="{ en: 'Challenge → Response', zh: '挑战 → 响应' }" :body="{ en: 'Server issues a nonce. Client signs with Ed25519. Verified, logged in.', zh: '服务器下发 nonce，客户端用 Ed25519 签名，验证通过即登录。' }" />
 
 <DeckMiniPanel tone="cyan" :title="{ en: 'Isomorphic', zh: '跨端同构' }" :body="{ en: 'Node crypto on desktop and WebCrypto in PWA — interchangeable keys.', zh: '桌面用 Node crypto，PWA 用 WebCrypto —— 密钥可互换。' }" />
+
+<!--
+For device identity, ClawWork uses Ed25519.
+
+The private key is generated on the device.
+It does not ship inside the app.
+
+The server sends a challenge.
+The client signs it.
+Then the server verifies it.
+
+This avoids embedded secrets.
+-->
 
 ---
 layout: split-media
@@ -772,6 +1152,20 @@ layout: split-media
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Isolated Write · Aggregated Read', zh: '写入隔离 · 读取聚合' }" :body="{ en: 'Each Performer writes to its own sessionKey. UI aggregates by taskId.', zh: '每个 Performer 写到自己的 sessionKey。UI 按 taskId 聚合展示。' }" />
 
+<!--
+For multi-agent work,
+ClawWork uses a conductor and performers.
+
+The conductor is the root session.
+The performers are subagent sessions.
+
+Each performer writes to its own session key.
+The UI reads them together as one task.
+
+So the user sees one task,
+but under the hood many agents can work together.
+-->
+
 ---
 layout: split-media
 ---
@@ -801,6 +1195,17 @@ font-size: var(--text-sm);</pre>
 
 <DeckMiniPanel tone="green" :title="{ en: 'Compiler Enforced', zh: '编译器保证' }" :body="{ en: 'Violations fail the build. Design consistency becomes a type error.', zh: '违规导致构建失败。设计一致性变成类型错误。' }" />
 
+<!--
+ClawWork also treats design rules as code.
+
+Colors, spacing, and UI tokens are checked by scripts.
+
+If someone uses raw colors or breaks the UI contract,
+the build can fail.
+
+This keeps the product consistent over time.
+-->
+
 ---
 
 <div class="cw-grid"></div>
@@ -813,6 +1218,13 @@ font-size: var(--text-sm);</pre>
   </h1>
   <p class="cw-thanks-copy">{{ $t({ en: 'Three stories from the field.', zh: '来自一线的三个故事。' }) }}</p>
 </div>
+
+<!--
+Now let me show three simple stories.
+
+These are not about features one by one.
+They are about how people can use ClawWork in real work.
+-->
 
 ---
 layout: split-media
@@ -837,6 +1249,18 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Linear time → parallel output.</strong>', zh: '<strong>串行时间 → 并行产出。</strong>' })"></p>
 </div>
 
+<!--
+First, a single developer.
+
+In one morning,
+the developer can start a bug fix,
+a documentation task,
+and a pull request review.
+
+The work happens in parallel,
+but the developer still sees all of it in one place.
+-->
+
 ---
 layout: split-media
 ---
@@ -860,6 +1284,18 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Three roles. One room.</strong> No context shuffling.', zh: '<strong>三个角色，一间房。</strong>零上下文搬运。' })"></p>
 </div>
 
+<!--
+Second, a team workflow.
+
+Different agents can take different roles.
+One agent can design the API.
+One agent can implement.
+One agent can review.
+
+They work inside one shared task flow.
+There is no manual context shuffling.
+-->
+
 ---
 layout: split-media
 ---
@@ -880,6 +1316,18 @@ layout: split-media
 
 <DeckMiniPanel tone="cyan" :title="{ en: '@All Summons', zh: '@All 召集' }" :body="{ en: 'Mention @All to broadcast a message to every performer at once.', zh: '@All 一次性把消息广播给所有 Performer。' }" />
 
+<!--
+Third, intelligent orchestration.
+
+One conductor can send work to many performers.
+Each performer works on a different part.
+Then the conductor collects the results.
+
+This is the direction I care about:
+not just a smarter chat,
+but a better way to operate agent work.
+-->
+
 ---
 
 <div class="cw-grid"></div>
@@ -892,6 +1340,13 @@ layout: split-media
   </h1>
   <p class="cw-thanks-copy">{{ $t({ en: 'The shape of what\'s next.', zh: '下一步的样子。' }) }}</p>
 </div>
+
+<!--
+Now, one more thing.
+
+This is the future direction.
+The idea is task-first, any runtime.
+-->
 
 ---
 layout: split-media
@@ -912,6 +1367,19 @@ layout: split-media
 <DeckMiniPanel tone="cyan" :title="{ en: 'Execution, under the hood', zh: '执行,藏在引擎盖下' }" :body="{ en: 'Lifecycle, placement, recovery — all handled for you.', zh: '生命周期、调度、恢复 —— 系统替你处理。' }" />
 
 <DeckMiniPanel tone="purple" :title="{ en: 'Capability, not brand', zh: '能力驱动,不是品牌' }" :body="{ en: 'Route by what a runtime can do, not what it is called.', zh: '按 runtime 能做什么路由,不是按叫什么名字。' }" />
+
+<!--
+The future idea is task-first, any runtime.
+
+The user should think about the task,
+not about sessions, runtimes, or workers.
+
+Today the runtime can be OpenClaw.
+In the future, it could also be other agent runtimes.
+
+The product experience should stay the same.
+The runtime underneath can change.
+-->
 
 ---
 layout: split-media
@@ -937,6 +1405,20 @@ layout: split-media
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Task stays the same.</strong> The runtime underneath is a deployment decision — not a product rewrite.', zh: '<strong>Task 不变。</strong>底下用什么 runtime,是部署决策 —— 不是产品重写。' })"></p>
 </div>
 
+<!--
+There can be different ways to run the system.
+
+Direct mode is simple:
+ClawWork talks to OpenClaw Gateway.
+
+Managed mode can add quotas, isolation, and audit.
+
+Mixed mode can route work to different runtimes.
+
+But the product idea stays the same:
+the user starts with a Task.
+-->
+
 ---
 
 <div class="cw-grid"></div>
@@ -951,6 +1433,18 @@ layout: split-media
     <span class="cw-shimmer">{{ $t({ en: 'Runtime does the real work.', zh: 'Runtime 负责真正执行。' }) }}</span>
   </h1>
 </div>
+
+<!--
+So the summary is:
+
+ClawWork is operator UX.
+The control plane governs execution.
+The runtime does the real work.
+
+My goal is to make agent work more visible,
+more parallel,
+and easier to control.
+-->
 
 ---
 
@@ -983,3 +1477,9 @@ layout: split-media
     {{ $t({ en: 'Apache 2.0 · macOS & Windows & Linux & PWA · Built with OpenClaw', zh: 'Apache 2.0 · macOS & Windows & Linux & PWA · 基于 OpenClaw 构建' }) }}
   </div>
 </div>
+
+<!--
+Thank you.
+
+Questions, ideas, and pull requests are all welcome.
+-->
