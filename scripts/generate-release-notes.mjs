@@ -50,6 +50,15 @@ function sh(cmd, { allowFail = false } = {}) {
   }
 }
 
+function isStableTag(ref) {
+  return /^v\d+\.\d+\.\d+$/.test(ref);
+}
+
+function previousTag(head) {
+  const prereleaseFilter = isStableTag(head) ? " --exclude 'v*-*'" : '';
+  return sh(`git describe --tags --abbrev=0${prereleaseFilter} ${head}^`, { allowFail: true });
+}
+
 function parseArgs() {
   const args = argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) {
@@ -58,7 +67,8 @@ function parseArgs() {
         'Usage: node scripts/generate-release-notes.mjs [RANGE]',
         '',
         'RANGE forms:',
-        '  v0.0.14                previous tag..v0.0.14',
+        '  v0.0.15                previous stable tag..v0.0.15',
+        '  v0.0.15-beta.4         previous tag..v0.0.15-beta.4',
         '  v0.0.13..v0.0.14       explicit range',
         '  (no arg)               previous tag..HEAD',
         '',
@@ -74,12 +84,12 @@ function parseArgs() {
   let head;
   if (!arg) {
     head = 'HEAD';
-    base = sh('git describe --tags --abbrev=0 HEAD^', { allowFail: true });
+    base = previousTag(head);
   } else if (arg.includes('..')) {
     [base, head] = arg.split('..');
   } else {
     head = arg;
-    base = sh(`git describe --tags --abbrev=0 ${head}^`, { allowFail: true });
+    base = previousTag(head);
   }
   if (!base || !head) {
     stderr.write('error: could not resolve base..head range\n');
