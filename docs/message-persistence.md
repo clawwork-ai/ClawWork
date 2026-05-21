@@ -1,6 +1,6 @@
 # Message Persistence Architecture — Full Reference
 
-> This file contains the detailed architecture. The CRITICAL invariant (single-writer table + prohibited patterns) is in `CLAUDE.md`.
+> This file contains the detailed architecture. The CRITICAL invariant (single-writer table + prohibited patterns) is in `docs/agent-rules/message-persistence.md`.
 
 ## Assistant Message State Machine
 

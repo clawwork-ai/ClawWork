@@ -12,13 +12,13 @@ Use this file as the tool-oriented summary for review and enforcement.
 
 ## Layer Ownership
 
-| Layer | Owns | Package |
-|---|---|---|
-| shared | protocol, constants, domain types, debug event types | `packages/shared/src/` |
-| core | stores, services, ports | `packages/core/src/` |
-| main | WebSocket, filesystem, database, workspace config, OS integration, IPC, tray | `packages/desktop/src/main/` |
-| preload | typed renderer bridge only | `packages/desktop/src/preload/` |
-| renderer | UI state, presentation, hooks, client-side coordination | `packages/desktop/src/renderer/` |
+| Layer    | Owns                                                                         | Package                          |
+| -------- | ---------------------------------------------------------------------------- | -------------------------------- |
+| shared   | protocol, constants, domain types, debug event types                         | `packages/shared/src/`           |
+| core     | stores, services, ports                                                      | `packages/core/src/`             |
+| main     | WebSocket, filesystem, database, workspace config, OS integration, IPC, tray | `packages/desktop/src/main/`     |
+| preload  | typed renderer bridge only                                                   | `packages/desktop/src/preload/`  |
+| renderer | UI state, presentation, hooks, client-side coordination                      | `packages/desktop/src/renderer/` |
 
 Cross-layer changes must keep boundaries explicit and justified in the PR.
 

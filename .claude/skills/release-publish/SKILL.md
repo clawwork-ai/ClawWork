@@ -22,7 +22,7 @@ Project-specific workflow for publishing ClawWork desktop releases.
 
 ## Preflight
 
-1. Read `CLAUDE.md`, `.claude/rules/git-conventions.md`, and the release section in `DEVELOPMENT.md`.
+1. Read `AGENTS.md`, `docs/agent-rules/git-conventions.md`, and the release section in `DEVELOPMENT.md`.
 2. Check repo state:
    ```bash
    git status --short --branch
