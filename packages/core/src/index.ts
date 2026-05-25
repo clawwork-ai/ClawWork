@@ -21,6 +21,9 @@ export type {
 
 export type { AppSettings, NotificationSettings } from './ports/settings.js';
 
+export type { RuntimeAdapterPort } from './ports/runtime-adapter-port.js';
+export { createOpenClawGatewayAdapter } from './services/openclaw-gateway-adapter.js';
+
 export type {
   ChatContentBlock,
   ChatMessage,
