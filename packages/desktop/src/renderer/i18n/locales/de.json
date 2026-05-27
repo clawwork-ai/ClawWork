@@ -631,6 +631,8 @@
     "theme": "Design",
     "themeAuto": "Automatisch",
     "themeUpdated": "Design aktualisiert",
+    "tlsVerify": "TLS-Zertifikat prüfen",
+    "tlsVerifyHint": "Nur für vertrauenswürdige private Gateways mit selbstsignierten Zertifikaten deaktivieren.",
     "token": "Token",
     "tokenPlaceholder": "Gateway-Token",
     "tokenRequired": "Token ist erforderlich",

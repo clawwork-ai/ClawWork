@@ -52,6 +52,15 @@ export function parseGatewaySetupCode(raw: string): { url: string; pairingCode: 
   }
 }
 
+export function isWssGatewayUrl(raw: string): boolean {
+  try {
+    const protocol = new URL(raw.trim()).protocol;
+    return protocol === 'wss:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function validateGatewayForm(input: GatewayFormValidationInput): GatewayFormErrorKey | null {
   if (!input.name.trim()) return 'nameRequired';
 

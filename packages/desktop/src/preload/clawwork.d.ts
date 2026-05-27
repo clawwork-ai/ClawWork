@@ -82,6 +82,7 @@ export interface GatewayServerConfig {
   password?: string;
   pairingCode?: string;
   authMode?: 'token' | 'password' | 'pairingCode';
+  tlsVerify?: boolean;
   isDefault?: boolean;
   color?: string;
 }
@@ -370,7 +371,10 @@ export interface ClawWorkAPI {
   removeGateway: (gatewayId: string) => Promise<IpcResult>;
   updateGateway: (gatewayId: string, partial: Partial<GatewayServerConfig>) => Promise<IpcResult>;
   setDefaultGateway: (gatewayId: string) => Promise<IpcResult>;
-  testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) => Promise<IpcResult>;
+  testGateway: (
+    url: string,
+    auth: { token?: string; password?: string; pairingCode?: string; tlsVerify?: boolean },
+  ) => Promise<IpcResult>;
 
   getAppVersion: () => Promise<string>;
   checkForUpdates: () => Promise<UpdateCheckResult>;

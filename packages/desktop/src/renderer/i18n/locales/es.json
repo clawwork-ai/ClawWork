@@ -631,6 +631,8 @@
     "theme": "Tema",
     "themeAuto": "Automático",
     "themeUpdated": "Tema actualizado",
+    "tlsVerify": "Verificar certificado TLS",
+    "tlsVerifyHint": "Desactívalo solo para gateways privados de confianza con certificados autofirmados.",
     "token": "Token",
     "tokenPlaceholder": "Token del Gateway",
     "tokenRequired": "El Token es obligatorio",

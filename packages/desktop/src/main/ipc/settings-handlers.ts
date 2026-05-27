@@ -38,7 +38,13 @@ export function registerSettingsHandlers(): void {
       config.defaultGatewayId = gateway.id;
     }
     writeConfig(config);
-    addGateway({ id: gateway.id, name: gateway.name, url: gateway.url, auth: buildGatewayAuth(gateway) });
+    addGateway({
+      id: gateway.id,
+      name: gateway.name,
+      url: gateway.url,
+      auth: buildGatewayAuth(gateway),
+      tlsVerify: gateway.tlsVerify,
+    });
     return { ok: true };
   });
 
@@ -70,7 +76,7 @@ export function registerSettingsHandlers(): void {
       const client = getGatewayClient(gatewayId);
       if (client) {
         const gw = config.gateways[idx];
-        client.updateConfig({ url: gw.url, auth: buildGatewayAuth(gw) });
+        client.updateConfig({ url: gw.url, auth: buildGatewayAuth(gw), tlsVerify: gw.tlsVerify });
       }
       return { ok: true, gateway: config.gateways[idx] };
     },
@@ -89,7 +95,11 @@ export function registerSettingsHandlers(): void {
 
   ipcMain.handle(
     'settings:test-gateway',
-    async (_event, url: string, auth: { token?: string; password?: string; pairingCode?: string }) => {
+    async (
+      _event,
+      url: string,
+      auth: { token?: string; password?: string; pairingCode?: string; tlsVerify?: boolean },
+    ) => {
       if (auth.pairingCode) {
         return { ok: false, error: 'pairing-code test is not supported' };
       }
@@ -99,7 +109,7 @@ export function registerSettingsHandlers(): void {
           ? { password: auth.password.trim() }
           : { token: '' };
       const testClient = new GatewayClient(
-        { id: `test-${Date.now()}`, name: 'test', url: url.trim(), auth: testAuth },
+        { id: `test-${Date.now()}`, name: 'test', url: url.trim(), auth: testAuth, tlsVerify: auth.tlsVerify },
         { noReconnect: true },
       );
       try {

@@ -26,8 +26,10 @@ import EmptyState from '@/components/semantic/EmptyState';
 import InlineNotice from '@/components/semantic/InlineNotice';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
+import Toggle from '../components/Toggle';
 import {
   inferGatewayAuthMode,
+  isWssGatewayUrl,
   parseGatewaySetupCode,
   validateGatewayForm,
   type GatewayAuthMode,
@@ -42,6 +44,7 @@ interface GatewayFormData {
   password: string;
   pairingCode: string;
   authMode?: GatewayAuthMode;
+  tlsVerify: boolean;
 }
 
 interface GatewayServerConfig {
@@ -52,6 +55,7 @@ interface GatewayServerConfig {
   password?: string;
   pairingCode?: string;
   authMode?: GatewayAuthMode;
+  tlsVerify?: boolean;
   isDefault?: boolean;
   color?: string;
   type?: GatewayType;
@@ -64,6 +68,7 @@ const EMPTY_FORM: GatewayFormData = {
   password: '',
   pairingCode: '',
   authMode: 'token',
+  tlsVerify: true,
 };
 
 const STATUS_ICON: Record<GatewayConnectionStatus, { icon: typeof CheckCircle2; color: string }> = {
@@ -258,6 +263,7 @@ function GatewayForm({
         : t('settings.pairingCodePlaceholder');
 
   const authValue = authMode === 'token' ? form.token : authMode === 'password' ? form.password : form.pairingCode;
+  const showTlsVerify = isWssGatewayUrl(form.url);
 
   const handleAuthChange = (v: string) => {
     if (authMode === 'token') setForm((f) => ({ ...f, token: v }));
@@ -326,6 +332,20 @@ function GatewayForm({
               onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
               placeholder="ws://127.0.0.1:18789"
               className={cn(inputClass, 'w-full')}
+            />
+          </div>
+        )}
+        {showTlsVerify && (
+          <div className="flex items-start justify-between gap-3 py-1">
+            <div className="min-w-0">
+              <div className="type-label text-[var(--text-secondary)]">{t('settings.tlsVerify')}</div>
+              <p className="type-support mt-1 text-[var(--text-muted)]">{t('settings.tlsVerifyHint')}</p>
+            </div>
+            <Toggle
+              checked={form.tlsVerify}
+              onChange={(checked) => setForm((f) => ({ ...f, tlsVerify: checked }))}
+              ariaLabel={t('settings.tlsVerify')}
+              size="sm"
             />
           </div>
         )}
@@ -457,6 +477,7 @@ export default function GatewaysSection() {
       password: gw.password ?? '',
       pairingCode: gw.pairingCode ?? '',
       authMode: gw.authMode,
+      tlsVerify: gw.tlsVerify !== false,
     });
     setShowForm(true);
   }, []);
@@ -484,6 +505,7 @@ export default function GatewaysSection() {
       const auth = {
         token: form.token || undefined,
         password: form.password || undefined,
+        tlsVerify: isWssGatewayUrl(form.url) ? form.tlsVerify : undefined,
       };
       const res = await window.clawwork.testGateway(form.url, auth);
       if (res.ok) {
@@ -507,6 +529,7 @@ export default function GatewaysSection() {
       const auth = {
         token: form.token || undefined,
         password: form.password || undefined,
+        tlsVerify: isWssGatewayUrl(form.url) ? form.tlsVerify : undefined,
       };
       const res = await window.clawwork.testGateway(form.url, auth);
       if (res.ok) {
@@ -521,7 +544,7 @@ export default function GatewaysSection() {
     } finally {
       setPairingRetrying(false);
     }
-  }, [form.url, form.token, form.password, t]);
+  }, [form.url, form.token, form.password, form.tlsVerify, t]);
 
   const handleSave = useCallback(async () => {
     const authMode = inferGatewayAuthMode(form);
@@ -548,6 +571,7 @@ export default function GatewaysSection() {
           password: form.password.trim() || undefined,
           pairingCode: form.pairingCode.trim() || undefined,
           authMode,
+          tlsVerify: isWssGatewayUrl(form.url) ? form.tlsVerify : undefined,
         });
         if (res.ok) {
           toast.success(t('settings.gatewayUpdated'));
@@ -565,6 +589,7 @@ export default function GatewaysSection() {
           password: form.password.trim() || undefined,
           pairingCode: form.pairingCode.trim() || undefined,
           authMode,
+          tlsVerify: isWssGatewayUrl(form.url) ? form.tlsVerify : undefined,
           type: 'openclaw',
         };
         const res = await window.clawwork.addGateway(newGw);

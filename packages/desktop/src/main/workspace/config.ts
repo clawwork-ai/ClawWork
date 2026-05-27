@@ -14,6 +14,7 @@ export interface GatewayServerConfig {
   password?: string;
   pairingCode?: string;
   authMode?: 'token' | 'password' | 'pairingCode';
+  tlsVerify?: boolean;
   isDefault?: boolean;
   color?: string;
 }

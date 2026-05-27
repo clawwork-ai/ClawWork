@@ -45,6 +45,7 @@ vi.mock('../src/main/ws/gateway-client.js', () => ({
 describe('registerSettingsHandlers', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.clearAllMocks();
     handleMap.clear();
     connected = false;
     connectMock.mockReset();
@@ -133,5 +134,121 @@ describe('registerSettingsHandlers', () => {
     };
     expect(result).toEqual({ ok: false, error: 'no config' });
     expect(configModule.writeConfig).not.toHaveBeenCalled();
+  });
+
+  it('passes TLS verification through when testing a gateway', async () => {
+    const { registerSettingsHandlers } = await import('../src/main/ipc/settings-handlers.js');
+    const gatewayModule = await import('../src/main/ws/gateway-client.js');
+
+    registerSettingsHandlers();
+
+    const handler = handleMap.get('settings:test-gateway');
+    expect(handler).toBeTypeOf('function');
+
+    const pending = handler?.({}, ' wss://gateway.example.com ', {
+      token: 'secret',
+      tlsVerify: false,
+    }) as Promise<{ ok: boolean }>;
+
+    await vi.advanceTimersByTimeAsync(300);
+
+    await expect(pending).resolves.toEqual({ ok: true });
+    expect(gatewayModule.GatewayClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'wss://gateway.example.com',
+        tlsVerify: false,
+      }),
+      { noReconnect: true },
+    );
+  });
+
+  it('persists TLS verification when adding a gateway', async () => {
+    const { registerSettingsHandlers } = await import('../src/main/ipc/settings-handlers.js');
+    const configModule = await import('../src/main/workspace/config.js');
+    const wsModule = await import('../src/main/ws/index.js');
+    const config = { workspacePath: '/tmp/workspace', gateways: [] };
+
+    vi.mocked(configModule.readConfig).mockReturnValue(config);
+    vi.mocked(configModule.buildGatewayAuth).mockReturnValue({ token: 'tok' });
+
+    registerSettingsHandlers();
+
+    const handler = handleMap.get('settings:add-gateway');
+    expect(handler).toBeTypeOf('function');
+
+    const gateway = {
+      id: 'gw1',
+      name: 'gw',
+      url: 'wss://gw.example.com',
+      authMode: 'token' as const,
+      token: 'tok',
+      tlsVerify: false,
+    };
+    const result = (await handler?.({}, gateway)) as { ok: boolean };
+
+    expect(result).toEqual({ ok: true });
+    expect(configModule.writeConfig).toHaveBeenCalledWith({
+      workspacePath: '/tmp/workspace',
+      gateways: [gateway],
+      defaultGatewayId: 'gw1',
+    });
+    expect(wsModule.addGateway).toHaveBeenCalledWith({
+      id: 'gw1',
+      name: 'gw',
+      url: 'wss://gw.example.com',
+      auth: { token: 'tok' },
+      tlsVerify: false,
+    });
+  });
+
+  it('updates an existing gateway client with TLS verification changes', async () => {
+    const { registerSettingsHandlers } = await import('../src/main/ipc/settings-handlers.js');
+    const configModule = await import('../src/main/workspace/config.js');
+    const wsModule = await import('../src/main/ws/index.js');
+    const updateConfig = vi.fn();
+    const config = {
+      workspacePath: '/tmp/workspace',
+      gateways: [
+        {
+          id: 'gw1',
+          name: 'gw',
+          url: 'wss://gw.example.com',
+          authMode: 'token' as const,
+          token: 'tok',
+          tlsVerify: true,
+        },
+      ],
+    };
+
+    vi.mocked(configModule.readConfig).mockReturnValue(config);
+    vi.mocked(configModule.buildGatewayAuth).mockReturnValue({ token: 'tok' });
+    vi.mocked(wsModule.getGatewayClient).mockReturnValue({ updateConfig } as never);
+
+    registerSettingsHandlers();
+
+    const handler = handleMap.get('settings:update-gateway');
+    expect(handler).toBeTypeOf('function');
+
+    const result = (await handler?.({}, 'gw1', { tlsVerify: false })) as { ok: boolean };
+
+    expect(result.ok).toBe(true);
+    expect(configModule.writeConfig).toHaveBeenCalledWith({
+      workspacePath: '/tmp/workspace',
+      gateways: [
+        {
+          id: 'gw1',
+          name: 'gw',
+          url: 'wss://gw.example.com',
+          authMode: 'token',
+          token: 'tok',
+          tlsVerify: false,
+        },
+      ],
+    });
+    expect(updateConfig).toHaveBeenCalledWith({
+      url: 'wss://gw.example.com',
+      auth: { token: 'tok' },
+      tlsVerify: false,
+    });
   });
 });

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { inferGatewayAuthMode, parseGatewaySetupCode, validateGatewayForm } from '../src/renderer/lib/gateway-auth.js';
+import {
+  inferGatewayAuthMode,
+  isWssGatewayUrl,
+  parseGatewaySetupCode,
+  validateGatewayForm,
+} from '../src/renderer/lib/gateway-auth.js';
 import { buildGatewayAuth } from '../src/main/workspace/config.js';
 
 describe('gateway auth helpers', () => {
@@ -35,6 +40,13 @@ describe('gateway auth helpers', () => {
     expect(inferGatewayAuthMode({ token: 'secret', password: 'pw', pairingCode: 'pair' })).toBe('token');
     expect(inferGatewayAuthMode({ password: 'pw', pairingCode: 'pair' })).toBe('password');
     expect(inferGatewayAuthMode({ pairingCode: 'pair' })).toBe('pairingCode');
+  });
+
+  it('detects secure gateway URLs for TLS settings', () => {
+    expect(isWssGatewayUrl('wss://gateway.example.com')).toBe(true);
+    expect(isWssGatewayUrl('https://gateway.example.com')).toBe(true);
+    expect(isWssGatewayUrl(' ws://127.0.0.1:18789 ')).toBe(false);
+    expect(isWssGatewayUrl('not a url')).toBe(false);
   });
 
   it('requires token and password fields for their respective auth modes', () => {

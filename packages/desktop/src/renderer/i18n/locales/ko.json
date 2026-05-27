@@ -631,6 +631,8 @@
     "theme": "테마",
     "themeAuto": "자동",
     "themeUpdated": "테마가 변경되었습니다",
+    "tlsVerify": "TLS 인증서 확인",
+    "tlsVerifyHint": "신뢰할 수 있는 사설 게이트웨이의 자체 서명 인증서에만 끄세요.",
     "token": "토큰",
     "tokenPlaceholder": "게이트웨이 토큰",
     "tokenRequired": "토큰을 입력해 주세요",

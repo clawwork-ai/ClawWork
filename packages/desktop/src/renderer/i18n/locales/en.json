@@ -631,6 +631,8 @@
     "theme": "Theme",
     "themeAuto": "Auto",
     "themeUpdated": "Theme updated",
+    "tlsVerify": "Verify TLS certificate",
+    "tlsVerifyHint": "Turn off only for trusted private gateways with self-signed certificates.",
     "token": "Token",
     "tokenPlaceholder": "Gateway token",
     "tokenRequired": "Token is required",

@@ -631,6 +631,8 @@
     "theme": "主题",
     "themeAuto": "自动",
     "themeUpdated": "主题已更新",
+    "tlsVerify": "校验 TLS 证书",
+    "tlsVerifyHint": "仅在可信私有网关使用自签名证书时关闭。",
     "token": "Token",
     "tokenPlaceholder": "Gateway Token",
     "tokenRequired": "Token 不能为空",

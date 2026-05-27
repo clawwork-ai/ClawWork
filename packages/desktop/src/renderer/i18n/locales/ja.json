@@ -631,6 +631,8 @@
     "theme": "テーマ",
     "themeAuto": "自動",
     "themeUpdated": "テーマを更新しました",
+    "tlsVerify": "TLS 証明書を検証",
+    "tlsVerifyHint": "信頼済みのプライベート Gateway で自己署名証明書を使う場合のみオフにしてください。",
     "token": "トークン",
     "tokenPlaceholder": "ゲートウェイトークン",
     "tokenRequired": "トークンは必須です",

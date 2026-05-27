@@ -50,7 +50,7 @@ export type GatewayAuth =
 
 export interface GatewayConnectParams {
   minProtocol: 3;
-  maxProtocol: 3;
+  maxProtocol: 3 | 4;
   client: {
     id: string;
     displayName: string;
@@ -77,4 +77,5 @@ export interface GatewayClientConfig {
   name: string;
   url: string;
   auth: GatewayAuth;
+  tlsVerify?: boolean;
 }

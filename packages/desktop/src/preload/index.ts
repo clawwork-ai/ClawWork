@@ -179,8 +179,10 @@ function buildApi(): ClawWorkAPI {
     updateGateway: (gatewayId: string, partial: Partial<GatewayServerConfig>) =>
       ipcRenderer.invoke('settings:update-gateway', gatewayId, partial),
     setDefaultGateway: (gatewayId: string) => ipcRenderer.invoke('settings:set-default-gateway', gatewayId),
-    testGateway: (url: string, auth: { token?: string; password?: string; pairingCode?: string }) =>
-      ipcRenderer.invoke('settings:test-gateway', url, auth),
+    testGateway: (
+      url: string,
+      auth: { token?: string; password?: string; pairingCode?: string; tlsVerify?: boolean },
+    ) => ipcRenderer.invoke('settings:test-gateway', url, auth),
 
     getAppVersion: () => ipcRenderer.invoke('app:get-version'),
     checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates'),

@@ -631,6 +631,8 @@
     "theme": "主題",
     "themeAuto": "自動",
     "themeUpdated": "主題已更新",
+    "tlsVerify": "驗證 TLS 憑證",
+    "tlsVerifyHint": "僅在可信任的私有 Gateway 使用自簽憑證時關閉。",
     "token": "Token",
     "tokenPlaceholder": "Gateway Token",
     "tokenRequired": "請輸入 Token",

@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import logo from '@/assets/logo.png';
-import { parseGatewaySetupCode, validateGatewayForm, type GatewayAuthMode } from '@/lib/gateway-auth';
+import { isWssGatewayUrl, parseGatewaySetupCode, validateGatewayForm, type GatewayAuthMode } from '@/lib/gateway-auth';
 import SectionCard from '@/components/semantic/SectionCard';
 import ToolbarButton from '@/components/semantic/ToolbarButton';
 import InlineNotice from '@/components/semantic/InlineNotice';
+import Toggle from '@/layouts/Settings/components/Toggle';
 
 interface SetupProps {
   onSetupComplete: () => void;
@@ -31,6 +32,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
   const [gwToken, setGwToken] = useState('');
   const [gwPassword, setGwPassword] = useState('');
   const [gwPairingCode, setGwPairingCode] = useState('');
+  const [gwTlsVerify, setGwTlsVerify] = useState(true);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<'success' | 'fail' | null>(null);
   const [saving, setSaving] = useState(false);
@@ -58,6 +60,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
   };
 
   const gwAuthValue = gwAuthMode === 'token' ? gwToken : gwAuthMode === 'password' ? gwPassword : gwPairingCode;
+  const showTlsVerify = isWssGatewayUrl(gwUrl);
   const handleGwAuthChange = (v: string) => {
     if (gwAuthMode === 'token') setGwToken(v);
     else if (gwAuthMode === 'password') setGwPassword(v);
@@ -114,13 +117,14 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
     const res = await window.clawwork.testGateway(gwUrl, {
       token: gwToken || undefined,
       password: gwPassword || undefined,
+      tlsVerify: isWssGatewayUrl(gwUrl) ? gwTlsVerify : undefined,
     });
     setTesting(false);
     setTestResult(res.ok || res.pairingRequired ? 'success' : 'fail');
     if (res.pairingRequired) {
       setError(t('pairing.instructions'));
     }
-  }, [gwAuthMode, gwUrl, gwToken, gwPassword, t]);
+  }, [gwAuthMode, gwUrl, gwToken, gwPassword, gwTlsVerify, t]);
 
   const handleFinish = useCallback(async () => {
     const validationError = validateGatewayForm({
@@ -145,6 +149,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
       password: gwPassword.trim() || undefined,
       pairingCode: gwPairingCode.trim() || undefined,
       authMode: gwAuthMode,
+      tlsVerify: isWssGatewayUrl(gwUrl) ? gwTlsVerify : undefined,
       isDefault: true,
     };
     const res = await window.clawwork.addGateway(gw);
@@ -154,7 +159,7 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
     } else {
       setError(res.error ?? t('errors.failed'));
     }
-  }, [gwAuthMode, gwName, gwUrl, gwToken, gwPassword, gwPairingCode, onSetupComplete, t]);
+  }, [gwAuthMode, gwName, gwUrl, gwToken, gwPassword, gwPairingCode, gwTlsVerify, onSetupComplete, t]);
 
   const handleSkipGateway = useCallback(() => {
     onSetupComplete();
@@ -357,6 +362,20 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
                         className={cn(inputClass, 'w-full')}
                       />
                       <p className="type-support text-[var(--text-muted)] opacity-70 mt-1">{t('setup.urlHint')}</p>
+                    </div>
+                  )}
+                  {showTlsVerify && (
+                    <div className="flex items-start justify-between gap-3 py-1">
+                      <div className="min-w-0">
+                        <div className="type-label text-[var(--text-secondary)]">{t('settings.tlsVerify')}</div>
+                        <p className="type-support mt-1 text-[var(--text-muted)]">{t('settings.tlsVerifyHint')}</p>
+                      </div>
+                      <Toggle
+                        checked={gwTlsVerify}
+                        onChange={setGwTlsVerify}
+                        ariaLabel={t('settings.tlsVerify')}
+                        size="sm"
+                      />
                     </div>
                   )}
                   <div>

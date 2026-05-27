@@ -17,7 +17,13 @@ export function initAllGateways(): void {
   const config = readConfig();
   const gateways = config?.gateways ?? [];
   for (const gw of gateways) {
-    const client = createGatewayClient({ id: gw.id, name: gw.name, url: gw.url, auth: buildGatewayAuth(gw) });
+    const client = createGatewayClient({
+      id: gw.id,
+      name: gw.name,
+      url: gw.url,
+      auth: buildGatewayAuth(gw),
+      tlsVerify: gw.tlsVerify,
+    });
     client.connect();
     gatewayClients.set(gw.id, client);
   }

@@ -1,4 +1,4 @@
-import WebSocket from 'ws';
+import WebSocket, { type ClientOptions } from 'ws';
 import { app } from 'electron';
 import { randomUUID } from 'crypto';
 import {
@@ -50,6 +50,15 @@ type PendingReq = {
 
 const REQ_TIMEOUT_MS = 15_000;
 
+function isSecureGatewayWebSocketUrl(raw: string): boolean {
+  try {
+    const protocol = new URL(raw.trim()).protocol;
+    return protocol === 'wss:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export class GatewayClient {
   private ws: WebSocket | null = null;
   private authenticated = false;
@@ -61,6 +70,7 @@ export class GatewayClient {
   private noReconnect = false;
   private wsUrl: string;
   private auth: GatewayAuth;
+  private tlsVerify: boolean;
   private gatewayId: string;
   private gatewayName: string;
   private connectNonce: string | null = null;
@@ -75,6 +85,7 @@ export class GatewayClient {
     this.gatewayName = config.name;
     this.wsUrl = config.url;
     this.auth = config.auth;
+    this.tlsVerify = config.tlsVerify !== false;
     this.deviceIdentity = loadOrCreateDeviceIdentity();
     if (opts?.noReconnect) this.noReconnect = true;
     this.onPairingSuccess = opts?.onPairingSuccess;
@@ -93,6 +104,7 @@ export class GatewayClient {
     if (config.name !== undefined) this.gatewayName = config.name;
     if (config.url !== undefined) this.wsUrl = config.url;
     if (config.auth !== undefined) this.auth = config.auth;
+    if (config.tlsVerify !== undefined) this.tlsVerify = config.tlsVerify !== false;
     this.reconnectAttempts = 0;
     this.connect();
   }
@@ -110,7 +122,11 @@ export class GatewayClient {
       attempt: this.reconnectAttempts + 1,
       data: { wsUrl: this.wsUrl },
     });
-    this.ws = new WebSocket(this.wsUrl, { handshakeTimeout: WS_HANDSHAKE_TIMEOUT_MS });
+    const wsOptions: ClientOptions = { handshakeTimeout: WS_HANDSHAKE_TIMEOUT_MS };
+    if (isSecureGatewayWebSocketUrl(this.wsUrl) && !this.tlsVerify) {
+      wsOptions.rejectUnauthorized = false;
+    }
+    this.ws = new WebSocket(this.wsUrl, wsOptions);
 
     this.ws.on('open', () => {
       getDebugLogger().info({
@@ -782,7 +798,7 @@ export class GatewayClient {
 
   get httpBase(): string {
     const parsed = new URL(this.wsUrl);
-    const protocol = parsed.protocol === 'wss:' ? 'https:' : 'http:';
+    const protocol = parsed.protocol === 'wss:' || parsed.protocol === 'https:' ? 'https:' : 'http:';
     return `${protocol}//${parsed.host}`;
   }
 
