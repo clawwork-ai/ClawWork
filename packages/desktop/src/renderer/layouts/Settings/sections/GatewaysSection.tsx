@@ -11,6 +11,8 @@ import {
   Crown,
   RefreshCw,
   ShieldCheck,
+  Eye,
+  EyeOff,
   X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -224,6 +226,7 @@ function GatewayForm({
   const authInputId = 'gateway-form-auth';
 
   const [authMode, setAuthMode] = useState<GatewayAuthMode>(() => form.authMode ?? inferGatewayAuthMode(form));
+  const [authVisible, setAuthVisible] = useState(false);
 
   useEffect(() => {
     const nextMode = form.authMode ?? inferGatewayAuthMode(form);
@@ -232,6 +235,7 @@ function GatewayForm({
 
   const handleAuthModeChange = (mode: GatewayAuthMode) => {
     setAuthMode(mode);
+    setAuthVisible(false);
     setForm((f) => ({
       ...f,
       token: '',
@@ -264,6 +268,8 @@ function GatewayForm({
 
   const authValue = authMode === 'token' ? form.token : authMode === 'password' ? form.password : form.pairingCode;
   const showTlsVerify = isWssGatewayUrl(form.url);
+  const authVisibilityLabel = authVisible ? t('settings.hideSecret') : t('settings.showSecret');
+  const AuthVisibilityIcon = authVisible ? EyeOff : Eye;
 
   const handleAuthChange = (v: string) => {
     if (authMode === 'token') setForm((f) => ({ ...f, token: v }));
@@ -353,26 +359,41 @@ function GatewayForm({
           <label className="type-label mb-1.5 block text-[var(--text-secondary)]">
             {authMode === 'pairingCode' ? t('settings.pairingCode') : t('settings.authMethod')}
           </label>
-          <input
-            id={authInputId}
-            type="password"
-            value={authValue}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (authMode === 'pairingCode' && !tryParseSetupCode(v)) {
-                handleAuthChange(v);
-              } else if (authMode !== 'pairingCode') {
-                handleAuthChange(v);
-              }
-            }}
-            onPaste={(e) => {
-              if (authMode !== 'pairingCode') return;
-              const text = e.clipboardData.getData('text');
-              if (tryParseSetupCode(text)) e.preventDefault();
-            }}
-            placeholder={authMode === 'pairingCode' ? t('settings.setupCodePlaceholder') : authPlaceholder}
-            className={cn(inputClass, 'w-full')}
-          />
+          <div className="relative">
+            <input
+              id={authInputId}
+              type={authVisible ? 'text' : 'password'}
+              value={authValue}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (authMode === 'pairingCode' && !tryParseSetupCode(v)) {
+                  handleAuthChange(v);
+                } else if (authMode !== 'pairingCode') {
+                  handleAuthChange(v);
+                }
+              }}
+              onPaste={(e) => {
+                if (authMode !== 'pairingCode') return;
+                const text = e.clipboardData.getData('text');
+                if (tryParseSetupCode(text)) e.preventDefault();
+              }}
+              placeholder={authMode === 'pairingCode' ? t('settings.setupCodePlaceholder') : authPlaceholder}
+              className={cn(inputClass, 'w-full pr-10')}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setAuthVisible((visible) => !visible)}
+                  className="glow-focus absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+                  aria-label={authVisibilityLabel}
+                >
+                  <AuthVisibilityIcon size={14} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{authVisibilityLabel}</TooltipContent>
+            </Tooltip>
+          </div>
           {authMode === 'pairingCode' && form.url && form.url !== 'ws://127.0.0.1:18789' && (
             <p className="type-support mt-1.5 text-[var(--accent)]">
               ✓ {t('settings.setupCodeParsed')}: <span className="type-mono-data">{form.url}</span>

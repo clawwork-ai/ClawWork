@@ -210,4 +210,91 @@ describe('gateway settings flow', () => {
 
     unmount();
   });
+
+  it('reveals and hides gateway credentials in the add form', async () => {
+    const { container, unmount } = render(<GatewaysSection />);
+
+    await flushAsync();
+
+    const addButton = Array.from(container.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('Add Gateway'),
+    );
+
+    act(() => {
+      addButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    await flushAsync();
+
+    const addAuthInput = container.querySelector('#gateway-form-auth') as HTMLInputElement | null;
+    expect(addAuthInput).toBeTruthy();
+    expect(addAuthInput?.type).toBe('password');
+
+    const addShowButton = container.querySelector('button[aria-label="Show secret"]') as HTMLButtonElement | null;
+    expect(addShowButton).toBeTruthy();
+
+    act(() => {
+      addShowButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    await flushAsync();
+
+    expect(addAuthInput?.type).toBe('text');
+    expect(container.querySelector('button[aria-label="Hide secret"]')).toBeTruthy();
+
+    unmount();
+  });
+
+  it('reveals and hides gateway credentials in the edit form', async () => {
+    window.clawwork.getSettings = vi.fn().mockResolvedValue({
+      gateways: [
+        {
+          id: 'gw-1',
+          name: 'Gateway 1',
+          url: 'ws://127.0.0.1:18789',
+          token: 'existing-token',
+          authMode: 'token',
+        },
+      ],
+      defaultGatewayId: 'gw-1',
+    });
+
+    const renderedEdit = render(<GatewaysSection />);
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const editButton = Array.from(renderedEdit.container.querySelectorAll('button')).find(
+      (button) => button.getAttribute('aria-label') === 'Edit: Gateway 1',
+    );
+    expect(editButton).toBeTruthy();
+
+    act(() => {
+      editButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    await flushAsync();
+
+    const editAuthInput = renderedEdit.container.querySelector('#gateway-form-auth') as HTMLInputElement | null;
+    expect(editAuthInput).toBeTruthy();
+    expect(editAuthInput?.value).toBe('existing-token');
+    expect(editAuthInput?.type).toBe('password');
+
+    const editShowButton = renderedEdit.container.querySelector(
+      'button[aria-label="Show secret"]',
+    ) as HTMLButtonElement | null;
+    expect(editShowButton).toBeTruthy();
+
+    act(() => {
+      editShowButton?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    await flushAsync();
+
+    expect(editAuthInput?.type).toBe('text');
+    expect(renderedEdit.container.querySelector('button[aria-label="Hide secret"]')).toBeTruthy();
+
+    renderedEdit.unmount();
+  });
 });
