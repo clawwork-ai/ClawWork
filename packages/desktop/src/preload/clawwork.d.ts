@@ -348,6 +348,7 @@ export interface ClawWorkAPI {
   isWorkspaceConfigured: () => Promise<boolean>;
   getWorkspacePath: () => Promise<string | null>;
   getDefaultWorkspacePath: () => Promise<string>;
+  getTeamWorkspacePath: (slug: string) => Promise<string>;
   browseWorkspace: () => Promise<string | null>;
   setupWorkspace: (path: string) => Promise<IpcResult>;
   changeWorkspace: (path: string) => Promise<IpcResult>;

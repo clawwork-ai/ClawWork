@@ -136,8 +136,7 @@ export function useTeamInstall(onDone?: () => void) {
       };
 
       try {
-        const wsBase = await window.clawwork.getWorkspacePath();
-        const workspace = wsBase ? `${wsBase}/${toSlug(teamInfo.name)}` : toSlug(teamInfo.name);
+        const workspace = await window.clawwork.getTeamWorkspacePath(toSlug(teamInfo.name));
         for await (const event of installTeam(parsed, agentFiles, teamInfo.gatewayId, workspace, deps, hubMeta)) {
           setInstallEvents((prev) => [...prev, event]);
 

@@ -118,4 +118,31 @@ describe('registerWorkspaceHandlers', () => {
     expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
     expect(reinitDatabaseMock).toHaveBeenCalledWith('/tmp/old-workspace');
   });
+
+  it('joins workspace and slug using path.join so the host separator is used', async () => {
+    const { registerWorkspaceHandlers } = await import('../src/main/ipc/workspace-handlers.js');
+    registerWorkspaceHandlers();
+
+    const handler = handleMap.get('workspace:team-path');
+    expect(handler).toBeTypeOf('function');
+
+    getWorkspacePathMock.mockReturnValue('/tmp/claw-workspace');
+    const result = (await handler?.({}, 'test-team')) as string;
+    const expected = (await import('path')).join('/tmp/claw-workspace', 'test-team');
+
+    expect(result).toBe(expected);
+    expect(result.endsWith(`${(await import('path')).sep}test-team`)).toBe(true);
+    expect(result.includes('//test-team')).toBe(false);
+  });
+
+  it('returns slug alone when no workspace is configured', async () => {
+    getWorkspacePathMock.mockReturnValue(null);
+    const { registerWorkspaceHandlers } = await import('../src/main/ipc/workspace-handlers.js');
+    registerWorkspaceHandlers();
+
+    const handler = handleMap.get('workspace:team-path');
+    expect(handler).toBeTypeOf('function');
+
+    expect(handler?.({}, 'lonely-team')).toBe('lonely-team');
+  });
 });

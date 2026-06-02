@@ -1,4 +1,5 @@
 import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
+import { join } from 'path';
 import {
   getWorkspacePath,
   writeConfig,
@@ -65,5 +66,11 @@ export function registerWorkspaceHandlers(): void {
 
   ipcMain.handle('workspace:get-device-id', () => {
     return ensureDeviceId();
+  });
+
+  ipcMain.handle('workspace:team-path', (_event, slug: string) => {
+    const base = getWorkspacePath();
+    if (!base) return slug;
+    return join(base, slug);
   });
 }
