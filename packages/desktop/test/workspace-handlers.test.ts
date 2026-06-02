@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const handleMap = new Map<string, (...args: unknown[]) => unknown>();
 
 const isWorkspaceConfiguredMock = vi.fn(() => false);
-const getWorkspacePathMock = vi.fn(() => '/tmp/old-workspace');
+const getWorkspacePathMock = vi.fn<() => string | null>(() => '/tmp/old-workspace');
 const writeConfigMock = vi.fn();
 const updateConfigMock = vi.fn();
 const getDefaultWorkspacePathMock = vi.fn(() => '/tmp/default-workspace');
@@ -144,5 +144,17 @@ describe('registerWorkspaceHandlers', () => {
     expect(handler).toBeTypeOf('function');
 
     expect(handler?.({}, 'lonely-team')).toBe('lonely-team');
+  });
+
+  it('rejects invalid team workspace slugs', async () => {
+    const { registerWorkspaceHandlers } = await import('../src/main/ipc/workspace-handlers.js');
+    registerWorkspaceHandlers();
+
+    const handler = handleMap.get('workspace:team-path');
+    expect(handler).toBeTypeOf('function');
+
+    for (const slug of ['', '../invalid', 'invalid/path', String.raw`invalid\path`, 'bad..slug', 123]) {
+      expect(() => handler?.({}, slug)).toThrow('Invalid team slug');
+    }
   });
 });
