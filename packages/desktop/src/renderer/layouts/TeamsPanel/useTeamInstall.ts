@@ -76,6 +76,7 @@ export function useTeamInstall(onDone?: () => void) {
       for (const a of agents) {
         if (a.model) agentModelMap.set(toSlug(a.name), a.model);
       }
+      const pendingModelUpdates: Promise<void>[] = [];
 
       const gwId = teamInfo.gatewayId;
       let cachedGatewayAgents: AgentInfo[] | null = null;
@@ -123,6 +124,11 @@ export function useTeamInstall(onDone?: () => void) {
           if (!res.ok) return { ok: false, error: res.error } as IpcResult<SkillInstallResult>;
           return { ok: true, result: res.result as unknown as SkillInstallResult };
         },
+        getConfig: async () => {
+          await Promise.all(pendingModelUpdates);
+          return window.clawwork.getConfig(gwId);
+        },
+        patchConfig: (params) => window.clawwork.patchConfig(gwId, params),
         persistTeam: editContext
           ? (team) =>
               window.clawwork.persistTeam({
@@ -143,9 +149,11 @@ export function useTeamInstall(onDone?: () => void) {
           if (event.type === 'agent_created' && event.agentSlug && event.agentId) {
             const model = agentModelMap.get(event.agentSlug);
             if (model) {
-              window.clawwork
+              const update = window.clawwork
                 .updateAgent(teamInfo.gatewayId, { agentId: event.agentId, model })
+                .then(() => undefined)
                 .catch((err) => console.error('Failed to update agent model', err));
+              pendingModelUpdates.push(update);
             }
           }
 

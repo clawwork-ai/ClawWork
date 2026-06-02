@@ -29,6 +29,16 @@ function makeDeps(overrides?: Partial<InstallerDeps>): InstallerDeps {
     installSkill: vi
       .fn()
       .mockResolvedValue({ ok: true, result: { ok: true, message: 'ok', stdout: '', stderr: '', code: 0 } }),
+    getConfig: vi.fn().mockResolvedValue({
+      ok: true,
+      result: {
+        raw: '{}',
+        hash: 'config-hash',
+        config: { agents: { list: [{ id: 'agent-1' }, { id: 'agent-2' }] } },
+        path: '/openclaw.json',
+      },
+    }),
+    patchConfig: vi.fn().mockResolvedValue({ ok: true, result: { ok: true, path: '/openclaw.json', config: {} } }),
     persistTeam: vi.fn().mockResolvedValue({ ok: true }),
     ...overrides,
   };
@@ -245,6 +255,57 @@ describe('installTeam', () => {
       { agentId: 'agent-1', role: 'coordinator', isManager: true, skills: ['plan'] },
       { agentId: 'agent-2', role: 'worker', isManager: false, skills: ['code', 'review'] },
     ]);
+  });
+
+  it('configures coordinator subagent allowlists for worker agents', async () => {
+    const parsed = makeParsed();
+    const deps = makeDeps({
+      getConfig: vi.fn().mockResolvedValue({
+        ok: true,
+        result: {
+          raw: '{}',
+          hash: 'config-hash',
+          config: {
+            agents: {
+              list: [
+                { id: 'agent-1', subagents: { allowAgents: ['existing-worker'] } },
+                { id: 'existing-worker' },
+                { id: 'agent-2' },
+              ],
+            },
+          },
+          path: '/openclaw.json',
+        },
+      }),
+    });
+
+    await collect(installTeam(parsed, {}, 'gw-1', '/w', deps));
+
+    expect(deps.getConfig).toHaveBeenCalledTimes(1);
+    expect(deps.patchConfig).toHaveBeenCalledTimes(1);
+    expect(deps.patchConfig).toHaveBeenCalledWith({
+      baseHash: 'config-hash',
+      raw: JSON.stringify({
+        agents: {
+          list: [{ id: 'agent-1', subagents: { allowAgents: ['existing-worker', 'agent-2'] } }],
+        },
+      }),
+    });
+  });
+
+  it('rolls back and errors when subagent configuration fails', async () => {
+    const parsed = makeParsed();
+    const deps = makeDeps({
+      patchConfig: vi.fn().mockResolvedValue({ ok: false, error: 'config changed' }),
+    });
+
+    const events = await collect(installTeam(parsed, {}, 'gw-1', '/w', deps));
+
+    expect(deps.deleteAgent).toHaveBeenCalledWith({ agentId: 'agent-1' });
+    expect(deps.deleteAgent).toHaveBeenCalledWith({ agentId: 'agent-2' });
+    expect(deps.persistTeam).not.toHaveBeenCalled();
+    const errorEvent = events.find((e) => e.type === 'error')!;
+    expect(errorEvent.message).toContain('Failed to configure subagents');
   });
 
   it('progress total includes file and skill operations', async () => {

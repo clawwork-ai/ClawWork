@@ -6,6 +6,9 @@ import type {
   AgentCreateParams,
   AgentCreateResponse,
   AgentDeleteParams,
+  ConfigPatchParams,
+  ConfigPatchResult,
+  ConfigSnapshot,
   IpcResult,
   SkillInstallParams,
   SkillInstallResult,
@@ -17,6 +20,8 @@ export interface InstallerDeps {
   deleteAgent: (params: AgentDeleteParams) => Promise<IpcResult>;
   setAgentFile: (agentId: string, name: string, content: string) => Promise<IpcResult>;
   installSkill: (params: SkillInstallParams) => Promise<IpcResult<SkillInstallResult>>;
+  getConfig: () => Promise<IpcResult<ConfigSnapshot>>;
+  patchConfig: (params: ConfigPatchParams) => Promise<IpcResult<ConfigPatchResult>>;
   persistTeam: (team: {
     id: string;
     name: string;
@@ -45,6 +50,45 @@ function buildSkillInstallParams(skill: SkillRef): SkillInstallParams | null {
     return { source: 'clawhub', slug: skill.id };
   }
   return null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readAllowAgents(config: Record<string, unknown>, agentId: string): string[] {
+  const agents = config.agents;
+  const list = isRecord(agents) && Array.isArray(agents.list) ? agents.list : [];
+  const entry = list.find((item) => isRecord(item) && item.id === agentId);
+  if (!isRecord(entry) || !isRecord(entry.subagents) || !Array.isArray(entry.subagents.allowAgents)) return [];
+  return entry.subagents.allowAgents.filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
+}
+
+async function configureTeamSubagents(
+  teamAgents: Array<{ agentId: string; role?: string; isManager?: boolean; skills?: string[] }>,
+  deps: InstallerDeps,
+): Promise<IpcResult> {
+  const managerIds = teamAgents.filter((agent) => agent.role === 'coordinator').map((agent) => agent.agentId);
+  const workerIds = teamAgents.filter((agent) => agent.role === 'worker').map((agent) => agent.agentId);
+  if (managerIds.length === 0 || workerIds.length === 0) return { ok: true };
+
+  const configRes = await deps.getConfig();
+  if (!configRes.ok || !configRes.result) return { ok: false, error: configRes.error ?? 'failed to read config' };
+  const snapshot = configRes.result;
+
+  const list = managerIds.map((agentId) => ({
+    id: agentId,
+    subagents: {
+      allowAgents: [...new Set([...readAllowAgents(snapshot.config, agentId), ...workerIds])],
+    },
+  }));
+
+  const patchRes = await deps.patchConfig({
+    baseHash: snapshot.hash,
+    raw: JSON.stringify({ agents: { list } }),
+  });
+  if (!patchRes.ok) return { ok: false, error: patchRes.error ?? 'failed to configure subagents' };
+  return { ok: true };
 }
 
 export async function* installTeam(
@@ -181,6 +225,13 @@ export async function* installTeam(
   if (teamAgents.length === 0) {
     yield* rollback(createdAgentIds, deps);
     yield { type: 'error', message: 'No agents were created successfully' };
+    return;
+  }
+
+  const subagentsRes = await configureTeamSubagents(teamAgents, deps);
+  if (!subagentsRes.ok) {
+    yield* rollback(createdAgentIds, deps);
+    yield { type: 'error', message: `Failed to configure subagents: ${subagentsRes.error}` };
     return;
   }
 
