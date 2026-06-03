@@ -1,6 +1,7 @@
 import { mkdirSync, existsSync } from 'fs';
 import { cp } from 'fs/promises';
 import { join, resolve, sep } from 'path';
+import { sep as winSep } from 'node:path/win32';
 
 export async function initWorkspace(workspacePath: string): Promise<void> {
   if (!existsSync(workspacePath)) {
@@ -8,11 +9,20 @@ export async function initWorkspace(workspacePath: string): Promise<void> {
   }
 }
 
+/** True when the destination is the same as or nested inside the source workspace path. */
+export function isNestedOrEqualWorkspacePath(resolvedOld: string, resolvedNew: string): boolean {
+  const caseInsensitive = process.platform === 'win32' || process.platform === 'darwin';
+  const normOld = caseInsensitive ? resolvedOld.toLowerCase() : resolvedOld;
+  const normNew = caseInsensitive ? resolvedNew.toLowerCase() : resolvedNew;
+  const pathSep = process.platform === 'win32' ? winSep : sep;
+  return normNew === normOld || normNew.startsWith(normOld + pathSep);
+}
+
 export async function migrateWorkspace(oldPath: string, newPath: string): Promise<void> {
   if (!existsSync(oldPath)) throw new Error(`Source workspace does not exist: ${oldPath}`);
   const resolvedOld = resolve(oldPath);
   const resolvedNew = resolve(newPath);
-  if (resolvedNew.startsWith(resolvedOld + sep) || resolvedNew === resolvedOld) {
+  if (isNestedOrEqualWorkspacePath(resolvedOld, resolvedNew)) {
     throw new Error('New workspace path must not be inside or equal to the current workspace');
   }
   await cp(resolvedOld, resolvedNew, {
