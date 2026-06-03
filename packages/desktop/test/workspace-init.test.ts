@@ -9,7 +9,7 @@ vi.mock('fs/promises', () => ({
 }));
 
 import { cp } from 'fs/promises';
-import { migrateWorkspace } from '../src/main/workspace/init.js';
+import { migrateWorkspace, isNestedOrEqualWorkspacePath } from '../src/main/workspace/init.js';
 
 const cpMock = vi.mocked(cp);
 
@@ -60,5 +60,31 @@ describe('migrateWorkspace', () => {
 
     expect(resolvedNew.startsWith(resolvedOld + '/')).toBe(false);
     expect(resolvedNew.startsWith(resolvedOld + winSep)).toBe(true);
+  });
+});
+
+describe('isNestedOrEqualWorkspacePath', () => {
+  it('is case-sensitive on linux', () => {
+    const resolvedOld = winResolve('C:\\Workspace');
+    const resolvedNew = winResolve('C:\\workspace\\sub');
+    expect(isNestedOrEqualWorkspacePath(resolvedOld, resolvedNew)).toBe(false);
+  });
+
+  it('is case-insensitive on win32', () => {
+    const resolvedOld = winResolve('C:\\Workspace');
+    const resolvedNew = winResolve('C:\\workspace\\sub');
+
+    const win32Spy = vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+    expect(isNestedOrEqualWorkspacePath(resolvedOld, resolvedNew)).toBe(true);
+    win32Spy.mockRestore();
+  });
+
+  it('is case-insensitive on darwin', () => {
+    const resolvedOld = resolve('/Users/Test/Workspace');
+    const resolvedNew = resolve('/users/test/workspace/sub');
+
+    const darwinSpy = vi.spyOn(process, 'platform', 'get').mockReturnValue('darwin');
+    expect(isNestedOrEqualWorkspacePath(resolvedOld, resolvedNew)).toBe(true);
+    darwinSpy.mockRestore();
   });
 });
