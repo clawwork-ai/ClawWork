@@ -59,6 +59,8 @@ export function registerWorkspaceHandlers(): void {
       await migrateWorkspace(oldPath, newWorkspacePath);
       reinitDatabase(newWorkspacePath);
       updateConfig({ workspacePath: newWorkspacePath });
+      const win = BrowserWindow.getAllWindows()[0];
+      if (win) win.webContents.send('workspace:changed', newWorkspacePath);
       return { ok: true };
     } catch (err) {
       reinitDatabase(oldPath);

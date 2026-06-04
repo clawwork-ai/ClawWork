@@ -348,6 +348,16 @@ function buildApi(): ClawWorkAPI {
 
     setWindowButtonVisibility: (visible: boolean) => ipcRenderer.send('ui:set-window-button-visibility', visible),
 
+    onWorkspaceChanged: (callback) => {
+      const listener = (_event: Electron.IpcRendererEvent, newPath: string): void => {
+        callback(newPath);
+      };
+      ipcRenderer.on('workspace:changed', listener);
+      return () => {
+        ipcRenderer.removeListener('workspace:changed', listener);
+      };
+    },
+
     getDeviceId: () => ipcRenderer.invoke('workspace:get-device-id') as Promise<string>,
 
     selectContextFolder: () => ipcRenderer.invoke('context:select-folder'),

@@ -1,4 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTaskStore, useMessageStore } from '@/platform';
+import { useDashboardStore } from '@/stores/dashboardStore';
+import { useUsageStore } from '@/stores/usageStore';
+import { useApprovalStore } from '@/stores/approvalStore';
 import { MonitorDot, Zap, FolderOpen, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
@@ -63,6 +67,21 @@ export default function SystemSection() {
     },
     [quickLaunchShortcut, t],
   );
+
+  useEffect(() => {
+    return window.clawwork.onWorkspaceChanged(async () => {
+      useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+      await useTaskStore.getState().hydrate();
+
+      useMessageStore.setState({ messagesByTask: {}, activeTurnBySession: {}, processingBySession: new Set() });
+
+      useDashboardStore.getState().clear();
+      useUsageStore.getState().clear();
+      useApprovalStore.getState().clear();
+
+      await refreshSettings().catch(() => {});
+    });
+  }, [refreshSettings]);
 
   const handleChangeWorkspace = useCallback(async () => {
     let selected: string | null = null;
