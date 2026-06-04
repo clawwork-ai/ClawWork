@@ -1,4 +1,14 @@
-import { createWriteStream, existsSync, mkdirSync, openSync, type WriteStream } from 'node:fs';
+import {
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  type WriteStream,
+} from 'node:fs';
 import { join } from 'node:path';
 import type { DebugDomain, DebugEvent, DebugLevel } from '@clawwork/shared';
 import { sanitizeForLog } from '@clawwork/shared';
@@ -8,6 +18,8 @@ interface CreateDebugLoggerOptions {
   maxEvents?: number;
   console?: boolean;
   onEvent?: (event: DebugEvent) => void;
+  maxFileSize?: number;
+  retentionDays?: number;
 }
 
 export interface DebugLogFilter {
@@ -55,38 +67,74 @@ export interface LogEventInput {
 export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogger {
   const maxEvents = options.maxEvents ?? 1000;
   const writeConsole = options.console ?? true;
+  const maxFileSize = options.maxFileSize ?? 50 * 1024 * 1024;
+  const retentionDays = options.retentionDays ?? 14;
   const recentEvents: DebugEvent[] = [];
   const debugDir = options.debugDir;
 
   // Write stream state — cached fd avoids open/write/close per event
   let writeStream: WriteStream | null = null;
   let currentLogDate = '';
+  let currentFileSize = 0;
 
   ensureDir(debugDir);
+
+  // Age-based cleanup: purge files older than retentionDays
+  if (retentionDays > 0) {
+    cleanupOldLogs(debugDir, retentionDays);
+  }
 
   function currentFilePath(): string {
     const day = new Date().toISOString().slice(0, 10);
     return join(debugDir, `debug-${day}.ndjson`);
   }
 
-  function ensureStream(): void {
+  /** Open a write stream for the current day's file. Restores file size via statSync
+   *  so mid-day process restarts don't lose track of the written size. */
+  function openStream(): void {
     const today = new Date().toISOString().slice(0, 10);
-    if (writeStream && currentLogDate === today) return;
-
-    // Close previous day's stream
-    if (writeStream) {
-      writeStream.end();
-      writeStream = null;
-    }
-
     ensureDir(debugDir);
     currentLogDate = today;
     const filePath = currentFilePath();
-    // Open fd synchronously so the file exists immediately and is append-only
+    // Restore file size on init (handles process restart mid-day)
+    try {
+      currentFileSize = statSync(filePath).size;
+    } catch {
+      currentFileSize = 0;
+    }
     const fd = openSync(filePath, 'a');
     writeStream = createWriteStream(filePath, { fd, autoClose: true }).on('error', (err) => {
       console.error('[debug] logger stream error:', err);
     });
+  }
+
+  function ensureStream(): void {
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Same day, stream open — check tracked size for rotation
+    if (writeStream && currentLogDate === today) {
+      if (currentFileSize >= maxFileSize) {
+        // Rotate: close stream, find next slot, rename current file
+        writeStream.end();
+        writeStream = null;
+
+        let rotIdx = 1;
+        while (existsSync(join(debugDir, `debug-${today}.${rotIdx}.ndjson`))) {
+          rotIdx++;
+        }
+        renameSync(currentFilePath(), join(debugDir, `debug-${today}.${rotIdx}.ndjson`));
+        openStream();
+      } else {
+        return; // stream is fine, no rotation needed
+      }
+    } else {
+      // Date changed, first call, or stream was rotated
+      if (writeStream) {
+        writeStream.end();
+        writeStream = null;
+      }
+      openStream();
+    }
   }
 
   function log(input: LogEventInput & { level: DebugLevel }): DebugEvent {
@@ -102,7 +150,9 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
 
     // Async write via persistent stream — no more blocking the event loop
     ensureStream();
-    writeStream!.write(`${JSON.stringify(event)}\n`, 'utf8');
+    const jsonLine = `${JSON.stringify(event)}\n`;
+    currentFileSize += Buffer.byteLength(jsonLine, 'utf8');
+    writeStream!.write(jsonLine, 'utf8');
 
     if (writeConsole) {
       const line = `[${event.level}] [${event.domain}] ${event.event}`;
@@ -157,5 +207,19 @@ function filterEvents(events: DebugEvent[], filter?: DebugLogFilter): DebugEvent
 function ensureDir(dir: string): void {
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
+  }
+}
+
+function cleanupOldLogs(dir: string, retentionDays: number): void {
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    const match = entry.name.match(/^debug-(\d{4}-\d{2}-\d{2})(?:\.\d+)?\.ndjson$/);
+    if (!match) continue;
+    const fileDate = new Date(match[1]).getTime();
+    if (fileDate < cutoff) {
+      unlinkSync(join(dir, entry.name));
+    }
   }
 }
