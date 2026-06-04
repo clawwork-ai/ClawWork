@@ -44,7 +44,7 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
   try {
     // When the IP is pinned, pass the original hostname as the Host header
     // so the server (and TLS SNI in Chromium) knows which virtual host to serve.
-    const fetchOpts: Record<string, unknown> = { signal: controller.signal };
+    const fetchOpts: Record<string, unknown> = { signal: controller.signal, redirect: 'error' };
     if (fetchUrl !== url) {
       fetchOpts.headers = { Host: parsed.hostname };
     }
@@ -52,9 +52,23 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
     if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
     const cl = Number(res.headers.get('content-length') ?? '0');
     if (cl > maxSize) throw new Error('response too large');
-    const ab = await res.arrayBuffer();
-    if (ab.byteLength > maxSize) throw new Error('response too large');
-    return Buffer.from(ab);
+
+    const reader = res.body?.getReader();
+    if (!reader) throw new Error('no body');
+
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxSize) {
+        controller.abort();
+        throw new Error('response too large');
+      }
+      chunks.push(value);
+    }
+    return Buffer.concat(chunks.map((c) => Buffer.from(c)));
   } finally {
     clearTimeout(timeout);
   }

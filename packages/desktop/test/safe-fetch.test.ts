@@ -37,12 +37,31 @@ beforeEach(() => {
   lastFetchOpts = undefined;
 });
 
+function streamReaderFrom(body: ArrayBuffer, chunkSize = 1024): ReadableStreamDefaultReader<Uint8Array> {
+  const u8 = new Uint8Array(body);
+  let offset = 0;
+  return {
+    read: async () => {
+      if (offset >= u8.length) return { done: true as const, value: undefined };
+      const end = Math.min(offset + chunkSize, u8.length);
+      const value = u8.slice(offset, end);
+      offset = end;
+      return { done: false as const, value };
+    },
+    cancel: async () => {},
+    releaseLock: () => {},
+    closed: Promise.resolve(undefined),
+  } as ReadableStreamDefaultReader<Uint8Array>;
+}
+
 function mockResponse(body: ArrayBuffer, status = 200, headers: Record<string, string> = {}): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
     headers: new Headers(headers),
-    arrayBuffer: () => Promise.resolve(body),
+    body: {
+      getReader: () => streamReaderFrom(body),
+    },
   } as unknown as Response;
 }
 
@@ -144,5 +163,39 @@ describe('safeFetch', () => {
     netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0), 404));
 
     await expect(safeFetch('https://cdn.example.com/missing.png')).rejects.toThrow('404');
+  });
+
+  it('passes redirect:error to net.fetch to prevent SSRF bypass via 3xx', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    mockFetchWithTracking();
+
+    await safeFetch('https://cdn.example.com/img.png');
+    expect(lastFetchOpts).toEqual(expect.objectContaining({ redirect: 'error' }));
+  });
+
+  it('enforces maxSize incrementally during streaming — no content-length', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const big = new ArrayBuffer(10 * 1024 * 1024 + 1);
+    netFetchMock.mockResolvedValue(mockResponse(big, 200, {}));
+
+    await expect(safeFetch('https://cdn.example.com/streaming.bin')).rejects.toThrow('too large');
+  });
+
+  it('handles empty response body', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0)));
+
+    const buf = await safeFetch('https://cdn.example.com/empty.bin');
+    expect(Buffer.isBuffer(buf)).toBe(true);
+    expect(buf.length).toBe(0);
+  });
+
+  it('reads multi-chunk body correctly', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const data = new TextEncoder().encode('hello world').buffer;
+    netFetchMock.mockResolvedValue(mockResponse(data, 200, {}));
+
+    const buf = await safeFetch('https://cdn.example.com/hello.bin');
+    expect(buf.toString()).toBe('hello world');
   });
 });
