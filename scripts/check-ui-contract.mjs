@@ -5,6 +5,10 @@ import { ALLOWLIST_CATEGORIES, uiContractAllowlist } from './ui-contract-allowli
 const root = process.cwd();
 const violations = [];
 
+const CSS_VARIABLE_DEFINITION_REGEX = /--[A-Za-z0-9-]+(?=\s*:)/g;
+const CSS_VARIABLE_REFERENCE_REGEX = /var\(\s*(--[A-Za-z0-9-]+)/g;
+const DYNAMIC_CSS_VARIABLE_REFERENCES = new Set(['--tool-']);
+
 const EXCLUDED_FILES = new Set([
   'packages/desktop/src/renderer/styles/theme.css',
   'packages/desktop/src/renderer/styles/design-tokens.ts',
@@ -139,6 +143,41 @@ function addViolation(filePath, content, index, category, message, match) {
 const rendererFiles = [...walk('packages/desktop/src/renderer'), ...walk('packages/pwa/src')].filter((filePath) =>
   /\.(ts|tsx|css|html)$/.test(filePath),
 );
+const desktopFiles = rendererFiles.filter((f) => f.startsWith('packages/desktop/'));
+const pwaFiles = rendererFiles.filter((f) => f.startsWith('packages/pwa/'));
+
+function checkCssVariableReferences(files) {
+  const definedVariables = new Set();
+  const references = [];
+
+  for (const filePath of files) {
+    const content = readFileSync(path.join(root, filePath), 'utf8');
+    const isStandalone = filePath.endsWith('quick-launch.html');
+
+    for (const match of content.matchAll(CSS_VARIABLE_DEFINITION_REGEX)) {
+      if (!isStandalone) definedVariables.add(match[0]);
+    }
+
+    for (const match of content.matchAll(CSS_VARIABLE_REFERENCE_REGEX)) {
+      const name = match[1];
+      if (DYNAMIC_CSS_VARIABLE_REFERENCES.has(name)) continue;
+      if (isStandalone && name.startsWith('--ql-')) continue;
+      references.push({ filePath, content, index: match.index, name });
+    }
+  }
+
+  for (const reference of references) {
+    if (definedVariables.has(reference.name)) continue;
+    addViolation(
+      reference.filePath,
+      reference.content,
+      reference.index,
+      'undefined-css-variable',
+      'Define CSS variables before referencing them.',
+      `var(${reference.name})`,
+    );
+  }
+}
 
 const COMPONENT_USAGE_RULES = [
   {
@@ -238,6 +277,9 @@ const COMPONENT_USAGE_RULES = [
     message: 'CommandPalette must use .glass-command utility class.',
   },
 ];
+
+checkCssVariableReferences(desktopFiles);
+checkCssVariableReferences(pwaFiles);
 
 for (const filePath of rendererFiles) {
   const absolutePath = path.join(root, filePath);
