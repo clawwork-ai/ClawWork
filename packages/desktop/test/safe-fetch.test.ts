@@ -37,7 +37,11 @@ beforeEach(() => {
   lastFetchOpts = undefined;
 });
 
-function streamReaderFrom(body: ArrayBuffer, chunkSize = 1024): ReadableStreamDefaultReader<Uint8Array> {
+function streamReaderFrom(
+  body: ArrayBuffer,
+  chunkSize = 1024,
+  cancel = vi.fn(async () => {}),
+): ReadableStreamDefaultReader<Uint8Array> {
   const u8 = new Uint8Array(body);
   let offset = 0;
   return {
@@ -48,19 +52,24 @@ function streamReaderFrom(body: ArrayBuffer, chunkSize = 1024): ReadableStreamDe
       offset = end;
       return { done: false as const, value };
     },
-    cancel: async () => {},
+    cancel,
     releaseLock: () => {},
     closed: Promise.resolve(undefined),
   } as ReadableStreamDefaultReader<Uint8Array>;
 }
 
-function mockResponse(body: ArrayBuffer, status = 200, headers: Record<string, string> = {}): Response {
+function mockResponse(
+  body: ArrayBuffer,
+  status = 200,
+  headers: Record<string, string> = {},
+  cancel = vi.fn(async () => {}),
+): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
     headers: new Headers(headers),
     body: {
-      getReader: () => streamReaderFrom(body),
+      getReader: () => streamReaderFrom(body, 1024, cancel),
     },
   } as unknown as Response;
 }
@@ -197,5 +206,46 @@ describe('safeFetch', () => {
 
     const buf = await safeFetch('https://cdn.example.com/hello.bin');
     expect(buf.toString()).toBe('hello world');
+  });
+
+  it('cancels the body reader when streaming past maxSize', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const cancel = vi.fn(async () => {});
+    const big = new ArrayBuffer(2048);
+    netFetchMock.mockResolvedValue(mockResponse(big, 200, {}, cancel));
+
+    await expect(safeFetch('https://cdn.example.com/big.bin', { maxSize: 1024 })).rejects.toThrow('too large');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it('rejects when a single chunk exceeds maxSize', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const cancel = vi.fn(async () => {});
+    const big = new ArrayBuffer(2048);
+    netFetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      body: {
+        getReader: () => streamReaderFrom(big, 2048, cancel),
+      },
+    } as unknown as Response);
+
+    await expect(safeFetch('https://cdn.example.com/one-chunk.bin', { maxSize: 1024 })).rejects.toThrow('too large');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it('aborts the fetch signal when streaming past maxSize', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const cancel = vi.fn(async () => {});
+    let abortSignal: AbortSignal | undefined;
+    netFetchMock.mockImplementation((_url: string, opts?: Record<string, unknown>) => {
+      abortSignal = opts?.signal as AbortSignal;
+      return Promise.resolve(mockResponse(new ArrayBuffer(2048), 200, {}, cancel));
+    });
+
+    await expect(safeFetch('https://cdn.example.com/big.bin', { maxSize: 1024 })).rejects.toThrow('too large');
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(abortSignal?.aborted).toBe(true);
   });
 });

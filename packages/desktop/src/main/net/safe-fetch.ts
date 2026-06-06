@@ -63,6 +63,7 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
       if (done) break;
       total += value.byteLength;
       if (total > maxSize) {
+        await reader.cancel().catch(() => undefined);
         controller.abort();
         throw new Error('response too large');
       }
