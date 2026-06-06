@@ -173,6 +173,33 @@ describe('safeFetch', () => {
     expect(lastFetchOpts).toEqual(expect.objectContaining({ redirect: 'error' }));
   });
 
+  it('rejects redirect response pointing to private host without following Location', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0), 302, { Location: 'http://127.0.0.1/admin' }));
+
+    await expect(safeFetch('https://cdn.example.com/img.png')).rejects.toThrow('302');
+    expect(assertNotPrivateHostMock).toHaveBeenCalledTimes(1);
+    expect(assertNotPrivateHostMock).toHaveBeenCalledWith('cdn.example.com');
+  });
+
+  it('rejects redirect response to another HTTPS URL without following Location', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    netFetchMock.mockResolvedValue(
+      mockResponse(new ArrayBuffer(0), 302, { Location: 'https://other.example.com/img.png' }),
+    );
+
+    await expect(safeFetch('https://cdn.example.com/img.png')).rejects.toThrow('302');
+    expect(assertNotPrivateHostMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates fetch error when redirect:error blocks a 3xx before response', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    netFetchMock.mockRejectedValue(new TypeError('redirected'));
+
+    await expect(safeFetch('https://cdn.example.com/img.png')).rejects.toThrow('redirected');
+    expect(assertNotPrivateHostMock).toHaveBeenCalledWith('cdn.example.com');
+  });
+
   it('enforces maxSize incrementally during streaming — no content-length', async () => {
     assertNotPrivateHostMock.mockResolvedValue(null);
     const big = new ArrayBuffer(10 * 1024 * 1024 + 1);
