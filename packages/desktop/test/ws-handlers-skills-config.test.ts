@@ -11,6 +11,7 @@ const patchConfigMock = vi.fn();
 const getConfigSchemaMock = vi.fn();
 const lookupConfigSchemaMock = vi.fn();
 const getChatHistoryMock = vi.fn();
+const listSessionsBySpawnerMock = vi.fn();
 
 const fakeGatewayClient = {
   isConnected: true,
@@ -24,6 +25,7 @@ const fakeGatewayClient = {
   getConfigSchema: getConfigSchemaMock,
   lookupConfigSchema: lookupConfigSchemaMock,
   getChatHistory: getChatHistoryMock,
+  listSessionsBySpawner: listSessionsBySpawnerMock,
 };
 
 vi.mock('electron', () => ({
@@ -354,6 +356,37 @@ describe('ws-handlers: skills + config IPC channels', () => {
 
       expect(lookupConfigSchemaMock).toHaveBeenCalledWith('model');
       expect(result).toEqual({ ok: true, result: lookupResult });
+    });
+  });
+
+  describe('ws:list-sessions-by-spawner', () => {
+    it('rejects missing spawnedBy before contacting the gateway', async () => {
+      const result = await invoke('ws:list-sessions-by-spawner', { gatewayId: 'gw-1', spawnedBy: '' });
+
+      expect(result).toEqual({ ok: false, error: 'invalid spawnedBy parameter' });
+      expect(listSessionsBySpawnerMock).not.toHaveBeenCalled();
+    });
+
+    it('rejects non-string spawnedBy before contacting the gateway', async () => {
+      const result = await invoke('ws:list-sessions-by-spawner', {
+        gatewayId: 'gw-1',
+        spawnedBy: 123 as unknown as string,
+      });
+
+      expect(result).toEqual({ ok: false, error: 'invalid spawnedBy parameter' });
+      expect(listSessionsBySpawnerMock).not.toHaveBeenCalled();
+    });
+
+    it('forwards valid spawnedBy to listSessionsBySpawner', async () => {
+      listSessionsBySpawnerMock.mockResolvedValue({ sessions: [] });
+
+      const result = await invoke('ws:list-sessions-by-spawner', {
+        gatewayId: 'gw-1',
+        spawnedBy: 'agent:main:clawwork:task:task-1',
+      });
+
+      expect(listSessionsBySpawnerMock).toHaveBeenCalledWith('agent:main:clawwork:task:task-1');
+      expect(result).toEqual({ ok: true, result: { sessions: [] } });
     });
   });
 });

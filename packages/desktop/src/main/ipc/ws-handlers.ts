@@ -237,10 +237,14 @@ export function registerWsHandlers(): void {
   );
 
   ipcMain.handle('ws:list-sessions-by-spawner', async (_event, payload: { gatewayId: string; spawnedBy: string }) => {
+    const { spawnedBy } = payload;
+    if (!spawnedBy || typeof spawnedBy !== 'string' || spawnedBy.length === 0) {
+      return { ok: false, error: 'invalid spawnedBy parameter' };
+    }
     const gw = getGatewayClient(payload.gatewayId);
     if (!gw?.isConnected) return { ok: false, error: 'gateway not connected' };
     try {
-      const result = await gw.listSessionsBySpawner(payload.spawnedBy);
+      const result = await gw.listSessionsBySpawner(spawnedBy);
       return { ok: true, result };
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
