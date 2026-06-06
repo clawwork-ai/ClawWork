@@ -112,7 +112,10 @@ export async function assertNotPrivateHost(hostname: string): Promise<string | n
   // actual fetch, closing the DNS rebinding TOCTOU window.  (#405)
   for (const r of results) {
     if (r.status !== 'fulfilled') continue;
-    return r.value[0]?.address ?? null;
+    const address = r.value[0]?.address;
+    if (address) return address;
   }
-  return null;
+  // Hostname lookups must pin an address; letting net.fetch re-resolve would
+  // reopen the DNS rebinding TOCTOU if the first lookup failed or was empty.
+  throw new Error('SSRF blocked: DNS resolution failed');
 }

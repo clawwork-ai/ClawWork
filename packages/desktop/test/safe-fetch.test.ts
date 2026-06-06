@@ -113,6 +113,12 @@ describe('safeFetch', () => {
     expect(netFetchMock).not.toHaveBeenCalled();
   });
 
+  it('rejects hostnames when DNS pinning fails', async () => {
+    assertNotPrivateHostMock.mockRejectedValue(new Error('SSRF blocked: DNS resolution failed'));
+    await expect(safeFetch('https://cdn.example.com/img.png')).rejects.toThrow('SSRF blocked');
+    expect(netFetchMock).not.toHaveBeenCalled();
+  });
+
   it('returns buffer on success', async () => {
     assertNotPrivateHostMock.mockResolvedValue(null);
     const data = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
@@ -132,6 +138,15 @@ describe('safeFetch', () => {
     expect(lastFetchUrl).toBe('https://93.184.216.34/img.png');
     // The original hostname must be preserved as the Host header
     expect(lastFetchOpts).toBeDefined();
+    expect((lastFetchOpts as Record<string, unknown>).headers).toEqual({ Host: 'cdn.example.com' });
+  });
+
+  it('rewrites URL with pinned IPv6 and preserves Host header', async () => {
+    assertNotPrivateHostMock.mockResolvedValue('2001:4860:4860::8888');
+    mockFetchWithTracking();
+
+    await safeFetch('https://cdn.example.com/img.png');
+    expect(lastFetchUrl).toBe('https://[2001:4860:4860::8888]/img.png');
     expect((lastFetchOpts as Record<string, unknown>).headers).toEqual({ Host: 'cdn.example.com' });
   });
 

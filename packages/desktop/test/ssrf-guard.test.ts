@@ -250,8 +250,13 @@ describe('assertNotPrivateHost', () => {
     await expect(assertNotPrivateHost('example.com')).resolves.toBe('93.184.216.34');
   });
 
-  it('returns null when DNS fails entirely', async () => {
+  it('rejects when DNS fails entirely', async () => {
     mockLookup.mockRejectedValue(new Error('ENOTFOUND'));
-    await expect(assertNotPrivateHost('broken-dns.example.com')).resolves.toBeNull();
+    await expect(assertNotPrivateHost('broken-dns.example.com')).rejects.toThrow('SSRF blocked');
+  });
+
+  it('rejects when DNS returns no addresses', async () => {
+    mockLookup.mockResolvedValue([]);
+    await expect(assertNotPrivateHost('empty-dns.example.com')).rejects.toThrow('SSRF blocked');
   });
 });

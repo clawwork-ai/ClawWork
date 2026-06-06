@@ -1,3 +1,4 @@
+import { isIP } from 'node:net';
 import { net } from 'electron';
 import { assertNotPrivateHost } from './ssrf-guard.js';
 
@@ -8,6 +9,10 @@ interface SafeFetchOptions {
   maxSize?: number;
   timeoutMs?: number;
   trustedOrigin?: string;
+}
+
+function formatPinnedHostname(ip: string): string {
+  return isIP(ip) === 6 ? `[${ip}]` : ip;
 }
 
 function isSameOrigin(parsed: URL, trustedOrigin?: string): boolean {
@@ -33,7 +38,7 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
       // Rewrite the URL with the pinned IP so net.fetch does NOT re-resolve DNS.
       // The original hostname is preserved via the Host header for SNI support.
       const rewritten = new URL(url);
-      rewritten.hostname = pinnedIP;
+      rewritten.hostname = formatPinnedHostname(pinnedIP);
       fetchUrl = rewritten.toString();
     }
   }
