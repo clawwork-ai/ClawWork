@@ -13,9 +13,7 @@ describe('debug logger pre-init behavior', () => {
   });
 
   it('buffers events before initDebugLogger runs', async () => {
-    const { getDebugLogger, isDebugLoggerInitialized } = await import(
-      '../../src/main/debug/index.js'
-    );
+    const { getDebugLogger, isDebugLoggerInitialized } = await import('../../src/main/debug/index.js');
 
     const logger = getDebugLogger();
     const event1 = logger.info({ domain: 'app', event: 'test-event-1' });
@@ -32,9 +30,7 @@ describe('debug logger pre-init behavior', () => {
   });
 
   it('flushes buffered events to real logger after init', async () => {
-    const { getDebugLogger, initDebugLogger, isDebugLoggerInitialized } = await import(
-      '../../src/main/debug/index.js'
-    );
+    const { getDebugLogger, initDebugLogger, isDebugLoggerInitialized } = await import('../../src/main/debug/index.js');
 
     const logger = getDebugLogger();
 
@@ -53,9 +49,7 @@ describe('debug logger pre-init behavior', () => {
   });
 
   it('drops oldest events when buffer is full (keeps most recent 256)', async () => {
-    const { getDebugLogger, initDebugLogger } = await import(
-      '../../src/main/debug/index.js'
-    );
+    const { getDebugLogger, initDebugLogger } = await import('../../src/main/debug/index.js');
 
     const logger = getDebugLogger();
 
@@ -77,9 +71,7 @@ describe('debug logger pre-init behavior', () => {
   });
 
   it('warns via console when logging before init', async () => {
-    const { getDebugLogger, isDebugLoggerInitialized } = await import(
-      '../../src/main/debug/index.js'
-    );
+    const { getDebugLogger, isDebugLoggerInitialized } = await import('../../src/main/debug/index.js');
 
     if (isDebugLoggerInitialized()) {
       return;

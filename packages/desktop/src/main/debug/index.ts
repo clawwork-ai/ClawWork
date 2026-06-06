@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { sanitizeForLog } from '@clawwork/shared';
-import type { DebugEvent, LogEventInput } from '@clawwork/shared';
-import type { DebugLogger } from './logger.js';
+import type { DebugEvent } from '@clawwork/shared';
+import type { DebugLogger, LogEventInput } from './logger.js';
 import { createDebugLogger } from './logger.js';
 
 const MAX_PRE_INIT_BUFFER = 256;
