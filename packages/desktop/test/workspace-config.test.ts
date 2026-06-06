@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'fs';
 import { homedir, tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -29,7 +29,7 @@ vi.mock('electron', () => ({
   },
 }));
 
-import { ensureDeviceId, readConfig } from '../src/main/workspace/config.js';
+import { ensureDeviceId, readConfig, writeConfig } from '../src/main/workspace/config.js';
 
 describe('workspace config', () => {
   let userDataDir: string;
@@ -54,5 +54,37 @@ describe('workspace config', () => {
     expect(raw.deviceId).toBe(first);
     expect(raw.workspacePath).toBe(join(homedir(), DEFAULT_WORKSPACE_DIR));
     expect(raw.gateways).toEqual([]);
+  });
+
+  it('writes config atomically without leaving a temp file', () => {
+    const configPath = join(userDataDir, CONFIG_FILE_NAME);
+    const config = {
+      workspacePath: '/workspace/atomic',
+      gateways: [{ id: 'gw-1', name: 'Local', url: 'ws://127.0.0.1:18789' }],
+    };
+
+    writeConfig(config);
+
+    expect(existsSync(configPath)).toBe(true);
+    expect(existsSync(`${configPath}.tmp`)).toBe(false);
+    expect(readConfig()).toEqual(config);
+    expect(() => JSON.parse(readFileSync(configPath, 'utf8'))).not.toThrow();
+  });
+
+  it('replaces config atomically across successive writes', () => {
+    const configPath = join(userDataDir, CONFIG_FILE_NAME);
+    const first = { workspacePath: '/first', gateways: [] as [] };
+    const second = {
+      workspacePath: '/second',
+      gateways: [{ id: 'gw-1', name: 'Local', url: 'ws://127.0.0.1:18789' }],
+    };
+
+    writeConfig(first);
+    expect(readConfig()).toEqual(first);
+
+    writeConfig(second);
+    expect(existsSync(`${configPath}.tmp`)).toBe(false);
+    expect(readConfig()).toEqual(second);
+    expect(() => JSON.parse(readFileSync(configPath, 'utf8'))).not.toThrow();
   });
 });
