@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { mkdirSync } from 'fs';
 import { DB_FILE_NAME } from '@clawwork/shared';
 import * as schema from './schema.js';
@@ -9,6 +9,10 @@ import { initFTS } from './fts.js';
 let db: ReturnType<typeof drizzle> | null = null;
 let sqlite: Database.Database | null = null;
 let initializedWorkspacePath: string | null = null;
+
+function canonicalWorkspacePath(workspacePath: string): string {
+  return resolve(workspacePath);
+}
 
 function migrateAddColumn(database: Database.Database, sql: string): void {
   try {
@@ -188,20 +192,22 @@ function openDatabaseAt(workspacePath: string): void {
 }
 
 export function initDatabase(workspacePath: string): void {
+  const canonicalPath = canonicalWorkspacePath(workspacePath);
   if (db) {
-    if (initializedWorkspacePath !== workspacePath) {
+    if (initializedWorkspacePath !== canonicalPath) {
       throw new Error('initDatabase called with different workspace path; use reinitDatabase to switch');
     }
     return;
   }
-  initializedWorkspacePath = workspacePath;
-  openDatabaseAt(workspacePath);
+  initializedWorkspacePath = canonicalPath;
+  openDatabaseAt(canonicalPath);
 }
 
 export function reinitDatabase(workspacePath: string): void {
+  const canonicalPath = canonicalWorkspacePath(workspacePath);
   closeDatabase();
-  initializedWorkspacePath = workspacePath;
-  openDatabaseAt(workspacePath);
+  initializedWorkspacePath = canonicalPath;
+  openDatabaseAt(canonicalPath);
 }
 
 export function getDb(): ReturnType<typeof drizzle> {

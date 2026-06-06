@@ -47,6 +47,13 @@ describe('initDatabase', () => {
     expect(Database).not.toHaveBeenCalled();
   });
 
+  it('returns early when called with an equivalent resolved path', () => {
+    initDatabase('/tmp/workspace-a');
+    vi.clearAllMocks();
+    expect(() => initDatabase('/tmp/workspace-a/')).not.toThrow();
+    expect(Database).not.toHaveBeenCalled();
+  });
+
   it('throws when called with different workspace path', () => {
     initDatabase('/tmp/workspace-a');
     expect(() => initDatabase('/tmp/workspace-b')).toThrow(
