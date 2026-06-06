@@ -29,7 +29,7 @@ vi.mock('electron', () => ({
   },
 }));
 
-import { ensureDeviceId, readConfig, writeConfig } from '../src/main/workspace/config.js';
+import { AppConfig, ensureDeviceId, readConfig, writeConfig } from '../src/main/workspace/config.js';
 
 describe('workspace config', () => {
   let userDataDir: string;
@@ -58,7 +58,7 @@ describe('workspace config', () => {
 
   it('writes config atomically without leaving a temp file', () => {
     const configPath = join(userDataDir, CONFIG_FILE_NAME);
-    const config = {
+    const config: AppConfig = {
       workspacePath: '/workspace/atomic',
       gateways: [{ id: 'gw-1', name: 'Local', url: 'ws://127.0.0.1:18789' }],
     };
@@ -73,8 +73,8 @@ describe('workspace config', () => {
 
   it('replaces config atomically across successive writes', () => {
     const configPath = join(userDataDir, CONFIG_FILE_NAME);
-    const first = { workspacePath: '/first', gateways: [] as [] };
-    const second = {
+    const first: AppConfig = { workspacePath: '/first', gateways: [] };
+    const second: AppConfig = {
       workspacePath: '/second',
       gateways: [{ id: 'gw-1', name: 'Local', url: 'ws://127.0.0.1:18789' }],
     };
