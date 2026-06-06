@@ -754,6 +754,32 @@ export interface SessionsUsageResult {
   totals: CostUsageTotals;
 }
 
+export type SessionPreviewItemRole = 'user' | 'assistant' | 'tool' | 'system' | 'other';
+
+export interface SessionPreviewItem {
+  role: SessionPreviewItemRole;
+  text: string;
+}
+
+export type SessionPreviewStatus = 'ok' | 'empty' | 'missing' | 'error';
+
+export interface SessionsPreviewEntry {
+  key: string;
+  status: SessionPreviewStatus;
+  items: SessionPreviewItem[];
+}
+
+export interface SessionsPreviewResult {
+  ts: number;
+  previews: SessionsPreviewEntry[];
+}
+
+export interface SessionsPreviewParams {
+  keys: string[];
+  limit?: number;
+  maxChars?: number;
+}
+
 export interface DashboardBreakdownEntry {
   name: string;
   count: number;

@@ -757,6 +757,14 @@ export class GatewayClient {
     return this.sendReq('sessions.usage', params as unknown as Record<string, unknown>);
   }
 
+  async previewSessions(params: {
+    keys: string[];
+    limit?: number;
+    maxChars?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.preview', params as unknown as Record<string, unknown>);
+  }
+
   async listCronJobs(params?: Record<string, unknown>): Promise<Record<string, unknown>> {
     return this.sendReq('cron.list', params ?? {});
   }

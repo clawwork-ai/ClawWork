@@ -31,6 +31,7 @@ import type {
   ConfigSchemaLookupResult,
   ParsedTeam,
   AgentFileSet,
+  SessionsPreviewResult,
 } from '@clawwork/shared';
 
 type IpcResult<T = Record<string, unknown>> = SharedIpcResult<T>;
@@ -472,6 +473,11 @@ export interface ClawWorkAPI {
     params?: { startDate?: string; endDate?: string; days?: number },
   ) => Promise<IpcResult>;
   getSessionUsage: (gatewayId: string, sessionKey: string) => Promise<IpcResult>;
+  previewSessions: (
+    gatewayId: string,
+    keys: string[],
+    options?: { limit?: number; maxChars?: number },
+  ) => Promise<IpcResult<SessionsPreviewResult>>;
 
   resolveExecApproval: (gatewayId: string, id: string, decision: ApprovalDecision) => Promise<IpcResult>;
 

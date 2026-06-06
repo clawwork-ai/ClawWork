@@ -660,6 +660,23 @@ export function registerWsHandlers(): void {
   );
 
   ipcMain.handle(
+    'ws:session-preview',
+    async (
+      _event,
+      payload: {
+        gatewayId: string;
+        keys: string[];
+        limit?: number;
+        maxChars?: number;
+      },
+    ) => {
+      const { gatewayId, keys, limit, maxChars } = payload;
+      if (!keys.length) return { ok: false, error: 'no session keys provided' };
+      return gatewayRpc(gatewayId, (gw) => gw.previewSessions({ keys, limit, maxChars }));
+    },
+  );
+
+  ipcMain.handle(
     'ws:exec-approval-resolve',
     async (
       _event,

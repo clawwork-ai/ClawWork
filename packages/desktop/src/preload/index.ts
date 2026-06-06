@@ -298,6 +298,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:usage-cost', { gatewayId, ...params }),
     getSessionUsage: (gatewayId: string, sessionKey: string) =>
       ipcRenderer.invoke('ws:session-usage', { gatewayId, sessionKey }),
+    previewSessions: (gatewayId: string, keys: string[], options?: { limit?: number; maxChars?: number }) =>
+      ipcRenderer.invoke('ws:session-preview', { gatewayId, keys, ...options }),
 
     resolveExecApproval: (gatewayId: string, id: string, decision: ApprovalDecision) =>
       ipcRenderer.invoke('ws:exec-approval-resolve', { gatewayId, id, decision }),

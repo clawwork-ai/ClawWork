@@ -45,6 +45,7 @@ import { exportToFiles, exportToLocal } from '@/lib/export-session';
 import TaskItem from './TaskItem';
 import type { Task, TaskStatus } from '@clawwork/shared';
 import EmptyState from '@/components/semantic/EmptyState';
+import { useSessionPreviews } from '@/hooks/useSessionPreviews';
 
 function groupTasksByTime(tasks: Task[]): {
   today: Task[];
@@ -293,6 +294,7 @@ export default function LeftNav() {
   const activeTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'active'), [visibleTasks]);
   const completedTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'completed'), [visibleTasks]);
   const activeGroups = useMemo(() => groupTasksByTime(activeTasks), [activeTasks]);
+  const sessionPreviews = useSessionPreviews(visibleTasks);
 
   const renderTaskGroup = (groupTasks: Task[], label: string) => {
     if (groupTasks.length === 0) return null;
@@ -307,6 +309,7 @@ export default function LeftNav() {
             onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
             editing={editingTaskId === task.id}
             onEditDone={() => setEditingTaskId(null)}
+            preview={sessionPreviews[task.id]}
           />
         ))}
       </>
@@ -416,6 +419,7 @@ export default function LeftNav() {
                 active={task.id === activeTaskId}
                 onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
                 collapsed
+                preview={sessionPreviews[task.id]}
               />
             ))}
             {completedTasks.length > 0 && activeTasks.length > 0 && (
@@ -428,6 +432,7 @@ export default function LeftNav() {
                 active={task.id === activeTaskId}
                 onContextMenu={(e) => handleContextMenu(e, task.id, task.status)}
                 collapsed
+                preview={sessionPreviews[task.id]}
               />
             ))}
           </motion.div>
