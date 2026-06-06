@@ -354,7 +354,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
 
       if (shouldDisplayError(correlation)) {
         const userText = formatErrorForUser(appError, deps.translate);
-        store.addMessage(taskId, 'system', userText);
+        store.addMessage(taskId, 'system', userText, undefined, { sessionKey });
         const { title, description } = formatErrorForToast(appError, deps.translate);
         deps.onToast?.('error', title, { description });
         recordDisplayedError(correlation);
@@ -369,6 +369,8 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
           taskId,
           'system',
           deps.translate('errors.serverAborted', { defaultValue: 'Task interrupted by server' }),
+          undefined,
+          { sessionKey },
         );
       }
     }
@@ -541,6 +543,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
         const existing = lifecycleErrorBuffer.get(taskId);
         if (existing) clearTimeout(existing.timer);
 
+        const lifecycleSessionKey = sessionKey;
         const timer = setTimeout(() => {
           lifecycleErrorBuffer.delete(taskId);
           const errorText = data.error!;
@@ -553,7 +556,9 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
             displayedAt: 0,
           };
           if (shouldDisplayError(correlation)) {
-            store.addMessage(taskId, 'system', formatErrorForUser(appError, deps.translate));
+            store.addMessage(taskId, 'system', formatErrorForUser(appError, deps.translate), undefined, {
+              sessionKey: lifecycleSessionKey,
+            });
             const { title, description } = formatErrorForToast(appError, deps.translate);
             deps.onToast?.('error', title, { description });
             recordDisplayedError(correlation);
@@ -575,7 +580,7 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
             model: data.activeModel,
             defaultValue: `Switched to model: ${data.activeModel}`,
           });
-          store.addMessage(taskId, 'system', msg, undefined, { persist: false });
+          store.addMessage(taskId, 'system', msg, undefined, { persist: false, sessionKey });
         }
         break;
     }
