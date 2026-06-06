@@ -109,4 +109,18 @@ describe('debug logger pre-init buffer (#412)', () => {
     const warningCall = consoleWarnSpy.mock.calls[0][0] as string;
     expect(warningCall).toContain('[debug] Logger not initialized yet');
   });
+
+  it('redacts sensitive fields in pre-init console warnings', async () => {
+    const { getDebugLogger } = await loadDebugModule();
+
+    getDebugLogger().error({
+      domain: 'app',
+      event: 'pre-init-secret-test',
+      data: { token: 'secret-token' },
+    });
+
+    const warnPayload = consoleWarnSpy.mock.calls.flat().join(' ');
+    expect(warnPayload).not.toContain('secret-token');
+    expect(warnPayload).toContain('pre-init-secret-test');
+  });
 });

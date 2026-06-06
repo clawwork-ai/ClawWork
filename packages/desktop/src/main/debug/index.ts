@@ -21,8 +21,7 @@ function record(level: DebugEvent['level'], input: LogEventInput): DebugEvent {
 
   console.warn(
     `[debug] Logger not initialized yet (pre-init event captured, buffer size: ${preInitBuffer.length}/${PRE_INIT_BUFFER_LIMIT}):`,
-    `[${level}] [${input.domain}] ${input.event}`,
-    input,
+    `[${event.level}] [${event.domain}] ${event.event}`,
   );
   return event;
 }
