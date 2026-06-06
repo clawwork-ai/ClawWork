@@ -41,6 +41,7 @@ export function useSessionPreviews(tasks: Task[]): Record<string, TaskSessionPre
   const [previews, setPreviews] = useState<Record<string, TaskSessionPreview>>({});
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const inFlightRef = useRef(false);
+  const pendingRefreshRef = useRef(false);
 
   useEffect(() => {
     if (tasks.length === 0) {
@@ -48,10 +49,13 @@ export function useSessionPreviews(tasks: Task[]): Record<string, TaskSessionPre
       return;
     }
 
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      if (inFlightRef.current) return;
+    const runFetch = () => {
+      if (inFlightRef.current) {
+        pendingRefreshRef.current = true;
+        return;
+      }
       inFlightRef.current = true;
+      pendingRefreshRef.current = false;
 
       const sessionKeyToTaskId = new Map<string, string>();
       const byGateway = new Map<string, string[]>();
@@ -103,8 +107,6 @@ export function useSessionPreviews(tasks: Task[]): Record<string, TaskSessionPre
           );
         } catch (err) {
           console.error('[session-preview] fetch failed:', err);
-        } finally {
-          inFlightRef.current = false;
         }
 
         for (const task of tasks) {
@@ -116,9 +118,19 @@ export function useSessionPreviews(tasks: Task[]): Record<string, TaskSessionPre
           }
         }
 
-        if (Object.keys(updates).length > 0) applyUpdates(updates);
+        const needsRefetch = pendingRefreshRef.current;
+        if (!needsRefetch && Object.keys(updates).length > 0) applyUpdates(updates);
+
+        inFlightRef.current = false;
+        if (needsRefetch) {
+          pendingRefreshRef.current = false;
+          runFetch();
+        }
       })();
-    }, 300);
+    };
+
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(runFetch, 300);
 
     return () => clearTimeout(timerRef.current);
   }, [taskFingerprint, connectedGateways, unreadRevision, messageRevision, tasks, gatewayStatusMap]);
