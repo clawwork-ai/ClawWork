@@ -110,7 +110,7 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 - Per-gateway session catalogs
 - Session controls that matter: stop, reset, compact, delete, and sync
 - Background work that stays readable instead of collapsing into one long thread
-- Set tasks on a schedule with `cron`, `every`, or `at` expressions — pick from presets or write your own, check run history, trigger manually anytime
+- Set tasks on a schedule with `cron`, `every`, or `at` expressions — pick from presets or write your own, check run history, trigger manually anytime ([recipe examples](./docs/scheduled-workflow-recipes.md))
 - Export any session as Markdown to keep a clean record outside the app
 
 ### 👁 Better visibility
