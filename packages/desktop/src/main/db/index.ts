@@ -15,9 +15,10 @@ function migrateAddColumn(database: Database.Database, sql: string): void {
     database.exec(sql);
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (!msg.includes('duplicate column')) {
-      console.error('[db:migration]', msg);
+    if (msg.includes('duplicate column')) {
+      return;
     }
+    throw e;
   }
 }
 

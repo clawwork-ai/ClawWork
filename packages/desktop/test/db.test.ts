@@ -68,4 +68,24 @@ describe('initDatabase', () => {
       'initDatabase called with different workspace path; use reinitDatabase to switch',
     );
   });
+
+  it('ignores duplicate column errors during ALTER TABLE migrations', () => {
+    mockDbInstance.exec.mockImplementation((sql: string) => {
+      if (sql.includes('ADD COLUMN')) {
+        throw new Error('SQLITE_ERROR: duplicate column name: gateway_id');
+      }
+    });
+
+    expect(() => initDatabase('/tmp/workspace-a')).not.toThrow();
+  });
+
+  it('propagates non-duplicate ALTER TABLE migration errors', () => {
+    mockDbInstance.exec.mockImplementation((sql: string) => {
+      if (sql.includes('ADD COLUMN')) {
+        throw new Error('SQLITE_ERROR: near "BOGUS": syntax error');
+      }
+    });
+
+    expect(() => initDatabase('/tmp/workspace-a')).toThrow('syntax error');
+  });
 });
