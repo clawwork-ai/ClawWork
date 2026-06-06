@@ -99,3 +99,82 @@ describe('room-store persistence failures', () => {
     expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBe(taskId);
   });
 });
+
+describe('room store', () => {
+  it('setRoomStatus persists stopped rooms and allows re-init for the same task', async () => {
+    const deps = createDeps({
+      loadRoom: vi.fn(async () => ({ ok: false, room: null, performers: [] })),
+    });
+    const store = createRoomStore(deps);
+    const sessionKey = buildSessionKey('task-1');
+
+    const ok = await store.getState().initConductor('task-1', 'gw-1', sessionKey, '[]');
+    expect(ok).toBe(true);
+    expect(store.getState().getRoom('task-1')?.status).toBe('active');
+
+    store.getState().setRoomStatus('task-1', 'stopped');
+    expect(store.getState().getRoom('task-1')?.status).toBe('stopped');
+    expect(deps.persistRoom).toHaveBeenCalledWith({
+      taskId: 'task-1',
+      status: 'stopped',
+      conductorReady: true,
+    });
+
+    const okAgain = await store.getState().initConductor('task-1', 'gw-2', sessionKey, '[]');
+    expect(okAgain).toBe(true);
+    expect(store.getState().getRoom('task-1')?.status).toBe('active');
+    expect(deps.createSession).toHaveBeenLastCalledWith('gw-2', expect.any(Object));
+  });
+
+  it('clears subagentKeyMap entries when room reaches stopped', async () => {
+    const taskId = 'task-1';
+    const sessionKey = buildSessionKey(taskId);
+    const subagentKey = 'agent:main:subagent:abc-123-def4-5678-90ab-cdef12345678';
+    const deps = createDeps({
+      loadRoom: vi.fn(async () => ({
+        ok: true,
+        room: { status: 'active', conductorReady: true },
+        performers: [],
+      })),
+    });
+    const store = createRoomStore(deps);
+    await store.getState().hydrateRoom(taskId, sessionKey);
+    store.getState().registerPerformerKey(taskId, subagentKey, 'performer-1', 'Performer');
+
+    expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBe(taskId);
+
+    store.getState().setRoomStatus(taskId, 'stopped');
+
+    expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBeUndefined();
+  });
+
+  it('clears subagentKeyMap entries hydrated from persisted performers when room stops', async () => {
+    const taskId = 'task-1';
+    const sessionKey = buildSessionKey(taskId);
+    const subagentKey = 'agent:main:subagent:abc-123-def4-5678-90ab-cdef12345678';
+    const deps = createDeps({
+      loadRoom: vi.fn(async () => ({
+        ok: true,
+        room: { status: 'active', conductorReady: true },
+        performers: [
+          {
+            sessionKey: subagentKey,
+            taskId,
+            agentId: 'performer-1',
+            agentName: 'Performer',
+            emoji: null,
+            verifiedAt: '2026-01-01T00:00:00.000Z',
+          },
+        ],
+      })),
+    });
+    const store = createRoomStore(deps);
+    await store.getState().hydrateRoom(taskId, sessionKey);
+
+    expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBe(taskId);
+
+    store.getState().setRoomStatus(taskId, 'stopped');
+
+    expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBeUndefined();
+  });
+});
