@@ -6,10 +6,17 @@ import { classifyTier, getMimeType } from './file-types.js';
 const MAX_TEXT_SIZE = 100 * 1024;
 const MAX_BINARY_SIZE = 10 * 1024 * 1024;
 
+export function resolveFdRealPath(fd: number, absolutePath: string): string {
+  if (process.platform === 'win32') {
+    return realpathSync(absolutePath);
+  }
+  return realpathSync(`/dev/fd/${fd}`);
+}
+
 export function readContextFile(absolutePath: string, contextFolders: string[]): FileReadResult {
   const fd = openSync(absolutePath, 'r');
   try {
-    const realPath = realpathSync(`/dev/fd/${fd}`);
+    const realPath = resolveFdRealPath(fd, absolutePath);
     const allowed = contextFolders.some((folder) => {
       const realFolder = realpathSync(folder);
       return realPath.startsWith(realFolder + sep) || realPath === realFolder;

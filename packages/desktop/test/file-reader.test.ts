@@ -8,7 +8,7 @@ vi.mock('fs', () => ({
   closeSync: vi.fn(),
 }));
 
-import { readContextFile } from '../src/main/context/file-reader.js';
+import { readContextFile, resolveFdRealPath } from '../src/main/context/file-reader.js';
 import { openSync, realpathSync, fstatSync, readSync, closeSync } from 'fs';
 
 const mockOpenSync = vi.mocked(openSync);
@@ -22,10 +22,14 @@ const CONTEXT_DIR = '/mock/context';
 const LARGE_SIZE = 11 * 1024 * 1024;
 const MAX_BINARY_SIZE = 10 * 1024 * 1024;
 
-function mockFile(filePath: string, fileSize: number) {
+function mockFile(filePath: string, fileSize: number, platform = process.platform) {
   mockOpenSync.mockReturnValue(FAKE_FD);
-  mockRealpathSync.mockImplementation(((p: string) =>
-    p === `/dev/fd/${FAKE_FD}` ? filePath : p) as typeof realpathSync);
+  mockRealpathSync.mockImplementation(((p: string) => {
+    if (platform === 'win32') {
+      return p === filePath ? filePath : p;
+    }
+    return p === `/dev/fd/${FAKE_FD}` ? filePath : p;
+  }) as typeof realpathSync);
   mockFstatSync.mockReturnValue({ size: fileSize } as ReturnType<typeof fstatSync>);
   mockReadSync.mockReturnValue(0);
   mockCloseSync.mockReturnValue(undefined);
@@ -131,5 +135,46 @@ describe('readContextFile', () => {
 
     expect(() => readContextFile(filePath, [CONTEXT_DIR])).toThrow('unsupported file type');
     expect(mockCloseSync).toHaveBeenCalledWith(FAKE_FD);
+  });
+
+  it('reads context files on win32 without /dev/fd', () => {
+    const filePath = `${CONTEXT_DIR}/small.pdf`;
+    const win32Spy = vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+    mockFile(filePath, 1024, 'win32');
+
+    const result = readContextFile(filePath, [CONTEXT_DIR]);
+
+    expect(result.truncated).toBe(false);
+    expect(result.mimeType).toBe('application/pdf');
+    expect(mockRealpathSync).toHaveBeenCalledWith(filePath);
+    expect(mockRealpathSync).not.toHaveBeenCalledWith(`/dev/fd/${FAKE_FD}`);
+    win32Spy.mockRestore();
+  });
+});
+
+describe('resolveFdRealPath', () => {
+  it('resolves via /dev/fd on linux and darwin', () => {
+    const filePath = `${CONTEXT_DIR}/doc.pdf`;
+    mockRealpathSync.mockImplementation(((p: string) =>
+      p === `/dev/fd/${FAKE_FD}` ? filePath : p) as typeof realpathSync);
+
+    for (const platform of ['linux', 'darwin'] as const) {
+      const spy = vi.spyOn(process, 'platform', 'get').mockReturnValue(platform);
+      expect(resolveFdRealPath(FAKE_FD, filePath)).toBe(filePath);
+      expect(mockRealpathSync).toHaveBeenCalledWith(`/dev/fd/${FAKE_FD}`);
+      spy.mockRestore();
+      mockRealpathSync.mockClear();
+    }
+  });
+
+  it('resolves via absolutePath on win32', () => {
+    const filePath = `${CONTEXT_DIR}/doc.pdf`;
+    const win32Spy = vi.spyOn(process, 'platform', 'get').mockReturnValue('win32');
+    mockRealpathSync.mockImplementation(((p: string) => p) as typeof realpathSync);
+
+    expect(resolveFdRealPath(FAKE_FD, filePath)).toBe(filePath);
+    expect(mockRealpathSync).toHaveBeenCalledWith(filePath);
+    expect(mockRealpathSync).not.toHaveBeenCalledWith(`/dev/fd/${FAKE_FD}`);
+    win32Spy.mockRestore();
   });
 });
