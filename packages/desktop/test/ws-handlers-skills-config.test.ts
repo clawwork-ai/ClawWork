@@ -11,6 +11,7 @@ const patchConfigMock = vi.fn();
 const getConfigSchemaMock = vi.fn();
 const lookupConfigSchemaMock = vi.fn();
 const getChatHistoryMock = vi.fn();
+const listSessionsBySpawnerMock = vi.fn();
 
 const fakeGatewayClient = {
   isConnected: true,
@@ -24,6 +25,7 @@ const fakeGatewayClient = {
   getConfigSchema: getConfigSchemaMock,
   lookupConfigSchema: lookupConfigSchemaMock,
   getChatHistory: getChatHistoryMock,
+  listSessionsBySpawner: listSessionsBySpawnerMock,
 };
 
 vi.mock('electron', () => ({
@@ -354,6 +356,32 @@ describe('ws-handlers: skills + config IPC channels', () => {
 
       expect(lookupConfigSchemaMock).toHaveBeenCalledWith('model');
       expect(result).toEqual({ ok: true, result: lookupResult });
+    });
+  });
+
+  describe('ws:list-sessions-by-spawner', () => {
+    it('rejects missing or empty spawnedBy before calling the gateway', async () => {
+      for (const spawnedBy of [undefined, null, '', 123]) {
+        listSessionsBySpawnerMock.mockClear();
+
+        const result = await invoke('ws:list-sessions-by-spawner', { gatewayId: 'gw-1', spawnedBy });
+
+        expect(result).toEqual({ ok: false, error: 'invalid spawnedBy parameter' });
+        expect(listSessionsBySpawnerMock).not.toHaveBeenCalled();
+      }
+    });
+
+    it('forwards a valid spawnedBy key to the gateway', async () => {
+      const sessions = { sessions: [{ key: 'agent:coder:subagent:abc' }] };
+      listSessionsBySpawnerMock.mockResolvedValue(sessions);
+
+      const result = await invoke('ws:list-sessions-by-spawner', {
+        gatewayId: 'gw-1',
+        spawnedBy: 'agent:conductor:clawwork:task:task-1',
+      });
+
+      expect(listSessionsBySpawnerMock).toHaveBeenCalledWith('agent:conductor:clawwork:task:task-1');
+      expect(result).toEqual({ ok: true, result: sessions });
     });
   });
 });

@@ -596,6 +596,9 @@ export class GatewayClient {
   }
 
   async listSessionsBySpawner(spawnedBy: string): Promise<Record<string, unknown>> {
+    if (!spawnedBy || typeof spawnedBy !== 'string' || spawnedBy.length === 0) {
+      throw new Error('invalid spawnedBy parameter');
+    }
     return this.sendReq('sessions.list', { spawnedBy }, { requestId: randomUUID() });
   }
 
