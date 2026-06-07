@@ -87,4 +87,36 @@ describe('workspace config', () => {
     expect(readConfig()).toEqual(second);
     expect(() => JSON.parse(readFileSync(configPath, 'utf8'))).not.toThrow();
   });
+
+  it('preserves existing config when rename fails', async () => {
+    const configPath = join(userDataDir, CONFIG_FILE_NAME);
+    const original: AppConfig = { workspacePath: '/original', gateways: [] };
+    writeConfig(original);
+    const snapshot = readFileSync(configPath, 'utf8');
+
+    const renameError = new Error('rename failed');
+    vi.resetModules();
+    vi.doMock('fs', async () => {
+      const actual = await vi.importActual<typeof import('fs')>('fs');
+      return {
+        ...actual,
+        renameSync: vi.fn((src: unknown, dest: unknown) => {
+          if (String(src).endsWith('.tmp')) throw renameError;
+          return actual.renameSync(src as string, dest as string);
+        }),
+      };
+    });
+
+    try {
+      const { writeConfig: writeWithFailingRename } = await import('../src/main/workspace/config.js');
+      expect(() => writeWithFailingRename({ workspacePath: '/new', gateways: [] })).toThrow(renameError);
+    } finally {
+      vi.resetModules();
+      vi.doUnmock('fs');
+    }
+    const { readConfig: readAfterFailure } = await import('../src/main/workspace/config.js');
+    expect(readFileSync(configPath, 'utf8')).toBe(snapshot);
+    expect(readAfterFailure()).toEqual(original);
+    expect(existsSync(`${configPath}.tmp`)).toBe(false);
+  });
 });

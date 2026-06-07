@@ -89,6 +89,18 @@ describe('workspace config persistence', () => {
     expect(fsMock.unlinkSync).toHaveBeenCalledWith(tmpPath);
   });
 
+  it('does not rename when temp write fails', async () => {
+    const writeError = new Error('disk full');
+    fsMock.writeFileSync.mockImplementationOnce(() => {
+      throw writeError;
+    });
+    const { writeConfig } = await loadConfigModule();
+
+    expect(() => writeConfig({ workspacePath: '/workspace', gateways: [] })).toThrow(writeError);
+    expect(fsMock.renameSync).not.toHaveBeenCalled();
+    expect(fsMock.unlinkSync).toHaveBeenCalledWith(tmpPath);
+  });
+
   it('backs up malformed JSON config without running migration', async () => {
     fsMock.readFileSync.mockReturnValue('{bad json');
     const { readConfig } = await loadConfigModule();
