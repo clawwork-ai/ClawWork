@@ -22,13 +22,7 @@ function createHarness(
     messagesByTask: {} as Record<string, unknown[]>,
     activeTurnBySession: {} as Record<string, unknown>,
     addMessage: vi.fn(
-      (
-        _taskId: string,
-        _role: string,
-        content: string,
-        _attachments?: unknown,
-        options?: { sessionKey?: string },
-      ) => {
+      (_taskId: string, _role: string, content: string, _attachments?: unknown, options?: { sessionKey?: string }) => {
         systemMessages.push({ taskId: _taskId, content, sessionKey: options?.sessionKey });
         return { id: 'msg-1', taskId: _taskId, role: _role, content, artifacts: [], toolCalls: [], timestamp: '' };
       },
@@ -306,9 +300,7 @@ describe('subagent terminated error suppression', () => {
     });
 
     expect(h.systemMessages.length).toBe(1);
-    expect(h.systemMessages[0].sessionKey).toBe(
-      'agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111',
-    );
+    expect(h.systemMessages[0].sessionKey).toBe('agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111');
     expect(h.toasts.length).toBe(1);
   });
 
@@ -359,13 +351,9 @@ describe('system error sessionKey correlation', () => {
       errorMessage: 'context length exceeded',
     });
 
-    expect(h.messageStore.addMessage).toHaveBeenCalledWith(
-      'task-1',
-      'system',
-      expect.any(String),
-      undefined,
-      { sessionKey: performerKey },
-    );
+    expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
+      sessionKey: performerKey,
+    });
   });
 
   it('includes sessionKey on agent lifecycle error system messages', async () => {
@@ -393,13 +381,9 @@ describe('system error sessionKey correlation', () => {
 
     await vi.advanceTimersByTimeAsync(2000);
 
-    expect(h.messageStore.addMessage).toHaveBeenCalledWith(
-      'task-1',
-      'system',
-      expect.any(String),
-      undefined,
-      { sessionKey: performerKey },
-    );
+    expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
+      sessionKey: performerKey,
+    });
     vi.useRealTimers();
   });
 });
