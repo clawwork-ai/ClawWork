@@ -85,8 +85,6 @@ export default function TaskItem({
       : preview?.state === 'empty'
         ? t('leftNav.noPreview')
         : null;
-  const tooltipLabel = previewText ? `${title}\n${previewText}` : title;
-
   if (collapsed) {
     return (
       <Tooltip>
@@ -118,7 +116,9 @@ export default function TaskItem({
             {hasUnread && <span className="absolute bottom-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />}
           </motion.button>
         </TooltipTrigger>
-        <TooltipContent side="right">{tooltipLabel}</TooltipContent>
+        <TooltipContent side="right" className={previewText ? 'whitespace-pre-line' : undefined}>
+          {previewText ? `${title}\n${previewText}` : title}
+        </TooltipContent>
       </Tooltip>
     );
   }
