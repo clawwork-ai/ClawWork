@@ -1,8 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useTaskStore, useMessageStore } from '@/platform';
-import { useDashboardStore } from '@/stores/dashboardStore';
-import { useUsageStore } from '@/stores/usageStore';
-import { useApprovalStore } from '@/stores/approvalStore';
 import { MonitorDot, Zap, FolderOpen, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
@@ -23,7 +19,6 @@ export default function SystemSection() {
   const workspacePath = useSettingsStore((s) => s.settings?.workspacePath);
   const settingsLoaded = useSettingsStore((s) => s.loaded);
   const loadSettings = useSettingsStore((s) => s.load);
-  const refreshSettings = useSettingsStore((s) => s.refresh);
 
   useEffect(() => {
     window.clawwork
@@ -68,21 +63,6 @@ export default function SystemSection() {
     [quickLaunchShortcut, t],
   );
 
-  useEffect(() => {
-    return window.clawwork.onWorkspaceChanged(async () => {
-      useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
-      await useTaskStore.getState().hydrate();
-
-      useMessageStore.setState({ messagesByTask: {}, activeTurnBySession: {}, processingBySession: new Set() });
-
-      useDashboardStore.getState().clear();
-      useUsageStore.getState().clear();
-      useApprovalStore.getState().clear();
-
-      await refreshSettings().catch(() => {});
-    });
-  }, [refreshSettings]);
-
   const handleChangeWorkspace = useCallback(async () => {
     let selected: string | null = null;
     try {
@@ -98,7 +78,6 @@ export default function SystemSection() {
     try {
       const result = await window.clawwork.changeWorkspace(selected);
       if (result.ok) {
-        await refreshSettings().catch(() => {});
         toast.success(t('settings.workspaceChanged'), {
           description: t('settings.workspaceOldPathHint', { path: oldPath }),
           duration: 8000,
@@ -112,7 +91,7 @@ export default function SystemSection() {
     } finally {
       setChangingWorkspace(false);
     }
-  }, [refreshSettings, workspacePath, t]);
+  }, [workspacePath, t]);
 
   const handleShortcutRecord = useCallback(
     (e: React.KeyboardEvent) => {
