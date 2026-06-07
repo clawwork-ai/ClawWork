@@ -52,7 +52,7 @@ In ClawWork:
 
 1. Open **Cron** from the sidebar.
 2. Create a job with an `every` or `cron` schedule.
-3. Use an isolated session target for clean recurring history.
+3. Use the task session target for clean recurring history.
 4. Put the task instructions in the agent message.
 5. Run once manually and inspect the tool calls before enabling the schedule.
 
