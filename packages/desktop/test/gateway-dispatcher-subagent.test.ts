@@ -358,32 +358,35 @@ describe('system error sessionKey correlation', () => {
 
   it('includes sessionKey on agent lifecycle error system messages', async () => {
     vi.useFakeTimers();
-    const performerKey = 'agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111';
-    const subagentMap: Record<string, string> = { [performerKey]: 'task-1' };
-    const h = createHarness({
-      tasks: [
-        {
-          id: 'task-1',
-          title: 'Ensemble task',
-          gatewayId: 'gw-1',
-          sessionKey: 'agent:conductor:clawwork:task:task-1',
-          ensemble: true,
-        },
-      ],
-      lookupTaskIdBySubagentKey: (key) => subagentMap[key],
-    });
+    try {
+      const performerKey = 'agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111';
+      const subagentMap: Record<string, string> = { [performerKey]: 'task-1' };
+      const h = createHarness({
+        tasks: [
+          {
+            id: 'task-1',
+            title: 'Ensemble task',
+            gatewayId: 'gw-1',
+            sessionKey: 'agent:conductor:clawwork:task:task-1',
+            ensemble: true,
+          },
+        ],
+        lookupTaskIdBySubagentKey: (key) => subagentMap[key],
+      });
 
-    h.emit('agent', {
-      sessionKey: performerKey,
-      stream: 'lifecycle',
-      data: { phase: 'error', error: 'provider unavailable' },
-    });
+      h.emit('agent', {
+        sessionKey: performerKey,
+        stream: 'lifecycle',
+        data: { phase: 'error', error: 'provider unavailable' },
+      });
 
-    await vi.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(2000);
 
-    expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
-      sessionKey: performerKey,
-    });
-    vi.useRealTimers();
+      expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
+        sessionKey: performerKey,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
