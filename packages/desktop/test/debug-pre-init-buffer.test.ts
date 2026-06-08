@@ -143,9 +143,7 @@ describe('debug logger pre-init buffer (#412)', () => {
 
       expect(consoleWarnSpy.mock.calls.length).toBe(preInitWarnCount);
       expect(consoleErrorSpy.mock.calls.length).toBe(preInitErrorCount);
-      expect(consoleLogSpy.mock.calls.some((c) => String(c[0]).includes('pre-init-replay-test'))).toBe(
-        false,
-      );
+      expect(consoleLogSpy.mock.calls.some((c) => String(c[0]).includes('pre-init-replay-test'))).toBe(false);
     } finally {
       consoleErrorSpy.mockRestore();
       consoleLogSpy.mockRestore();
