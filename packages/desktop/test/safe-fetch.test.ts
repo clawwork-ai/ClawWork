@@ -290,4 +290,35 @@ describe('safeFetch', () => {
     expect(cancel).toHaveBeenCalledOnce();
     expect(abortSignal?.aborted).toBe(true);
   });
+
+  it('does not read the entire oversized body before rejecting — bounded streaming (#408)', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const chunkSize = 256;
+    const maxSize = 1024;
+    const bodySize = 10 * 1024;
+    const cancel = vi.fn(async () => {});
+    const reader = streamReaderFrom(new ArrayBuffer(bodySize), chunkSize, cancel);
+    const read = vi.fn(reader.read.bind(reader));
+    netFetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers(),
+      body: {
+        getReader: () =>
+          ({
+            read,
+            cancel,
+            releaseLock: () => {},
+            closed: Promise.resolve(undefined),
+          }) as ReadableStreamDefaultReader<Uint8Array>,
+      },
+    } as unknown as Response);
+
+    await expect(safeFetch('https://cdn.example.com/huge-stream.bin', { maxSize })).rejects.toThrow('too large');
+
+    // 5 chunks (1280 bytes) exceed maxSize; must not drain the full 10 KiB body.
+    expect(read.mock.calls.length).toBeLessThan(bodySize / chunkSize);
+    expect(read.mock.calls.length).toBeLessThanOrEqual(Math.ceil(maxSize / chunkSize) + 1);
+    expect(cancel).toHaveBeenCalledOnce();
+  });
 });
