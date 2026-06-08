@@ -44,7 +44,7 @@ export function initDebugLogger(debugDir: string): DebugLogger {
     onEvent: broadcastDebugEvent,
   });
   for (const event of preInitBuffer) {
-    debugLogger.log(event);
+    debugLogger.log(event, { silent: true });
   }
   preInitBuffer.length = 0;
   isInitialized = true;

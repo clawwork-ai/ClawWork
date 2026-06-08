@@ -123,4 +123,32 @@ describe('debug logger pre-init buffer (#412)', () => {
     expect(warnPayload).not.toContain('secret-token');
     expect(warnPayload).toContain('pre-init-secret-test');
   });
+
+  it('does not re-print buffered events to console when flushing on init', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    try {
+      const { getDebugLogger, initDebugLogger } = await loadDebugModule();
+      getDebugLogger().error({ domain: 'app', event: 'pre-init-replay-test' });
+
+      const preInitWarnCount = consoleWarnSpy.mock.calls.length;
+      const preInitErrorCount = consoleErrorSpy.mock.calls.length;
+
+      const os = await import('node:os');
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'clawwork-debug-'));
+      initDebugLogger(tmp);
+
+      expect(consoleWarnSpy.mock.calls.length).toBe(preInitWarnCount);
+      expect(consoleErrorSpy.mock.calls.length).toBe(preInitErrorCount);
+      expect(consoleLogSpy.mock.calls.some((c) => String(c[0]).includes('pre-init-replay-test'))).toBe(
+        false,
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+      consoleLogSpy.mockRestore();
+    }
+  });
 });

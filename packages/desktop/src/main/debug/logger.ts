@@ -33,12 +33,17 @@ export interface DebugLogFilter {
   limit?: number;
 }
 
+export interface LogEventOptions {
+  /** Skip console output (used when replaying pre-init buffered events). */
+  silent?: boolean;
+}
+
 export interface DebugLogger {
   debug: (input: LogEventInput) => DebugEvent;
   info: (input: LogEventInput) => DebugEvent;
   warn: (input: LogEventInput) => DebugEvent;
   error: (input: LogEventInput) => DebugEvent;
-  log: (input: LogEventInput & { level: DebugLevel }) => DebugEvent;
+  log: (input: LogEventInput & { level: DebugLevel }, options?: LogEventOptions) => DebugEvent;
   getRecentEvents: (filter?: DebugLogFilter) => DebugEvent[];
   currentFilePath: () => string;
   flush: () => Promise<void>;
@@ -137,7 +142,7 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
     }
   }
 
-  function log(input: LogEventInput & { level: DebugLevel }): DebugEvent {
+  function log(input: LogEventInput & { level: DebugLevel }, logOptions?: LogEventOptions): DebugEvent {
     const event: DebugEvent = sanitizeForLog({
       ts: new Date().toISOString(),
       ...input,
@@ -154,7 +159,7 @@ export function createDebugLogger(options: CreateDebugLoggerOptions): DebugLogge
     currentFileSize += Buffer.byteLength(jsonLine, 'utf8');
     writeStream!.write(jsonLine, 'utf8');
 
-    if (writeConsole) {
+    if (writeConsole && !logOptions?.silent) {
       const line = `[${event.level}] [${event.domain}] ${event.event}`;
       if (event.level === 'error') console.error(line, event);
       else if (event.level === 'warn') console.warn(line, event);
