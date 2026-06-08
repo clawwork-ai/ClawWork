@@ -80,9 +80,8 @@ env:
     </details>
 
 permissions:
-  actions: write
   checks: read
-  contents: write
+  contents: read
   deployments: none
   id-token: none
   issues: write
@@ -99,13 +98,36 @@ jobs:
     name: Bot
     runs-on: ubuntu-latest
     steps:
+      # Fetch comment bodies via API instead of embedding untrusted event payloads
+      # in workflow expressions (see clawwork-ai/ClawWork#132).
+      - name: Load message body safely
+        if: >-
+          github.event_name == 'issue_comment' ||
+          github.event_name == 'pull_request_review_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            body=$(gh api "repos/${GH_REPOSITORY}/pulls/comments/${{ github.event.comment.id }}" --jq '.body')
+          else
+            body=$(gh api "repos/${GH_REPOSITORY}/issues/comments/${{ github.event.comment.id }}" --jq '.body')
+          fi
+          delimiter=$(openssl rand -hex 16)
+          {
+            echo "MESSAGE<<${delimiter}"
+            printf '%s' "$body"
+            echo
+            echo "${delimiter}"
+          } >> "$GITHUB_ENV"
+
       - name: Issue Opened
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'issues' }}
         env:
           LOGIN: ${{ github.event.issue.user.login }}
           AUTHOR: ${{ github.event.issue.user.login }}
-          MESSAGE: ${{ github.event.issue.body }}
+          MESSAGE: ''
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           AUTHOR_ASSOCIATION: ${{ github.event.issue.author_association }}
           ISSUE_KIND: issue
@@ -116,12 +138,12 @@ jobs:
             We will look into it as soon as possible.
 
       - name: PR Opened
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'pull_request_target' && github.event.action == 'opened' }}
         env:
           LOGIN: ${{ github.event.pull_request.user.login }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-          MESSAGE: ${{ github.event.pull_request.body }}
+          MESSAGE: ''
           ISSUE_NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
           ISSUE_KIND: pr
@@ -133,7 +155,7 @@ jobs:
             We will review it shortly.
 
       - name: PR Synchronize
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'pull_request_target' && github.event.action == 'synchronize' }}
         env:
           LOGIN: ${{ github.event.pull_request.user.login }}
@@ -145,36 +167,33 @@ jobs:
           TYPE: synchronize
 
       - name: Issue Commented
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'issue_comment' && !github.event.issue.pull_request }}
         env:
           LOGIN: ${{ github.event.comment.user.login }}
           AUTHOR: ${{ github.event.issue.user.login }}
-          MESSAGE: ${{ github.event.comment.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
           ISSUE_KIND: issue
           TYPE: comment
 
       - name: PR Review Commented
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'pull_request_review_comment' }}
         env:
           LOGIN: ${{ github.event.comment.user.login }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-          MESSAGE: ${{ github.event.comment.body }}
           ISSUE_NUMBER: ${{ github.event.pull_request.number }}
           AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
           ISSUE_KIND: pr
           TYPE: comment
 
       - name: PR Commented
-        uses: wzshiming/gh-ci-bot@v1.5.0
+        uses: wzshiming/gh-ci-bot@7bce89588aeb39494eefafef4ede1d845f61d403 # v1.5.0
         if: ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request }}
         env:
           LOGIN: ${{ github.event.comment.user.login }}
           AUTHOR: ${{ github.event.issue.user.login }}
-          MESSAGE: ${{ github.event.comment.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association }}
           ISSUE_KIND: pr
