@@ -63,6 +63,12 @@ export interface SyncResult {
   error?: string;
 }
 
+export interface SessionSyncFilter {
+  gatewayId?: string;
+  agentId?: string;
+  workspace?: string;
+}
+
 export interface ChatAttachment {
   mimeType: string;
   fileName: string;
@@ -82,7 +88,7 @@ export interface GatewayTransportPort {
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
   listSessionsBySpawner: (gatewayId: string, spawnedBy: string) => Promise<IpcResult>;
   gatewayStatus: () => Promise<GatewayStatusMap>;
-  syncSessions: () => Promise<SyncResult>;
+  syncSessions: (filter?: SessionSyncFilter) => Promise<SyncResult>;
   listGateways: () => Promise<GatewayListItem[]>;
   listModels: (gatewayId: string) => Promise<IpcResult>;
   listCommands: (gatewayId: string, params?: CommandsListParams) => Promise<IpcResult>;

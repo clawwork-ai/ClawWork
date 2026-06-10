@@ -1,5 +1,5 @@
 import { createStore } from 'zustand/vanilla';
-import { buildSessionKey } from '@clawwork/shared';
+import { buildSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
 import type { Task, TaskStatus, IpcResult } from '@clawwork/shared';
 
 export interface PendingNewTask {
@@ -278,6 +278,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
               tags: r.tags,
               artifactDir: r.artifactDir,
               gatewayId: r.gatewayId,
+              agentId: parseAgentIdFromSessionKey(r.sessionKey),
             })),
             hydrated: true,
           });

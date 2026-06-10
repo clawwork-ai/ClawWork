@@ -28,7 +28,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:chat-history', { gatewayId, sessionKey, limit }),
     listSessions: (gatewayId: string) => ipcRenderer.invoke('ws:list-sessions', { gatewayId }),
     gatewayStatus: () => ipcRenderer.invoke('ws:gateway-status'),
-    syncSessions: () => ipcRenderer.invoke('ws:sync-sessions'),
+    syncSessions: (filter?: { gatewayId?: string; agentId?: string; workspace?: string }) =>
+      ipcRenderer.invoke('ws:sync-sessions', filter),
     abortChat: (gatewayId: string, sessionKey: string) =>
       ipcRenderer.invoke('ws:abort-chat', { gatewayId, sessionKey }),
     listGateways: () => ipcRenderer.invoke('ws:list-gateways'),

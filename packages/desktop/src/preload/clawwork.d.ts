@@ -228,6 +228,12 @@ interface SyncResult {
   error?: string;
 }
 
+interface SessionSyncFilter {
+  gatewayId?: string;
+  agentId?: string;
+  workspace?: string;
+}
+
 interface ListResult<T> {
   ok: boolean;
   rows?: T[];
@@ -284,7 +290,7 @@ export interface ClawWorkAPI {
   lookupConfigSchema: (gatewayId: string, path: string) => Promise<IpcResult<ConfigSchemaLookupResult>>;
 
   gatewayStatus: () => Promise<GatewayStatusMap>;
-  syncSessions: () => Promise<SyncResult>;
+  syncSessions: (filter?: SessionSyncFilter) => Promise<SyncResult>;
   listGateways: () => Promise<GatewayListItem[]>;
 
   onGatewayEvent: (callback: (data: GatewayEvent) => void) => () => void;

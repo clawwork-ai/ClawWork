@@ -80,7 +80,8 @@ const taskStoreApi = createTaskStore({
   getDefaultGatewayId: () => uiStoreApi.getState().defaultGatewayId,
   getAgentCatalog: (gatewayId) => {
     const entry = uiStoreApi.getState().agentCatalogByGateway[gatewayId];
-    return entry ? { agents: entry.agents, defaultId: entry.defaultId } : { agents: [], defaultId: null };
+    const selected = uiStoreApi.getState().getSelectedMainAgentId(gatewayId);
+    return entry ? { agents: entry.agents, defaultId: selected ?? entry.defaultId } : { agents: [], defaultId: null };
   },
   onTaskCreated: () => uiStoreApi.getState().setMainView('chat'),
 });

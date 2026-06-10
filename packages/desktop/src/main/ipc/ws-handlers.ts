@@ -1,7 +1,14 @@
 import { ipcMain } from 'electron';
+import { createHash } from 'crypto';
 import { getGatewayClient, getAllGatewayClients, reconnectGateway } from '../ws/index.js';
 import { readConfig, ensureDeviceId } from '../workspace/config.js';
-import { isClawWorkSession, parseTaskIdFromSessionKey, parseAgentIdFromSessionKey } from '@clawwork/shared';
+import {
+  isClawWorkSession,
+  isSubagentSession,
+  isSystemSession,
+  parseTaskIdFromSessionKey,
+  parseAgentIdFromSessionKey,
+} from '@clawwork/shared';
 import { normalizeContentBlocks, parseToolArgs } from '@clawwork/core';
 import type {
   ApprovalDecision,
@@ -45,7 +52,9 @@ async function gatewayRpc(
 
 interface GatewaySessionRow {
   key: string;
+  agentId?: string;
   sessionId?: string;
+  workspace?: string;
   updatedAt: number | null;
   derivedTitle?: string;
   label?: string;
@@ -90,6 +99,37 @@ interface ChatHistoryPayload {
 
 const INTERNAL_ASSISTANT_MARKERS = new Set(['NO_REPLY']);
 const RELATIVE_GATEWAY_MEDIA_PATH_RE = /^\/(?:api\/chat\/media\/outgoing\/|media\/|__openclaw__\/media\/)/;
+
+function nativeTaskIdForSessionKey(sessionKey: string): string {
+  const parsed = parseTaskIdFromSessionKey(sessionKey);
+  if (parsed) return parsed;
+  return `native-${createHash('sha256').update(sessionKey).digest('hex').slice(0, 24)}`;
+}
+
+function sessionAgentId(session: GatewaySessionRow): string {
+  return session.agentId || parseAgentIdFromSessionKey(session.key);
+}
+
+function normalizePathForCompare(path: string | undefined): string {
+  return (path ?? '').trim().replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+}
+
+function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?: SyncSessionFilter): boolean {
+  if (!session.key || isSystemSession(session.key) || isSubagentSession(session.key)) return false;
+  if (!filter?.agentId && !filter?.workspace) return isClawWorkSession(session.key, deviceId);
+
+  if (filter.agentId && sessionAgentId(session) !== filter.agentId) return false;
+  if (filter.workspace && session.workspace) {
+    return normalizePathForCompare(session.workspace) === normalizePathForCompare(filter.workspace);
+  }
+  return true;
+}
+
+interface SyncSessionFilter {
+  gatewayId?: string;
+  agentId?: string;
+  workspace?: string;
+}
 
 /** Parsed tool call for transport to renderer */
 interface ParsedToolCall {
@@ -283,7 +323,7 @@ export function registerWsHandlers(): void {
     return statusMap;
   });
 
-  ipcMain.handle('ws:sync-sessions', async () => {
+  ipcMain.handle('ws:sync-sessions', async (_event, filter?: SyncSessionFilter) => {
     const clients = getAllGatewayClients();
     getDebugLogger().info({
       domain: 'ipc',
@@ -314,15 +354,16 @@ export function registerWsHandlers(): void {
     }[] = [];
 
     for (const [gatewayId, gw] of clients) {
+      if (filter?.gatewayId && filter.gatewayId !== gatewayId) continue;
       if (!gw.isConnected) continue;
       try {
         const deviceId = ensureDeviceId();
         const raw = (await gw.listSessions()) as unknown as SessionsListPayload;
         const allSessions = raw.sessions ?? [];
-        const ours = allSessions.filter((s) => isClawWorkSession(s.key, deviceId));
+        const ours = allSessions.filter((s) => shouldSyncSession(s, deviceId, filter));
 
         for (const s of ours) {
-          const taskId = parseTaskIdFromSessionKey(s.key);
+          const taskId = nativeTaskIdForSessionKey(s.key);
           if (!taskId) continue;
 
           const historyRaw = (await gw.getChatHistory(s.key, 200)) as unknown as ChatHistoryPayload;
@@ -401,7 +442,7 @@ export function registerWsHandlers(): void {
             sessionKey: s.key,
             title: s.derivedTitle ?? s.label ?? titleFromMsg,
             updatedAt: s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString(),
-            agentId: parseAgentIdFromSessionKey(s.key),
+            agentId: sessionAgentId(s),
             model: s.model,
             modelProvider: s.modelProvider,
             thinkingLevel: s.thinkingLevel,

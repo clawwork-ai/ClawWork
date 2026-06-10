@@ -2,6 +2,7 @@ import { parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork
 import type { Message, MessageRole, ToolCall, IpcResult } from '@clawwork/shared';
 import type { RawHistoryMessage } from '../protocol/types.js';
 import type { ActiveTurn, MessageState } from '../stores/message-store.js';
+import type { SessionSyncFilter } from '../ports/gateway-transport.js';
 import { mergeCanonicalMessageWithActiveTurn } from '../stores/message-store.js';
 import {
   sanitizeModel,
@@ -52,7 +53,7 @@ export interface SessionSyncDeps {
   gateway: {
     getHttpBase?: (gatewayId: string) => string | undefined | Promise<string | undefined>;
     chatHistory: (gatewayId: string, sessionKey: string, limit?: number) => Promise<IpcResult>;
-    syncSessions: () => Promise<{
+    syncSessions: (filter?: SessionSyncFilter) => Promise<{
       ok: boolean;
       discovered?: {
         gatewayId: string;
@@ -360,10 +361,10 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
   }
 
-  async function syncFromGateway(): Promise<void> {
+  async function syncFromGateway(filter?: SessionSyncFilter): Promise<void> {
     try {
       await hydrateFromLocal();
-      const res = await deps.gateway.syncSessions();
+      const res = await deps.gateway.syncSessions(filter);
       if (!res.ok || !res.discovered) return;
       const taskStore = deps.getTaskStore();
       const messageStore = deps.getMessageStore();
