@@ -25,6 +25,14 @@ export interface RawContentBlock {
   openUrl?: string;
   alt?: string;
   mimeType?: string;
+  dataUrl?: string;
+  sourcePath?: string;
+  path?: string;
+  filePath?: string;
+  fileName?: string;
+  size?: number;
+  base64?: string;
+  content?: string;
   id?: string;
   name?: string;
   arguments?: Record<string, unknown> | string;

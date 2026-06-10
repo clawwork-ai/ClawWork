@@ -31,6 +31,8 @@ import type {
   ConfigSchemaLookupResult,
   ParsedTeam,
   AgentFileSet,
+  Artifact,
+  MessageAttachment,
 } from '@clawwork/shared';
 
 type IpcResult<T = Record<string, unknown>> = SharedIpcResult<T>;
@@ -217,7 +219,7 @@ interface DiscoveredSession {
   inputTokens?: number;
   outputTokens?: number;
   contextTokens?: number;
-  messages: { role: string; content: string; timestamp: string }[];
+  messages: { role: string; content: string; timestamp: string; attachments?: MessageAttachment[]; toolCalls?: unknown[] }[];
 }
 
 interface SyncResult {
@@ -325,6 +327,11 @@ export interface ClawWorkAPI {
     language?: string;
     fileName?: string;
   }) => Promise<IpcResult>;
+  saveMessageAttachment: (params: {
+    taskId: string;
+    messageId: string;
+    attachment: MessageAttachment;
+  }) => Promise<IpcResult<Artifact>>;
   saveImageFromUrl: (params: { taskId: string; messageId: string; url: string; alt?: string }) => Promise<IpcResult>;
   searchArtifacts: (
     query: string,

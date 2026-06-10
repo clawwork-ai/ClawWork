@@ -155,6 +155,22 @@ function createWindow(): BrowserWindow {
     if (isReload) event.preventDefault();
   });
 
+  win.webContents.on('context-menu', (_event, params) => {
+    if (!params.isEditable) return;
+    const template: Electron.MenuItemConstructorOptions[] = [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut', enabled: params.editFlags.canCut },
+      { role: 'copy', enabled: params.editFlags.canCopy },
+      { role: 'paste', enabled: params.editFlags.canPaste },
+      { role: 'delete', enabled: params.editFlags.canDelete },
+      { type: 'separator' },
+      { role: 'selectAll', enabled: params.editFlags.canSelectAll },
+    ];
+    Menu.buildFromTemplate(template).popup({ window: win });
+  });
+
   win.on('blur', () => {
     if (win.isDestroyed()) return;
     const level = win.webContents.getZoomLevel();

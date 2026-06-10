@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import type { Message } from '@clawwork/shared';
+import type { Artifact, Message, MessageAttachment } from '@clawwork/shared';
 import { Check, Copy, File, FileCode, Loader2, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
@@ -104,28 +104,68 @@ function MessageActionButton({
   );
 }
 
-function AttachmentFileCard({ attachment }: { attachment: { fileName: string; localPath?: string } }) {
+function AttachmentFileCard({
+  attachment,
+  taskId,
+  messageId,
+}: {
+  attachment: MessageAttachment;
+  taskId: string;
+  messageId: string;
+}) {
   const { t } = useTranslation();
-  const canOpen = Boolean(attachment.localPath);
+  const [artifactLocalPath, setArtifactLocalPath] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const canOpen = Boolean(attachment.localPath || artifactLocalPath);
+  const canSave = Boolean(taskId && messageId && (attachment.dataUrl || attachment.sourcePath));
+
+  const handleClick = async () => {
+    if (attachment.localPath) {
+      const res = await window.clawwork.openInboxFile(attachment.localPath);
+      if (!res.ok) toast.error(t('chatInput.openFailed', { fileName: attachment.fileName }));
+      return;
+    }
+    if (artifactLocalPath) {
+      const res = await window.clawwork.openArtifactFile(artifactLocalPath);
+      if (!res.ok) toast.error(t('chatInput.openFailed', { fileName: attachment.fileName }));
+      return;
+    }
+    if (!canSave || saving) return;
+    setSaving(true);
+    try {
+      const res = await window.clawwork.saveMessageAttachment({ taskId, messageId, attachment });
+      if (!res.ok || !res.result) throw new Error(res.error);
+      const artifact = res.result as Artifact;
+      setArtifactLocalPath(artifact.localPath);
+      await window.clawwork.openArtifactFile(artifact.localPath);
+    } catch {
+      toast.error(t('chatInput.attachmentSaveFailed', { fileName: attachment.fileName }));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <button
       type="button"
-      disabled={!canOpen}
-      onClick={async () => {
-        if (!attachment.localPath) return;
-        const res = await window.clawwork.openInboxFile(attachment.localPath);
-        if (!res.ok) toast.error(t('chatInput.openFailed', { fileName: attachment.fileName }));
-      }}
+      disabled={!canOpen && !canSave}
+      onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-2 rounded-xl px-3 py-2 max-w-xs',
         'border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-[var(--text-secondary)]',
-        canOpen
+        canOpen || canSave
           ? 'cursor-pointer hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors'
           : 'opacity-70 cursor-default',
       )}
-      title={attachment.fileName}
+      title={canOpen ? attachment.fileName : t('common.save')}
     >
-      <File size={16} className="flex-shrink-0" />
+      {saving ? (
+        <Loader2 size={16} className="flex-shrink-0 animate-spin" />
+      ) : canOpen ? (
+        <File size={16} className="flex-shrink-0" />
+      ) : (
+        <Save size={16} className="flex-shrink-0" />
+      )}
       <span className="type-body truncate">{attachment.fileName}</span>
     </button>
   );
@@ -338,7 +378,12 @@ const ChatMessage = memo(function ChatMessage({
                   onOpen={onImageClick}
                 />
               ) : (
-                <AttachmentFileCard key={`${attachment.fileName}-${i}`} attachment={attachment} />
+                <AttachmentFileCard
+                  key={`${attachment.fileName}-${i}`}
+                  attachment={attachment}
+                  taskId={message.taskId}
+                  messageId={message.id}
+                />
               );
             })}
           </div>

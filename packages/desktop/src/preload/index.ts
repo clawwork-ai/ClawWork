@@ -143,6 +143,7 @@ function buildApi(): ClawWorkAPI {
       };
     },
     saveCodeBlock: (params) => ipcRenderer.invoke('artifact:save-content', params),
+    saveMessageAttachment: (params) => ipcRenderer.invoke('artifact:save-attachment', params),
     saveImageFromUrl: (params) => ipcRenderer.invoke('artifact:save-image-url', params),
     searchArtifacts: (query: string, options) => ipcRenderer.invoke('artifact:search', { query, ...(options ?? {}) }),
     openArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:open-file', { localPath }),
