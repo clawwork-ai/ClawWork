@@ -946,4 +946,134 @@ describe('session sync startup flow', () => {
       }),
     );
   });
+
+  it('aborts in-flight session sync after resetHydration to prevent cross-workspace writes', async () => {
+    const { sessionSync, taskStore, messageStore } = await loadModules();
+    const sessionKey = 'agent:main:clawwork:task:task-race';
+
+    taskStore.useTaskStore.setState({
+      tasks: [
+        {
+          id: 'task-race',
+          sessionKey,
+          sessionId: 'session-race',
+          title: 'Race test',
+          status: 'active',
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: 'tasks/task-race',
+          gatewayId: 'gw-1',
+        },
+      ],
+      activeTaskId: 'task-race',
+      hydrated: true,
+    });
+    messageStore.useMessageStore.setState({
+      messagesByTask: {
+        'task-race': [
+          {
+            id: 'u1',
+            taskId: 'task-race',
+            role: 'user',
+            content: 'hello',
+            artifacts: [],
+            toolCalls: [],
+            timestamp: '2026-03-16T10:00:00.000Z',
+          },
+        ],
+      },
+      activeTurnBySession: {},
+      processingBySession: new Set(),
+      highlightedMessageId: null,
+    });
+
+    const chatHistoryDeferred = createDeferred<{
+      ok: true;
+      result: {
+        messages: Array<{
+          role: string;
+          timestamp: number;
+          content: Array<{ type: string; text: string }>;
+        }>;
+      };
+    }>();
+
+    mockApi.chatHistory.mockReturnValue(chatHistoryDeferred.promise);
+
+    const syncPromise = sessionSync.syncSessionMessages('task-race');
+    await Promise.resolve();
+
+    sessionSync.resetHydration();
+
+    chatHistoryDeferred.resolve({
+      ok: true,
+      result: {
+        messages: [
+          {
+            role: 'assistant',
+            timestamp: Date.parse('2026-03-16T10:00:01.000Z'),
+            content: [{ type: 'text', text: 'stale write' }],
+          },
+        ],
+      },
+    });
+
+    await syncPromise;
+
+    expect(mockApi.persistMessage).not.toHaveBeenCalled();
+    expect(messageStore.useMessageStore.getState().messagesByTask['task-race']).toHaveLength(1);
+  });
+
+  it('resetHydration allows hydrateFromLocal to reload after workspace switch', async () => {
+    const { sessionSync, taskStore } = await loadModules();
+
+    mockApi.loadTasks.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'task-old',
+          sessionKey: 'agent:main:clawwork:task:task-old',
+          sessionId: 'sess-old',
+          title: 'Old workspace task',
+          status: 'active',
+          createdAt: '2026-03-16T00:00:00.000Z',
+          updatedAt: '2026-03-16T00:00:00.000Z',
+          tags: [],
+          artifactDir: '/tmp/old',
+          gatewayId: 'gw-1',
+        },
+      ],
+    });
+
+    await sessionSync.hydrateFromLocal();
+    expect(taskStore.useTaskStore.getState().tasks).toHaveLength(1);
+    expect(taskStore.useTaskStore.getState().tasks[0].id).toBe('task-old');
+
+    taskStore.useTaskStore.setState({ tasks: [], activeTaskId: null, hydrated: false });
+    sessionSync.resetHydration();
+
+    mockApi.loadTasks.mockResolvedValue({
+      ok: true,
+      rows: [
+        {
+          id: 'task-new',
+          sessionKey: 'agent:main:clawwork:task:task-new',
+          sessionId: 'sess-new',
+          title: 'New workspace task',
+          status: 'active',
+          createdAt: '2026-03-17T00:00:00.000Z',
+          updatedAt: '2026-03-17T00:00:00.000Z',
+          tags: [],
+          artifactDir: '/tmp/new',
+          gatewayId: 'gw-1',
+        },
+      ],
+    });
+
+    await sessionSync.hydrateFromLocal();
+
+    expect(taskStore.useTaskStore.getState().tasks).toHaveLength(1);
+    expect(taskStore.useTaskStore.getState().tasks[0].id).toBe('task-new');
+  });
 });

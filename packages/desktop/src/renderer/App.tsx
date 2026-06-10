@@ -13,6 +13,7 @@ import { useTaskStore } from './stores/taskStore';
 import { useFileStore } from './stores/fileStore';
 import { composer } from './platform';
 import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
+import { useWorkspaceRefresh } from './hooks/useWorkspaceRefresh';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
 import { cn } from '@/lib/utils';
@@ -63,6 +64,7 @@ export default function App() {
   const loadSettings = useSettingsStore((s) => s.load);
 
   useGatewayBootstrap();
+  useWorkspaceRefresh();
   useUpdateCheck();
   useTraySync();
 

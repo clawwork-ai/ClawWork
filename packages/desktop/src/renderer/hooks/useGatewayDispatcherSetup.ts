@@ -141,3 +141,9 @@ export async function fetchAgentsForGateway(gatewayId: string): Promise<void> {
   const agentCatalog = useUiStore.getState().agentCatalogByGateway;
   return getDispatcher().fetchAgentsForGateway(gatewayId, agentCatalog);
 }
+
+export async function reinitializeGatewayBootstrap(): Promise<void> {
+  const d = getDispatcher();
+  d.reset();
+  await d.initialize();
+}

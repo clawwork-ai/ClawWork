@@ -19,7 +19,6 @@ export default function SystemSection() {
   const workspacePath = useSettingsStore((s) => s.settings?.workspacePath);
   const settingsLoaded = useSettingsStore((s) => s.loaded);
   const loadSettings = useSettingsStore((s) => s.load);
-  const refreshSettings = useSettingsStore((s) => s.refresh);
 
   useEffect(() => {
     window.clawwork
@@ -79,7 +78,6 @@ export default function SystemSection() {
     try {
       const result = await window.clawwork.changeWorkspace(selected);
       if (result.ok) {
-        await refreshSettings().catch(() => {});
         toast.success(t('settings.workspaceChanged'), {
           description: t('settings.workspaceOldPathHint', { path: oldPath }),
           duration: 8000,
@@ -93,7 +91,7 @@ export default function SystemSection() {
     } finally {
       setChangingWorkspace(false);
     }
-  }, [refreshSettings, workspacePath, t]);
+  }, [workspacePath, t]);
 
   const handleShortcutRecord = useCallback(
     (e: React.KeyboardEvent) => {
