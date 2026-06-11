@@ -64,12 +64,22 @@ interface GatewaySessionRow {
   workingDir?: string;
   workingDirectory?: string;
   spawnedBy?: string;
-  updatedAt: number | null;
+  parentSessionKey?: string;
+  parentKey?: string;
+  spawnerKey?: string;
+  isSubagent?: boolean;
+  type?: string;
+  role?: string;
+  updatedAt: number | string | null;
+  startedAt?: number | string;
   derivedTitle?: string;
+  title?: string;
+  name?: string;
   label?: string;
   displayName?: string;
   model?: string;
   modelProvider?: string;
+  provider?: string;
   thinkingLevel?: string;
   reasoningLevel?: string;
   fastMode?: boolean;
@@ -79,26 +89,25 @@ interface GatewaySessionRow {
   contextTokens?: number;
 }
 
-interface SessionsListPayload {
-  sessions?: GatewaySessionRow[];
-}
-
 interface ChatHistoryMessage {
   role: string;
-  content: {
-    type: string;
-    text?: string;
-    thinking?: string;
-    url?: string;
-    openUrl?: string;
-    alt?: string;
-    mimeType?: string;
-    id?: string;
-    name?: string;
-    arguments?: Record<string, unknown> | string;
-    result?: unknown;
-  }[];
+  content:
+    | string
+    | {
+        type: string;
+        text?: string;
+        thinking?: string;
+        url?: string;
+        openUrl?: string;
+        alt?: string;
+        mimeType?: string;
+        id?: string;
+        name?: string;
+        arguments?: Record<string, unknown> | string;
+        result?: unknown;
+      }[];
   timestamp?: number;
+  ts?: number;
 }
 
 interface ChatHistoryPayload {
@@ -108,11 +117,98 @@ interface ChatHistoryPayload {
 
 const INTERNAL_ASSISTANT_MARKERS = new Set(['NO_REPLY']);
 const RELATIVE_GATEWAY_MEDIA_PATH_RE = /^\/(?:api\/chat\/media\/outgoing\/|media\/|__openclaw__\/media\/)/;
+const SESSION_METADATA_KEYS = new Set([
+  'recent',
+  'count',
+  'path',
+  'defaults',
+  'ts',
+  'timestamp',
+  'updatedAt',
+  'sessions',
+  'items',
+  'rows',
+  'data',
+  'result',
+]);
 
 function nativeTaskIdForSessionKey(sessionKey: string): string {
   const parsed = parseTaskIdFromSessionKey(sessionKey);
   if (parsed) return parsed;
   return `native-${createHash('sha256').update(sessionKey).digest('hex').slice(0, 24)}`;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function nonEmptyString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function stringField(source: Record<string, unknown>, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = nonEmptyString(source[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function isSessionMetadataKey(key: string): boolean {
+  return SESSION_METADATA_KEYS.has(key);
+}
+
+function normalizeGatewaySessionRow(value: unknown, mapKey?: string): GatewaySessionRow | null {
+  if (!isRecord(value)) {
+    const key = nonEmptyString(mapKey);
+    return key && !isSessionMetadataKey(key) ? ({ key, updatedAt: null } as GatewaySessionRow) : null;
+  }
+
+  const agent = isRecord(value.agent) ? (value.agent as GatewaySessionRow['agent']) : undefined;
+  const key = stringField(value, ['key', 'sessionKey', 'sessionId', 'id']) ?? nonEmptyString(mapKey);
+  if (!key || isSessionMetadataKey(key)) return null;
+
+  return {
+    ...(value as Record<string, unknown>),
+    key,
+    agent,
+    agentId: stringField(value, ['agentId', 'agentID', 'agent_id']) ?? agent?.id,
+    sessionId: stringField(value, ['sessionId', 'sessionID']) ?? stringField(value, ['id']),
+    spawnedBy: stringField(value, ['spawnedBy', 'spawnedBySessionKey']),
+    parentSessionKey: stringField(value, ['parentSessionKey', 'parentSessionId']),
+    parentKey: stringField(value, ['parentKey']),
+    spawnerKey: stringField(value, ['spawnerKey']),
+    workspace: stringField(value, ['workspace', 'workspaceRoot']),
+    workspacePath: stringField(value, ['workspacePath', 'worktreePath']),
+    cwd: stringField(value, ['cwd']),
+    workingDir: stringField(value, ['workingDir']),
+    workingDirectory: stringField(value, ['workingDirectory']),
+    updatedAt: typeof value.updatedAt === 'number' || typeof value.updatedAt === 'string' ? value.updatedAt : null,
+  } as GatewaySessionRow;
+}
+
+function collectSessionRows(value: unknown): GatewaySessionRow[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeGatewaySessionRow(item)).filter((item): item is GatewaySessionRow => !!item);
+  }
+
+  if (!isRecord(value)) return [];
+
+  const nestedKeys = ['sessions', 'items', 'rows', 'data', 'result'];
+  for (const key of nestedKeys) {
+    if (key in value) {
+      const nested = collectSessionRows(value[key]);
+      if (nested.length > 0) return nested;
+    }
+  }
+
+  const single = normalizeGatewaySessionRow(value);
+  if (single) return [single];
+
+  return Object.entries(value)
+    .filter(([key]) => !isSessionMetadataKey(key))
+    .map(([key, row]) => normalizeGatewaySessionRow(row, key))
+    .filter((item): item is GatewaySessionRow => !!item);
 }
 
 function explicitSessionAgentId(session: GatewaySessionRow): string | undefined {
@@ -138,8 +234,28 @@ function normalizePathForCompare(path: string | undefined): string {
   return (path ?? '').trim().replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
 }
 
+function isDerivedSession(session: GatewaySessionRow): boolean {
+  return Boolean(
+    session.spawnedBy ||
+      session.parentSessionKey ||
+      session.parentKey ||
+      session.spawnerKey ||
+      session.isSubagent ||
+      session.type === 'subagent' ||
+      session.role === 'subagent',
+  );
+}
+
 function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?: SyncSessionFilter): boolean {
-  if (!session.key || session.spawnedBy || isSystemSession(session.key) || isSubagentSession(session.key)) return false;
+  if (
+    !session.key ||
+    isDerivedSession(session) ||
+    session.type === 'system' ||
+    session.role === 'system' ||
+    isSystemSession(session.key) ||
+    isSubagentSession(session.key)
+  )
+    return false;
   if (!filter?.agentId && !filter?.workspace) return isClawWorkSession(session.key, deviceId);
 
   const agentId = explicitSessionAgentId(session);
@@ -162,6 +278,36 @@ function sessionListParamsForFilter(filter?: SyncSessionFilter): Record<string, 
     includeDerivedTitles: true,
     includeLastMessage: true,
   };
+}
+
+function messageContentBlocks(message: ChatHistoryMessage): Exclude<ChatHistoryMessage['content'], string> {
+  if (Array.isArray(message.content)) return message.content;
+  if (typeof message.content === 'string' && message.content.length > 0) {
+    return [{ type: 'text', text: message.content }];
+  }
+  return [];
+}
+
+function messageTimestamp(message: ChatHistoryMessage): number | undefined {
+  return typeof message.timestamp === 'number'
+    ? message.timestamp
+    : typeof message.ts === 'number'
+      ? message.ts
+      : undefined;
+}
+
+function toIsoTimestamp(value: number | string | null | undefined): string {
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value);
+    return Number.isFinite(parsed) ? new Date(parsed).toISOString() : new Date().toISOString();
+  }
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return new Date().toISOString();
+  const millis = value < 10_000_000_000 ? value * 1000 : value;
+  return new Date(millis).toISOString();
+}
+
+function sessionTitle(session: GatewaySessionRow, titleFromMsg: string): string {
+  return session.derivedTitle ?? session.label ?? session.title ?? session.displayName ?? session.name ?? titleFromMsg;
 }
 
 interface SyncSessionFilter {
@@ -397,9 +543,22 @@ export function registerWsHandlers(): void {
       if (!gw.isConnected) continue;
       try {
         const deviceId = ensureDeviceId();
-        const raw = (await gw.listSessions(sessionListParamsForFilter(filter))) as unknown as SessionsListPayload;
-        const allSessions = raw.sessions ?? [];
+        const params = sessionListParamsForFilter(filter);
+        const raw = await gw.listSessions(params);
+        const allSessions = collectSessionRows(raw);
         const ours = allSessions.filter((s) => shouldSyncSession(s, deviceId, filter));
+        getDebugLogger().info({
+          domain: 'ipc',
+          event: 'ipc.ws.sync-sessions.listed',
+          gatewayId,
+          data: {
+            requestedAgentId: filter?.agentId,
+            requestedWorkspace: filter?.workspace,
+            paramKeys: Object.keys(params),
+            sessionCount: allSessions.length,
+            importableCount: ours.length,
+          },
+        });
 
         for (const s of ours) {
           const taskId = nativeTaskIdForSessionKey(s.key);
@@ -411,7 +570,7 @@ export function registerWsHandlers(): void {
           const toolResultMap = new Map<string, string>();
           for (const m of rawMsgs) {
             if (m.role === 'toolResult') {
-              for (const b of m.content ?? []) {
+              for (const b of messageContentBlocks(m)) {
                 if (b.type === 'toolResult' && b.id && b.result !== undefined) {
                   toolResultMap.set(b.id, typeof b.result === 'string' ? b.result : JSON.stringify(b.result));
                 }
@@ -422,17 +581,19 @@ export function registerWsHandlers(): void {
           const msgs = rawMsgs
             .filter((m) => m.role === 'user' || m.role === 'assistant')
             .map((m) => {
+              const blocks = messageContentBlocks(m);
+              const timestamp = messageTimestamp(m);
               const normalizedContent =
                 m.role === 'assistant'
-                  ? normalizeContentBlocks(m.content ?? [], gw.httpBase)
+                  ? normalizeContentBlocks(blocks, gw.httpBase)
                   : {
-                      content: (m.content ?? [])
+                      content: blocks
                         .filter((b) => b.type === 'text' && b.text)
                         .map((b) => b.text!)
                         .join(''),
                     };
 
-              const toolCalls: ParsedToolCall[] = (m.content ?? [])
+              const toolCalls: ParsedToolCall[] = blocks
                 .filter((b) => b.type === 'toolCall' && b.id && b.name)
                 .map((b) => {
                   const tcId = b.id!;
@@ -448,12 +609,10 @@ export function registerWsHandlers(): void {
                           ? parseToolArgs(b.arguments)
                           : undefined,
                     result: resultText,
-                    startedAt: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
+                    startedAt: toIsoTimestamp(timestamp),
                     completedAt:
                       resultText !== undefined
-                        ? m.timestamp
-                          ? new Date(m.timestamp).toISOString()
-                          : new Date().toISOString()
+                        ? toIsoTimestamp(timestamp)
                         : undefined,
                   };
                 });
@@ -462,7 +621,7 @@ export function registerWsHandlers(): void {
                 role: m.role,
                 content: normalizedContent.content,
                 attachments: normalizedContent.attachments,
-                timestamp: m.timestamp ? new Date(m.timestamp).toISOString() : new Date().toISOString(),
+                timestamp: toIsoTimestamp(timestamp),
                 toolCalls,
               };
             })
@@ -479,11 +638,11 @@ export function registerWsHandlers(): void {
             gatewayId,
             taskId,
             sessionKey: s.key,
-            title: s.derivedTitle ?? s.label ?? titleFromMsg,
-            updatedAt: s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString(),
+            title: sessionTitle(s, titleFromMsg),
+            updatedAt: toIsoTimestamp(s.updatedAt),
             agentId: sessionAgentId(s, filter?.agentId),
             model: s.model,
-            modelProvider: s.modelProvider,
+            modelProvider: s.modelProvider ?? s.provider,
             thinkingLevel: s.thinkingLevel,
             inputTokens: s.inputTokens,
             outputTokens: s.outputTokens,

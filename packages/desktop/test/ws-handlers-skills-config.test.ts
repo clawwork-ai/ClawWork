@@ -416,6 +416,69 @@ describe('ws-handlers: skills + config IPC channels', () => {
       ]);
     });
 
+    it('imports sessions when the gateway returns a bare array payload', async () => {
+      listSessionsMock.mockResolvedValue([
+        {
+          sessionKey: 'agent:agent-b:main',
+          title: 'Bare array session',
+          updatedAt: 1_775_120_400,
+        },
+      ]);
+      getChatHistoryMock.mockResolvedValue({
+        messages: [
+          {
+            role: 'user',
+            ts: 1_775_120_399,
+            content: 'string chat history content',
+          },
+        ],
+      });
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'agent-b' })) as {
+        ok: boolean;
+        discovered?: Array<{ sessionKey: string; agentId: string; title: string; messages: Array<{ content: string }> }>;
+      };
+
+      expect(listSessionsMock).toHaveBeenCalledWith({ agentId: 'agent-b' });
+      expect(getChatHistoryMock).toHaveBeenCalledWith('agent:agent-b:main', 200);
+      expect(result.ok).toBe(true);
+      expect(result.discovered).toEqual([
+        expect.objectContaining({
+          sessionKey: 'agent:agent-b:main',
+          agentId: 'agent-b',
+          title: 'Bare array session',
+          messages: [expect.objectContaining({ content: 'string chat history content' })],
+        }),
+      ]);
+    });
+
+    it('imports sessions when the gateway returns an object keyed by session id', async () => {
+      listSessionsMock.mockResolvedValue({
+        'agent:agent-c:main': {
+          displayName: 'Mapped session',
+          updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+        },
+        count: 1,
+        path: '/tmp/openclaw-sessions.json',
+      });
+      getChatHistoryMock.mockResolvedValue({ messages: [] });
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'agent-c' })) as {
+        ok: boolean;
+        discovered?: Array<{ sessionKey: string; agentId: string; title: string }>;
+      };
+
+      expect(getChatHistoryMock).toHaveBeenCalledWith('agent:agent-c:main', 200);
+      expect(result.ok).toBe(true);
+      expect(result.discovered).toEqual([
+        expect.objectContaining({
+          sessionKey: 'agent:agent-c:main',
+          agentId: 'agent-c',
+          title: 'Mapped session',
+        }),
+      ]);
+    });
+
     it('does not import spawned, system, or subagent sessions', async () => {
       listSessionsMock.mockResolvedValue({
         sessions: [
