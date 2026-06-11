@@ -378,6 +378,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
           {
             key: 'openclaw:session:abc',
             agentId: 'agent-a',
+            workspace: '/mnt/c/remote/work',
             updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
             label: 'Native OpenClaw session',
           },
@@ -402,13 +403,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
         discovered?: Array<{ taskId: string; sessionKey: string; agentId: string; title: string }>;
       };
 
-      expect(listSessionsMock).toHaveBeenCalledWith({
-        agentId: 'agent-a',
-        includeGlobal: true,
-        includeUnknown: true,
-        includeDerivedTitles: true,
-        includeLastMessage: true,
-      });
+      expect(listSessionsMock).toHaveBeenCalledWith({ agentId: 'agent-a' });
       expect(getChatHistoryMock).toHaveBeenCalledWith('openclaw:session:abc', 200);
       expect(result.ok).toBe(true);
       expect(result.discovered).toEqual([
@@ -445,13 +440,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
         discovered?: unknown[];
       };
 
-      expect(listSessionsMock).toHaveBeenCalledWith({
-        agentId: 'agent-a',
-        includeGlobal: true,
-        includeUnknown: true,
-        includeDerivedTitles: true,
-        includeLastMessage: true,
-      });
+      expect(listSessionsMock).toHaveBeenCalledWith({ agentId: 'agent-a' });
       expect(getChatHistoryMock).not.toHaveBeenCalled();
       expect(result).toEqual({ ok: true, discovered: [] });
     });

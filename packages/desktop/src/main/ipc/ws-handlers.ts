@@ -146,7 +146,7 @@ function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?
   if (filter.agentId && agentId && agentId !== filter.agentId) return false;
 
   const workspace = sessionWorkspace(session);
-  if (filter.workspace && workspace) {
+  if (!filter.agentId && filter.workspace && workspace) {
     return normalizePathForCompare(workspace) === normalizePathForCompare(filter.workspace);
   }
   return true;
@@ -154,9 +154,9 @@ function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?
 
 function sessionListParamsForFilter(filter?: SyncSessionFilter): Record<string, unknown> {
   if (!filter?.agentId && !filter?.workspace) return {};
+  if (filter.agentId) return { agentId: filter.agentId };
 
   return {
-    ...(filter.agentId ? { agentId: filter.agentId } : {}),
     includeGlobal: true,
     includeUnknown: true,
     includeDerivedTitles: true,

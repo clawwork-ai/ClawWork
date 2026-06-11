@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bot, Sparkles, Users, Compass } from 'lucide-react';
+import { Sparkles, Users, Compass, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Team } from '@clawwork/shared';
 import { useTaskStore } from '@/stores/taskStore';
@@ -199,8 +199,7 @@ export default function WelcomeScreen() {
   }, [setMainView]);
 
   const visibleTabs = useMemo(() => {
-    const all: { id: WelcomeTab; label: string; icon: typeof Bot; visible: boolean }[] = [
-      { id: 'agent', label: t('mainArea.tabAgent'), icon: Bot, visible: true },
+    const all: { id: WelcomeTab; label: string; icon: LucideIcon; visible: boolean }[] = [
       { id: 'team', label: t('mainArea.tabTeam'), icon: Users, visible: true },
       {
         id: 'orchestrate',
@@ -277,7 +276,7 @@ function TabButton({
   onSelectTab,
 }: {
   active: boolean;
-  icon: typeof Bot;
+  icon: LucideIcon;
   label: string;
   onSelectTab: () => void;
 }) {
