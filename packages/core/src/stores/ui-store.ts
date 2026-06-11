@@ -287,7 +287,7 @@ export function createUiStore(deps: UiStoreDeps) {
       const selected = state.selectedMainAgentByGateway[gatewayId];
       const catalog = state.agentCatalogByGateway[gatewayId];
       if (selected && catalog?.agents.some((agent) => agent.id === selected)) return selected;
-      return catalog?.defaultId ?? catalog?.agents[0]?.id ?? null;
+      return null;
     },
 
     toolsCatalogByGateway: {},

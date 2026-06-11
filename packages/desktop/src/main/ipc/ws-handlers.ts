@@ -53,8 +53,17 @@ async function gatewayRpc(
 interface GatewaySessionRow {
   key: string;
   agentId?: string;
+  agent?: {
+    id?: string;
+    workspace?: string;
+  };
   sessionId?: string;
   workspace?: string;
+  workspacePath?: string;
+  cwd?: string;
+  workingDir?: string;
+  workingDirectory?: string;
+  spawnedBy?: string;
   updatedAt: number | null;
   derivedTitle?: string;
   label?: string;
@@ -106,8 +115,23 @@ function nativeTaskIdForSessionKey(sessionKey: string): string {
   return `native-${createHash('sha256').update(sessionKey).digest('hex').slice(0, 24)}`;
 }
 
-function sessionAgentId(session: GatewaySessionRow): string {
-  return session.agentId || parseAgentIdFromSessionKey(session.key);
+function explicitSessionAgentId(session: GatewaySessionRow): string | undefined {
+  return session.agentId || session.agent?.id;
+}
+
+function sessionAgentId(session: GatewaySessionRow, fallbackAgentId?: string): string {
+  return explicitSessionAgentId(session) || fallbackAgentId || parseAgentIdFromSessionKey(session.key);
+}
+
+function sessionWorkspace(session: GatewaySessionRow): string | undefined {
+  return (
+    session.workspace ||
+    session.workspacePath ||
+    session.cwd ||
+    session.workingDir ||
+    session.workingDirectory ||
+    session.agent?.workspace
+  );
 }
 
 function normalizePathForCompare(path: string | undefined): string {
@@ -115,12 +139,15 @@ function normalizePathForCompare(path: string | undefined): string {
 }
 
 function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?: SyncSessionFilter): boolean {
-  if (!session.key || isSystemSession(session.key) || isSubagentSession(session.key)) return false;
+  if (!session.key || session.spawnedBy || isSystemSession(session.key) || isSubagentSession(session.key)) return false;
   if (!filter?.agentId && !filter?.workspace) return isClawWorkSession(session.key, deviceId);
 
-  if (filter.agentId && sessionAgentId(session) !== filter.agentId) return false;
-  if (filter.workspace && session.workspace) {
-    return normalizePathForCompare(session.workspace) === normalizePathForCompare(filter.workspace);
+  const agentId = explicitSessionAgentId(session);
+  if (filter.agentId && agentId && agentId !== filter.agentId) return false;
+
+  const workspace = sessionWorkspace(session);
+  if (filter.workspace && workspace) {
+    return normalizePathForCompare(workspace) === normalizePathForCompare(filter.workspace);
   }
   return true;
 }
@@ -442,7 +469,7 @@ export function registerWsHandlers(): void {
             sessionKey: s.key,
             title: s.derivedTitle ?? s.label ?? titleFromMsg,
             updatedAt: s.updatedAt ? new Date(s.updatedAt).toISOString() : new Date().toISOString(),
-            agentId: sessionAgentId(s),
+            agentId: sessionAgentId(s, filter?.agentId),
             model: s.model,
             modelProvider: s.modelProvider,
             thinkingLevel: s.thinkingLevel,
