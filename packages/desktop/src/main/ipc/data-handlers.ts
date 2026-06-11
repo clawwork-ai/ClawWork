@@ -47,6 +47,7 @@ export function registerDataHandlers(): void {
         tags: string[];
         artifactDir: string;
         gatewayId: string;
+        agentId?: string;
       },
     ) => {
       if (!isDbReady()) return ipcError(new Error('database not ready'));
@@ -72,6 +73,7 @@ export function registerDataHandlers(): void {
             tags: JSON.stringify(task.tags),
             artifactDir: task.artifactDir,
             gatewayId: task.gatewayId,
+            agentId: task.agentId ?? null,
           })
           .run();
         return { ok: true };
@@ -98,6 +100,7 @@ export function registerDataHandlers(): void {
         outputTokens?: number;
         contextTokens?: number;
         teamId?: string | null;
+        agentId?: string | null;
         updatedAt: string;
       },
     ) => {
@@ -115,6 +118,7 @@ export function registerDataHandlers(): void {
         if (params.outputTokens !== undefined) updates.outputTokens = params.outputTokens;
         if (params.contextTokens !== undefined) updates.contextTokens = params.contextTokens;
         if (params.teamId !== undefined) updates.teamId = params.teamId;
+        if (params.agentId !== undefined) updates.agentId = params.agentId;
         db.update(tasks).set(updates).where(eq(tasks.id, params.id)).run();
         return { ok: true };
       } catch (err) {

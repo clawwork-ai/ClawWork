@@ -100,6 +100,7 @@ export interface SessionSyncDeps {
         inputTokens?: number;
         outputTokens?: number;
         contextTokens?: number;
+        agentId?: string;
       },
     ) => void;
   };
@@ -400,6 +401,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
         );
 
         taskStore.updateTaskMetadata(d.taskId, {
+          agentId: d.agentId,
           model: d.model,
           modelProvider: d.modelProvider,
           thinkingLevel: d.thinkingLevel,

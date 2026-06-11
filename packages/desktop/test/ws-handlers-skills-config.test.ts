@@ -479,6 +479,53 @@ describe('ws-handlers: skills + config IPC channels', () => {
       ]);
     });
 
+    it('skips scheduled cron sessions by title prefix', async () => {
+      listSessionsMock.mockResolvedValue({
+        sessions: [
+          {
+            key: 'agent:agent-a:cron:nightly',
+            agentId: 'agent-a',
+            title: 'Cron：daily backup',
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+          },
+        ],
+      });
+      getChatHistoryMock.mockResolvedValue({ messages: [] });
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'agent-a' })) as {
+        ok: boolean;
+        discovered?: unknown[];
+      };
+
+      expect(result).toEqual({ ok: true, discovered: [] });
+    });
+
+    it('imports dashboard sessions and continues when history is unavailable', async () => {
+      listSessionsMock.mockResolvedValue({
+        'dashboard:agent-a:overview': {
+          title: 'dashboard：overview',
+          updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+        },
+      });
+      getChatHistoryMock.mockRejectedValue(new Error('history unavailable'));
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'agent-a' })) as {
+        ok: boolean;
+        discovered?: Array<{ sessionKey: string; agentId: string; title: string; messages: unknown[] }>;
+      };
+
+      expect(getChatHistoryMock).toHaveBeenCalledWith('dashboard:agent-a:overview', 200);
+      expect(result.ok).toBe(true);
+      expect(result.discovered).toEqual([
+        expect.objectContaining({
+          sessionKey: 'dashboard:agent-a:overview',
+          agentId: 'agent-a',
+          title: 'dashboard：overview',
+          messages: [],
+        }),
+      ]);
+    });
+
     it('does not import spawned, system, or subagent sessions', async () => {
       listSessionsMock.mockResolvedValue({
         sessions: [

@@ -172,6 +172,15 @@ function agentLabel(agent: AgentInfo | undefined, fallbackId: string): string {
   return basename(agent.workspace) || agent.name || fallbackId;
 }
 
+function isCronTaskTitle(title: string | undefined): boolean {
+  return /^\s*cron\s*[:：]/i.test(title ?? '');
+}
+
+function matchesSelectedMainAgent(task: Task, gatewayId: string | undefined, agentId: string | undefined): boolean {
+  if (!gatewayId || !agentId) return true;
+  return task.gatewayId === gatewayId && task.agentId === agentId;
+}
+
 const startupSyncedMainAgentKeys = new Set<string>();
 
 function mainAgentSyncKey(gatewayId: string, agent: AgentInfo): string {
@@ -332,6 +341,9 @@ export default function LeftNav() {
   const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
   const focusSearch = useUiStore((s) => s.focusSearch);
   const searchFocusTrigger = useUiStore((s) => s.searchFocusTrigger);
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
+  const selectedMainAgentId = defaultGatewayId ? selectedMainAgentByGateway[defaultGatewayId] : undefined;
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [confirmTaskId, setConfirmTaskId] = useState('');
@@ -449,7 +461,16 @@ export default function LeftNav() {
     openMenu(e, taskId, status);
   };
 
-  const visibleTasks = useMemo(() => tasks.filter((t) => t.status !== 'archived'), [tasks]);
+  const visibleTasks = useMemo(
+    () =>
+      tasks.filter(
+        (t) =>
+          t.status !== 'archived' &&
+          !isCronTaskTitle(t.title) &&
+          matchesSelectedMainAgent(t, defaultGatewayId ?? undefined, selectedMainAgentId),
+      ),
+    [defaultGatewayId, selectedMainAgentId, tasks],
+  );
   const activeTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'active'), [visibleTasks]);
   const completedTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'completed'), [visibleTasks]);
   const activeGroups = useMemo(() => groupTasksByTime(activeTasks), [activeTasks]);

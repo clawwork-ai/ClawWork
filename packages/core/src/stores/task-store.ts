@@ -37,6 +37,7 @@ export interface TaskState {
       outputTokens?: number;
       contextTokens?: number;
       teamId?: string | null;
+      agentId?: string;
       updatedAt?: string;
     },
   ) => void;
@@ -74,6 +75,7 @@ export interface TaskStoreDeps {
     outputTokens?: number;
     contextTokens?: number;
     teamId?: string | null;
+    agentId?: string | null;
     updatedAt: string;
   }) => Promise<IpcResult>;
   deleteTask: (taskId: string) => Promise<IpcResult>;
@@ -98,6 +100,7 @@ export interface TaskStoreDeps {
       tags: string[];
       artifactDir: string;
       gatewayId: string;
+      agentId?: string | null;
     }[];
   }>;
   patchSession: (gatewayId: string, sessionKey: string, patch: Record<string, unknown>) => Promise<IpcResult>;
@@ -232,6 +235,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
           outputTokens: meta.outputTokens,
           contextTokens: meta.contextTokens,
           teamId: meta.teamId,
+          agentId: meta.agentId,
           updatedAt,
         })
         .catch((err) => {
@@ -278,7 +282,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
               tags: r.tags,
               artifactDir: r.artifactDir,
               gatewayId: r.gatewayId,
-              agentId: parseAgentIdFromSessionKey(r.sessionKey),
+              agentId: r.agentId ?? parseAgentIdFromSessionKey(r.sessionKey),
             })),
             hydrated: true,
           });
@@ -290,10 +294,19 @@ export function createTaskStore(deps: TaskStoreDeps) {
 
     adoptTasks: (discovered) => {
       const toPersist: Task[] = [];
+      const toUpdate: Array<{ id: string; agentId: string; updatedAt: string }> = [];
       set((s) => {
         const existing = new Set(s.tasks.map((t) => t.id));
+        const existingById = new Map(s.tasks.map((t) => [t.id, t]));
         const newTasks: Task[] = [];
         for (const d of discovered) {
+          const existingTask = existingById.get(d.taskId);
+          if (existingTask) {
+            if (d.agentId && existingTask.agentId !== d.agentId) {
+              toUpdate.push({ id: d.taskId, agentId: d.agentId, updatedAt: d.updatedAt });
+            }
+            continue;
+          }
           if (existing.has(d.taskId)) continue;
           const task: Task = {
             id: d.taskId,
@@ -316,12 +329,25 @@ export function createTaskStore(deps: TaskStoreDeps) {
           };
           newTasks.push(task);
         }
-        if (newTasks.length === 0) return s;
+        if (newTasks.length === 0 && toUpdate.length === 0) return s;
         toPersist.push(...newTasks);
-        return { tasks: [...newTasks, ...s.tasks] };
+        return {
+          tasks: [
+            ...newTasks,
+            ...s.tasks.map((task) => {
+              const update = toUpdate.find((item) => item.id === task.id);
+              return update ? { ...task, agentId: update.agentId } : task;
+            }),
+          ],
+        };
       });
       for (const task of toPersist) {
         deps.persistTask(task).catch((err) => {
+          console.error('[persist:task]', err);
+        });
+      }
+      for (const update of toUpdate) {
+        deps.persistTaskUpdate(update).catch((err) => {
           console.error('[persist:task]', err);
         });
       }

@@ -310,6 +310,10 @@ function sessionTitle(session: GatewaySessionRow, titleFromMsg: string): string 
   return session.derivedTitle ?? session.label ?? session.title ?? session.displayName ?? session.name ?? titleFromMsg;
 }
 
+function isCronSessionTitle(title: string | undefined): boolean {
+  return /^\s*cron\s*[:：]/i.test(title ?? '');
+}
+
 interface SyncSessionFilter {
   gatewayId?: string;
   agentId?: string;
@@ -564,8 +568,20 @@ export function registerWsHandlers(): void {
           const taskId = nativeTaskIdForSessionKey(s.key);
           if (!taskId) continue;
 
-          const historyRaw = (await gw.getChatHistory(s.key, 200)) as unknown as ChatHistoryPayload;
-          const rawMsgs = historyRaw.messages ?? [];
+          let rawMsgs: ChatHistoryMessage[] = [];
+          try {
+            const historyRaw = (await gw.getChatHistory(s.key, 200)) as unknown as ChatHistoryPayload;
+            rawMsgs = Array.isArray(historyRaw.messages) ? historyRaw.messages : [];
+          } catch (err) {
+            getDebugLogger().warn({
+              domain: 'ipc',
+              event: 'ipc.ws.sync-sessions.history-failed',
+              gatewayId,
+              sessionKey: s.key,
+              data: { agentId: filter?.agentId },
+              error: { message: err instanceof Error ? err.message : 'unknown error' },
+            });
+          }
 
           const toolResultMap = new Map<string, string>();
           for (const m of rawMsgs) {
@@ -633,12 +649,14 @@ export function registerWsHandlers(): void {
 
           const firstUserMsg = msgs.find((m) => m.role === 'user' && m.content);
           const titleFromMsg = firstUserMsg ? firstUserMsg.content.slice(0, 30) : '';
+          const title = sessionTitle(s, titleFromMsg);
+          if (isCronSessionTitle(title)) continue;
 
           discovered.push({
             gatewayId,
             taskId,
             sessionKey: s.key,
-            title: sessionTitle(s, titleFromMsg),
+            title,
             updatedAt: toIsoTimestamp(s.updatedAt),
             agentId: sessionAgentId(s, filter?.agentId),
             model: s.model,

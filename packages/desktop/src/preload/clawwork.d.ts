@@ -192,6 +192,7 @@ interface PersistedTask {
   tags: string[];
   artifactDir: string;
   gatewayId: string;
+  agentId?: string | null;
 }
 
 interface PersistedMessage {
@@ -421,6 +422,7 @@ export interface ClawWorkAPI {
     tags: string[];
     artifactDir: string;
     gatewayId: string;
+    agentId?: string | null;
   }) => Promise<IpcResult>;
 
   persistTaskUpdate: (params: {
@@ -435,6 +437,7 @@ export interface ClawWorkAPI {
     outputTokens?: number;
     contextTokens?: number;
     teamId?: string | null;
+    agentId?: string | null;
     updatedAt: string;
   }) => Promise<IpcResult>;
 

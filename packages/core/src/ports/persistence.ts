@@ -11,6 +11,7 @@ export interface PersistedTask {
   tags: string[];
   artifactDir: string;
   gatewayId: string;
+  agentId?: string | null;
   model?: string;
   modelProvider?: string;
   thinkingLevel?: string;
@@ -58,6 +59,7 @@ export interface PersistencePort {
     tags: string[];
     artifactDir: string;
     gatewayId: string;
+    agentId?: string | null;
   }) => Promise<IpcResult>;
   persistTaskUpdate: (params: {
     id: string;
@@ -69,6 +71,7 @@ export interface PersistencePort {
     inputTokens?: number;
     outputTokens?: number;
     contextTokens?: number;
+    agentId?: string | null;
     updatedAt: string;
   }) => Promise<IpcResult>;
   persistMessage: (msg: {

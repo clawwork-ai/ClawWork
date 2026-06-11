@@ -245,6 +245,7 @@ function buildApi(): ClawWorkAPI {
       tags: string[];
       artifactDir: string;
       gatewayId: string;
+      agentId?: string | null;
     }) => ipcRenderer.invoke('data:create-task', task),
 
     persistTaskUpdate: (params: {
@@ -259,6 +260,7 @@ function buildApi(): ClawWorkAPI {
       outputTokens?: number;
       contextTokens?: number;
       teamId?: string | null;
+      agentId?: string | null;
       updatedAt: string;
     }) => ipcRenderer.invoke('data:update-task', params),
 
