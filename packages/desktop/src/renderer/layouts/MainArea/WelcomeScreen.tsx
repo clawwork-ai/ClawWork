@@ -8,7 +8,7 @@ import { useTeamStore } from '@/stores/teamStore';
 import { cn } from '@/lib/utils';
 import { motion as animationPresets } from '@/styles/design-tokens';
 import { motion } from 'framer-motion';
-import { useGatewaySelector } from '@/hooks/useGatewaySelector';
+import { fetchAgentsForGateway } from '@/hooks/useGatewayBootstrap';
 import GatewayInstanceSelector from '@/components/GatewayInstanceSelector';
 import logo from '@/assets/logo.png';
 
@@ -17,6 +17,10 @@ type WelcomeTab = 'agent' | 'team' | 'orchestrate';
 export default function WelcomeScreen() {
   const { t } = useTranslation();
   const setMainView = useUiStore((s) => s.setMainView);
+  const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const activeTaskEnsemble = useTaskStore((s) => {
@@ -35,18 +39,19 @@ export default function WelcomeScreen() {
   const loadTeams = useTeamStore((s) => s.loadTeams);
 
   const teams = useMemo(() => Object.values(teamsMap), [teamsMap]);
-  const {
-    gateways,
-    selectedGwId,
-    setSelectedGwId,
-    agentCatalog,
-    defaultAgentId,
-    effectiveAgentId,
-    hasMultipleAgents,
-  } = useGatewaySelector({
-    initialGatewayId: pendingNewTask?.gatewayId,
-    initialAgentId: pendingNewTask?.agentId,
-  });
+  const gateways = useMemo(() => Object.values(gatewayInfoMap), [gatewayInfoMap]);
+  const [selectedGwId, setSelectedGwId] = useState(
+    pendingNewTask?.gatewayId ?? defaultGatewayId ?? gateways[0]?.id ?? '',
+  );
+  const gwAgents = agentCatalogByGateway[selectedGwId];
+  const agentCatalog = useMemo(() => gwAgents?.agents ?? [], [gwAgents]);
+  const defaultAgentId = gwAgents?.defaultId ?? agentCatalog[0]?.id ?? '';
+  const selectedMainAgentId = selectedMainAgentByGateway[selectedGwId] || '';
+  const effectiveAgentId = useMemo(
+    () => (agentCatalog.some((agent) => agent.id === selectedMainAgentId) ? selectedMainAgentId : defaultAgentId),
+    [agentCatalog, defaultAgentId, selectedMainAgentId],
+  );
+  const hasMultipleAgents = agentCatalog.length > 1;
 
   const [activeTab, setActiveTab] = useState<WelcomeTab>(() => {
     const ensemble = activeTaskEnsemble ?? pendingNewTask?.ensemble;
@@ -67,6 +72,20 @@ export default function WelcomeScreen() {
   useEffect(() => {
     loadTeams();
   }, [loadTeams]);
+
+  useEffect(() => {
+    if (!gateways.length) return;
+    if (gateways.some((gw) => gw.id === selectedGwId)) return;
+    const fallback =
+      defaultGatewayId && gateways.some((gw) => gw.id === defaultGatewayId)
+        ? defaultGatewayId
+        : (gateways[0]?.id ?? '');
+    if (fallback && fallback !== selectedGwId) setSelectedGwId(fallback);
+  }, [defaultGatewayId, gateways, selectedGwId]);
+
+  useEffect(() => {
+    if (selectedGwId) fetchAgentsForGateway(selectedGwId);
+  }, [selectedGwId]);
 
   useEffect(() => {
     if (activeTab === 'agent') {

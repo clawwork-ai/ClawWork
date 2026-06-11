@@ -11,6 +11,7 @@ const patchConfigMock = vi.fn();
 const getConfigSchemaMock = vi.fn();
 const lookupConfigSchemaMock = vi.fn();
 const getChatHistoryMock = vi.fn();
+const listSessionsMock = vi.fn();
 const listSessionsBySpawnerMock = vi.fn();
 
 const fakeGatewayClient = {
@@ -25,6 +26,7 @@ const fakeGatewayClient = {
   getConfigSchema: getConfigSchemaMock,
   lookupConfigSchema: lookupConfigSchemaMock,
   getChatHistory: getChatHistoryMock,
+  listSessions: listSessionsMock,
   listSessionsBySpawner: listSessionsBySpawnerMock,
 };
 
@@ -49,16 +51,24 @@ vi.mock('../src/main/workspace/config.js', () => ({
 }));
 
 vi.mock('../src/main/debug/index.js', () => ({
-  getDebugLogger: vi.fn(() => ({ emit: vi.fn() })),
+  getDebugLogger: vi.fn(() => ({ emit: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() })),
 }));
 
 vi.mock('@clawwork/shared', () => ({
   isClawWorkSession: vi.fn(() => true),
-  parseTaskIdFromSessionKey: vi.fn(() => 'task-1'),
+  isSubagentSession: vi.fn((key: string) => key.includes(':subagent:')),
+  isSystemSession: vi.fn((key: string) => key.includes(':system:')),
+  parseTaskIdFromSessionKey: vi.fn((key: string) => (key.includes('clawwork:task:') ? 'task-1' : null)),
   parseAgentIdFromSessionKey: vi.fn(() => 'main'),
 }));
 
 vi.mock('@clawwork/core', () => ({
+  normalizeContentBlocks: vi.fn((blocks) => ({
+    content: blocks
+      .filter((block: { type?: string; text?: string }) => block.type === 'text' && block.text)
+      .map((block: { text: string }) => block.text)
+      .join(''),
+  })),
   parseToolArgs: vi.fn(() => ({})),
 }));
 
@@ -73,6 +83,8 @@ describe('ws-handlers: skills + config IPC channels', () => {
     handleMap.clear();
     vi.clearAllMocks();
     getChatHistoryMock.mockReset();
+    listSessionsMock.mockReset();
+    listSessionsBySpawnerMock.mockReset();
     fakeGatewayClient.isConnected = true;
 
     vi.resetModules();
@@ -356,6 +368,92 @@ describe('ws-handlers: skills + config IPC channels', () => {
 
       expect(lookupConfigSchemaMock).toHaveBeenCalledWith('model');
       expect(result).toEqual({ ok: true, result: lookupResult });
+    });
+  });
+
+  describe('ws:sync-sessions', () => {
+    it('passes selected agent list parameters and imports native OpenClaw sessions', async () => {
+      listSessionsMock.mockResolvedValue({
+        sessions: [
+          {
+            key: 'openclaw:session:abc',
+            agentId: 'agent-a',
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+            label: 'Native OpenClaw session',
+          },
+        ],
+      });
+      getChatHistoryMock.mockResolvedValue({
+        messages: [
+          {
+            role: 'user',
+            timestamp: Date.parse('2026-04-02T09:59:00.000Z'),
+            content: [{ type: 'text', text: 'hello from openclaw' }],
+          },
+        ],
+      });
+
+      const result = (await invoke('ws:sync-sessions', {
+        gatewayId: 'gw-1',
+        agentId: 'agent-a',
+        workspace: 'C:\\work',
+      })) as {
+        ok: boolean;
+        discovered?: Array<{ taskId: string; sessionKey: string; agentId: string; title: string }>;
+      };
+
+      expect(listSessionsMock).toHaveBeenCalledWith({
+        agentId: 'agent-a',
+        includeGlobal: true,
+        includeUnknown: true,
+        includeDerivedTitles: true,
+        includeLastMessage: true,
+      });
+      expect(getChatHistoryMock).toHaveBeenCalledWith('openclaw:session:abc', 200);
+      expect(result.ok).toBe(true);
+      expect(result.discovered).toEqual([
+        expect.objectContaining({
+          taskId: expect.stringMatching(/^native-[a-f0-9]{24}$/),
+          sessionKey: 'openclaw:session:abc',
+          agentId: 'agent-a',
+          title: 'Native OpenClaw session',
+        }),
+      ]);
+    });
+
+    it('does not import spawned, system, or subagent sessions', async () => {
+      listSessionsMock.mockResolvedValue({
+        sessions: [
+          {
+            key: 'openclaw:session:spawned',
+            spawnedBy: 'openclaw:session:parent',
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+          },
+          {
+            key: 'agent:agent-a:clawwork:system:setup:1',
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+          },
+          {
+            key: 'agent:agent-a:clawwork:subagent:child',
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+          },
+        ],
+      });
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'agent-a' })) as {
+        ok: boolean;
+        discovered?: unknown[];
+      };
+
+      expect(listSessionsMock).toHaveBeenCalledWith({
+        agentId: 'agent-a',
+        includeGlobal: true,
+        includeUnknown: true,
+        includeDerivedTitles: true,
+        includeLastMessage: true,
+      });
+      expect(getChatHistoryMock).not.toHaveBeenCalled();
+      expect(result).toEqual({ ok: true, discovered: [] });
     });
   });
 

@@ -152,6 +152,18 @@ function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?
   return true;
 }
 
+function sessionListParamsForFilter(filter?: SyncSessionFilter): Record<string, unknown> {
+  if (!filter?.agentId && !filter?.workspace) return {};
+
+  return {
+    ...(filter.agentId ? { agentId: filter.agentId } : {}),
+    includeGlobal: true,
+    includeUnknown: true,
+    includeDerivedTitles: true,
+    includeLastMessage: true,
+  };
+}
+
 interface SyncSessionFilter {
   gatewayId?: string;
   agentId?: string;
@@ -385,7 +397,7 @@ export function registerWsHandlers(): void {
       if (!gw.isConnected) continue;
       try {
         const deviceId = ensureDeviceId();
-        const raw = (await gw.listSessions()) as unknown as SessionsListPayload;
+        const raw = (await gw.listSessions(sessionListParamsForFilter(filter))) as unknown as SessionsListPayload;
         const allSessions = raw.sessions ?? [];
         const ours = allSessions.filter((s) => shouldSyncSession(s, deviceId, filter));
 
