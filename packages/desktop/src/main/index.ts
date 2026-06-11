@@ -158,15 +158,15 @@ function createWindow(): BrowserWindow {
   win.webContents.on('context-menu', (_event, params) => {
     if (!params.isEditable) return;
     const template: Electron.MenuItemConstructorOptions[] = [
-      { role: 'undo' },
-      { role: 'redo' },
+      { role: 'undo', label: '撤销' },
+      { role: 'redo', label: '重做' },
       { type: 'separator' },
-      { role: 'cut', enabled: params.editFlags.canCut },
-      { role: 'copy', enabled: params.editFlags.canCopy },
-      { role: 'paste', enabled: params.editFlags.canPaste },
-      { role: 'delete', enabled: params.editFlags.canDelete },
+      { role: 'cut', label: '剪切', enabled: params.editFlags.canCut },
+      { role: 'copy', label: '复制', enabled: params.editFlags.canCopy },
+      { role: 'paste', label: '粘贴', enabled: params.editFlags.canPaste },
+      { role: 'delete', label: '删除', enabled: params.editFlags.canDelete },
       { type: 'separator' },
-      { role: 'selectAll', enabled: params.editFlags.canSelectAll },
+      { role: 'selectAll', label: '全选', enabled: params.editFlags.canSelectAll },
     ];
     Menu.buildFromTemplate(template).popup({ window: win });
   });
