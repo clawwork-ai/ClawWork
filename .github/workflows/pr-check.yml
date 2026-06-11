@@ -46,6 +46,7 @@ jobs:
               - 'eslint.config.mjs'
               - 'knip.json'
               - 'scripts/**'
+              - '.github/workflows/ci-bot.yml'
               - '.github/workflows/pr-check.yml'
               - '.github/workflows/e2e.yml'
             shared:
@@ -141,6 +142,9 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
+
+      - name: CI bot security guardrails
+        run: pnpm check:ci-bot-security
 
       - name: Architecture guardrails
         if: needs.changes.outputs.architecture == 'true'

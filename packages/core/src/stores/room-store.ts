@@ -66,9 +66,15 @@ export interface RoomState {
 
 const VERIFY_COOLDOWN_MS = 2000;
 
+const TERMINAL_ROOM_STATUSES: ReadonlySet<RoomStatus> = new Set(['stopped']);
+
 export function createRoomStore(deps: RoomStoreDeps) {
   const taskGateways = new Map<string, string>();
   const verifyInFlight = new Set<string>();
+
+  function cleanupRoomResources(taskId: string): void {
+    taskGateways.delete(taskId);
+  }
 
   function updateRoom(
     taskId: string,
@@ -159,6 +165,18 @@ export function createRoomStore(deps: RoomStoreDeps) {
 
     setRoomStatus: (taskId, status) => {
       updateRoom(taskId, { status }, set);
+      if (TERMINAL_ROOM_STATUSES.has(status)) {
+        cleanupRoomResources(taskId);
+        set((s) => {
+          const nextMap = { ...s.subagentKeyMap };
+          for (const [key, id] of Object.entries(nextMap)) {
+            if (id === taskId) {
+              delete nextMap[key];
+            }
+          }
+          return { subagentKeyMap: nextMap };
+        });
+      }
       const room = get().rooms[taskId];
       if (room) {
         deps.persistRoom({ taskId, status, conductorReady: room.conductorReady }).catch((err) => {

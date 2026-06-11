@@ -5,7 +5,7 @@ import { createDebugLogger } from './logger.js';
 
 const PRE_INIT_BUFFER_LIMIT = 256;
 const preInitBuffer: DebugEvent[] = [];
-let preInitOverflowed = false;
+let isInitialized = false;
 
 function record(level: DebugEvent['level'], input: LogEventInput): DebugEvent {
   const event = sanitizeForLog({
@@ -14,15 +14,15 @@ function record(level: DebugEvent['level'], input: LogEventInput): DebugEvent {
     level,
   });
 
-  if (preInitBuffer.length < PRE_INIT_BUFFER_LIMIT) {
-    preInitBuffer.push(event);
-  } else if (!preInitOverflowed) {
-    preInitOverflowed = true;
-    console.warn(
-      `[debug] pre-init buffer cap (${PRE_INIT_BUFFER_LIMIT}) reached; ` +
-        'further events before initDebugLogger will be dropped.',
-    );
+  preInitBuffer.push(event);
+  if (preInitBuffer.length > PRE_INIT_BUFFER_LIMIT) {
+    preInitBuffer.shift();
   }
+
+  console.warn(
+    `[debug] Logger not initialized yet (pre-init event captured, buffer size: ${preInitBuffer.length}/${PRE_INIT_BUFFER_LIMIT}):`,
+    `[${event.level}] [${event.domain}] ${event.event}`,
+  );
   return event;
 }
 
@@ -32,7 +32,7 @@ let debugLogger: DebugLogger = {
   warn: (input) => record('warn', input),
   error: (input) => record('error', input),
   log: (input) => record(input.level, input),
-  getRecentEvents: () => [],
+  getRecentEvents: () => [...preInitBuffer],
   currentFilePath: () => '',
   flush: () => Promise.resolve(),
 };
@@ -44,15 +44,19 @@ export function initDebugLogger(debugDir: string): DebugLogger {
     onEvent: broadcastDebugEvent,
   });
   for (const event of preInitBuffer) {
-    debugLogger.log(event);
+    debugLogger.log(event, { silent: true });
   }
   preInitBuffer.length = 0;
-  preInitOverflowed = false;
+  isInitialized = true;
   return debugLogger;
 }
 
 export function getDebugLogger(): DebugLogger {
   return debugLogger;
+}
+
+export function isDebugLoggerInitialized(): boolean {
+  return isInitialized;
 }
 
 function broadcastDebugEvent(event: DebugEvent): void {

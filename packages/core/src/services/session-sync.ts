@@ -133,6 +133,7 @@ function normalizeLocalAssistantMessage(row: { role: string; content: string; at
 export function createSessionSync(deps: SessionSyncDeps) {
   let hydrationPromise: Promise<void> | null = null;
   const syncChains = new Map<string, Promise<void>>();
+  let syncEpoch = 0;
 
   function persistCanonicalMessage(message: Message): void {
     deps.persistence
@@ -190,14 +191,17 @@ export function createSessionSync(deps: SessionSyncDeps) {
 
   async function hydrateFromLocal(): Promise<void> {
     if (!hydrationPromise) {
+      const epoch = syncEpoch;
       hydrationPromise = (async () => {
         const taskStore = deps.getTaskStore();
         const messageStore = deps.getMessageStore();
         await taskStore.hydrate();
+        if (syncEpoch !== epoch) return;
         const tasks = deps.getTaskStore().tasks;
         for (const t of tasks) {
           try {
             const res = await deps.persistence.loadMessages(t.id);
+            if (syncEpoch !== epoch) return;
             if (res.ok && res.rows && res.rows.length > 0) {
               const msgs: Message[] = res.rows.map((r) => {
                 const normalized = normalizeLocalAssistantMessage(r);
@@ -229,13 +233,15 @@ export function createSessionSync(deps: SessionSyncDeps) {
     await hydrationPromise;
   }
 
-  async function doSyncSession(taskId: string, sessionKeyOverride?: string): Promise<void> {
+  async function doSyncSession(taskId: string, sessionKeyOverride: string | undefined, epoch: number): Promise<void> {
     const task = deps.getTaskStore().tasks.find((t) => t.id === taskId);
     const sessionKey = sessionKeyOverride ?? task?.sessionKey;
     if (!task?.gatewayId || !sessionKey) return;
 
     const httpBase = await deps.gateway.getHttpBase?.(task.gatewayId);
+    if (syncEpoch !== epoch) return;
     const res = await deps.gateway.chatHistory(task.gatewayId, sessionKey);
+    if (syncEpoch !== epoch) return;
     if (!res.ok || !res.result) return;
 
     const raw = res.result as { messages?: RawHistoryMessage[] };
@@ -266,6 +272,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
 
     for (let i = 0; i < newest.length; i++) {
+      if (syncEpoch !== epoch) return;
       const gm = newest[i];
       const canonical: Message = {
         id: crypto.randomUUID(),
@@ -314,17 +321,22 @@ export function createSessionSync(deps: SessionSyncDeps) {
   }
 
   async function syncWithRetry(taskId: string, sessionKeyOverride?: string): Promise<void> {
+    const epoch = syncEpoch;
     for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+      if (syncEpoch !== epoch) return;
       try {
-        await doSyncSession(taskId, sessionKeyOverride);
+        await doSyncSession(taskId, sessionKeyOverride, epoch);
         return;
       } catch {
         if (attempt < RETRY_DELAYS.length) {
           await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
+          if (syncEpoch !== epoch) return;
         }
       }
     }
-    console.warn('[sync] syncSessionMessages exhausted retries for task', taskId);
+    if (syncEpoch === epoch) {
+      console.warn('[sync] syncSessionMessages exhausted retries for task', taskId);
+    }
   }
 
   function retrySyncPending(): void {
@@ -362,9 +374,12 @@ export function createSessionSync(deps: SessionSyncDeps) {
   }
 
   async function syncFromGateway(filter?: SessionSyncFilter): Promise<void> {
+    const epoch = syncEpoch;
     try {
       await hydrateFromLocal();
+      if (syncEpoch !== epoch) return;
       const res = await deps.gateway.syncSessions(filter);
+      if (syncEpoch !== epoch) return;
       if (!res.ok || !res.discovered) return;
       const taskStore = deps.getTaskStore();
       const messageStore = deps.getMessageStore();
@@ -372,6 +387,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
       taskStore.adoptTasks(discovered);
 
       for (const d of discovered) {
+        if (syncEpoch !== epoch) return;
         const collapsedMessages = collapseDiscoveredMessages(
           d.messages.map((message: DiscoveredSyncMessage) => ({
             role: message.role,
@@ -429,5 +445,11 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
   }
 
-  return { hydrateFromLocal, syncSessionMessages, syncFromGateway, retrySyncPending };
+  function resetHydration(): void {
+    hydrationPromise = null;
+    syncChains.clear();
+    syncEpoch++;
+  }
+
+  return { hydrateFromLocal, syncSessionMessages, syncFromGateway, retrySyncPending, resetHydration };
 }

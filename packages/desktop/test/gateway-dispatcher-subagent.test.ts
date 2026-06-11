@@ -13,7 +13,7 @@ function createHarness(
   let listener: EventListener | null = null;
 
   const tasks = overrides?.tasks ?? [];
-  const systemMessages: Array<{ taskId: string; content: string }> = [];
+  const systemMessages: Array<{ taskId: string; content: string; sessionKey?: string }> = [];
   const toasts: Array<{ type: string; title: string }> = [];
   const performerCandidates: Array<{ taskId: string; sessionKey: string; gatewayId: string }> = [];
   const subagentCandidates: Array<{ sessionKey: string; gatewayId: string }> = [];
@@ -21,10 +21,12 @@ function createHarness(
   const messageStore = {
     messagesByTask: {} as Record<string, unknown[]>,
     activeTurnBySession: {} as Record<string, unknown>,
-    addMessage: vi.fn((_taskId: string, _role: string, content: string) => {
-      systemMessages.push({ taskId: _taskId, content });
-      return { id: 'msg-1', taskId: _taskId, role: _role, content, artifacts: [], toolCalls: [], timestamp: '' };
-    }),
+    addMessage: vi.fn(
+      (_taskId: string, _role: string, content: string, _attachments?: unknown, options?: { sessionKey?: string }) => {
+        systemMessages.push({ taskId: _taskId, content, sessionKey: options?.sessionKey });
+        return { id: 'msg-1', taskId: _taskId, role: _role, content, artifacts: [], toolCalls: [], timestamp: '' };
+      },
+    ),
     upsertToolCall: vi.fn(),
     appendStreamDelta: vi.fn(),
     appendThinkingDelta: vi.fn(),
@@ -298,6 +300,7 @@ describe('subagent terminated error suppression', () => {
     });
 
     expect(h.systemMessages.length).toBe(1);
+    expect(h.systemMessages[0].sessionKey).toBe('agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111');
     expect(h.toasts.length).toBe(1);
   });
 
@@ -320,6 +323,70 @@ describe('subagent terminated error suppression', () => {
     });
 
     expect(h.systemMessages.length).toBe(1);
+    expect(h.systemMessages[0].sessionKey).toBe('agent:main:clawwork:task:task-1');
     expect(h.toasts.length).toBe(1);
+  });
+});
+
+describe('system error sessionKey correlation', () => {
+  it('includes sessionKey on chat error system messages', () => {
+    const performerKey = 'agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111';
+    const subagentMap: Record<string, string> = { [performerKey]: 'task-1' };
+    const h = createHarness({
+      tasks: [
+        {
+          id: 'task-1',
+          title: 'Ensemble task',
+          gatewayId: 'gw-1',
+          sessionKey: 'agent:conductor:clawwork:task:task-1',
+          ensemble: true,
+        },
+      ],
+      lookupTaskIdBySubagentKey: (key) => subagentMap[key],
+    });
+
+    h.emit('chat', {
+      sessionKey: performerKey,
+      state: 'error',
+      errorMessage: 'context length exceeded',
+    });
+
+    expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
+      sessionKey: performerKey,
+    });
+  });
+
+  it('includes sessionKey on agent lifecycle error system messages', async () => {
+    vi.useFakeTimers();
+    try {
+      const performerKey = 'agent:coder:subagent:aaaa0000-bbbb-cccc-dddd-eeee00001111';
+      const subagentMap: Record<string, string> = { [performerKey]: 'task-1' };
+      const h = createHarness({
+        tasks: [
+          {
+            id: 'task-1',
+            title: 'Ensemble task',
+            gatewayId: 'gw-1',
+            sessionKey: 'agent:conductor:clawwork:task:task-1',
+            ensemble: true,
+          },
+        ],
+        lookupTaskIdBySubagentKey: (key) => subagentMap[key],
+      });
+
+      h.emit('agent', {
+        sessionKey: performerKey,
+        stream: 'lifecycle',
+        data: { phase: 'error', error: 'provider unavailable' },
+      });
+
+      await vi.advanceTimersByTimeAsync(2000);
+
+      expect(h.messageStore.addMessage).toHaveBeenCalledWith('task-1', 'system', expect.any(String), undefined, {
+        sessionKey: performerKey,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

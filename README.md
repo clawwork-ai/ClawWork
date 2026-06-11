@@ -43,6 +43,23 @@ Once you have multiple sessions, long-running jobs, approval stops, generated fi
 
 ClawWork fixes that. Every task becomes a durable workspace with its own session, artifacts, controls, and history — laid out in a three-panel UI: tasks on the left, active work in the center, artifacts and context on the right.
 
+### ClawWork vs messaging channels
+
+**The dedicated UI for OpenClaw — stop chatting with Agents in Feishu.**
+
+|                | Feishu / DingTalk / Slack  | ClawWork                                              |
+| -------------- | -------------------------- | ----------------------------------------------------- |
+| Layout         | Single chat thread         | Three-column: task list, conversation, progress panel |
+| Multi-task     | One conversation at a time | Parallel tasks in isolated sessions                   |
+| Tool calls     | Hidden or text-only        | Real-time visualization with expandable details       |
+| Artifacts      | Lost in chat history       | Auto-saved to local Git repo, searchable              |
+| Progress       | No structured tracking     | Step-by-step progress panel                           |
+| Data ownership | On third-party servers     | 100% local (SQLite + Git)                             |
+
+## Demo
+
+> **Launch prep:** Record a 60-second demo and save as `docs/demo.gif`. See [docs/promotion/demo-recording.md](./docs/promotion/demo-recording.md) for the checklist.
+
 ## Teams
 
 One agent is useful. A coordinated team of agents is a workforce.
@@ -110,7 +127,7 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 - Per-gateway session catalogs
 - Session controls that matter: stop, reset, compact, delete, and sync
 - Background work that stays readable instead of collapsing into one long thread
-- Set tasks on a schedule with `cron`, `every`, or `at` expressions — pick from presets or write your own, check run history, trigger manually anytime
+- Set tasks on a schedule with `cron`, `every`, or `at` expressions — pick from presets or write your own, check run history, trigger manually anytime ([recipe examples](./docs/scheduled-workflow-recipes.md))
 - Export any session as Markdown to keep a clean record outside the app
 
 ### 👁 Better visibility

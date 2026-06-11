@@ -27,7 +27,7 @@ export interface MessageState {
     role: MessageRole,
     content: string,
     attachments?: MessageAttachment[],
-    options?: { persist?: boolean },
+    options?: { persist?: boolean; sessionKey?: string },
   ) => Message;
   upsertToolCall: (sessionKey: string, taskId: string, tc: ToolCall) => void;
   bulkLoad: (taskId: string, msgs: Message[]) => void;
@@ -163,6 +163,7 @@ export function createMessageStore(deps: MessageStoreDeps) {
     highlightedMessageId: null,
 
     addMessage: (taskId, role, content, attachments?, options?) => {
+      const sessionKey = options?.sessionKey;
       const msg: Message = {
         id: generateId(),
         taskId,
@@ -172,6 +173,8 @@ export function createMessageStore(deps: MessageStoreDeps) {
         toolCalls: [],
         attachments: attachments?.length ? attachments : undefined,
         timestamp: new Date().toISOString(),
+        sessionKey,
+        agentId: sessionKey ? parseAgentIdFromSessionKey(sessionKey) : undefined,
       };
       set((s) => ({
         messagesByTask: {

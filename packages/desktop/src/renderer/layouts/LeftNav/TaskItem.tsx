@@ -12,6 +12,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { deriveSessionActivity, getTaskSessionKeys } from '@clawwork/core';
 import type { Task } from '@clawwork/shared';
 import ActivityBars from '@/components/ActivityBars';
+import type { TaskSessionPreview } from '@/hooks/useSessionPreviews';
 
 interface TaskItemProps {
   task: Task;
@@ -20,9 +21,18 @@ interface TaskItemProps {
   collapsed?: boolean;
   editing?: boolean;
   onEditDone?: () => void;
+  preview?: TaskSessionPreview;
 }
 
-export default function TaskItem({ task, active, onContextMenu, collapsed, editing, onEditDone }: TaskItemProps) {
+export default function TaskItem({
+  task,
+  active,
+  onContextMenu,
+  collapsed,
+  editing,
+  onEditDone,
+  preview,
+}: TaskItemProps) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   const setActiveTask = useTaskStore((s) => s.setActiveTask);
@@ -68,6 +78,13 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
     setMainView('chat');
   };
 
+  const title = task.title || t('common.newTask');
+  const previewText =
+    preview?.state === 'ready' && preview.text
+      ? preview.text
+      : preview?.state === 'empty'
+        ? t('leftNav.noPreview')
+        : null;
   if (collapsed) {
     return (
       <Tooltip>
@@ -99,7 +116,9 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
             {hasUnread && <span className="absolute bottom-0.5 right-1 w-2 h-2 rounded-full bg-[var(--accent)]" />}
           </motion.button>
         </TooltipTrigger>
-        <TooltipContent side="right">{task.title || t('common.newTask')}</TooltipContent>
+        <TooltipContent side="right" className={previewText ? 'whitespace-pre-line' : undefined}>
+          {previewText ? `${title}\n${previewText}` : title}
+        </TooltipContent>
       </Tooltip>
     );
   }
@@ -124,7 +143,7 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
               : 'hover:bg-[var(--bg-hover)]',
       )}
     >
-      <div className="flex items-center gap-2 px-3 h-9">
+      <div className={cn('flex items-center gap-2 px-3', editing ? 'h-9' : 'py-1.5 min-h-9')}>
         <div className="flex-1 min-w-0">
           {editing ? (
             <input
@@ -147,19 +166,22 @@ export default function TaskItem({ task, active, onContextMenu, collapsed, editi
               className="type-label w-full rounded border border-[var(--ring-accent)] bg-[var(--bg-primary)] px-1 py-0 text-[var(--text-primary)] outline-none"
             />
           ) : (
-            <span
-              className={cn(
-                'block truncate type-body',
-                hasUnread && 'font-medium',
-                active
-                  ? 'text-[var(--text-primary)]'
-                  : isCompleted
-                    ? 'text-[var(--text-muted)]'
-                    : 'text-[var(--text-secondary)]',
-              )}
-            >
-              {task.title || t('common.newTask')}
-            </span>
+            <>
+              <span
+                className={cn(
+                  'block truncate type-body',
+                  hasUnread && 'font-medium',
+                  active
+                    ? 'text-[var(--text-primary)]'
+                    : isCompleted
+                      ? 'text-[var(--text-muted)]'
+                      : 'text-[var(--text-secondary)]',
+                )}
+              >
+                {title}
+              </span>
+              {previewText && <span className="block truncate type-meta text-[var(--text-muted)]">{previewText}</span>}
+            </>
           )}
         </div>
 
