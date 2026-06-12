@@ -485,7 +485,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
           {
             key: 'agent:agent-a:cron:nightly',
             agentId: 'agent-a',
-            title: 'Cron：daily backup',
+            title: 'Cron\uFF1Adaily backup',
             updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
           },
         ],
@@ -503,7 +503,7 @@ describe('ws-handlers: skills + config IPC channels', () => {
     it('imports dashboard sessions and continues when history is unavailable', async () => {
       listSessionsMock.mockResolvedValue({
         'dashboard:agent-a:overview': {
-          title: 'dashboard：overview',
+          title: 'dashboard\uFF1Aoverview',
           updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
         },
       });
@@ -520,10 +520,32 @@ describe('ws-handlers: skills + config IPC channels', () => {
         expect.objectContaining({
           sessionKey: 'dashboard:agent-a:overview',
           agentId: 'agent-a',
-          title: 'dashboard：overview',
+          title: 'dashboard\uFF1Aoverview',
           messages: [],
         }),
       ]);
+    });
+
+    it('does not import metadata or empty placeholder sessions for agents without conversations', async () => {
+      listSessionsMock.mockResolvedValue({
+        sessions: {
+          global: {},
+          main: {},
+          defaults: { mainSessionKey: 'agent:empty-agent:main' },
+          'agent:empty-agent:main': {
+            updatedAt: Date.parse('2026-04-02T10:00:00.000Z'),
+          },
+        },
+      });
+      getChatHistoryMock.mockResolvedValue({ messages: [] });
+
+      const result = (await invoke('ws:sync-sessions', { gatewayId: 'gw-1', agentId: 'empty-agent' })) as {
+        ok: boolean;
+        discovered?: unknown[];
+      };
+
+      expect(getChatHistoryMock).toHaveBeenCalledWith('agent:empty-agent:main', 200);
+      expect(result).toEqual({ ok: true, discovered: [] });
     });
 
     it('does not import spawned, system, or subagent sessions', async () => {

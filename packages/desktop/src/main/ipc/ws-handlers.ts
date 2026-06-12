@@ -122,6 +122,7 @@ const SESSION_METADATA_KEYS = new Set([
   'count',
   'path',
   'defaults',
+  'sessionDefaults',
   'ts',
   'timestamp',
   'updatedAt',
@@ -130,6 +131,13 @@ const SESSION_METADATA_KEYS = new Set([
   'rows',
   'data',
   'result',
+  'global',
+  'main',
+  'default',
+  'current',
+  'active',
+  'latest',
+  'unknown',
 ]);
 
 function nativeTaskIdForSessionKey(sessionKey: string): string {
@@ -158,14 +166,26 @@ function isSessionMetadataKey(key: string): boolean {
   return SESSION_METADATA_KEYS.has(key);
 }
 
+function isLikelySessionKey(key: string | undefined): key is string {
+  if (!key || isSessionMetadataKey(key)) return false;
+  return /^(agent|openclaw|dashboard)[:\uFF1A]/i.test(key) || (key.includes(':') && /session/i.test(key));
+}
+
+function hasSessionTitlePrefix(value: Record<string, unknown>): boolean {
+  const title = stringField(value, ['derivedTitle', 'label', 'title', 'displayName', 'name']);
+  return /^\s*(dashboard|cron)\s*[:\uFF1A]/i.test(title ?? '');
+}
+
 function normalizeGatewaySessionRow(value: unknown, mapKey?: string): GatewaySessionRow | null {
   if (!isRecord(value)) {
     const key = nonEmptyString(mapKey);
-    return key && !isSessionMetadataKey(key) ? ({ key, updatedAt: null } as GatewaySessionRow) : null;
+    return isLikelySessionKey(key) ? ({ key, updatedAt: null } as GatewaySessionRow) : null;
   }
 
   const agent = isRecord(value.agent) ? (value.agent as GatewaySessionRow['agent']) : undefined;
-  const key = stringField(value, ['key', 'sessionKey', 'sessionId', 'id']) ?? nonEmptyString(mapKey);
+  const explicitKey = stringField(value, ['key', 'sessionKey', 'sessionId', 'id']);
+  const mapSessionKey = nonEmptyString(mapKey);
+  const key = explicitKey ?? (isLikelySessionKey(mapSessionKey) || hasSessionTitlePrefix(value) ? mapSessionKey : undefined);
   if (!key || isSessionMetadataKey(key)) return null;
 
   return {
@@ -197,8 +217,7 @@ function collectSessionRows(value: unknown): GatewaySessionRow[] {
   const nestedKeys = ['sessions', 'items', 'rows', 'data', 'result'];
   for (const key of nestedKeys) {
     if (key in value) {
-      const nested = collectSessionRows(value[key]);
-      if (nested.length > 0) return nested;
+      return collectSessionRows(value[key]);
     }
   }
 
@@ -215,8 +234,16 @@ function explicitSessionAgentId(session: GatewaySessionRow): string | undefined 
   return session.agentId || session.agent?.id;
 }
 
+function dashboardSessionAgentId(sessionKey: string): string | undefined {
+  return sessionKey.match(/^dashboard[:\uFF1A]([^:\uFF1A]+)(?:[:\uFF1A]|$)/i)?.[1];
+}
+
+function inferredSessionAgentId(session: GatewaySessionRow): string | undefined {
+  return explicitSessionAgentId(session) || dashboardSessionAgentId(session.key);
+}
+
 function sessionAgentId(session: GatewaySessionRow, fallbackAgentId?: string): string {
-  return explicitSessionAgentId(session) || fallbackAgentId || parseAgentIdFromSessionKey(session.key);
+  return inferredSessionAgentId(session) || fallbackAgentId || parseAgentIdFromSessionKey(session.key);
 }
 
 function sessionWorkspace(session: GatewaySessionRow): string | undefined {
@@ -258,7 +285,7 @@ function shouldSyncSession(session: GatewaySessionRow, deviceId: string, filter?
     return false;
   if (!filter?.agentId && !filter?.workspace) return isClawWorkSession(session.key, deviceId);
 
-  const agentId = explicitSessionAgentId(session);
+  const agentId = inferredSessionAgentId(session);
   if (filter.agentId && agentId && agentId !== filter.agentId) return false;
 
   const workspace = sessionWorkspace(session);
@@ -307,11 +334,18 @@ function toIsoTimestamp(value: number | string | null | undefined): string {
 }
 
 function sessionTitle(session: GatewaySessionRow, titleFromMsg: string): string {
-  return session.derivedTitle ?? session.label ?? session.title ?? session.displayName ?? session.name ?? titleFromMsg;
+  const explicitTitle = session.derivedTitle ?? session.label ?? session.title ?? session.displayName ?? session.name;
+  if (explicitTitle) return explicitTitle;
+  if (/^dashboard[:\uFF1A]/i.test(session.key)) return session.key.replace(/^dashboard[:\uFF1A]?/i, 'dashboard: ');
+  return titleFromMsg;
 }
 
 function isCronSessionTitle(title: string | undefined): boolean {
-  return /^\s*cron\s*[:：]/i.test(title ?? '');
+  return /^\s*cron\s*[:\uFF1A]/i.test(title ?? '');
+}
+
+function isDashboardSession(session: GatewaySessionRow, title: string | undefined): boolean {
+  return /^dashboard[:\uFF1A]/i.test(session.key) || /^\s*dashboard\s*[:\uFF1A]/i.test(title ?? '');
 }
 
 interface SyncSessionFilter {
@@ -651,6 +685,7 @@ export function registerWsHandlers(): void {
           const titleFromMsg = firstUserMsg ? firstUserMsg.content.slice(0, 30) : '';
           const title = sessionTitle(s, titleFromMsg);
           if (isCronSessionTitle(title)) continue;
+          if (!title.trim() && msgs.length === 0 && !isDashboardSession(s, title)) continue;
 
           discovered.push({
             gatewayId,

@@ -173,7 +173,11 @@ function agentLabel(agent: AgentInfo | undefined, fallbackId: string): string {
 }
 
 function isCronTaskTitle(title: string | undefined): boolean {
-  return /^\s*cron\s*[:：]/i.test(title ?? '');
+  return /^\s*cron\s*[:\uFF1A]/i.test(title ?? '');
+}
+
+function isEmptyImportedPlaceholder(task: Task): boolean {
+  return task.id.startsWith('native-') && !task.title.trim();
 }
 
 function matchesSelectedMainAgent(task: Task, gatewayId: string | undefined, agentId: string | undefined): boolean {
@@ -467,6 +471,7 @@ export default function LeftNav() {
         (t) =>
           t.status !== 'archived' &&
           !isCronTaskTitle(t.title) &&
+          !isEmptyImportedPlaceholder(t) &&
           matchesSelectedMainAgent(t, defaultGatewayId ?? undefined, selectedMainAgentId),
       ),
     [defaultGatewayId, selectedMainAgentId, tasks],
