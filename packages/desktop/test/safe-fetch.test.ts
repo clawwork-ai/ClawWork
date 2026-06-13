@@ -182,6 +182,15 @@ describe('safeFetch', () => {
     await expect(safeFetch('https://cdn.example.com/big.bin', { maxSize: 1024 })).rejects.toThrow('too large');
   });
 
+  it('accepts body exactly at maxSize', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const exact = new ArrayBuffer(1024);
+    netFetchMock.mockResolvedValue(mockResponse(exact));
+
+    const buf = await safeFetch('https://cdn.example.com/exact.bin', { maxSize: 1024 });
+    expect(buf.length).toBe(1024);
+  });
+
   it('rejects on non-ok HTTP status', async () => {
     assertNotPrivateHostMock.mockResolvedValue(null);
     netFetchMock.mockResolvedValue(mockResponse(new ArrayBuffer(0), 404));
