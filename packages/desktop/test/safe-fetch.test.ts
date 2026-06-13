@@ -300,6 +300,16 @@ describe('safeFetch', () => {
     expect(abortSignal?.aborted).toBe(true);
   });
 
+  it('does not await a slow reader.cancel() before rejecting maxSize overflow', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const cancel = vi.fn(() => new Promise<void>(() => {}));
+    const big = new ArrayBuffer(2048);
+    netFetchMock.mockResolvedValue(mockResponse(big, 200, {}, cancel));
+
+    await expect(safeFetch('https://cdn.example.com/big.bin', { maxSize: 1024 })).rejects.toThrow('too large');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
   it('does not read the entire oversized body before rejecting — bounded streaming (#408)', async () => {
     assertNotPrivateHostMock.mockResolvedValue(null);
     const chunkSize = 256;
