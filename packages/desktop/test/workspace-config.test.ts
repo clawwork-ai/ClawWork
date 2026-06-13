@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { homedir, tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -86,6 +86,27 @@ describe('workspace config', () => {
     expect(existsSync(`${configPath}.tmp`)).toBe(false);
     expect(readConfig()).toEqual(second);
     expect(() => JSON.parse(readFileSync(configPath, 'utf8'))).not.toThrow();
+  });
+
+  it('keeps valid config when a partial temp file remains after interrupted write', () => {
+    const configPath = join(userDataDir, CONFIG_FILE_NAME);
+    const original: AppConfig = {
+      workspacePath: '/stable',
+      gateways: [{ id: 'gw-1', name: 'Local', url: 'ws://127.0.0.1:18789' }],
+    };
+    writeConfig(original);
+    const snapshot = readFileSync(configPath, 'utf8');
+
+    // Crash after temp write but before atomic rename — main config must stay intact.
+    writeFileSync(`${configPath}.tmp`, '{\n  "workspacePath": "/part', { encoding: 'utf-8', mode: 0o600 });
+
+    expect(readConfig()).toEqual(original);
+    expect(readFileSync(configPath, 'utf8')).toBe(snapshot);
+
+    const updated: AppConfig = { workspacePath: '/recovered', gateways: [] };
+    writeConfig(updated);
+    expect(existsSync(`${configPath}.tmp`)).toBe(false);
+    expect(readConfig()).toEqual(updated);
   });
 
   it('preserves existing config when rename fails', async () => {
