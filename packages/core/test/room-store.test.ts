@@ -177,6 +177,46 @@ describe('room store', () => {
 
     expect(store.getState().lookupTaskIdBySubagentKey(subagentKey)).toBeUndefined();
   });
+
+  it('cleans up room resources when initConductor fails to create the session', async () => {
+    const createSession = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, error: 'gateway unavailable' })
+      .mockResolvedValue({ ok: true });
+    const deps = createDeps({ createSession });
+    const store = createRoomStore(deps);
+    const taskId = 'task-fail';
+    const sessionKey = buildSessionKey(taskId);
+
+    const failed = await store.getState().initConductor(taskId, 'gw-1', sessionKey, '[]');
+    expect(failed).toBe(false);
+
+    const ok = await store.getState().initConductor(taskId, 'gw-2', sessionKey, '[]');
+    expect(ok).toBe(true);
+    expect(createSession).toHaveBeenLastCalledWith('gw-2', expect.any(Object));
+
+    store.getState().setRoomStatus(taskId, 'stopped');
+
+    const okAgain = await store.getState().initConductor(taskId, 'gw-3', sessionKey, '[]');
+    expect(okAgain).toBe(true);
+    expect(createSession).toHaveBeenLastCalledWith('gw-3', expect.any(Object));
+  });
+
+  it('cleans up room resources when initConductor throws', async () => {
+    const err = new Error('network reset');
+    const createSession = vi.fn().mockRejectedValueOnce(err).mockResolvedValueOnce({ ok: true });
+    const deps = createDeps({ createSession });
+    const store = createRoomStore(deps);
+    const taskId = 'task-throw';
+    const sessionKey = buildSessionKey(taskId);
+
+    const failed = await store.getState().initConductor(taskId, 'gw-1', sessionKey, '[]');
+    expect(failed).toBe(false);
+
+    const ok = await store.getState().initConductor(taskId, 'gw-2', sessionKey, '[]');
+    expect(ok).toBe(true);
+    expect(createSession).toHaveBeenLastCalledWith('gw-2', expect.any(Object));
+  });
 });
 
 describe('room-store initConductor', () => {
