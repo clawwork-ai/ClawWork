@@ -40,69 +40,53 @@ const defaultConfig = {
 
 describe('resolveGlobalShortcutAction', () => {
   it('does not bind Ctrl/Cmd+P', () => {
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ ctrlKey: true, code: 'KeyP' }), defaultConfig),
-    ).toBeNull();
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'KeyP' }), defaultConfig),
-    ).toBeNull();
+    expect(resolveGlobalShortcutAction(keyEvent({ ctrlKey: true, code: 'KeyP' }), defaultConfig)).toBeNull();
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'KeyP' }), defaultConfig)).toBeNull();
   });
 
   it('resolves built-in shortcuts', () => {
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, shiftKey: true, code: 'KeyO' }), defaultConfig),
-    ).toBe('new-task');
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, shiftKey: true, code: 'KeyF' }), defaultConfig),
-    ).toBe('open-files');
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'KeyK' }), defaultConfig),
-    ).toBe('toggle-command-palette');
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, shiftKey: true, code: 'KeyO' }), defaultConfig)).toBe(
+      'new-task',
+    );
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, shiftKey: true, code: 'KeyF' }), defaultConfig)).toBe(
+      'open-files',
+    );
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'KeyK' }), defaultConfig)).toBe(
+      'toggle-command-palette',
+    );
   });
 
   it('respects configurable panel shortcuts', () => {
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Comma' }), defaultConfig),
-    ).toBe('toggle-left-nav');
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Period' }), defaultConfig),
-    ).toBe('toggle-right-panel');
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Comma' }), defaultConfig)).toBe(
+      'toggle-left-nav',
+    );
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Period' }), defaultConfig)).toBe(
+      'toggle-right-panel',
+    );
   });
 
   it('skips panel shortcuts when set to None', () => {
     const disabled = { leftNavShortcut: 'None' as const, rightPanelShortcut: 'None' as const };
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Comma' }), disabled),
-    ).toBeNull();
-    expect(
-      resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Period' }), disabled),
-    ).toBeNull();
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Comma' }), disabled)).toBeNull();
+    expect(resolveGlobalShortcutAction(keyEvent({ metaKey: true, code: 'Period' }), disabled)).toBeNull();
   });
 });
 
 describe('shouldDeferGlobalShortcut', () => {
   it('defers panel shortcuts while typing in a text field', () => {
-    expect(
-      shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'Comma' }, mockTextInput())),
-    ).toBe(true);
+    expect(shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'Comma' }, mockTextInput()))).toBe(true);
   });
 
   it('still allows Cmd/Ctrl+K inside text fields', () => {
-    expect(
-      shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'KeyK' }, mockTextInput())),
-    ).toBe(false);
+    expect(shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'KeyK' }, mockTextInput()))).toBe(false);
   });
 
   it('does not defer shortcuts outside text inputs', () => {
-    expect(
-      shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'Comma' }, mockNonInput())),
-    ).toBe(false);
+    expect(shouldDeferGlobalShortcut(keyEvent({ metaKey: true, code: 'Comma' }, mockNonInput()))).toBe(false);
   });
 
   it('defers Ctrl/Cmd+P inside text fields so print can pass through', () => {
-    expect(
-      shouldDeferGlobalShortcut(keyEvent({ ctrlKey: true, code: 'KeyP' }, mockTextInput())),
-    ).toBe(true);
+    expect(shouldDeferGlobalShortcut(keyEvent({ ctrlKey: true, code: 'KeyP' }, mockTextInput()))).toBe(true);
   });
 });
 
