@@ -71,19 +71,11 @@ describe('task-store hydrate', () => {
     expect(store.getState().tasks).toHaveLength(1);
   });
 
-  it('includes deviceId in session keys created after store init', async () => {
-    let resolveDeviceId!: (id: string) => void;
-    const getDeviceId = vi.fn(
-      () =>
-        new Promise<string>((resolve) => {
-          resolveDeviceId = resolve;
-        }),
-    );
-    const deps = createDeps({ getDeviceId });
+  it('includes deviceId in session keys created after hydrate', async () => {
+    const deps = createDeps({ getDeviceId: vi.fn(async () => 'device-abc') });
     const store = createTaskStore(deps);
 
-    resolveDeviceId('device-abc');
-    await Promise.resolve();
+    await store.getState().hydrate();
 
     const task = store.getState().createTask({ gatewayId: 'gw-1', agentId: 'main' });
 

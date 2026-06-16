@@ -110,9 +110,6 @@ export interface TaskStoreDeps {
 export function createTaskStore(deps: TaskStoreDeps) {
   let cachedDeviceId: string | null = null;
   let hydrationPromise: Promise<void> | null = null;
-  const deviceIdReady = deps.getDeviceId().then((id) => {
-    cachedDeviceId = id;
-  });
 
   return createStore<TaskState>((set, get) => ({
     tasks: [],
@@ -262,7 +259,7 @@ export function createTaskStore(deps: TaskStoreDeps) {
 
       hydrationPromise = (async () => {
         try {
-          await deviceIdReady;
+          cachedDeviceId = await deps.getDeviceId();
           const res = await deps.loadTasks();
           if (res.ok && res.rows) {
             set({
