@@ -98,7 +98,7 @@ function buildMenu(state: TrayState): Menu {
   }
 
   items.push({ type: 'separator' });
-  items.push({ label: 'Open ClawWork', click: focusMainWindow });
+  items.push({ label: 'Open OpenClaw Desktop', click: focusMainWindow });
   items.push({ label: 'Settings', click: openSettings });
   items.push({ type: 'separator' });
   items.push({ label: 'Quit', click: () => app.quit() });
@@ -110,7 +110,7 @@ function createTray(): void {
   if (tray) return;
   const icon = loadIcon();
   tray = new Tray(icon);
-  tray.setToolTip('ClawWork');
+  tray.setToolTip('OpenClaw Desktop');
   tray.setContextMenu(buildMenu({ status: 'idle', tasks: [] }));
   getDebugLogger().info({ domain: 'tray', event: 'tray.init' });
 }
@@ -142,16 +142,16 @@ export function updateTrayStatus(state: TrayState): void {
 
   switch (state.status) {
     case 'running':
-      tray.setToolTip(`ClawWork — ${state.tasks.length} task(s) running`);
+      tray.setToolTip(`OpenClaw Desktop — ${state.tasks.length} task(s) running`);
       startAnimation();
       break;
     case 'unread':
       tray.setTitle('●');
-      tray.setToolTip('ClawWork — new results');
+      tray.setToolTip('OpenClaw Desktop — new results');
       break;
     default:
       tray.setTitle('');
-      tray.setToolTip('ClawWork');
+      tray.setToolTip('OpenClaw Desktop');
   }
 
   tray.setContextMenu(buildMenu(state));

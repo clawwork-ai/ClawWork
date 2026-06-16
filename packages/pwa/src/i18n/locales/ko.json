@@ -6,7 +6,7 @@
   "app": {
     "error": "오류가 발생했습니다",
     "loading": "로딩 중...",
-    "name": "ClawWork",
+    "name": "OpenClaw Desktop",
     "paired": "모바일 기기가 페어링되었습니다",
     "reload": "새로고침"
   },

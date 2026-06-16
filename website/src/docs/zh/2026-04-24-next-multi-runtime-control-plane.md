@@ -6,19 +6,19 @@ date: 2026-04-24
 
 # AgentOS：从单 Runtime 桌面客户端到 Task-First 多 Runtime 操作台
 
-> ClawWork 是 operator UX。
+> OpenClaw Desktop 是 operator UX。
 > 控制面负责执行治理。
 > runtime 负责真正执行。
 
-ClawWork 的下一站是 **the Workspace layer of the Agent OS**，IDE 是代码的操作者层，Terminal 是 Unix 的操作者层，Agent OS 时代需要一个同样承载工作流的 workspace 层。
+OpenClaw Desktop 的下一站是 **the Workspace layer of the Agent OS**，IDE 是代码的操作者层，Terminal 是 Unix 的操作者层，Agent OS 时代需要一个同样承载工作流的 workspace 层。
 
-但今天的 ClawWork 仍然是一个"OpenClaw 桌面客户端"：一个 workspace 只能挂一种 runtime。这和 Vision 里 **Multi-runtime adapters — bring agents from other runtimes into the same task / session / artifact model** 那一条之间，还隔着一段结构性的距离。
+但今天的 OpenClaw Desktop 仍然是一个"OpenClaw 桌面客户端"：一个 workspace 只能挂一种 runtime。这和 Vision 里 **Multi-runtime adapters — bring agents from other runtimes into the same task / session / artifact model** 那一条之间，还隔着一段结构性的距离。
 
 这篇讲的，就是这段距离怎么走。
 
 ## 为什么现在要思考这个
 
-作为 Agent OS workspace 层的雏形，ClawWork 当前的执行模型仍然围绕单一 runtime 建立：
+作为 Agent OS workspace 层的雏形，OpenClaw Desktop 当前的执行模型仍然围绕单一 runtime 建立：
 
 - 一个主 `Task`
 - 一个主 OpenClaw session
@@ -57,11 +57,11 @@ ACP 可以帮我们解决：
 - 执行树的观测与审计
 - 基于能力的编排
 
-如果 ClawWork 继续把产品逻辑直接绑在 OpenClaw session 语义上，renderer 和 core 层会越来越多地吸收 runtime-specific 复杂度，最终演变成一堆特判。
+如果 OpenClaw Desktop 继续把产品逻辑直接绑在 OpenClaw session 语义上，renderer 和 core 层会越来越多地吸收 runtime-specific 复杂度，最终演变成一堆特判。
 
 ## 一个具体的例子
 
-今天的 ClawWork 在多个位置直接或间接地假设：
+今天的 OpenClaw Desktop 在多个位置直接或间接地假设：
 
 - `Task` 可以直接映射成 OpenClaw 的 `sessionKey`
 - subagent 是 OpenClaw 原生 session
@@ -76,7 +76,7 @@ ACP 可以帮我们解决：
 - 一个 Hermes 类 runtime 可能有完全不同的 lifecycle 模型和事件流
 - 多个 OpenClaw 实例之间也可能存在不同的模型、技能、权限和插件能力
 
-如果没有中间控制面，ClawWork 就不得不在很多地方按 runtime 分叉：task 路由、message 同步、approval、room 和 performer 追踪、team orchestration、artifact 归属、failure handling、usage accounting。
+如果没有中间控制面，OpenClaw Desktop 就不得不在很多地方按 runtime 分叉：task 路由、message 同步、approval、room 和 performer 追踪、team orchestration、artifact 归属、failure handling、usage accounting。
 
 这不是可持续的架构。
 
@@ -189,7 +189,7 @@ graph TB
 ### 模式 A：直连
 
 ```text
-ClawWork -> OpenClaw Gateway
+OpenClaw Desktop -> OpenClaw Gateway
 ```
 
 当前形态。适合本地、单实例场景。Next 阶段不改变这条路径的任何用户可见行为，只是把它放到一个正式的 Adapter 边界后面。
@@ -197,15 +197,15 @@ ClawWork -> OpenClaw Gateway
 ### 模式 B：受管
 
 ```text
-ClawWork -> managed-agents -> OpenClaw
+OpenClaw Desktop -> managed-agents -> OpenClaw
 ```
 
-适合需要更强 runtime 治理的场景。managed-agents 自带 execution isolation、quota、networking policy、session versioning、audit、recovery-oriented state——ClawWork 不需要重造这一套。
+适合需要更强 runtime 治理的场景。managed-agents 自带 execution isolation、quota、networking policy、session versioning、audit、recovery-oriented state——OpenClaw Desktop 不需要重造这一套。
 
 ### 模式 C：混合调度
 
 ```text
-ClawWork -> Execution Control Plane -> {
+OpenClaw Desktop -> Execution Control Plane -> {
   OpenClaw, managed-agents, Codex, Claude Code, Hermes, ...
 }
 ```
@@ -271,7 +271,7 @@ ACP adapter 可以负责：
 
 ### Engine-Specific Adapter
 
-在 ACP 不足或不可用时，ClawWork 仍然可以为特定引擎提供直接 adapter，例如 Codex、Claude Code、Hermes 类 runtime。但这些 adapter 仍然必须落到同一个内部 contract 上。
+在 ACP 不足或不可用时，OpenClaw Desktop 仍然可以为特定引擎提供直接 adapter，例如 Codex、Claude Code、Hermes 类 runtime。但这些 adapter 仍然必须落到同一个内部 contract 上。
 
 ## 能力清单
 
@@ -376,7 +376,7 @@ Room 只是一个面向用户的协作视图，把一个或多个 execution 投�
 
 验收：
 
-- 一个 ClawWork 实例能同时使用 direct OpenClaw 和 managed runtime backend
+- 一个 OpenClaw Desktop 实例能同时使用 direct OpenClaw 和 managed runtime backend
 
 ### Phase 4：支持 Mixed Runtime Routing
 
@@ -386,7 +386,7 @@ Room 只是一个面向用户的协作视图，把一个或多个 execution 投�
 
 - 一个 Task 能跨异构 runtime 协同执行
 
-到这一步，ClawWork 才真正成为 runtime-agnostic 的 workspace 层——README Vision 里那句 _one operator surface for every agent you touch_ 第一次兑现。
+到这一步，OpenClaw Desktop 才真正成为 runtime-agnostic 的 workspace 层——README Vision 里那句 _one operator surface for every agent you touch_ 第一次兑现。
 
 ## 数据持久化策略
 
@@ -407,7 +407,7 @@ Room 只是一个面向用户的协作视图，把一个或多个 execution 投�
 - placement decisions
 - normalized event checkpoints
 
-不要把产品状态替换成纯远端 orchestration state。桌面端的强本地模型是 ClawWork 的底色，不能丢。
+不要把产品状态替换成纯远端 orchestration state。桌面端的强本地模型是 OpenClaw Desktop 的底色，不能丢。
 
 ## 风险
 
@@ -421,9 +421,9 @@ Room 只是一个面向用户的协作视图，把一个或多个 execution 投�
 - adapter contract 尽量小
 - 只归一化 UI 和控制面真正需要的语义
 
-### 把 ClawWork 做成后台控制台
+### 把 OpenClaw Desktop 做成后台控制台
 
-如果 runtime primitive 大量泄漏到主 UI，ClawWork 会失去 task-first 的产品身份，变成一个 `Agent / Environment / Session / Event` 风格的运维后台。
+如果 runtime primitive 大量泄漏到主 UI，OpenClaw Desktop 会失去 task-first 的产品身份，变成一个 `Agent / Environment / Session / Event` 风格的运维后台。
 
 缓解：
 
@@ -458,6 +458,6 @@ Room 只是一个面向用户的协作视图，把一个或多个 execution 投�
 
 > 把当前 direct OpenClaw execution path 抽到一个正式的 runtime adapter 边界后面，且不改变任何用户可见行为。
 
-这是最小、最稳、最有价值的第一步。它不会让 ClawWork 立刻支持多 runtime，但它让 workspace 层第一次真正与 runtime 解耦——也是从"OpenClaw 桌面客户端"迈向"Agent OS workspace layer"的第一步。
+这是最小、最稳、最有价值的第一步。它不会让 OpenClaw Desktop 立刻支持多 runtime，但它让 workspace 层第一次真正与 runtime 解耦——也是从"OpenClaw 桌面客户端"迈向"Agent OS workspace layer"的第一步。
 
 完整 KEP 在 `design/kep-task-first-multi-runtime-control-plane.zh-CN.md`。欢迎 PR 和 challenge。

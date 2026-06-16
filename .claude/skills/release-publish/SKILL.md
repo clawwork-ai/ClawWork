@@ -1,14 +1,14 @@
 ---
 name: release-publish
 description: >
-  Prepare and publish a ClawWork desktop release or prerelease.
+  Prepare and publish a OpenClaw Desktop desktop release or prerelease.
   Use when: user says "release", "publish beta", "发版", "发布 beta",
   "发 beta", "cut a release", or asks to ship a version tag.
 ---
 
 # Release Publish
 
-Project-specific workflow for publishing ClawWork desktop releases.
+Project-specific workflow for publishing OpenClaw Desktop desktop releases.
 
 ## Rules
 

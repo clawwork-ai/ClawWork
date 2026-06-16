@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FolderOpen, Loader2, Server, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { PRODUCT_DISPLAY_NAME } from '@clawwork/shared';
 import { motionDuration, motionEase, motion as motionPresets } from '@/styles/design-tokens';
 import logo from '@/assets/logo.png';
 import { isWssGatewayUrl, parseGatewaySetupCode, validateGatewayForm, type GatewayAuthMode } from '@/lib/gateway-auth';
@@ -181,7 +182,11 @@ export default function Setup({ onSetupComplete, initialStep = 'workspace' }: Se
           <div className="flex flex-col items-center text-center space-y-3">
             <div className="relative">
               <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
-              <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
+              <img
+                src={logo}
+                alt={PRODUCT_DISPLAY_NAME}
+                className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]"
+              />
             </div>
             <h1 className="type-section-title text-[var(--text-primary)]">{t('setup.welcome')}</h1>
             <p className="type-body leading-relaxed text-[var(--text-muted)]">

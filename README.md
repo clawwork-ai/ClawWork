@@ -1,13 +1,13 @@
 <div align="center">
 
 <table border="0" cellspacing="0" cellpadding="0"><tr>
-<td><img src="./docs/screenshot.png" alt="ClawWork Desktop" height="420" /></td>
-<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="ClawWork PWA" height="420" /></td>
+<td><img src="./docs/screenshot.png" alt="OpenClaw Desktop" height="420" /></td>
+<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="OpenClaw Desktop PWA" height="420" /></td>
 </tr></table>
 
 **English** · [简体中文](./README.zh.md) · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md)
 
-# ClawWork
+# OpenClaw Desktop
 
 **The local-first workspace for the Agent OS era.**
 
@@ -23,17 +23,17 @@ Desktop client for [OpenClaw](https://github.com/openclaw/openclaw) — run agen
 </div>
 
 > **⚠️ Official Repository**
-> This is the **official** ClawWork project: https://github.com/clawwork-ai/clawwork
+> This is the **official** OpenClaw Desktop project: https://github.com/clawwork-ai/clawwork
 >
 > A copycat repository (ClawWorkAi/ClawWork) and website (clawworkai.store) have been found without proper attribution. Please be aware and use the official links above.
 >
 > Official Website: https://clawwork-ai.github.io/ClawWork/
 
-## Why ClawWork
+## Why OpenClaw Desktop
 
 **Agents are multiplying. The bottleneck is no longer capability — it's the operator surface.**
 
-As agent runtimes proliferate, users end up juggling sessions across chat windows, web UIs, and terminals, each with its own context and no shared memory. Just as IDEs became the operator layer for code and terminals for Unix, the Agent OS needs a workspace layer. ClawWork is building that layer — starting as the best-in-class client for OpenClaw, extensible toward a multi-runtime future.
+As agent runtimes proliferate, users end up juggling sessions across chat windows, web UIs, and terminals, each with its own context and no shared memory. Just as IDEs became the operator layer for code and terminals for Unix, the Agent OS needs a workspace layer. OpenClaw Desktop is building that layer — starting as the best-in-class client for OpenClaw, extensible toward a multi-runtime future.
 
 ### Today: OpenClaw, without the chat-history mud
 
@@ -41,13 +41,13 @@ OpenClaw is powerful. Plain chat is a bad container for the kind of work it can 
 
 Once you have multiple sessions, long-running jobs, approval stops, generated files, recurring automation, and different gateways, chat history turns into mud. Status vanishes. Files vanish. Context vanishes.
 
-ClawWork fixes that. Every task becomes a durable workspace with its own session, artifacts, controls, and history — laid out in a three-panel UI: tasks on the left, active work in the center, artifacts and context on the right.
+OpenClaw Desktop fixes that. Every task becomes a durable workspace with its own session, artifacts, controls, and history — laid out in a three-panel UI: tasks on the left, active work in the center, artifacts and context on the right.
 
-### ClawWork vs messaging channels
+### OpenClaw Desktop vs messaging channels
 
 **The dedicated UI for OpenClaw — stop chatting with Agents in Feishu.**
 
-|                | Feishu / DingTalk / Slack  | ClawWork                                              |
+|                | Feishu / DingTalk / Slack  | OpenClaw Desktop                                      |
 | -------------- | -------------------------- | ----------------------------------------------------- |
 | Layout         | Single chat thread         | Three-column: task list, conversation, progress panel |
 | Multi-task     | One conversation at a time | Parallel tasks in isolated sessions                   |
@@ -64,7 +64,7 @@ ClawWork fixes that. Every task becomes a durable workspace with its own session
 
 One agent is useful. A coordinated team of agents is a workforce.
 
-ClawWork Teams package multiple agents into a single deployable unit — roles, personalities, skills, and workflow included. A **coordinator** agent breaks down the task and delegates to **worker** agents, each running in its own sub-session. You see the full orchestration in real time.
+OpenClaw Desktop Teams package multiple agents into a single deployable unit — roles, personalities, skills, and workflow included. A **coordinator** agent breaks down the task and delegates to **worker** agents, each running in its own sub-session. You see the full orchestration in real time.
 
 ```
 skill → agent → team
@@ -114,7 +114,7 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 ## Quick start
 
 1. Start an OpenClaw Gateway.
-2. Open ClawWork and add a gateway in Settings. Authenticate with a token, password, or pairing code. Default local endpoint: `ws://127.0.0.1:18789`.
+2. Open OpenClaw Desktop and add a gateway in Settings. Authenticate with a token, password, or pairing code. Default local endpoint: `ws://127.0.0.1:18789`.
 3. Create a task, pick a gateway and agent, and describe the work.
 4. Chat: send messages, attach images, `@` files for context, or use `/` commands.
 5. Follow the task as it runs, inspect tool activity, and keep the output files.
@@ -171,7 +171,7 @@ No install required — open **[cpwa.pages.dev](https://cpwa.pages.dev)** in any
 
 ## Data & architecture
 
-ClawWork talks to OpenClaw through a single Gateway WebSocket connection. Each task gets its own session key for isolation, and everything lives in a local workspace directory you choose — no cloud sync, no external database.
+OpenClaw Desktop talks to OpenClaw through a single Gateway WebSocket connection. Each task gets its own session key for isolation, and everything lives in a local workspace directory you choose — no cloud sync, no external database.
 
 - **Tasks** — each one maps to an independent OpenClaw session, so parallel work never collides.
 - **Messages** — user, assistant, and system messages, including tool calls and image attachments, all persisted locally.
@@ -179,7 +179,7 @@ ClawWork talks to OpenClaw through a single Gateway WebSocket connection. Each t
 - **Full-text search** — search across all of the above. Find that one code snippet from three weeks ago without remembering which task it came from.
 
 <div align="center">
-<img src="./docs/architecture.svg" alt="ClawWork Architecture" width="840" />
+<img src="./docs/architecture.svg" alt="OpenClaw Desktop Architecture" width="840" />
 </div>
 
 ## Repo layout
@@ -234,7 +234,7 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 
 ### 🌐 Vision — the Workspace layer of the Agent OS
 
-ClawWork today is optimized for OpenClaw. We're building toward a future where the workspace layer is runtime-agnostic — one operator surface for every agent you touch.
+OpenClaw Desktop today is optimized for OpenClaw. We're building toward a future where the workspace layer is runtime-agnostic — one operator surface for every agent you touch.
 
 - **Multi-runtime adapters** — bring agents from other runtimes into the same task / session / artifact model · [design direction →](./website/src/docs/en/2026-04-24-next-multi-runtime-control-plane.md)
 - **Richer team orchestration** — coordination patterns beyond coordinator / worker

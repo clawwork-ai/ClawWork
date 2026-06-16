@@ -1,13 +1,13 @@
 <div align="center">
 
 <table border="0" cellspacing="0" cellpadding="0"><tr>
-<td><img src="./docs/screenshot.png" alt="ClawWork Desktop" height="420" /></td>
-<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="ClawWork PWA" height="420" /></td>
+<td><img src="./docs/screenshot.png" alt="OpenClaw Desktop" height="420" /></td>
+<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="OpenClaw Desktop PWA" height="420" /></td>
 </tr></table>
 
 [English](./README.md) · **简体中文** · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md)
 
-# ClawWork
+# OpenClaw Desktop
 
 **面向 Agent OS 时代的本地优先工作台。**
 
@@ -22,17 +22,17 @@
 </div>
 
 > **⚠️ 官方仓库**
-> 这是 ClawWork 的**官方**项目：https://github.com/clawwork-ai/clawwork
+> 这是 OpenClaw Desktop 的**官方**项目：https://github.com/clawwork-ai/clawwork
 >
 > 我们发现了山寨仓库（ClawWorkAi/ClawWork）和山寨网站（clawworkai.store），未经授权使用 ClawWork 名称。请认准上方官方链接。
 >
 > 官网：https://clawwork-ai.github.io/ClawWork/
 
-## 为什么是 ClawWork
+## 为什么是 OpenClaw Desktop
 
 **Agent 在爆炸式增长。瓶颈不再是能力，而是操作界面。**
 
-随着 Agent Runtime 越来越多，用户被迫在聊天窗口、网页 UI、终端之间来回切换，每个都有自己的上下文，彼此之间没有共享记忆。正如 IDE 成为了代码的操作层、终端成为了 Unix 的操作层 —— Agent OS 也需要一个工作台层。ClawWork 就是在建这一层：从 OpenClaw 的最佳客户端起步，向多 Runtime 未来演进。
+随着 Agent Runtime 越来越多，用户被迫在聊天窗口、网页 UI、终端之间来回切换，每个都有自己的上下文，彼此之间没有共享记忆。正如 IDE 成为了代码的操作层、终端成为了 Unix 的操作层 —— Agent OS 也需要一个工作台层。OpenClaw Desktop 就是在建这一层：从 OpenClaw 的最佳客户端起步，向多 Runtime 未来演进。
 
 ### 现在：OpenClaw，从此不再被聊天记录淹没
 
@@ -40,13 +40,13 @@ OpenClaw 本身很强，但纯聊天是糟糕的承载容器。
 
 一旦你同时跑多个会话、长任务、审批中断、生成的文件、定时自动化、不同的 gateway —— 聊天记录就会变成一滩泥。状态消失、文件消失、上下文消失。
 
-ClawWork 解决这个问题。每个任务都是一个拥有持久会话、artifacts、控制、历史的独立工作台，以三栏布局呈现：左边任务列表、中间正在运行的工作、右边 artifacts 和上下文。
+OpenClaw Desktop 解决这个问题。每个任务都是一个拥有持久会话、artifacts、控制、历史的独立工作台，以三栏布局呈现：左边任务列表、中间正在运行的工作、右边 artifacts 和上下文。
 
 ## Teams
 
 一个 Agent 有用，但一群协调好的 Agent 就是一支生产力。
 
-ClawWork Teams 把多个 Agent 打包成一个可部署单元 —— 角色、人格、技能、工作流俱全。**Coordinator** Agent 拆解任务并分派给 **Worker** Agent，每个 Worker 都在自己的子会话里运行。你实时看到完整的编排过程。
+OpenClaw Desktop Teams 把多个 Agent 打包成一个可部署单元 —— 角色、人格、技能、工作流俱全。**Coordinator** Agent 拆解任务并分派给 **Worker** Agent，每个 Worker 都在自己的子会话里运行。你实时看到完整的编排过程。
 
 ```
 skill → agent → team
@@ -96,7 +96,7 @@ macOS、Windows、Linux 预构建版本见 [Releases 页面](https://github.com/
 ## 快速开始
 
 1. 启动一个 OpenClaw Gateway。
-2. 打开 ClawWork，在设置中添加 gateway。用 token、密码或配对码认证。默认本地端点：`ws://127.0.0.1:18789`。
+2. 打开 OpenClaw Desktop，在设置中添加 gateway。用 token、密码或配对码认证。默认本地端点：`ws://127.0.0.1:18789`。
 3. 创建任务，选择 gateway 和 agent，描述工作内容。
 4. 聊天：发送消息、附加图片、用 `@` 引用文件作为上下文、或用 `/` 命令。
 5. 跟进任务执行、检查工具调用、保存输出文件。
@@ -153,7 +153,7 @@ macOS、Windows、Linux 预构建版本见 [Releases 页面](https://github.com/
 
 ## 数据与架构
 
-ClawWork 通过单条 Gateway WebSocket 连接与 OpenClaw 通信。每个任务有自己的 session key 用于隔离，所有数据都存在你选定的本地工作区目录 —— 无云同步、无外部数据库。
+OpenClaw Desktop 通过单条 Gateway WebSocket 连接与 OpenClaw 通信。每个任务有自己的 session key 用于隔离，所有数据都存在你选定的本地工作区目录 —— 无云同步、无外部数据库。
 
 - **Tasks** —— 每个任务映射到独立的 OpenClaw 会话，并行工作互不干扰。
 - **Messages** —— 用户、助手、系统消息（包括工具调用和图片附件）全部本地持久化。
@@ -161,7 +161,7 @@ ClawWork 通过单条 Gateway WebSocket 连接与 OpenClaw 通信。每个任务
 - **全文搜索** —— 跨以上所有内容搜索。不记得是哪个任务里的代码片段？三周前的也能找回来。
 
 <div align="center">
-<img src="./docs/architecture.svg" alt="ClawWork Architecture" width="840" />
+<img src="./docs/architecture.svg" alt="OpenClaw Desktop Architecture" width="840" />
 </div>
 
 ## 仓库结构
@@ -216,7 +216,7 @@ Electron 34、React 19、TypeScript、Tailwind CSS v4、Zustand、SQLite（Drizz
 
 ### 🌐 愿景 —— Agent OS 的工作台层
 
-ClawWork 目前针对 OpenClaw 优化。我们正在构建一个未来：工作台层与 runtime 无关 —— 所有 Agent 都在同一个界面里操作。
+OpenClaw Desktop 目前针对 OpenClaw 优化。我们正在构建一个未来：工作台层与 runtime 无关 —— 所有 Agent 都在同一个界面里操作。
 
 - **多 Runtime 适配器** —— 把其他 Runtime 的 Agent 纳入同一套 task / session / artifact 模型
 - **更丰富的团队编排** —— 超越 coordinator / worker 的协调模式

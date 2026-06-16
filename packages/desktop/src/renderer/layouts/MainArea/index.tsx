@@ -16,7 +16,7 @@ import {
   ArrowLeftRight,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { parseAgentIdFromSessionKey } from '@clawwork/shared';
+import { parseAgentIdFromSessionKey, PRODUCT_DISPLAY_NAME } from '@clawwork/shared';
 import { deriveSessionActivity, getTaskSessionKeys } from '@clawwork/core';
 import { useTaskStore } from '@/stores/taskStore';
 import { useMessageStore, EMPTY_MESSAGES, activeTurnToMessage } from '@/stores/messageStore';
@@ -234,7 +234,7 @@ function ChatHeader({
             )}
           </>
         ) : (
-          <h2 className="type-label text-[var(--text-muted)]">ClawWork</h2>
+          <h2 className="type-label text-[var(--text-muted)]">{PRODUCT_DISPLAY_NAME}</h2>
         )}
       </div>
       <div className="titlebar-no-drag flex items-center gap-1">

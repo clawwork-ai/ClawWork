@@ -1,18 +1,18 @@
 # Reddit r/opensource
 
-**Title:** [Project] ClawWork — open-source desktop client for OpenClaw with local Git artifact versioning
+**Title:** [Project] OpenClaw Desktop — open-source desktop client for OpenClaw with local Git artifact versioning
 
 ---
 
 ## Post body
 
-**ClawWork** is an open-source desktop client for [OpenClaw](https://github.com/openclaw/openclaw), the self-hosted AI agent runtime.
+**OpenClaw Desktop** is an open-source desktop client for [OpenClaw](https://github.com/openclaw/openclaw), the self-hosted AI agent runtime.
 
 ### The problem
 
 OpenClaw is powerful, but most users interact through generic chat channels (Feishu, Slack, Telegram). Chat is a poor container for agent work: no parallel tasks, no structured progress, no durable artifact management.
 
-### What ClawWork does
+### What OpenClaw Desktop does
 
 - **Three-panel workspace** — tasks, conversation, progress/artifacts
 - **Parallel multi-task** — each task maps to an isolated OpenClaw session

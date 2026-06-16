@@ -1,6 +1,6 @@
 # Reddit r/LocalLLaMA
 
-**Title:** ClawWork — a dedicated desktop UI for self-hosted OpenClaw agents (parallel tasks, local artifacts)
+**Title:** OpenClaw Desktop — a dedicated desktop UI for self-hosted OpenClaw agents (parallel tasks, local artifacts)
 
 ---
 
@@ -8,7 +8,7 @@
 
 If you run [OpenClaw](https://github.com/openclaw/openclaw) locally with your own models and gateways, you might be using Feishu/Slack/Telegram as the chat front-end. It works, but it's not built for agent workflows.
 
-**ClawWork** is an open-source desktop client designed specifically for OpenClaw:
+**OpenClaw Desktop** is an open-source desktop client designed specifically for OpenClaw:
 
 - Run **multiple agent tasks in parallel**, each with its own session and context
 - **Switch models and thinking levels per task** across multiple gateways

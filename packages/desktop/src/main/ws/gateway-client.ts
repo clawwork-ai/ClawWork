@@ -311,7 +311,7 @@ export class GatewayClient {
       maxProtocol: 4,
       client: {
         id: 'gateway-client',
-        displayName: 'ClawWork Desktop',
+        displayName: 'OpenClaw Desktop',
         version: app.getVersion(),
         platform: process.platform,
         mode: 'backend',

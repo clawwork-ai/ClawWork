@@ -1,5 +1,5 @@
 appId: com.clawwork.app
-productName: ClawWork
+productName: OpenClaw Desktop
 directories:
   buildResources: build
   output: dist
@@ -35,7 +35,7 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: true
   extendInfo:
-    NSMicrophoneUsageDescription: ClawWork needs microphone access for voice dictation in chat input.
+    NSMicrophoneUsageDescription: OpenClaw Desktop needs microphone access for voice dictation in chat input.
 win:
   target:
     - target: nsis
@@ -59,4 +59,4 @@ linux:
   icon: build/icon.png
   maintainer: samzong <samzong.lu@gmail.com>
   desktop:
-    StartupWMClass: ClawWork
+    StartupWMClass: OpenClaw Desktop

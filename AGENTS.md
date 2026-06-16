@@ -1,4 +1,4 @@
-# ClawWork Agent Guide
+# OpenClaw Desktop Agent Guide
 
 This is the canonical agent entrypoint for this repo. Tool-specific shims such
 as `CLAUDE.md` and `.github/copilot-instructions.md` must point here instead of

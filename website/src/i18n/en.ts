@@ -79,7 +79,7 @@ export const en: Translations = {
       'A single WebSocket connects to one or more OpenClaw Gateways. Each task gets its own session. Everything is stored locally.',
   },
   features: {
-    title: 'Why ClawWork',
+    title: 'Why OpenClaw Desktop',
     items: [
       {
         title: 'Parallel Multi-Task',
@@ -118,7 +118,7 @@ export const en: Translations = {
       {
         title: 'PWA & Mobile',
         description:
-          'Access ClawWork from any browser — desktop or mobile. Installable to your home screen, works offline.',
+          'Access OpenClaw Desktop from any browser — desktop or mobile. Installable to your home screen, works offline.',
       },
     ],
   },
@@ -126,7 +126,7 @@ export const en: Translations = {
     title: 'Quick Start',
     steps: [
       {
-        title: 'Install ClawWork',
+        title: 'Install OpenClaw Desktop',
         code: 'brew tap clawwork-ai/clawwork\nbrew install --cask clawwork',
       },
       {
@@ -173,6 +173,6 @@ export const en: Translations = {
         { label: 'License', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],
     },
-    copyright: '© 2026 ClawWork Contributors. Apache 2.0 License.',
+    copyright: '© 2026 OpenClaw Desktop Contributors. Apache 2.0 License.',
   },
 };

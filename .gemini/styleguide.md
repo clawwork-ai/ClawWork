@@ -1,4 +1,4 @@
-# ClawWork Code Review Style Guide
+# OpenClaw Desktop Code Review Style Guide
 
 ## Instructions for Gemini Code Assist
 

@@ -1,7 +1,7 @@
 {
   "name": "clawwork",
   "private": true,
-  "description": "OpenClaw desktop client with structured task management",
+  "description": "OpenClaw Desktop — OpenClaw desktop client with structured task management",
   "repository": {
     "type": "git",
     "url": "https://github.com/clawwork-ai/ClawWork.git"

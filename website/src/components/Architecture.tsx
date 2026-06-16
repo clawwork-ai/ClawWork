@@ -40,7 +40,7 @@ export function Architecture() {
         <div ref={imgRef} style={{ textAlign: 'center' }}>
           <img
             src={`${import.meta.env.BASE_URL}architecture.svg`}
-            alt="ClawWork Architecture"
+            alt="OpenClaw Desktop Architecture"
             style={{
               display: 'block',
               width: '100%',

@@ -1,6 +1,6 @@
 # WeChat Official Account — Launch Article
 
-**Title:** 别再用飞书和 Agent 聊天了：ClawWork 是 OpenClaw 的专用桌面客户端
+**Title:** 别再用飞书和 Agent 聊天了：OpenClaw Desktop 是 OpenClaw 的专用桌面客户端
 
 **Target:** Launch day or Week 1
 
@@ -14,7 +14,7 @@
 
 单个问题还行。但当任务变多、变长、变复杂——多个 Agent 并行、工具调用频繁、生成大量文件——聊天记录就变成一团浆糊。
 
-**今天推荐一个开源项目：ClawWork。**
+**今天推荐一个开源项目：OpenClaw Desktop。**
 
 ### 一句话定位
 
@@ -22,7 +22,7 @@
 
 ### 和飞书通道比，强在哪？
 
-|          | 飞书 / 钉钉 / Slack | ClawWork                 |
+|          | 飞书 / 钉钉 / Slack | OpenClaw Desktop         |
 | -------- | ------------------- | ------------------------ |
 | 布局     | 单聊线程            | 三栏：任务 + 对话 + 进度 |
 | 多任务   | 一次一个            | 并行隔离                 |
@@ -64,4 +64,4 @@ GitHub：https://github.com/clawwork-ai/ClawWork
 ### 结尾 CTA
 
 - 扫码关注 / 加入用户群（维护者填写）
-- 回复「ClawWork」获取快速入门指南（维护者填写）
+- 回复「OpenClaw Desktop」获取快速入门指南（维护者填写）

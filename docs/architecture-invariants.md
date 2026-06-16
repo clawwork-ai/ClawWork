@@ -4,7 +4,7 @@ This document is the short list of rules that should survive refactors, contribu
 
 ## Product Invariants
 
-- ClawWork is an OpenClaw desktop operator client.
+- OpenClaw Desktop is an OpenClaw desktop operator client.
 - It is not an admin console, general IM client, or collaboration product.
 - Task is the primary product object.
 - One Task maps to one OpenClaw session.

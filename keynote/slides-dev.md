@@ -1,8 +1,8 @@
 ---
 theme: default
-title: ClawWork — How It's Built
+title: OpenClaw Desktop — How It's Built
 info: |
-  ## ClawWork — Engineering Deep Dive
+  ## OpenClaw Desktop — Engineering Deep Dive
   15 days · 161 PRs · 13 releases. How we built it.
 
   [GitHub](https://github.com/clawwork-ai/ClawWork)
@@ -109,7 +109,7 @@ layout: split-media
 
 ::left::
 
-<img src="/images/architecture.svg" class="cw-shot cw-shot--panel" alt="ClawWork Architecture" />
+<img src="/images/architecture.svg" class="cw-shot cw-shot--panel" alt="OpenClaw Desktop Architecture" />
 
 ::right::
 
@@ -220,7 +220,7 @@ layout: split-media
     :title="{ en: 'GitHub Star Notification', zh: 'GitHub Star 通知' }"
     :note="{ en: 'The person who built OpenClaw thinks this project is worth watching.', zh: 'OpenClaw 的作者认为这个项目值得关注。' }"
   >
-    <img src="/images/peter-github-star.png" class="cw-shot cw-shot--signal" alt="Peter starred ClawWork on GitHub" />
+    <img src="/images/peter-github-star.png" class="cw-shot cw-shot--signal" alt="Peter starred OpenClaw Desktop on GitHub" />
   </DeckSignalCard>
 
   <DeckSignalCard tone="green" :title="{ en: 'Star History' }">
@@ -236,7 +236,7 @@ layout: split-media
 
 <div class="cw-thanks-shell">
   <div class="mb-8">
-    <img src="/images/clawwork-logo.png" class="cw-logo-md cw-float cw-logo-glow" alt="ClawWork" />
+    <img src="/images/clawwork-logo.png" class="cw-logo-md cw-float cw-logo-glow" alt="OpenClaw Desktop" />
   </div>
 
   <h1 class="cw-display-title">

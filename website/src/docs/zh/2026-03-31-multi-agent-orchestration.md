@@ -1,10 +1,10 @@
 ---
-title: TaskRoom 薄协作层：ClawWork 的多 Agent 编排设计
+title: TaskRoom 薄协作层：OpenClaw Desktop 的多 Agent 编排设计
 description: 基于 OpenClaw 原生 session 能力，把一个 Task 扩展成 1 个 Conductor 加多个 Performer 的协作工作单元
 date: 2026-03-31
 ---
 
-# TaskRoom 薄协作层：ClawWork 的多 Agent 编排设计
+# TaskRoom 薄协作层：OpenClaw Desktop 的多 Agent 编排设计
 
 > 不加外部 worker，纯 session 原语编排多 Agent
 
@@ -24,7 +24,7 @@ TaskRoom 核心目标很简单，Task 是产品对象，session 集合是执行�
 | **Performer**     | Performer     | 执行者。在独立 session 中执行具体任务。由 Conductor 通过 `sessions_spawn` 创建，`sessions_send` 分派。                                                       |
 | **Ensemble Task** | Ensemble Task | 多 Agent 任务。用户创建 Task 时显式选择。1 Conductor + N Performer。                                                                                         |
 
-角色模型是有意保持克制的，多 Agent 不是替换 ClawWork 现有任务模型，而是在现有模型上增加一种新的任务模式。实现层的复杂度集中在后面的 Performer 发现和停止逻辑上。
+角色模型是有意保持克制的，多 Agent 不是替换 OpenClaw Desktop 现有任务模型，而是在现有模型上增加一种新的任务模式。实现层的复杂度集中在后面的 Performer 发现和停止逻辑上。
 
 **什么不做：**
 
@@ -37,7 +37,7 @@ TaskRoom 核心目标很简单，Task 是产品对象，session 集合是执行�
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant CW as ClawWork Client
+    participant CW as OpenClaw Desktop Client
     participant GW as OpenClaw Gateway
     participant C as Conductor Session
     participant P1 as Performer A
@@ -281,7 +281,7 @@ User-selected agents (if any):
 
 ## Conductor 与 Performer 通信
 
-协调发生在 Conductor 的 agent 侧（OpenClaw），ClawWork 客户端不参与调度逻辑。
+协调发生在 Conductor 的 agent 侧（OpenClaw），OpenClaw Desktop 客户端不参与调度逻辑。
 
 ### 通信模式
 
@@ -366,12 +366,12 @@ agent:<agentId>:subagent:<uuid>
 
 ```text
 Gateway 事件到达 -> parseTaskIdFromSessionKey(sessionKey)
-  |- 成功（ClawWork 格式 key）-> 正常路由
+  |- 成功（OpenClaw Desktop 格式 key）-> 正常路由
   |- 失败 -> isSubagentSession(sessionKey)?
        |- 是 -> 检查已注册 subagentKeyMap
        |    |- 命中 -> 按 taskId 正常路由
        |    |- 未命中 -> 缓存事件 + 投入全局候选队列
-       |- 否 -> 丢弃（非 ClawWork 事件）
+       |- 否 -> 丢弃（非 OpenClaw Desktop 事件）
 ```
 
 ### 权威验证 -> 白名单

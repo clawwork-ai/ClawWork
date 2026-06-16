@@ -1,20 +1,20 @@
 # V2EX — #share-creation
 
-**Title:** ClawWork — OpenClaw 专用桌面客户端，别再在飞书里和 Agent 聊天了
+**Title:** OpenClaw Desktop — OpenClaw 专用桌面客户端，别再在飞书里和 Agent 聊天了
 
 ---
 
 ## Post body
 
-大家好，分享一个我最近一直在用的开源项目：**ClawWork**。
+大家好，分享一个我最近一直在用的开源项目：**OpenClaw Desktop**。
 
 如果你在用 [OpenClaw](https://github.com/openclaw/openclaw) 跑本地 Agent，大概率是通过飞书、钉钉或 Slack 当对话通道。单个任务还行，但多任务并行、长时运行、工具调用、生成文件一多，聊天记录就变成一团浆糊——状态看不清、文件找不到、上下文串台。
 
-ClawWork 的定位很简单：**OpenClaw 的专用 UI**，就像 GitHub Desktop 之于 Git。
+OpenClaw Desktop 的定位很简单：**OpenClaw 的专用 UI**，就像 GitHub Desktop 之于 Git。
 
 ### 和飞书/钉钉/Slack 通道对比
 
-|          | 飞书 / 钉钉 / Slack | ClawWork                         |
+|          | 飞书 / 钉钉 / Slack | OpenClaw Desktop                 |
 | -------- | ------------------- | -------------------------------- |
 | 布局     | 单聊线程            | 三栏：任务列表 + 对话 + 进度面板 |
 | 多任务   | 一次一个对话        | 并行任务，独立 Session           |

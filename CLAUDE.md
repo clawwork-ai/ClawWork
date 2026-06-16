@@ -1,4 +1,4 @@
-# CLAUDE.md — ClawWork Compatibility Entry
+# CLAUDE.md — OpenClaw Desktop Compatibility Entry
 
 The canonical agent guide for this repo is `AGENTS.md`.
 

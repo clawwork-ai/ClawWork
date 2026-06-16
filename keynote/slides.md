@@ -1,8 +1,8 @@
 ---
 theme: default
-title: ClawWork — The Task Workbench for OpenClaw
+title: OpenClaw Desktop — The Task Workbench for OpenClaw
 info: |
-  ## ClawWork
+  ## OpenClaw Desktop
   A desktop client for OpenClaw, built for parallel work.
 
   [GitHub](https://github.com/clawwork-ai/ClawWork)
@@ -24,8 +24,8 @@ Hi everyone, I am Sam.
 
 English is not my first language, so I will keep this talk simple and direct.
 
-Today I want to share ClawWork.
-ClawWork is a desktop client for OpenClaw.
+Today I want to share OpenClaw Desktop.
+OpenClaw Desktop is a desktop client for OpenClaw.
 
 The main idea is simple:
 agents should not only chat.
@@ -41,7 +41,7 @@ They should help us run real tasks, in parallel.
 <!--
 I am Sam.
 
-I work on ClawWork and use OpenClaw in my daily engineering work.
+I work on OpenClaw Desktop and use OpenClaw in my daily engineering work.
 
 This talk is about one problem I feel every day:
 how to make agent work more visible, more parallel, and easier to control.
@@ -136,20 +136,20 @@ I want direct and visible control.
   <h1 class="cw-display-title">
     <span class="cw-shimmer">{{ $t({ en: 'The Answer', zh: '答案' }) }}</span>
   </h1>
-  <p class="cw-thanks-copy">{{ $t({ en: 'Meet ClawWork.', zh: 'ClawWork 登场。' }) }}</p>
+  <p class="cw-thanks-copy">{{ $t({ en: 'Meet OpenClaw Desktop.', zh: 'OpenClaw Desktop 登场。' }) }}</p>
 </div>
 
 <!--
 So this is my answer:
-ClawWork.
+OpenClaw Desktop.
 
-ClawWork is not another chat window.
+OpenClaw Desktop is not another chat window.
 It is a task workbench for OpenClaw.
 -->
 
 ---
 
-# 🦐 {{ $t({ en: 'What is ClawWork', zh: 'ClawWork 是什么' }) }}
+# 🦐 {{ $t({ en: 'What is OpenClaw Desktop', zh: 'OpenClaw Desktop 是什么' }) }}
 
 <div class="cw-kicker" v-html="$t({ en: 'A desktop client for OpenClaw, <strong>built for parallel work</strong>.', zh: '一个 OpenClaw 桌面客户端，<strong>为并行工作而生</strong>。' })"></div>
 
@@ -180,9 +180,9 @@ It is a task workbench for OpenClaw.
 </div>
 
 <!--
-ClawWork is built for parallel work.
+OpenClaw Desktop is built for parallel work.
 
-In ClawWork, the main object is a Task.
+In OpenClaw Desktop, the main object is a Task.
 A Task has its own messages, artifacts, progress, and OpenClaw session.
 
 This means I can run many tasks at the same time.
@@ -200,7 +200,7 @@ so it does not need server changes.
 <div class="cw-kicker">{{ $t({ en: 'All three pillars in one workbench.', zh: '三大支柱，一个工作台。' }) }}</div>
 
 <div style="display: flex; justify-content: center; margin-top: 16px;">
-  <img src="/images/clawwork-screenshot.png" class="cw-shot cw-shot--hero" alt="ClawWork overview" />
+  <img src="/images/clawwork-screenshot.png" class="cw-shot cw-shot--hero" alt="OpenClaw Desktop overview" />
 </div>
 
 <!--
@@ -259,7 +259,7 @@ layout: split-media
 
 ::left::
 
-<img src="/images/three-panel-full.png" class="cw-shot cw-shot--panel" alt="ClawWork three-panel layout" />
+<img src="/images/three-panel-full.png" class="cw-shot cw-shot--panel" alt="OpenClaw Desktop three-panel layout" />
 
 ::right::
 
@@ -319,7 +319,7 @@ Quick Launch is for fast task creation.
 
 I press Alt Space.
 I type what I want.
-Then ClawWork starts a task.
+Then OpenClaw Desktop starts a task.
 
 This reduces the distance between an idea and a running agent task.
 -->
@@ -386,7 +386,7 @@ But I can see all progress in one place.
 <!--
 Artifacts are important.
 
-When an agent produces a file, ClawWork collects it automatically.
+When an agent produces a file, OpenClaw Desktop collects it automatically.
 I do not need to copy and paste from chat.
 
 I can browse artifacts, search them, filter them,
@@ -440,7 +440,7 @@ gap: mt-6
 </div>
 
 <!--
-ClawWork also shows token usage, context usage, cost, and rate limits.
+OpenClaw Desktop also shows token usage, context usage, cost, and rate limits.
 
 For me, this is not only a feature.
 It is about transparency.
@@ -536,7 +536,7 @@ Tool approval is another important part.
 Some tool calls are safe.
 Some can change files or run commands.
 
-ClawWork shows the risk level,
+OpenClaw Desktop shows the risk level,
 the countdown,
 and the approval policy.
 
@@ -555,7 +555,7 @@ layout: split-media
 ::left::
 
 <div style="position: relative; width: 100%; height: 400px;">
-  <img src="/images/slash-command.png" style="position: absolute; top: 18px; left: 0; height: 320px; width: auto; max-width: 62%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 1;" alt="ClawWork chat with slash menu" />
+  <img src="/images/slash-command.png" style="position: absolute; top: 18px; left: 0; height: 320px; width: auto; max-width: 62%; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 1;" alt="OpenClaw Desktop chat with slash menu" />
   <img src="/images/slash-command-2.png" style="position: absolute; top: 50px; left: 31%; height: 308px; width: auto; max-width: 58%; border-radius: 10px; box-shadow: 0 18px 44px rgba(0,0,0,0.7); z-index: 2;" alt="Slash commands modal dialog" />
 </div>
 
@@ -694,7 +694,7 @@ layout: split-media
 </ul>
 
 <!--
-ClawWork also has an Agent Manager.
+OpenClaw Desktop also has an Agent Manager.
 
 Users can see agents,
 edit their config,
@@ -720,7 +720,7 @@ layout: split-media
 
 <ul class="cw-bullets">
   <li v-html="$t({ en: '<strong>Describe</strong> what the Agent should do — natural language', zh: '<strong>描述</strong> Agent 应该做什么 —— 自然语言' })"></li>
-  <li v-html="$t({ en: '<strong>ClawWork drafts</strong> the <code>AGENT.md</code>, picks Skills, sets the model', zh: '<strong>ClawWork 起草</strong> <code>AGENT.md</code>，选择 Skill，设定模型' })"></li>
+  <li v-html="$t({ en: '<strong>OpenClaw Desktop drafts</strong> the <code>AGENT.md</code>, picks Skills, sets the model', zh: '<strong>OpenClaw Desktop 起草</strong> <code>AGENT.md</code>，选择 Skill，设定模型' })"></li>
   <li v-html="$t({ en: '<strong>Tweak inline</strong> before saving — every field is editable', zh: '<strong>保存前内联微调</strong> —— 每个字段都可编辑' })"></li>
   <li v-html="$t({ en: '<strong>Save</strong> — Agent appears in the manager, ready for tasks', zh: '<strong>保存</strong> —— Agent 出现在管理面板，准备接任务' })"></li>
 </ul>
@@ -729,7 +729,7 @@ layout: split-media
 Agent Builder helps users create a new agent with natural language.
 
 The user describes what the agent should do.
-ClawWork drafts the agent config,
+OpenClaw Desktop drafts the agent config,
 picks skills,
 and sets the model.
 
@@ -740,7 +740,7 @@ Then the user can edit everything before saving.
 layout: split-media
 ---
 
-# 🧬 {{ $t({ en: 'ClawWork Teams', zh: 'ClawWork Teams' }) }}
+# 🧬 {{ $t({ en: 'OpenClaw Desktop Teams', zh: 'OpenClaw Desktop Teams' }) }}
 
 <div class="cw-kicker" v-html="$t({ en: 'A self-contained multi-agent unit. Roles, skills, workflow — packaged together.', zh: '一个自包含的多 Agent 单元。角色、技能、工作流 —— 打包在一起。' })"></div>
 
@@ -757,11 +757,11 @@ layout: split-media
 </ul>
 
 <div class="cw-note-panel mt-4" data-tone="green">
-  <p class="cw-note-copy" v-html="$t({ en: '<strong>No manual setup.</strong> ClawWork handles agent creation, skill installation, and model assignment for you.', zh: '<strong>无需手动配置。</strong>ClawWork 替你完成 Agent 创建、Skill 安装和模型分配。' })"></p>
+  <p class="cw-note-copy" v-html="$t({ en: '<strong>No manual setup.</strong> OpenClaw Desktop handles agent creation, skill installation, and model assignment for you.', zh: '<strong>无需手动配置。</strong>OpenClaw Desktop 替你完成 Agent 创建、Skill 安装和模型分配。' })"></p>
 </div>
 
 <!--
-For bigger work, ClawWork supports Teams.
+For bigger work, OpenClaw Desktop supports Teams.
 
 A Team is a group of agents with roles, skills, and workflow.
 
@@ -770,7 +770,7 @@ one can implement,
 and one can review.
 
 The user does not need to manually set up everything.
-ClawWork helps create and run the team.
+OpenClaw Desktop helps create and run the team.
 -->
 
 ---
@@ -779,7 +779,7 @@ layout: split-media
 
 # 🎯 {{ $t({ en: 'Teams in Action', zh: 'Team 实战' }) }}
 
-<div class="cw-kicker">{{ $t({ en: 'From concept to running agents. Every step inside ClawWork.', zh: '从概念到运行。每一步都在 ClawWork 里。' }) }}</div>
+<div class="cw-kicker">{{ $t({ en: 'From concept to running agents. Every step inside OpenClaw Desktop.', zh: '从概念到运行。每一步都在 OpenClaw Desktop 里。' }) }}</div>
 
 ::left::
 
@@ -797,9 +797,9 @@ layout: split-media
 This is Teams in action.
 
 The user starts with a simple idea.
-ClawWork turns that idea into roles, skills, and workflow.
+OpenClaw Desktop turns that idea into roles, skills, and workflow.
 
-Then the Team can run inside ClawWork,
+Then the Team can run inside OpenClaw Desktop,
 with visible agents and visible activity.
 -->
 
@@ -909,7 +909,7 @@ This gives us multi-agent work without a separate runtime.
 </div>
 
 <!--
-ClawWork is not only a web page.
+OpenClaw Desktop is not only a web page.
 
 It is built for desktop first:
 macOS, Windows, and Linux.
@@ -923,15 +923,15 @@ So native desktop matters.
 layout: split-media
 ---
 
-# 📱 {{ $t({ en: 'ClawWork in Your Pocket', zh: 'ClawWork 装进口袋' }) }}
+# 📱 {{ $t({ en: 'OpenClaw Desktop in Your Pocket', zh: 'OpenClaw Desktop 装进口袋' }) }}
 
 <div class="cw-kicker">{{ $t({ en: 'Not remote control. A real mobile app.', zh: '不是远程控制，是真正的移动端 App。' }) }}</div>
 
 ::left::
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 14px; height: 100%;">
-  <img src="/images/screenshot-mobile.png" class="cw-shot cw-shot--hero" style="max-height: 360px;" alt="ClawWork PWA home" />
-  <img src="/images/screenshot-mobile-2.png" class="cw-shot cw-shot--hero" style="max-height: 360px;" alt="ClawWork PWA device authorization" />
+  <img src="/images/screenshot-mobile.png" class="cw-shot cw-shot--hero" style="max-height: 360px;" alt="OpenClaw Desktop PWA home" />
+  <img src="/images/screenshot-mobile-2.png" class="cw-shot cw-shot--hero" style="max-height: 360px;" alt="OpenClaw Desktop PWA device authorization" />
 </div>
 
 ::right::
@@ -948,7 +948,7 @@ There is also a PWA version.
 The idea is that users can watch and manage tasks from more places.
 
 This is not just remote control.
-It is a real mobile surface for ClawWork.
+It is a real mobile surface for OpenClaw Desktop.
 -->
 
 ---
@@ -969,7 +969,7 @@ Now I want to quickly show how it works under the hood.
 
 I will keep this part short.
 The key idea is:
-ClawWork keeps the product simple,
+OpenClaw Desktop keeps the product simple,
 and uses OpenClaw primitives underneath.
 -->
 
@@ -998,7 +998,7 @@ layout: split-media
 </div>
 
 <!--
-ClawWork has a three-layer structure:
+OpenClaw Desktop has a three-layer structure:
 shared, core, and desktop or PWA.
 
 Shared has protocol and domain types.
@@ -1031,12 +1031,12 @@ layout: split-media
 
 <!--
 For OpenClaw connection,
-ClawWork uses one Gateway WebSocket.
+OpenClaw Desktop uses one Gateway WebSocket.
 
 It does not need one WebSocket per task.
 Instead, it routes events by session key.
 
-This is important because ClawWork can support many sessions
+This is important because OpenClaw Desktop can support many sessions
 without changing the OpenClaw server.
 -->
 
@@ -1061,7 +1061,7 @@ layout: split-media
 <DeckMiniPanel tone="red" :title="{ en: 'DB Unique Index', zh: 'DB 唯一索引' }" :body="{ en: 'Belt-and-braces. Any dual-write path is rejected at INSERT.', zh: '双保险。任何双写路径在 INSERT 时被拒绝。' }" />
 
 <!--
-For messages, ClawWork uses a single-writer rule.
+For messages, OpenClaw Desktop uses a single-writer rule.
 
 User messages, assistant messages, and system messages
 each have a clear write path.
@@ -1101,7 +1101,7 @@ fs.writeFileSync(keyPath, privateKey,
 <DeckMiniPanel tone="cyan" :title="{ en: 'Isomorphic', zh: '跨端同构' }" :body="{ en: 'Node crypto on desktop and WebCrypto in PWA — interchangeable keys.', zh: '桌面用 Node crypto，PWA 用 WebCrypto —— 密钥可互换。' }" />
 
 <!--
-For device identity, ClawWork uses Ed25519.
+For device identity, OpenClaw Desktop uses Ed25519.
 
 The private key is generated on the device.
 It does not ship inside the app.
@@ -1154,7 +1154,7 @@ layout: split-media
 
 <!--
 For multi-agent work,
-ClawWork uses a conductor and performers.
+OpenClaw Desktop uses a conductor and performers.
 
 The conductor is the root session.
 The performers are subagent sessions.
@@ -1196,7 +1196,7 @@ font-size: var(--text-sm);</pre>
 <DeckMiniPanel tone="green" :title="{ en: 'Compiler Enforced', zh: '编译器保证' }" :body="{ en: 'Violations fail the build. Design consistency becomes a type error.', zh: '违规导致构建失败。设计一致性变成类型错误。' }" />
 
 <!--
-ClawWork also treats design rules as code.
+OpenClaw Desktop also treats design rules as code.
 
 Colors, spacing, and UI tokens are checked by scripts.
 
@@ -1223,7 +1223,7 @@ This keeps the product consistent over time.
 Now let me show three simple stories.
 
 These are not about features one by one.
-They are about how people can use ClawWork in real work.
+They are about how people can use OpenClaw Desktop in real work.
 -->
 
 ---
@@ -1395,11 +1395,11 @@ layout: split-media
 
 ::right::
 
-<DeckMiniPanel compact tone="green" :title="{ en: '🎯 Direct', zh: '🎯 直连模式' }" :body="{ en: 'ClawWork → OpenClaw Gateway. Local, single-instance, zero extra layer.', zh: 'ClawWork → OpenClaw Gateway。本地、单实例、零额外层级。' }" />
+<DeckMiniPanel compact tone="green" :title="{ en: '🎯 Direct', zh: '🎯 直连模式' }" :body="{ en: 'OpenClaw Desktop → OpenClaw Gateway. Local, single-instance, zero extra layer.', zh: 'OpenClaw Desktop → OpenClaw Gateway。本地、单实例、零额外层级。' }" />
 
-<DeckMiniPanel compact tone="cyan" :title="{ en: '🛡 Managed', zh: '🛡 受管模式' }" :body="{ en: 'ClawWork → managed-agents → OpenClaw. Quotas, isolation, audit.', zh: 'ClawWork → managed-agents → OpenClaw。配额、隔离、审计。' }" />
+<DeckMiniPanel compact tone="cyan" :title="{ en: '🛡 Managed', zh: '🛡 受管模式' }" :body="{ en: 'OpenClaw Desktop → managed-agents → OpenClaw. Quotas, isolation, audit.', zh: 'OpenClaw Desktop → managed-agents → OpenClaw。配额、隔离、审计。' }" />
 
-<DeckMiniPanel compact tone="purple" :title="{ en: '🧬 Mixed', zh: '🧬 混合调度' }" :body="{ en: 'ClawWork → Control Plane → { OpenClaw, Codex, Claude Code, Hermes, ... }', zh: 'ClawWork → 控制面 → { OpenClaw、Codex、Claude Code、Hermes、... }' }" />
+<DeckMiniPanel compact tone="purple" :title="{ en: '🧬 Mixed', zh: '🧬 混合调度' }" :body="{ en: 'OpenClaw Desktop → Control Plane → { OpenClaw, Codex, Claude Code, Hermes, ... }', zh: 'OpenClaw Desktop → 控制面 → { OpenClaw、Codex、Claude Code、Hermes、... }' }" />
 
 <div class="cw-note-panel mt-4" data-tone="cyan">
   <p class="cw-note-copy" v-html="$t({ en: '<strong>Task stays the same.</strong> The runtime underneath is a deployment decision — not a product rewrite.', zh: '<strong>Task 不变。</strong>底下用什么 runtime,是部署决策 —— 不是产品重写。' })"></p>
@@ -1409,7 +1409,7 @@ layout: split-media
 There can be different ways to run the system.
 
 Direct mode is simple:
-ClawWork talks to OpenClaw Gateway.
+OpenClaw Desktop talks to OpenClaw Gateway.
 
 Managed mode can add quotas, isolation, and audit.
 
@@ -1428,7 +1428,7 @@ the user starts with a Task.
 
 <div class="cw-thanks-shell">
   <h1 class="cw-display-title" style="font-size: 2.4rem; line-height: 1.4;">
-    <span class="cw-shimmer">{{ $t({ en: 'ClawWork is operator UX.', zh: 'ClawWork 是 operator UX。' }) }}</span><br/>
+    <span class="cw-shimmer">{{ $t({ en: 'OpenClaw Desktop is operator UX.', zh: 'OpenClaw Desktop 是 operator UX。' }) }}</span><br/>
     <span class="cw-shimmer">{{ $t({ en: 'Control plane governs execution.', zh: '控制面负责执行治理。' }) }}</span><br/>
     <span class="cw-shimmer">{{ $t({ en: 'Runtime does the real work.', zh: 'Runtime 负责真正执行。' }) }}</span>
   </h1>
@@ -1437,7 +1437,7 @@ the user starts with a Task.
 <!--
 So the summary is:
 
-ClawWork is operator UX.
+OpenClaw Desktop is operator UX.
 The control plane governs execution.
 The runtime does the real work.
 
@@ -1454,7 +1454,7 @@ and easier to control.
 
 <div class="cw-thanks-shell">
   <div class="mb-8">
-    <img src="/images/clawwork-logo.png" class="cw-logo-md cw-float cw-logo-glow" alt="ClawWork" />
+    <img src="/images/clawwork-logo.png" class="cw-logo-md cw-float cw-logo-glow" alt="OpenClaw Desktop" />
   </div>
 
   <h1 class="cw-display-title">

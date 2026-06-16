@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: ClawWork Operator Console
+name: OpenClaw Desktop Operator Console
 description: A dense local-first desktop workspace for OpenClaw tasks, sessions, messages, artifacts, and teams.
 colors:
   primary: '#13131C'
@@ -214,7 +214,7 @@ components:
 
 ## Overview
 
-ClawWork is an operator console, not a marketing surface. It should feel like a quiet desktop control room for parallel OpenClaw work: persistent Tasks in the left rail, the active Message stream in the center, and Task-scoped operational context around it.
+OpenClaw Desktop is an operator console, not a marketing surface. It should feel like a quiet desktop control room for parallel OpenClaw work: persistent Tasks in the left rail, the active Message stream in the center, and Task-scoped operational context around it.
 
 The visual reference is a local-first agent workspace with terminal-adjacent density and macOS desktop restraint. The product can show Teams, usage, tool calls, artifacts, scheduled Tasks, and search without turning into a dashboard collage. Hierarchy comes from panels, muted text, exact spacing, and sparse accent, not from decorative illustration.
 
@@ -237,7 +237,7 @@ In application code, all UI colors should come through CSS variables. Do not int
 
 ## Typography
 
-ClawWork uses Inter Variable for interface text and JetBrains Mono Variable for inline code, command data, token counts, paths, IDs, and compact technical metadata.
+OpenClaw Desktop uses Inter Variable for interface text and JetBrains Mono Variable for inline code, command data, token counts, paths, IDs, and compact technical metadata.
 
 Type is intentionally modest. Page titles are only 24px; section titles are 16px; most working UI text sits at 14px or 13px. The product should read like a desktop tool that expects repeated use, not a landing page trying to impress a first-time visitor.
 
@@ -272,7 +272,7 @@ Motion is fast: 100ms for immediate feedback, 150ms for normal control transitio
 
 ## Shapes
 
-ClawWork uses slightly rounded desktop geometry. Small badges and status tags use 3-4px radius. Buttons and compact controls use 8px. Cards and framed sections use 12px. The command composer can use a large 24px radius because it is a primary input surface, not a generic card.
+OpenClaw Desktop uses slightly rounded desktop geometry. Small badges and status tags use 3-4px radius. Buttons and compact controls use 8px. Cards and framed sections use 12px. The command composer can use a large 24px radius because it is a primary input surface, not a generic card.
 
 Do not increase rounding globally to make the UI feel friendlier. The product should remain precise, dense, and operator-grade.
 

@@ -1,6 +1,6 @@
 # OpenClaw Gateway Source Code Navigation Guide
 
-> For ClawWork developers who need to read, trace, and debug OpenClaw Gateway internals.
+> For OpenClaw Desktop developers who need to read, trace, and debug OpenClaw Gateway internals.
 > Prerequisite: read `openclaw-gateway-whitepaper.md` first for the protocol contract.
 > Repo: `~/git/openclaw` (TypeScript, ESM, pnpm)
 
@@ -429,7 +429,7 @@ rg "SessionsPatchParamsSchema" src/gateway/protocol/schema/
 # 2. Read the TypeBox definition — every field, type, and constraint is there
 ```
 
-### "I want to add support for a new method in ClawWork"
+### "I want to add support for a new method in OpenClaw Desktop"
 
 ```
 Step 1: Schema    → src/gateway/protocol/schema/<domain>.ts     (params + result)
@@ -492,7 +492,7 @@ server/ws-connection/message-handler.ts
   → rejects with INVALID_REQUEST if validation fails
 ```
 
-**Key implication for ClawWork:** If a field is marked `{ additionalProperties: false }` in the schema (and almost all are), sending extra fields in your request **will cause a validation error**. Only send fields defined in the schema.
+**Key implication for OpenClaw Desktop:** If a field is marked `{ additionalProperties: false }` in the schema (and almost all are), sending extra fields in your request **will cause a validation error**. Only send fields defined in the schema.
 
 ---
 
@@ -540,7 +540,7 @@ rg "chat.send" src/gateway/server-methods/chat.test.ts
 | Document                     | Purpose                                                         | When to read                          |
 | ---------------------------- | --------------------------------------------------------------- | ------------------------------------- |
 | `protocol.md`                | WS protocol spec: handshake, framing, roles, scopes, versioning | First read for protocol understanding |
-| `authentication.md`          | Auth mechanisms and configuration                               | Implementing auth in ClawWork         |
+| `authentication.md`          | Auth mechanisms and configuration                               | Implementing auth in OpenClaw Desktop |
 | `pairing.md`                 | Device pairing and trust model                                  | Implementing device pairing           |
 | `configuration.md`           | Task-oriented config guide                                      | Setting up Gateway for development    |
 | `configuration-reference.md` | All config keys (122KB)                                         | Looking up specific config options    |

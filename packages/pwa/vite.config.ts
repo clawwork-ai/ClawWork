@@ -21,9 +21,9 @@ export default defineConfig(({ command }) => ({
       injectRegister: null,
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'ClawWork',
-        short_name: 'ClawWork',
-        description: 'Mobile companion for ClawWork',
+        name: 'OpenClaw Desktop',
+        short_name: 'OpenClaw Desktop',
+        description: 'Mobile companion for OpenClaw Desktop',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',

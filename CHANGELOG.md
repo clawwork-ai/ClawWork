@@ -1,8 +1,14 @@
 # Changelog
 
-All notable changes to ClawWork are documented here.
+All notable changes to OpenClaw Desktop are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Changed
+
+- Rebranded user-facing product name from **ClawWork** to **OpenClaw Desktop** to reduce collision with similarly named GitHub projects ([#95](https://github.com/clawwork-ai/ClawWork/issues/95)). Internal identifiers (`@clawwork/*`, session keys, config paths) are unchanged in this release; see `docs/rename-plan.md`.
 
 ## [0.1.0] - TBD
 

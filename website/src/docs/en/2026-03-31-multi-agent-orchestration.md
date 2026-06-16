@@ -1,10 +1,10 @@
 ---
-title: "TaskRoom: ClawWork's Thin Collaboration Layer for Multi-Agent Orchestration"
+title: "TaskRoom: OpenClaw Desktop's Thin Collaboration Layer for Multi-Agent Orchestration"
 description: Extend one Task into 1 Conductor + N Performers using only OpenClaw's native session primitives — no external worker runtime
 date: 2026-03-31
 ---
 
-# TaskRoom: ClawWork's Thin Collaboration Layer for Multi-Agent Orchestration
+# TaskRoom: OpenClaw Desktop's Thin Collaboration Layer for Multi-Agent Orchestration
 
 > No external workers. Orchestrate multi-agent collaboration purely with session primitives.
 
@@ -24,7 +24,7 @@ It's a deliberately thin collaboration layer, currently implemented directly on 
 | **Performer**     | Performer     | The executor. Runs a concrete task inside an isolated session. Created by the Conductor via `sessions_spawn`, dispatched via `sessions_send`.                                                                                                                |
 | **Ensemble Task** | Ensemble Task | A multi-agent Task. The user explicitly selects this mode when creating a Task. 1 Conductor + N Performers.                                                                                                                                                  |
 
-The role model is intentionally restrained. Multi-agent is not a replacement for ClawWork's existing Task model — it's a new task mode layered on top. Implementation complexity concentrates in Performer discovery and stop logic, which we cover later.
+The role model is intentionally restrained. Multi-agent is not a replacement for OpenClaw Desktop's existing Task model — it's a new task mode layered on top. Implementation complexity concentrates in Performer discovery and stop logic, which we cover later.
 
 **What we're not doing:**
 
@@ -37,7 +37,7 @@ The role model is intentionally restrained. Multi-agent is not a replacement for
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant CW as ClawWork Client
+    participant CW as OpenClaw Desktop Client
     participant GW as OpenClaw Gateway
     participant C as Conductor Session
     participant P1 as Performer A
@@ -281,7 +281,7 @@ The single most important line is the explicit ban on silently falling back to a
 
 ## Conductor <-> Performer communication
 
-Coordination happens on the Conductor agent side (inside OpenClaw). The ClawWork client is not part of the scheduling loop.
+Coordination happens on the Conductor agent side (inside OpenClaw). The OpenClaw Desktop client is not part of the scheduling loop.
 
 ### Communication modes
 
@@ -367,12 +367,12 @@ It has no `taskId`, so the client cannot determine ownership by parsing the key 
 
 ```text
 Gateway event arrives -> parseTaskIdFromSessionKey(sessionKey)
-  |- success (ClawWork-format key) -> normal routing
+  |- success (OpenClaw Desktop-format key) -> normal routing
   |- failure -> isSubagentSession(sessionKey)?
        |- yes -> check registered subagentKeyMap
        |    |- hit -> route by taskId
        |    |- miss -> buffer event + enqueue to global candidate queue
-       |- no -> drop (non-ClawWork event)
+       |- no -> drop (non-OpenClaw Desktop event)
 ```
 
 ### Authoritative verification -> whitelist

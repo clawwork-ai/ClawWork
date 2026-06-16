@@ -1,12 +1,12 @@
 ---
-title: 使用 ClawWork PWA（移动端）
-description: 在 Android 和 iOS 上通过浏览器安装 ClawWork PWA，扫码配对即可使用
+title: 使用 OpenClaw Desktop PWA（移动端）
+description: 在 Android 和 iOS 上通过浏览器安装 OpenClaw Desktop PWA，扫码配对即可使用
 date: 2026-03-30
 ---
 
-# 使用 ClawWork PWA（移动端）
+# 使用 OpenClaw Desktop PWA（移动端）
 
-ClawWork 最强大的能力在桌面端。移动端我们提供了一个统一的 PWA，可在 Android 和 iOS 上通过浏览器直接安装使用。
+OpenClaw Desktop 最强大的能力在桌面端。移动端我们提供了一个统一的 PWA，可在 Android 和 iOS 上通过浏览器直接安装使用。
 
 ## 安装
 
@@ -16,7 +16,7 @@ ClawWork 最强大的能力在桌面端。移动端我们提供了一个统一�
 
 ## 离线优先
 
-ClawWork PWA 是纯离线应用。首次加载完成后，除了连接 OpenClaw 网关，不会与任何外部服务通信。
+OpenClaw Desktop PWA 是纯离线应用。首次加载完成后，除了连接 OpenClaw 网关，不会与任何外部服务通信。
 
 应用托管在 Cloudflare Pages，跟随代码仓库自动构建。新版本发布后，需要在手机端**设置**里手动点击更新——只有点更新时才会与云端建立联系。
 
@@ -24,7 +24,7 @@ ClawWork PWA 是纯离线应用。首次加载完成后，除了连接 OpenClaw 
 
 首次使用需要通过二维码与桌面端配对：
 
-1. 在 ClawWork Desktop 中找到**与手机端配对**功能
+1. 在 OpenClaw Desktop 中找到**与手机端配对**功能
 2. 选择要连接的网关，桌面端会生成一个二维码
 3. 用手机扫描该二维码
 4. OpenClaw 授权确认后，配对完成

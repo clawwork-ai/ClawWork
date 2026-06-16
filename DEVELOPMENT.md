@@ -2,7 +2,7 @@
 
 ## Mission
 
-ClawWork is the desktop operator client for OpenClaw: Cowork-style parallel task execution, structured context, and local-first artifact management.
+OpenClaw Desktop is the desktop operator client for OpenClaw: Cowork-style parallel task execution, structured context, and local-first artifact management.
 
 Non-goals:
 
@@ -31,7 +31,7 @@ Requirements:
 
 ## Mental Model
 
-ClawWork is a thin but opinionated desktop layer on top of OpenClaw Gateway.
+OpenClaw Desktop is a thin but opinionated desktop layer on top of OpenClaw Gateway.
 
 - one desktop app
 - one WebSocket connection per configured gateway
@@ -187,7 +187,7 @@ Task is the product primitive, not chat thread cosmetics.
 
 ### 3. Workspace and artifacts
 
-ClawWork persists AI output locally and treats files as first-class product value.
+OpenClaw Desktop persists AI output locally and treats files as first-class product value.
 
 - workspace root contains `.clawwork.db`, `.clawwork-debug/`, and per-task directories
 - `artifact/` saves files and records metadata
@@ -407,7 +407,7 @@ Local expectation: do not open a PR that obviously cannot survive CI.
 - the authoritative protocol behavior lives in OpenClaw, not in guesses here
 - reference repo: `~/git/openclaw`
 - likely source locations: Gateway protocol handling, slash command registry, Telegram bot native command menu
-- when ClawWork and OpenClaw disagree, verify the server behavior first
+- when OpenClaw Desktop and OpenClaw disagree, verify the server behavior first
 - avoid compensating for undocumented server behavior with renderer hacks unless unavoidable
 
 ## Known Failure Modes

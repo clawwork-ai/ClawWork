@@ -6,12 +6,12 @@ date: 2026-03-18
 
 # 与 OpenClaw 网关配对
 
-ClawWork 通过 Gateway 连接 OpenClaw。以下是添加网关并完成设备认证的流程。
+OpenClaw Desktop 通过 Gateway 连接 OpenClaw。以下是添加网关并完成设备认证的流程。
 
 ## 前置条件
 
 - 一个正在运行且网络可达的 OpenClaw Gateway 实例
-- 已安装 ClawWork 桌面应用
+- 已安装 OpenClaw Desktop 桌面应用
 - 网关 URL（本地默认：`ws://127.0.0.1:18789`）
 
 ```bash
@@ -20,7 +20,7 @@ openclaw gateway start
 
 ## 添加网关
 
-1. 打开 ClawWork，进入**设置**（侧栏齿轮图标）
+1. 打开 OpenClaw Desktop，进入**设置**（侧栏齿轮图标）
 2. 滚动到**网关**区域，点击**添加网关**
 3. 输入名称（如「本地网关」）和 WebSocket URL
 4. 选择认证方式：**Token**、**密码**或**配对码**
@@ -50,12 +50,12 @@ openclaw gateway start
 
 1. 在网关表单中选择**配对码**标签页
 2. 从网关管理员或网关 Web UI 获取 setup code
-3. 粘贴 setup code——ClawWork 会自动提取 URL 和配对 Token
+3. 粘贴 setup code——OpenClaw Desktop 会自动提取 URL 和配对 Token
 4. 点击**开始配对**发起设备配对请求
 5. 等待网关管理员批准你的设备
-6. 批准后，ClawWork 会收到设备 Token 并自动连接
+6. 批准后，OpenClaw Desktop 会收到设备 Token 并自动连接
 
-> 配对码是一次性的。设备获批后，ClawWork 会在本地保存设备 Token 用于后续连接。如果你重置了设备身份，需要重新配对。
+> 配对码是一次性的。设备获批后，OpenClaw Desktop 会在本地保存设备 Token 用于后续连接。如果你重置了设备身份，需要重新配对。
 
 ## 验证连接
 

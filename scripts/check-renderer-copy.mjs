@@ -40,7 +40,7 @@ const TOAST_PATTERNS = [
 ];
 
 const IGNORE_MATCHES = [
-  'ClawWork',
+  'OpenClaw Desktop',
   'GitHub',
   'Markdown',
   'OpenClaw',

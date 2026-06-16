@@ -2,7 +2,7 @@
   "name": "@clawwork/keynote",
   "private": true,
   "version": "0.1.0",
-  "description": "ClawWork presentation slides powered by Slidev",
+  "description": "OpenClaw Desktop presentation slides powered by Slidev",
   "scripts": {
     "dev": "slidev --open",
     "dev:dev": "slidev slides-dev.md --open",

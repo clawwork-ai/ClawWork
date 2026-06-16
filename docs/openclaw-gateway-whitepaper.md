@@ -14,7 +14,7 @@ Gateway is a WebSocket-first server (default port `:18789`) sitting between clie
 
 ```
 ┌─────────────────────┐          ┌────────────────────────────┐
-│ ClawWork Desktop    │  WS :18789  │ OpenClaw Gateway Server    │
+│ OpenClaw Desktop    │  WS :18789  │ OpenClaw Gateway Server    │
 │                     │◄──────────►│                            │
 │ React 19 + Electron │           │ ┌────────────────────────┐ │
 │                     │           │ │ Protocol Validator     │ │
@@ -195,7 +195,7 @@ Client                          Gateway
 
 > Source: `src/gateway/protocol/client-info.ts` → `GATEWAY_CLIENT_IDS`, `GATEWAY_CLIENT_MODES`, `GATEWAY_CLIENT_CAPS`
 
-**Client IDs** (for ClawWork, use `openclaw-macos`):
+**Client IDs** (for OpenClaw Desktop, use `openclaw-macos`):
 
 | ID                    | Purpose               |
 | --------------------- | --------------------- |
@@ -215,15 +215,15 @@ Client                          Gateway
 
 **Client Modes:**
 
-| Mode      | Purpose                                   |
-| --------- | ----------------------------------------- |
-| `webchat` | WebChat UI interface                      |
-| `cli`     | Command-line interface                    |
-| `ui`      | Desktop/Mobile UI (use this for ClawWork) |
-| `backend` | Backend service                           |
-| `node`    | Remote compute node                       |
-| `probe`   | Health check probing                      |
-| `test`    | Automated testing                         |
+| Mode      | Purpose                                           |
+| --------- | ------------------------------------------------- |
+| `webchat` | WebChat UI interface                              |
+| `cli`     | Command-line interface                            |
+| `ui`      | Desktop/Mobile UI (use this for OpenClaw Desktop) |
+| `backend` | Backend service                                   |
+| `node`    | Remote compute node                               |
+| `probe`   | Health check probing                              |
+| `test`    | Automated testing                                 |
 
 ### 3.4 Capability Negotiation
 
@@ -488,7 +488,7 @@ chat.history              chat.abort                chat.send
 
 Channel plugins may register additional methods.
 
-### 5.2 Chat Methods (Core for ClawWork)
+### 5.2 Chat Methods (Core for OpenClaw Desktop)
 
 > Source: schema `src/gateway/protocol/schema/logs-chat.ts`, impl `src/gateway/server-methods/chat.ts`
 
@@ -1329,7 +1329,7 @@ In addition to WebSocket, Gateway exposes HTTP endpoints:
 | Canvas WS path         | WS      | Canvas collaboration         |
 | Plugin routes          | Various | Channel plugin HTTP handlers |
 
-The `/v1/chat/completions` endpoint allows OpenAI-compatible integration, but for ClawWork the WebSocket protocol is the primary interface.
+The `/v1/chat/completions` endpoint allows OpenAI-compatible integration, but for OpenClaw Desktop the WebSocket protocol is the primary interface.
 
 ---
 
@@ -1392,7 +1392,7 @@ Session keys uniquely identify conversation contexts:
 agent:<agentKey>:<scope>:<label>
 ```
 
-For ClawWork:
+For OpenClaw Desktop:
 
 ```
 agent:main:clawwork:task:<taskId>
@@ -1425,7 +1425,7 @@ Messages in `chat` events and `chat.history` responses follow this structure:
 
 ---
 
-## 10. ClawWork Integration Guide
+## 10. OpenClaw Desktop Integration Guide
 
 > Source: composite — see inline references in §2–§9; connection flow from `src/gateway/protocol/schema/frames.ts` → `ConnectParamsSchema`, `HelloOkSchema`
 
@@ -1468,9 +1468,9 @@ ws.send(
 // event: "chat" with state: "final" (once)
 ```
 
-### 10.3 Capabilities ClawWork Can Leverage
+### 10.3 Capabilities OpenClaw Desktop Can Leverage
 
-| Capability            | Gateway Support                                | ClawWork Feature             |
+| Capability            | Gateway Support                                | OpenClaw Desktop Feature     |
 | --------------------- | ---------------------------------------------- | ---------------------------- |
 | Multi-session         | `sessions.list`, `sessions.create`             | Parallel task execution      |
 | Streaming responses   | `chat` events with delta/final                 | Real-time response rendering |
@@ -1491,7 +1491,7 @@ ws.send(
 | TTS                   | `talk.speak`                                   | Text-to-speech playback      |
 | Tools inventory       | `tools.catalog`, `tools.effective`             | Tool management UI           |
 
-### 10.4 What ClawWork Should NOT Do
+### 10.4 What OpenClaw Desktop Should NOT Do
 
 - Do NOT use `deliver: true` in `chat.send` (this sends to external channels)
 - Do NOT use `send` method (this is for external channel delivery)

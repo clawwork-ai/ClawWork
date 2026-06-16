@@ -6,7 +6,7 @@
   "app": {
     "error": "出现错误",
     "loading": "加载中...",
-    "name": "ClawWork",
+    "name": "OpenClaw Desktop",
     "paired": "移动设备已配对",
     "reload": "重新加载"
   },

@@ -14,7 +14,7 @@ For self-hosters who care about data ownership, that has real problems:
 - AI-generated files scroll away and aren't versioned
 - Running multiple agent tasks in parallel turns one chat into chaos
 
-So I built **ClawWork** — a local-first desktop client (Electron + React + SQLite) that:
+So I built **OpenClaw Desktop** — a local-first desktop client (Electron + React + SQLite) that:
 
 - Keeps **100% of data on your machine** (SQLite + local Git repo for artifacts)
 - Runs **parallel tasks** with isolated OpenClaw sessions

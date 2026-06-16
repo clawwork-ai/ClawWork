@@ -5,7 +5,7 @@ Use this file as the tool-oriented summary for review and enforcement.
 
 ## Product Identity
 
-- ClawWork is an OpenClaw desktop operator client, not an admin console, IM client, or collaboration product.
+- OpenClaw Desktop is an OpenClaw desktop operator client, not an admin console, IM client, or collaboration product.
 - Task is the primary product object. One Task = one OpenClaw session.
 - Artifact persistence is local-first: filesystem first, SQLite index second.
 - The three-panel layout is a core product affordance, not optional chrome.

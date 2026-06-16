@@ -6,9 +6,10 @@ import {
   isSystemSession,
   isClawWorkSession,
   isSubagentSession,
+  PRODUCT_DISPLAY_NAME,
 } from '../src/constants';
 
-test('parseTaskIdFromSessionKey parses current ClawWork session keys', () => {
+test('parseTaskIdFromSessionKey parses current clawwork session keys', () => {
   const taskId = 'task-current';
   const sessionKey = buildSessionKey(taskId);
   expect(parseTaskIdFromSessionKey(sessionKey)).toBe(taskId);
@@ -52,4 +53,8 @@ describe('system session keys', () => {
     expect(isClawWorkSession(key)).toBe(false);
     expect(isSubagentSession(key)).toBe(false);
   });
+});
+
+test('PRODUCT_DISPLAY_NAME is the public brand string', () => {
+  expect(PRODUCT_DISPLAY_NAME).toBe('OpenClaw Desktop');
 });

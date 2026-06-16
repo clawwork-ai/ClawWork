@@ -2,7 +2,7 @@
 
 ## 1. Problem Statement
 
-OpenClaw Gateway exposes a full cron scheduling system (`cron.*` RPCs) for recurring agent tasks. ClawWork needs a first-class UI for managing these — not buried in Settings, but a main area view on par with Files and Archived.
+OpenClaw Gateway exposes a full cron scheduling system (`cron.*` RPCs) for recurring agent tasks. OpenClaw Desktop needs a first-class UI for managing these — not buried in Settings, but a main area view on par with Files and Archived.
 
 The server API is significantly richer than a simple "expression + command" model. A production client must model the real data faithfully, even if the UI exposes a subset of options initially.
 
@@ -440,23 +440,23 @@ MainArea
 
 #### Essential fields
 
-| Field            | Type              | Default     | Notes                                                                                   |
-| ---------------- | ----------------- | ----------- | --------------------------------------------------------------------------------------- |
-| Name             | text input        | —           | Required                                                                                |
-| Schedule type    | segmented control | `cron`      | `cron` / `every` / `at`                                                                 |
-| — if cron        | text input        | —           | Placeholder: `0 9 * * 1-5`                                                              |
-| — if cron: tz    | text input        | —           | Optional, placeholder: `Asia/Shanghai`                                                  |
-| — if every       | number input      | —           | Interval in minutes (UI converts to ms)                                                 |
-| — if at          | datetime picker   | —           | ISO timestamp                                                                           |
-| Payload type     | segmented control | `agentTurn` | `agentTurn` / `systemEvent`                                                             |
-| — if agentTurn   | textarea          | —           | The message to send. Required                                                           |
-| — if systemEvent | textarea          | —           | The event text. Required                                                                |
-| Session target   | select            | `task`      | `task` / `main`                                                                         |
-| — if main        | —                 | —           | Force payload to `systemEvent`, show note                                               |
-| — if task        | read-only note    | —           | ClawWork allocates a stable task-bound session and stores `sessionTarget=session:<key>` |
-| Enabled          | switch            | `true`      | —                                                                                       |
+| Field            | Type              | Default     | Notes                                                                                           |
+| ---------------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| Name             | text input        | —           | Required                                                                                        |
+| Schedule type    | segmented control | `cron`      | `cron` / `every` / `at`                                                                         |
+| — if cron        | text input        | —           | Placeholder: `0 9 * * 1-5`                                                                      |
+| — if cron: tz    | text input        | —           | Optional, placeholder: `Asia/Shanghai`                                                          |
+| — if every       | number input      | —           | Interval in minutes (UI converts to ms)                                                         |
+| — if at          | datetime picker   | —           | ISO timestamp                                                                                   |
+| Payload type     | segmented control | `agentTurn` | `agentTurn` / `systemEvent`                                                                     |
+| — if agentTurn   | textarea          | —           | The message to send. Required                                                                   |
+| — if systemEvent | textarea          | —           | The event text. Required                                                                        |
+| Session target   | select            | `task`      | `task` / `main`                                                                                 |
+| — if main        | —                 | —           | Force payload to `systemEvent`, show note                                                       |
+| — if task        | read-only note    | —           | OpenClaw Desktop allocates a stable task-bound session and stores `sessionTarget=session:<key>` |
+| Enabled          | switch            | `true`      | —                                                                                               |
 
-> **Why no `current` or `isolated`?** `current` depends on ambient session context, which CronPanel does not have. `isolated` currently does not preserve ClawWork task/session identity through the OpenClaw cron execution path. Until upstream behavior is fixed, CronPanel only offers a stable task-bound session (`session:<key>`) or `main`.
+> **Why no `current` or `isolated`?** `current` depends on ambient session context, which CronPanel does not have. `isolated` currently does not preserve OpenClaw Desktop task/session identity through the OpenClaw cron execution path. Until upstream behavior is fixed, CronPanel only offers a stable task-bound session (`session:<key>`) or `main`.
 
 #### Advanced fields (collapsed by default)
 
@@ -476,10 +476,10 @@ MainArea
 
 #### Session target constraints
 
-| Target | Allowed payload    | Notes                                                                                       |
-| ------ | ------------------ | ------------------------------------------------------------------------------------------- |
-| `main` | `systemEvent` only | Server enforces this; UI disables `agentTurn` when `main` selected                          |
-| `task` | both               | Reuses a stable ClawWork-owned session across runs; implemented as `session:<clawwork-key>` |
+| Target | Allowed payload    | Notes                                                                                               |
+| ------ | ------------------ | --------------------------------------------------------------------------------------------------- |
+| `main` | `systemEvent` only | Server enforces this; UI disables `agentTurn` when `main` selected                                  |
+| `task` | both               | Reuses a stable OpenClaw Desktop-owned session across runs; implemented as `session:<clawwork-key>` |
 
 > `current` and `isolated` are deliberately excluded from the create/edit form — see rationale above. If a job was created elsewhere with another target, the card display still shows the raw server value for compatibility.
 

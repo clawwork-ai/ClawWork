@@ -1,6 +1,6 @@
 # Hacker News — Show HN
 
-**Title:** Show HN: ClawWork – Open-source desktop client for OpenClaw (replaces Feishu/Slack channels)
+**Title:** Show HN: OpenClaw Desktop – Open-source desktop client for OpenClaw (replaces Feishu/Slack channels)
 
 **Best time:** Tuesday–Thursday, 8–10 AM Pacific. Stay online for 2–3 hours after posting.
 
@@ -8,11 +8,11 @@
 
 ## Post body
 
-Hi HN — I built ClawWork, an open-source desktop client for [OpenClaw](https://github.com/openclaw/openclaw).
+Hi HN — I built OpenClaw Desktop, an open-source desktop client for [OpenClaw](https://github.com/openclaw/openclaw).
 
 If you run OpenClaw agents locally, you probably talk to them through Feishu, Slack, or a web chat UI. That works for one-off questions, but breaks down fast: multiple tasks bleed together, tool calls disappear in the message stream, and generated files vanish into chat history.
 
-ClawWork is a purpose-built workspace instead of a chat workaround:
+OpenClaw Desktop is a purpose-built workspace instead of a chat workaround:
 
 - **Three-column layout** — task list, conversation, progress/artifacts panel
 - **Parallel tasks** — each task gets its own isolated OpenClaw session
