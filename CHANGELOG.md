@@ -4,6 +4,14 @@ All notable changes to ClawWork are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Phase 3 promotion drafts: Product Hunt, Bilibili, and YouTube scripts ([#11](https://github.com/clawwork-ai/ClawWork/issues/11))
+- Phase 2 Sspai product experience outline; Phase 3 Homebrew cask and awesome-list PR guides ([#11](https://github.com/clawwork-ai/ClawWork/issues/11))
+- `pnpm check:promotion-readiness` — validates in-repo pre-launch checklist items from the promotion plan
+
 ## [0.1.0] - TBD
 
 First public launch release. Prior `0.0.x` builds were pre-release iterations.

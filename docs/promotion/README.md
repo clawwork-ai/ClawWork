@@ -26,19 +26,32 @@ ClawWork is to OpenClaw what GitHub Desktop is to Git — a purpose-built native
 | ------------------------------ | ------------------------------------------------------ | -------- |
 | Juejin technical article       | [juejin-outline.md](./juejin-outline.md)               | Chinese  |
 | Zhihu column                   | [zhihu-outline.md](./zhihu-outline.md)                 | Chinese  |
+| Sspai product experience       | [sspai-outline.md](./sspai-outline.md)                 | Chinese  |
 | WeChat Official Account launch | [wechat-launch-article.md](./wechat-launch-article.md) | Chinese  |
+
+## Phase 3 — video and Product Hunt
+
+| Platform     | File                                       | Language |
+| ------------ | ------------------------------------------ | -------- |
+| Product Hunt | [product-hunt.md](./product-hunt.md)       | English  |
+| Bilibili     | [bilibili-script.md](./bilibili-script.md) | Chinese  |
+| YouTube      | [youtube-script.md](./youtube-script.md)   | English  |
 
 ## Ecosystem integration
 
 | Target                      | File                                         |
 | --------------------------- | -------------------------------------------- |
 | OpenClaw docs PR content    | [openclaw-docs-pr.md](./openclaw-docs-pr.md) |
+| Awesome list PR template    | [awesome-list-pr.md](./awesome-list-pr.md)   |
+| Homebrew cask distribution  | [homebrew-cask.md](./homebrew-cask.md)       |
 | Demo recording checklist    | [demo-recording.md](./demo-recording.md)     |
 | GitHub repo topics (manual) | [github-topics.md](./github-topics.md)       |
 
 ## Before posting
 
-1. Confirm launch prep ([#6](https://github.com/clawwork-ai/ClawWork/issues/6)) is complete.
-2. Record and embed the 60-second demo GIF in README (see [demo-recording.md](./demo-recording.md)).
-3. Verify the latest release DMG/installer is on GitHub Releases.
-4. Post on all high-leverage platforms on the **same day** for maximum impact.
+1. Run `pnpm check:promotion-readiness` — validates in-repo checklist items from [#11](https://github.com/clawwork-ai/ClawWork/issues/11).
+2. Confirm launch prep ([#6](https://github.com/clawwork-ai/ClawWork/issues/6)) is complete.
+3. Record and embed the 60-second demo GIF in README (see [demo-recording.md](./demo-recording.md)).
+4. Verify the latest release DMG/installer is on GitHub Releases.
+5. Apply GitHub repo topics per [github-topics.md](./github-topics.md).
+6. Post on all high-leverage platforms on the **same day** for maximum impact.
