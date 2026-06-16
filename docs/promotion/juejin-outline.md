@@ -1,6 +1,6 @@
 # Juejin Technical Article Outline
 
-**Title:** 用 Electron + React 19 构建 OpenClaw 专用桌面客户端 — ClawWork 技术实践
+**Title:** 用 Electron + React 19 构建 OpenClaw 专用桌面客户端 — OpenClaw Desktop 技术实践
 
 **Target:** Week 2–4, technical depth audience
 
