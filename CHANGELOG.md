@@ -8,7 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Changed
 
-- Rebranded user-facing product name from **ClawWork** to **OpenClaw Desktop** to reduce collision with similarly named GitHub projects ([#95](https://github.com/clawwork-ai/ClawWork/issues/95)). Internal identifiers (`@clawwork/*`, session keys, config paths) are unchanged in this release; see `docs/rename-plan.md`.
+- Rebranded user-facing product name from **ClawWork** to **OpenClaw Desktop** to reduce collision with similarly named GitHub projects ([#95](https://github.com/clawwork-ai/ClawWork/issues/95)). Internal identifiers (`@clawwork/*`, session keys, config paths) are unchanged in this release; see `RENAME-PLAN.md`.
 
 ## [0.1.0] - TBD
 

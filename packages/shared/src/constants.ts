@@ -1,4 +1,4 @@
-/** User-facing product name (see docs/rename-plan.md). Internal ids still use "clawwork". */
+/** User-facing product name (see RENAME-PLAN.md). Internal ids still use "clawwork". */
 export const PRODUCT_DISPLAY_NAME = 'OpenClaw Desktop';
 
 export const GATEWAY_WS_PORT = 18789;
