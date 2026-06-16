@@ -131,8 +131,8 @@ interface AppSettings {
   quickLaunch?: QuickLaunchSettings;
   trayEnabled?: boolean;
   notifications?: NotificationSettings;
-  leftNavShortcut?: 'Comma' | 'BracketLeft';
-  rightPanelShortcut?: 'Period' | 'BracketRight';
+  leftNavShortcut?: 'Comma' | 'BracketLeft' | 'None';
+  rightPanelShortcut?: 'Period' | 'BracketRight' | 'None';
   devMode?: boolean;
   teamHubRegistries?: Array<{ id: string; url: string; isOfficial: boolean }>;
   updateChannel?: 'stable' | 'beta';

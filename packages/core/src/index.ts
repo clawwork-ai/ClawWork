@@ -100,6 +100,14 @@ export type { GatewayDispatcherDeps } from './services/gateway-dispatcher.js';
 export { createChatComposer } from './services/chat-composer.js';
 export type { ChatComposerDeps, ChatComposer, SendOptions } from './services/chat-composer.js';
 
+export {
+  hasPreferencesShortcutConflict,
+  isTextInputElement,
+  resolveGlobalShortcutAction,
+  shouldDeferGlobalShortcut,
+} from './lib/global-shortcuts.js';
+export type { GlobalShortcutAction, GlobalShortcutConfig } from './lib/global-shortcuts.js';
+
 export { createSystemSessionService } from './services/system-session-service.js';
 export type { SystemSessionServiceDeps, SystemSessionService } from './services/system-session-service.js';
 

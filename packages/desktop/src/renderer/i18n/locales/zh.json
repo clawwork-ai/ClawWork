@@ -564,6 +564,8 @@
     "setupCodeParsed": "已识别网关地址",
     "setupCodePlaceholder": "粘贴来自网关 Web UI 或 openclaw qr 的 Setup Code",
     "shortcuts": "快捷键",
+    "shortcutConflictPreferences": "此快捷键可能与 macOS 系统偏好设置 (⌘,) 冲突",
+    "shortcutDisabled": "已禁用",
     "shortcutUpdated": "快捷键已更新",
     "showSecret": "显示凭据",
     "skillApiKeySave": "保存",

@@ -564,6 +564,8 @@
     "setupCodeParsed": "Gateway URL detected",
     "setupCodePlaceholder": "Paste setup code from gateway web UI or openclaw qr",
     "shortcuts": "Shortcuts",
+    "shortcutConflictPreferences": "This shortcut may conflict with system Preferences (⌘,) on macOS",
+    "shortcutDisabled": "Disabled",
     "shortcutUpdated": "Shortcut updated",
     "showSecret": "Show secret",
     "skillApiKeySave": "Save",
