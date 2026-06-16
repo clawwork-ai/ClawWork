@@ -177,4 +177,19 @@ describe('resolveFdRealPath', () => {
     expect(mockRealpathSync).not.toHaveBeenCalledWith(`/dev/fd/${FAKE_FD}`);
     win32Spy.mockRestore();
   });
+
+  it('falls back to absolutePath when macOS leaves /dev/fd aliases unresolved', () => {
+    const filePath = `${CONTEXT_DIR}/doc.pdf`;
+    const darwinSpy = vi.spyOn(process, 'platform', 'get').mockReturnValue('darwin');
+    mockRealpathSync.mockImplementation(((p: string) => {
+      if (p === `/dev/fd/${FAKE_FD}`) return `/dev/fd/${FAKE_FD}`;
+      if (p === filePath) return filePath;
+      throw new Error(`unexpected path ${p}`);
+    }) as typeof realpathSync);
+
+    expect(resolveFdRealPath(FAKE_FD, filePath)).toBe(filePath);
+    expect(mockRealpathSync).toHaveBeenCalledWith(`/dev/fd/${FAKE_FD}`);
+    expect(mockRealpathSync).toHaveBeenCalledWith(filePath);
+    darwinSpy.mockRestore();
+  });
 });
