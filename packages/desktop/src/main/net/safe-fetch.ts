@@ -52,9 +52,23 @@ export async function safeFetch(url: string, opts: SafeFetchOptions = {}): Promi
     if (!res.ok) throw new Error(`fetch ${url}: ${res.status}`);
     const cl = Number(res.headers.get('content-length') ?? '0');
     if (cl > maxSize) throw new Error('response too large');
-    const ab = await res.arrayBuffer();
-    if (ab.byteLength > maxSize) throw new Error('response too large');
-    return Buffer.from(ab);
+
+    const reader = res.body?.getReader();
+    if (!reader) throw new Error('response has no body');
+
+    const chunks: Buffer[] = [];
+    let total = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxSize) {
+        controller.abort();
+        throw new Error('response too large');
+      }
+      chunks.push(Buffer.from(value));
+    }
+    return Buffer.concat(chunks);
   } finally {
     clearTimeout(timeout);
   }

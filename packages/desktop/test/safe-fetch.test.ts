@@ -38,11 +38,27 @@ beforeEach(() => {
 });
 
 function mockResponse(body: ArrayBuffer, status = 200, headers: Record<string, string> = {}): Response {
+  const bytes = new Uint8Array(body);
   return {
     ok: status >= 200 && status < 300,
     status,
     headers: new Headers(headers),
     arrayBuffer: () => Promise.resolve(body),
+    body: {
+      getReader: () => {
+        let offset = 0;
+        const chunkSize = 256;
+        return {
+          read: async () => {
+            if (offset >= bytes.length) return { done: true, value: undefined };
+            const end = Math.min(offset + chunkSize, bytes.length);
+            const value = bytes.subarray(offset, end);
+            offset = end;
+            return { done: false, value };
+          },
+        };
+      },
+    },
   } as unknown as Response;
 }
 
@@ -137,6 +153,14 @@ describe('safeFetch', () => {
     netFetchMock.mockResolvedValue(mockResponse(big));
 
     await expect(safeFetch('https://cdn.example.com/big.bin', { maxSize: 1024 })).rejects.toThrow('too large');
+  });
+
+  it('rejects streaming bodies without content-length before exceeding maxSize', async () => {
+    assertNotPrivateHostMock.mockResolvedValue(null);
+    const big = new ArrayBuffer(4096);
+    netFetchMock.mockResolvedValue(mockResponse(big, 200, {}));
+
+    await expect(safeFetch('https://cdn.example.com/stream.bin', { maxSize: 1024 })).rejects.toThrow('too large');
   });
 
   it('rejects on non-ok HTTP status', async () => {
