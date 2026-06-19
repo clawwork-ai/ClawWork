@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const handleMap = new Map<string, (...args: unknown[]) => unknown>();
+const webContentsSendMock = vi.fn();
 
 const isWorkspaceConfiguredMock = vi.fn(() => false);
 const getWorkspacePathMock = vi.fn<() => string | null>(() => '/tmp/old-workspace');
@@ -17,7 +18,7 @@ const closeDatabaseMock = vi.fn();
 
 vi.mock('electron', () => ({
   BrowserWindow: {
-    getAllWindows: vi.fn(() => []),
+    getAllWindows: vi.fn(() => [{ webContents: { send: webContentsSendMock } }]),
   },
   dialog: {
     showOpenDialog: vi.fn(),
@@ -98,6 +99,9 @@ describe('registerWorkspaceHandlers', () => {
     expect(closeDatabaseMock).toHaveBeenCalledTimes(1);
     expect(reinitDatabaseMock).toHaveBeenCalledWith('/tmp/new-workspace');
     expect(updateConfigMock).toHaveBeenCalledWith({ workspacePath: '/tmp/new-workspace' });
+    expect(webContentsSendMock).toHaveBeenCalledWith('workspace:changed', {
+      workspacePath: '/tmp/new-workspace',
+    });
   });
 
   it('returns error without closing database when migration fails', async () => {

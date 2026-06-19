@@ -428,5 +428,13 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
   }
 
-  return { hydrateFromLocal, syncSessionMessages, syncFromGateway, retrySyncPending };
+  return {
+    hydrateFromLocal,
+    syncSessionMessages,
+    syncFromGateway,
+    retrySyncPending,
+    resetHydration: () => {
+      hydrationPromise = null;
+    },
+  };
 }

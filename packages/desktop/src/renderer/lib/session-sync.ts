@@ -11,4 +11,4 @@ const sync = createSessionSync({
   }),
 });
 
-export const { hydrateFromLocal, syncSessionMessages, syncFromGateway, retrySyncPending } = sync;
+export const { hydrateFromLocal, syncSessionMessages, syncFromGateway, retrySyncPending, resetHydration } = sync;

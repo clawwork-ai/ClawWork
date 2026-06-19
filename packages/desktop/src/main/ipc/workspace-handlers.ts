@@ -13,6 +13,12 @@ import { reinitDatabase, closeDatabase } from '../db/index.js';
 
 const TEAM_WORKSPACE_SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+function broadcastWorkspaceChanged(workspacePath: string): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    win.webContents.send('workspace:changed', { workspacePath });
+  }
+}
+
 export function registerWorkspaceHandlers(): void {
   ipcMain.handle('workspace:open-folder', () => {
     const p = getWorkspacePath();
@@ -59,6 +65,7 @@ export function registerWorkspaceHandlers(): void {
       await migrateWorkspace(oldPath, newWorkspacePath);
       reinitDatabase(newWorkspacePath);
       updateConfig({ workspacePath: newWorkspacePath });
+      broadcastWorkspaceChanged(newWorkspacePath);
       return { ok: true };
     } catch (err) {
       reinitDatabase(oldPath);

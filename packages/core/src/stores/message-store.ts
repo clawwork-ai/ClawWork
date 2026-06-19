@@ -39,6 +39,7 @@ export interface MessageState {
   clearMessages: (taskId: string) => void;
   setHighlightedMessage: (id: string | null) => void;
   setProcessing: (sessionKey: string, processing: boolean) => void;
+  resetForWorkspaceChange: () => void;
 }
 
 export interface MessageStoreDeps {
@@ -360,6 +361,14 @@ export function createMessageStore(deps: MessageStoreDeps) {
         if (processing) next.add(sessionKey);
         else next.delete(sessionKey);
         return { processingBySession: next };
+      }),
+
+    resetForWorkspaceChange: () =>
+      set({
+        messagesByTask: {},
+        activeTurnBySession: {},
+        processingBySession: new Set(),
+        highlightedMessageId: null,
       }),
   }));
 }

@@ -15,6 +15,7 @@ import { composer } from './platform';
 import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
+import { useWorkspaceRefresh } from './hooks/useWorkspaceRefresh';
 import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
@@ -65,6 +66,7 @@ export default function App() {
   useGatewayBootstrap();
   useUpdateCheck();
   useTraySync();
+  useWorkspaceRefresh();
 
   const startPanelDrag = useCallback(
     (e: React.MouseEvent, startWidth: number, setWidth: (w: number) => void, dir: 1 | -1) => {

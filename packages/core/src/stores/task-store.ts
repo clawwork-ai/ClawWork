@@ -41,6 +41,7 @@ export interface TaskState {
     },
   ) => void;
   removeTask: (id: string) => void;
+  resetForWorkspaceChange: () => void;
   hydrate: () => Promise<void>;
   adoptTasks: (
     discovered: {
@@ -251,6 +252,14 @@ export function createTaskStore(deps: TaskStoreDeps) {
         console.error('[persist:task]', err);
       });
     },
+
+    resetForWorkspaceChange: () =>
+      set({
+        tasks: [],
+        activeTaskId: null,
+        hydrated: false,
+        pendingNewTask: null,
+      }),
 
     hydrate: async () => {
       if (get().hydrated) return;

@@ -62,6 +62,7 @@ export interface RoomState {
   lookupTaskIdBySubagentKey: (subagentKey: string) => string | undefined;
   registerPerformerKey: (taskId: string, subagentKey: string, agentId: string, agentName: string) => void;
   verifyCandidates: (taskId: string, gatewayId: string) => Promise<void>;
+  resetForWorkspaceChange: () => void;
 }
 
 const VERIFY_COOLDOWN_MS = 2000;
@@ -222,6 +223,12 @@ export function createRoomStore(deps: RoomStoreDeps) {
       } finally {
         setTimeout(() => verifyInFlight.delete(taskId), VERIFY_COOLDOWN_MS);
       }
+    },
+
+    resetForWorkspaceChange: () => {
+      taskGateways.clear();
+      verifyInFlight.clear();
+      set({ rooms: {}, subagentKeyMap: {} });
     },
   }));
 

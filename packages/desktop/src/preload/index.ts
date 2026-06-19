@@ -164,6 +164,15 @@ function buildApi(): ClawWorkAPI {
     browseWorkspace: () => ipcRenderer.invoke('workspace:browse') as Promise<string | null>,
     setupWorkspace: (path: string) => ipcRenderer.invoke('workspace:setup', path),
     changeWorkspace: (path: string) => ipcRenderer.invoke('workspace:change', path),
+    onWorkspaceChanged: (callback: (payload: { workspacePath: string }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, payload: { workspacePath: string }): void => {
+        callback(payload);
+      };
+      ipcRenderer.on('workspace:changed', listener);
+      return () => {
+        ipcRenderer.removeListener('workspace:changed', listener);
+      };
+    },
 
     getSettings: () => ipcRenderer.invoke('settings:get'),
     updateSettings: (partial: Record<string, unknown>) => ipcRenderer.invoke('settings:update', partial),

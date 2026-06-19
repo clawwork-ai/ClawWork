@@ -32,6 +32,7 @@ interface FileState {
   setSearchResults: (results: ArtifactSearchResult[] | null) => void;
   setIsSearching: (v: boolean) => void;
   setTypeFilter: (filter: ArtifactKindFilter) => void;
+  resetForWorkspaceChange: () => void;
 }
 
 export const useFileStore = create<FileState>((set) => ({
@@ -61,4 +62,14 @@ export const useFileStore = create<FileState>((set) => ({
   setIsSearching: (v) => set({ isSearching: v }),
 
   setTypeFilter: (filter) => set({ typeFilter: filter }),
+
+  resetForWorkspaceChange: () =>
+    set({
+      artifacts: [],
+      selectedArtifactId: null,
+      searchQuery: '',
+      searchResults: null,
+      isSearching: false,
+      typeFilter: 'all',
+    }),
 }));
