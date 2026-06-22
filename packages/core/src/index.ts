@@ -95,7 +95,13 @@ export { deriveSessionActivity, getTaskSessionKeys } from './services/session-ac
 export type { SessionActivity } from './services/session-activity.js';
 
 export { createGatewayDispatcher } from './services/gateway-dispatcher.js';
-export type { GatewayDispatcherDeps } from './services/gateway-dispatcher.js';
+export type {
+  GatewayDispatcherDeps,
+  GatewayDispatcherStoreDeps,
+  GatewayDispatcherStatusDeps,
+  GatewayDispatcherCatalogDeps,
+  GatewayDispatcherSyncDeps,
+} from './services/gateway-dispatcher.js';
 
 export { createChatComposer } from './services/chat-composer.js';
 export type { ChatComposerDeps, ChatComposer, SendOptions } from './services/chat-composer.js';
