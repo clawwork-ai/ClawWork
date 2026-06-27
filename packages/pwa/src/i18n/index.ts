@@ -8,6 +8,7 @@ import ko from './locales/ko.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
 import pt from './locales/pt.json';
+import fr from './locales/fr.json';
 
 function detectLanguage(): string {
   try {
@@ -24,6 +25,7 @@ function detectLanguage(): string {
   if (nav.startsWith('de')) return 'de';
   if (nav.startsWith('es')) return 'es';
   if (nav.startsWith('pt')) return 'pt';
+  if (nav.startsWith('fr')) return 'fr';
   return 'en';
 }
 
@@ -37,6 +39,7 @@ i18n.use(initReactI18next).init({
     de: { translation: de },
     es: { translation: es },
     pt: { translation: pt },
+    fr: { translation: fr },
   },
   lng: detectLanguage(),
   fallbackLng: 'en',

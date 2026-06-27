@@ -8,6 +8,7 @@ import ko from './locales/ko.json';
 import pt from './locales/pt.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
+import fr from './locales/fr.json';
 
 const resources = {
   en: { translation: en },
@@ -18,6 +19,7 @@ const resources = {
   pt: { translation: pt },
   de: { translation: de },
   es: { translation: es },
+  fr: { translation: fr },
 } as const;
 
 i18n.use(initReactI18next).init({

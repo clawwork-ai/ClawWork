@@ -18,6 +18,7 @@ export const SUPPORTED_LANGUAGES: LanguageConfig[] = [
   { code: 'pt', label: 'Português', intlLocale: 'pt-BR', cronstrueLocale: 'pt_BR' },
   { code: 'de', label: 'Deutsch', intlLocale: 'de', cronstrueLocale: 'de' },
   { code: 'es', label: 'Español', intlLocale: 'es', cronstrueLocale: 'es' },
+  { code: 'fr', label: 'Français', intlLocale: 'fr', cronstrueLocale: 'fr' },
 ];
 
 const CONFIG_MAP = new Map(SUPPORTED_LANGUAGES.map((l) => [l.code, l]));

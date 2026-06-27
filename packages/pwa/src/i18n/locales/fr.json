@@ -1,0 +1,109 @@
+{
+  "agents": {
+    "empty": "Aucun agent disponible",
+    "selectTitle": "Sélectionner un agent"
+  },
+  "app": {
+    "error": "Une erreur est survenue",
+    "loading": "Chargement...",
+    "name": "ClawWork",
+    "paired": "Appareil mobile appairé",
+    "reload": "Recharger"
+  },
+  "chat": {
+    "abortButton": "Arrêter",
+    "assistant": "Assistant",
+    "assistantMessage": "Message de l'assistant",
+    "authorizationPending": "En attente d'autorisation...",
+    "emptyState": "Sélectionnez une tâche ou créez-en une nouvelle",
+    "inputPlaceholder": "Saisissez un message...",
+    "mainArea": "Discussion",
+    "sendButton": "Envoyer",
+    "systemMessage": "Message système",
+    "thinking": "Réflexion...",
+    "userMessage": "Votre message",
+    "virtualizedList": "Transcription de la discussion"
+  },
+  "debugLog": {
+    "clearLog": "Effacer le journal",
+    "close": "Fermer",
+    "copyLog": "Copier le journal",
+    "empty": "Aucun événement pour l'instant",
+    "reconnect": "Reconnecter",
+    "title": "Journal de la passerelle"
+  },
+  "drawer": {
+    "closeButton": "Fermer le menu",
+    "menuButton": "Ouvrir le menu",
+    "newTaskButton": "Nouvelle tâche",
+    "search": "Rechercher",
+    "settings": "Réglages",
+    "signOut": "Se déconnecter",
+    "signOutConfirm": "Se déconnecter ? Toutes les données locales seront effacées.",
+    "title": "Volet de navigation"
+  },
+  "errors": {
+    "agentNotResponding": "L'agent ne répond pas - il est peut-être indisponible ou mal configuré sur le serveur. Essayez un autre agent.",
+    "failed": "échoué",
+    "requestFailed": "Échec de la requête",
+    "sendFailed": "Échec de l'envoi",
+    "serverAborted": "Tâche interrompue par le serveur",
+    "stage": {
+      "final": "Finaliser",
+      "lifecycle": "Agent",
+      "persist": "Enregistrer",
+      "send": "Envoyer",
+      "stream": "Flux",
+      "sync": "Synchroniser"
+    },
+    "unknown": "Erreur inconnue"
+  },
+  "gateway": {
+    "connected": "Connecté",
+    "connecting": "Connexion...",
+    "disconnected": "Déconnecté",
+    "statusLabel": "État de la connexion à la passerelle"
+  },
+  "pairing": {
+    "cameraError": "Accès à la caméra refusé",
+    "cancelButton": "Annuler",
+    "instruction": "Après la lecture, approuvez cet appareil sur votre poste de bureau avant que l'app mobile puisse se connecter.",
+    "invalidQr": "Code QR invalide",
+    "loadingCamera": "Chargement de la caméra...",
+    "scanButton": "Scanner le code QR",
+    "scannerUnsupported": "Lecteur de code QR non pris en charge sur ce navigateur",
+    "subtitle": "Scannez le code QR affiché sur votre app de bureau pour commencer",
+    "videoError": "Échec du démarrage de la caméra"
+  },
+  "qrScanner": {
+    "scanFrameLabel": "Zone de lecture du code QR",
+    "videoLabel": "Viseur de la caméra pour la lecture du code QR"
+  },
+  "settings": {
+    "applyUpdate": "Mise à jour disponible — Touchez pour installer",
+    "checking": "Vérification...",
+    "checkUpdate": "Rechercher des mises à jour",
+    "darkMode": "Mode sombre",
+    "language": "Langue",
+    "lightMode": "Mode clair",
+    "updateFailed": "Échec de la vérification de mise à jour",
+    "updateUnavailable": "Mises à jour non disponibles",
+    "upToDate": "Déjà à jour",
+    "version": "Version {{version}}"
+  },
+  "shell": {
+    "reconnect": "Reconnecter"
+  },
+  "tasks": {
+    "empty": "Aucune tâche pour l'instant",
+    "navigationLabel": "Liste des tâches",
+    "newTask": "Nouvelle tâche",
+    "older": "Plus anciennes",
+    "thisWeek": "Cette semaine",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier"
+  },
+  "tools": {
+    "emptyDetails": "Aucun détail disponible"
+  }
+}
