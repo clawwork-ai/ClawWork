@@ -67,7 +67,7 @@
   "pairing": {
     "cameraError": "Accès à la caméra refusé",
     "cancelButton": "Annuler",
-    "instruction": "Après la lecture, approuvez cet appareil sur votre poste de bureau avant que l'app mobile puisse se connecter.",
+    "instruction": "Après le scan, approuvez cet appareil sur votre poste de bureau avant que l'app mobile puisse se connecter.",
     "invalidQr": "Code QR invalide",
     "loadingCamera": "Chargement de la caméra...",
     "scanButton": "Scanner le code QR",
