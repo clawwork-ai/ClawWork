@@ -16,6 +16,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
   pt: 'Português',
   de: 'Deutsch',
   es: 'Español',
+  fr: 'Français',
 };
 
 interface SettingsSheetProps {
