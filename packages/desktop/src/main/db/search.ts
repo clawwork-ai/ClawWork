@@ -32,12 +32,28 @@ SELECT * FROM (
 ) ORDER BY rank LIMIT 20;
 `;
 
-export function globalSearch(db: Database.Database, query: string): SearchResult[] {
-  const q = query.trim();
-  if (!q) return [];
+/**
+ * Minimum number of normalized (punctuation-stripped) characters a query must
+ * have before we run an FTS5 prefix match. A single-character prefix such as
+ * `a*` matches almost every indexed token, degrading into a full-table scan
+ * that blocks the main process for hundreds of milliseconds (#391).
+ */
+const MIN_FTS_QUERY_LENGTH = 2;
 
-  const ftsQuery = q.replace(/[^\w\u4e00-\u9fff]/g, ' ').trim() + '*';
-  if (ftsQuery === '*') return [];
+/**
+ * Normalize a raw user query into an FTS5 prefix expression, or return `null`
+ * when it is empty or shorter than {@link MIN_FTS_QUERY_LENGTH}. Word and CJK
+ * characters are preserved; everything else is treated as a separator.
+ */
+function toFtsPrefixQuery(query: string): string | null {
+  const normalized = query.replace(/[^\w\u4e00-\u9fff]/g, ' ').trim();
+  if (normalized.length < MIN_FTS_QUERY_LENGTH) return null;
+  return normalized + '*';
+}
+
+export function globalSearch(db: Database.Database, query: string): SearchResult[] {
+  const ftsQuery = toFtsPrefixQuery(query);
+  if (!ftsQuery) return [];
 
   const stmt = db.prepare(SEARCH_SQL);
   const rows = stmt.all(ftsQuery, ftsQuery, ftsQuery) as Array<{
@@ -100,10 +116,8 @@ export function searchArtifacts(
   query: string,
   options: ArtifactSearchOptions = {},
 ): ArtifactSearchResult[] {
-  const q = query.trim();
-  if (!q) return [];
-  const ftsQuery = q.replace(/[^\w\u4e00-\u9fff]/g, ' ').trim() + '*';
-  if (ftsQuery === '*') return [];
+  const ftsQuery = toFtsPrefixQuery(query);
+  if (!ftsQuery) return [];
   const clauses = ['artifacts_fts MATCH ?'];
   const params: string[] = [ftsQuery];
   const kindClause = artifactKindClause(options.kind);
