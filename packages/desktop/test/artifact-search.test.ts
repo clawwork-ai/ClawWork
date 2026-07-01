@@ -111,4 +111,20 @@ describe('search query length guard', () => {
 
     expect(all).toHaveBeenCalledWith('ab*', 'ab*', 'ab*');
   });
+
+  it('preserves accented Latin characters instead of stripping them', () => {
+    const { db, all } = mockDb([]);
+
+    globalSearch(db as never, 'café');
+
+    expect(all).toHaveBeenCalledWith('café*', 'café*', 'café*');
+  });
+
+  it('preserves non-Latin scripts such as Japanese kana', () => {
+    const { db, all } = mockDb([]);
+
+    globalSearch(db as never, 'ひらがな');
+
+    expect(all).toHaveBeenCalledWith('ひらがな*', 'ひらがな*', 'ひらがな*');
+  });
 });

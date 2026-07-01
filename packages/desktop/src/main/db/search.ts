@@ -42,11 +42,12 @@ const MIN_FTS_QUERY_LENGTH = 2;
 
 /**
  * Normalize a raw user query into an FTS5 prefix expression, or return `null`
- * when it is empty or shorter than {@link MIN_FTS_QUERY_LENGTH}. Word and CJK
- * characters are preserved; everything else is treated as a separator.
+ * when it is empty or shorter than {@link MIN_FTS_QUERY_LENGTH}. Letters and
+ * digits of any script (Latin incl. accents, CJK, kana, Hangul, Cyrillic, \u2026)
+ * are preserved; everything else is treated as a separator.
  */
 function toFtsPrefixQuery(query: string): string | null {
-  const normalized = query.replace(/[^\w\u4e00-\u9fff]/g, ' ').trim();
+  const normalized = query.replace(/[^\p{L}\p{N}_]/gu, ' ').trim();
   if (normalized.length < MIN_FTS_QUERY_LENGTH) return null;
   return normalized + '*';
 }
