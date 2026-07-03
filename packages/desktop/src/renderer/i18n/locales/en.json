@@ -522,6 +522,7 @@
     "noGateways": "No gateways configured",
     "notifications": "Notifications",
     "notificationsDesc": "Desktop notifications for background events",
+    "notificationsUpdated": "Notification settings updated",
     "notifyApproval": "Approval requests",
     "notifyDisconnect": "Gateway disconnection",
     "notifyTaskComplete": "Task completion",

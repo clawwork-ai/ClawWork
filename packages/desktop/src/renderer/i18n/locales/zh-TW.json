@@ -522,6 +522,7 @@
     "noGateways": "尚未設定 Gateway",
     "notifications": "通知",
     "notificationsDesc": "背景事件的桌面通知",
+    "notificationsUpdated": "通知設定已更新",
     "notifyApproval": "核准請求",
     "notifyDisconnect": "Gateway 斷線",
     "notifyTaskComplete": "任務完成",

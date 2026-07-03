@@ -522,6 +522,7 @@
     "noGateways": "ゲートウェイが設定されていません",
     "notifications": "通知",
     "notificationsDesc": "バックグラウンドイベントのデスクトップ通知",
+    "notificationsUpdated": "通知設定を更新しました",
     "notifyApproval": "承認リクエスト",
     "notifyDisconnect": "ゲートウェイ切断",
     "notifyTaskComplete": "タスク完了",
