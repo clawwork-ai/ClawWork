@@ -87,8 +87,21 @@ export const USER_TASK_FENCE_CLOSE = '>>>USER_TASK';
 
 const TRUNCATED_PROMPT_SUFFIX = '\n... [truncated]';
 
+// Matches catalog lines produced by useChatSend: "- id: <id>, name: \"...\"[, emoji: ...][, role: \"...\"][, description: \"...\"]"
+const AGENT_CATALOG_LINE_BREAK_CHARS = '\\n\\r\\x00-\\x1f\\u0085\\u2028\\u2029';
+const AGENT_CATALOG_QUOTED_VALUE_RE = `(?:[^"${AGENT_CATALOG_LINE_BREAK_CHARS}\\\\]|\\\\.)*`;
+const AGENT_CATALOG_EMOJI_RE = `[^\\s,${AGENT_CATALOG_LINE_BREAK_CHARS}]+`;
+const AGENT_CATALOG_LINE_RE = new RegExp(
+  `^- id: [\\w-]+, name: "${AGENT_CATALOG_QUOTED_VALUE_RE}"(?:, emoji: ${AGENT_CATALOG_EMOJI_RE})?(?:, role: "${AGENT_CATALOG_QUOTED_VALUE_RE}")?(?:, description: "${AGENT_CATALOG_QUOTED_VALUE_RE}")?$`,
+);
+
 function normalizePromptText(input: unknown): string {
-  return typeof input === 'string' ? input.replace(/\r\n?/g, '\n').trim() : '';
+  return typeof input === 'string'
+    ? input
+        .replace(/\r\n?/g, '\n')
+        .replace(/[\f\v\u0085\u2028\u2029]/g, '\n')
+        .trim()
+    : '';
 }
 
 function truncatePromptText(input: string, maxChars: number): string {
@@ -97,23 +110,26 @@ function truncatePromptText(input: string, maxChars: number): string {
   return `${input.slice(0, maxBodyChars).trimEnd()}${TRUNCATED_PROMPT_SUFFIX}`;
 }
 
+function stripPromptFenceLines(lines: string[]): string[] {
+  return lines.filter((line) => line.trim() !== USER_TASK_FENCE_OPEN && line.trim() !== USER_TASK_FENCE_CLOSE);
+}
+
 export function sanitizeAgentCatalog(input: unknown): string {
-  const normalized = normalizePromptText(input);
+  // Only normalize CRLF pairs here — do not fold lone \r or Unicode line separators before
+  // validation, or a single malformed line can split into injected catalog entries.
+  const normalized = typeof input === 'string' ? input.replace(/\r\n/g, '\n').trim() : '';
   if (!normalized) return '';
-  const stripped = normalized
-    .split('\n')
-    .filter((line) => line.trim() !== USER_TASK_FENCE_OPEN && line.trim() !== USER_TASK_FENCE_CLOSE)
-    .join('\n');
-  return truncatePromptText(stripped, MAX_AGENT_CATALOG_CHARS);
+  // Split on LF only — do not split on lone \r or the injection line above becomes two valid entries.
+  const validated = stripPromptFenceLines(normalized.split('\n'))
+    .map((line) => line.trimEnd())
+    .filter((line) => line.length > 0 && AGENT_CATALOG_LINE_RE.test(line));
+  return truncatePromptText(validated.join('\n'), MAX_AGENT_CATALOG_CHARS);
 }
 
 export function sanitizeUserTask(input: unknown): string {
   const normalized = normalizePromptText(input);
   if (!normalized) return '';
-  const stripped = normalized
-    .split('\n')
-    .filter((line) => line.trim() !== USER_TASK_FENCE_OPEN && line.trim() !== USER_TASK_FENCE_CLOSE)
-    .join('\n');
+  const stripped = stripPromptFenceLines(normalized.split('\n')).join('\n');
   return truncatePromptText(stripped, MAX_USER_TASK_CHARS);
 }
 
