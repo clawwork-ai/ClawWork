@@ -73,7 +73,18 @@ function buildAppMenu(devMode = false): Menu {
       : []),
     {
       label: 'File',
-      submenu: [isMac ? { role: 'close' as const, accelerator: 'Command+W' } : { role: 'quit' as const }],
+      submenu: [
+        {
+          label: 'Print',
+          accelerator: isMac ? 'Command+P' : 'Ctrl+P',
+          click: () => {
+            const win = BrowserWindow.getFocusedWindow();
+            win?.webContents.print({});
+          },
+        },
+        { type: 'separator' as const },
+        isMac ? { role: 'close' as const, accelerator: 'Command+W' } : { role: 'quit' as const },
+      ],
     },
     { role: 'editMenu' as const },
     {

@@ -6,8 +6,8 @@ export type Theme = 'dark' | 'light' | 'auto';
 export type DensityMode = 'compact' | 'comfortable' | 'spacious';
 export type SendShortcut = 'enter' | 'cmdEnter';
 export type MessageLayout = 'centered' | 'wide';
-export type PanelShortcutLeft = 'Comma' | 'BracketLeft';
-export type PanelShortcutRight = 'Period' | 'BracketRight';
+export type PanelShortcutLeft = 'Comma' | 'BracketLeft' | 'None';
+export type PanelShortcutRight = 'Period' | 'BracketRight' | 'None';
 export interface GatewayInfo {
   id: string;
   name: string;

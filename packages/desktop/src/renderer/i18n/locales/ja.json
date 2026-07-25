@@ -564,6 +564,8 @@
     "setupCodeParsed": "ゲートウェイ URL を検出しました",
     "setupCodePlaceholder": "ゲートウェイ Web UI または openclaw qr からセットアップコードを貼り付け",
     "shortcuts": "ショートカット",
+    "shortcutConflictPreferences": "このショートカットは macOS のシステム設定 (⌘,) と競合する可能性があります",
+    "shortcutDisabled": "無効",
     "shortcutUpdated": "ショートカットを更新しました",
     "showSecret": "シークレットを表示",
     "skillApiKeySave": "保存",
