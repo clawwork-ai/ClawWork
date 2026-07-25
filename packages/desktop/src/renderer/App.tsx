@@ -11,6 +11,7 @@ import CommandPalette from './components/CommandPalette';
 import { useUiStore, type Theme } from './stores/uiStore';
 import { useTaskStore } from './stores/taskStore';
 import { useFileStore } from './stores/fileStore';
+import { resolveGlobalShortcutAction, shouldDeferGlobalShortcut } from '@clawwork/core';
 import { composer } from './platform';
 import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
 import { useWorkspaceRefresh } from './hooks/useWorkspaceRefresh';
@@ -130,39 +131,32 @@ export default function App() {
 
   const handleGlobalKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      const meta = e.metaKey || e.ctrlKey;
-      if (!meta) return;
+      if (shouldDeferGlobalShortcut(e)) return;
 
-      if (e.shiftKey && e.code === 'KeyO') {
-        e.preventDefault();
-        startNewTask();
-        return;
-      }
+      const action = resolveGlobalShortcutAction(e, {
+        leftNavShortcut,
+        rightPanelShortcut,
+      });
+      if (!action) return;
 
-      if (e.shiftKey && e.code === 'KeyF') {
-        e.preventDefault();
-        setMainView('files');
-        return;
-      }
+      e.preventDefault();
 
-      if (!e.shiftKey && e.code === 'KeyK') {
-        e.preventDefault();
-        toggleCommandPalette();
-        return;
-      }
-
-      const leftCode = leftNavShortcut;
-      const rightCode = rightPanelShortcut;
-
-      if (!e.shiftKey && e.code === leftCode) {
-        e.preventDefault();
-        toggleLeftNavCollapsed();
-        return;
-      }
-
-      if (!e.shiftKey && e.code === rightCode) {
-        e.preventDefault();
-        if (useUiStore.getState().mainView === 'chat') toggleRightPanel();
+      switch (action) {
+        case 'new-task':
+          startNewTask();
+          return;
+        case 'open-files':
+          setMainView('files');
+          return;
+        case 'toggle-command-palette':
+          toggleCommandPalette();
+          return;
+        case 'toggle-left-nav':
+          toggleLeftNavCollapsed();
+          return;
+        case 'toggle-right-panel':
+          if (useUiStore.getState().mainView === 'chat') toggleRightPanel();
+          return;
       }
     },
     [

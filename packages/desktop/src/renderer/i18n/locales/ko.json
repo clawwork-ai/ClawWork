@@ -564,6 +564,8 @@
     "setupCodeParsed": "게이트웨이 URL이 감지되었습니다",
     "setupCodePlaceholder": "게이트웨이 웹 UI 또는 openclaw qr에서 설정 코드를 붙여넣으세요",
     "shortcuts": "단축키",
+    "shortcutConflictPreferences": "이 단축키는 macOS 시스템 설정(⌘,)과 충돌할 수 있습니다",
+    "shortcutDisabled": "사용 안 함",
     "shortcutUpdated": "단축키가 변경되었습니다",
     "showSecret": "비밀 표시",
     "skillApiKeySave": "저장",

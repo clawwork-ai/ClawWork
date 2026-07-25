@@ -564,6 +564,8 @@
     "setupCodeParsed": "已偵測到 Gateway URL",
     "setupCodePlaceholder": "貼上來自 Gateway Web UI 或 openclaw qr 的設定碼",
     "shortcuts": "快捷鍵",
+    "shortcutConflictPreferences": "此快捷鍵可能與 macOS 系統偏好設定 (⌘,) 衝突",
+    "shortcutDisabled": "已停用",
     "shortcutUpdated": "快捷鍵已更新",
     "showSecret": "顯示憑證",
     "skillApiKeySave": "儲存",

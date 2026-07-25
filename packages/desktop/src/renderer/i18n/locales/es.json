@@ -564,6 +564,8 @@
     "setupCodeParsed": "URL del Gateway detectada",
     "setupCodePlaceholder": "Pega el código de configuración desde la interfaz web del Gateway o el QR de OpenClaw",
     "shortcuts": "Atajos",
+    "shortcutConflictPreferences": "Este atajo puede entrar en conflicto con Preferencias del sistema (⌘,) en macOS",
+    "shortcutDisabled": "Desactivado",
     "shortcutUpdated": "Atajo actualizado",
     "showSecret": "Mostrar secreto",
     "skillApiKeySave": "Guardar",

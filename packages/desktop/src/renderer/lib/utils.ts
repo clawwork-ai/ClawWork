@@ -50,4 +50,5 @@ export function formatCost(usd: number): string {
 
 const isMac = navigator.platform.toUpperCase().includes('MAC');
 
+export const isMacPlatform = isMac;
 export const modKey = isMac ? '⌘' : 'Ctrl';

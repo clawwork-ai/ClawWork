@@ -564,6 +564,8 @@
     "setupCodeParsed": "Gateway-URL erkannt",
     "setupCodePlaceholder": "Setup-Code aus der Gateway-Weboberflaeche oder openclaw qr einfuegen",
     "shortcuts": "Tastenkuerzel",
+    "shortcutConflictPreferences": "Dieses Tastenkuerzel kann mit den macOS-Systemeinstellungen (⌘,) kollidieren",
+    "shortcutDisabled": "Deaktiviert",
     "shortcutUpdated": "Tastenkuerzel aktualisiert",
     "showSecret": "Zugangsdaten anzeigen",
     "skillApiKeySave": "Speichern",
