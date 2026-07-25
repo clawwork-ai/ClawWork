@@ -109,6 +109,7 @@ export interface TaskStoreDeps {
 
 export function createTaskStore(deps: TaskStoreDeps) {
   let cachedDeviceId: string | null = null;
+  let hydrationPromise: Promise<void> | null = null;
 
   return createStore<TaskState>((set, get) => ({
     tasks: [],
@@ -254,37 +255,45 @@ export function createTaskStore(deps: TaskStoreDeps) {
 
     hydrate: async () => {
       if (get().hydrated) return;
-      try {
-        cachedDeviceId = await deps.getDeviceId();
-        const res = await deps.loadTasks();
-        if (res.ok && res.rows) {
-          set({
-            tasks: res.rows.map((r) => ({
-              id: r.id,
-              sessionKey: r.sessionKey,
-              sessionId: r.sessionId,
-              title: r.title,
-              status: r.status as TaskStatus,
-              ensemble: r.ensemble ?? undefined,
-              model: r.model ?? undefined,
-              modelProvider: r.modelProvider ?? undefined,
-              thinkingLevel: r.thinkingLevel ?? undefined,
-              inputTokens: r.inputTokens ?? undefined,
-              outputTokens: r.outputTokens ?? undefined,
-              contextTokens: r.contextTokens ?? undefined,
-              teamId: r.teamId ?? undefined,
-              createdAt: r.createdAt,
-              updatedAt: r.updatedAt,
-              tags: r.tags,
-              artifactDir: r.artifactDir,
-              gatewayId: r.gatewayId,
-            })),
-            hydrated: true,
-          });
+      if (hydrationPromise) return hydrationPromise;
+
+      hydrationPromise = (async () => {
+        try {
+          cachedDeviceId = await deps.getDeviceId();
+          const res = await deps.loadTasks();
+          if (res.ok && res.rows) {
+            set({
+              tasks: res.rows.map((r) => ({
+                id: r.id,
+                sessionKey: r.sessionKey,
+                sessionId: r.sessionId,
+                title: r.title,
+                status: r.status as TaskStatus,
+                ensemble: r.ensemble ?? undefined,
+                model: r.model ?? undefined,
+                modelProvider: r.modelProvider ?? undefined,
+                thinkingLevel: r.thinkingLevel ?? undefined,
+                inputTokens: r.inputTokens ?? undefined,
+                outputTokens: r.outputTokens ?? undefined,
+                contextTokens: r.contextTokens ?? undefined,
+                teamId: r.teamId ?? undefined,
+                createdAt: r.createdAt,
+                updatedAt: r.updatedAt,
+                tags: r.tags,
+                artifactDir: r.artifactDir,
+                gatewayId: r.gatewayId,
+              })),
+              hydrated: true,
+            });
+          }
+        } catch (err) {
+          console.warn('[taskStore] hydrate failed:', err);
+        } finally {
+          hydrationPromise = null;
         }
-      } catch (err) {
-        console.warn('[taskStore] hydrate failed:', err);
-      }
+      })();
+
+      return hydrationPromise;
     },
 
     adoptTasks: (discovered) => {

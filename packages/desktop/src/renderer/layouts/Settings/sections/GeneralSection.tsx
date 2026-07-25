@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Moon, Sun, Monitor, Bell, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
-import { modKey } from '@/lib/utils';
+import { modKey, isMacPlatform } from '@/lib/utils';
 import {
   useUiStore,
   type Theme,
@@ -18,6 +18,7 @@ import SegmentedControl from '../components/SegmentedControl';
 import Toggle from '../components/Toggle';
 import SettingGroup from '@/components/semantic/SettingGroup';
 import PairMobileDialog from '../components/PairMobileDialog';
+import { hasPreferencesShortcutConflict } from '@clawwork/core';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 export default function GeneralSection() {
@@ -194,16 +195,24 @@ export default function GeneralSection() {
             />
           </SettingRow>
           <SettingRow label={t('settings.leftNavShortcut')}>
-            <SegmentedControl
-              layoutId="seg-left-nav"
-              value={leftNavShortcut}
-              onChange={handleLeftNavShortcutChange}
-              ariaLabel={t('settings.leftNavShortcut')}
-              options={[
-                { value: 'Comma' as const, label: `${modKey} ,` },
-                { value: 'BracketLeft' as const, label: `${modKey} [` },
-              ]}
-            />
+            <div className="flex flex-col items-end gap-1">
+              <SegmentedControl
+                layoutId="seg-left-nav"
+                value={leftNavShortcut}
+                onChange={handleLeftNavShortcutChange}
+                ariaLabel={t('settings.leftNavShortcut')}
+                options={[
+                  { value: 'Comma' as const, label: `${modKey} ,` },
+                  { value: 'BracketLeft' as const, label: `${modKey} [` },
+                  { value: 'None' as const, label: t('settings.shortcutDisabled') },
+                ]}
+              />
+              {hasPreferencesShortcutConflict(leftNavShortcut, isMacPlatform ? 'darwin' : 'win32') && (
+                <p className="type-support max-w-xs text-right text-[var(--text-muted)]">
+                  {t('settings.shortcutConflictPreferences')}
+                </p>
+              )}
+            </div>
           </SettingRow>
           <SettingRow label={t('settings.rightPanelShortcut')}>
             <SegmentedControl
@@ -214,6 +223,7 @@ export default function GeneralSection() {
               options={[
                 { value: 'Period' as const, label: `${modKey} .` },
                 { value: 'BracketRight' as const, label: `${modKey} ]` },
+                { value: 'None' as const, label: t('settings.shortcutDisabled') },
               ]}
             />
           </SettingRow>

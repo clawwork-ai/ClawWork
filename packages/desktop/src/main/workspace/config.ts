@@ -50,8 +50,8 @@ export interface AppConfig {
   quickLaunch?: QuickLaunchConfig;
   trayEnabled?: boolean;
   notifications?: NotificationConfig;
-  leftNavShortcut?: 'Comma' | 'BracketLeft';
-  rightPanelShortcut?: 'Period' | 'BracketRight';
+  leftNavShortcut?: 'Comma' | 'BracketLeft' | 'None';
+  rightPanelShortcut?: 'Period' | 'BracketRight' | 'None';
   deviceId?: string;
   zoomLevel?: number;
   devMode?: boolean;

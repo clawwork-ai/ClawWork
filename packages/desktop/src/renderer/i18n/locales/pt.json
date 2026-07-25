@@ -564,6 +564,8 @@
     "setupCodeParsed": "URL do Gateway detectada",
     "setupCodePlaceholder": "Cole o código de configuração da interface web do gateway ou do openclaw qr",
     "shortcuts": "Atalhos",
+    "shortcutConflictPreferences": "Este atalho pode entrar em conflito com Preferências do sistema (⌘,) no macOS",
+    "shortcutDisabled": "Desativado",
     "shortcutUpdated": "Atalho atualizado",
     "showSecret": "Mostrar segredo",
     "skillApiKeySave": "Salvar",

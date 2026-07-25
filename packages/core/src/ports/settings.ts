@@ -10,8 +10,8 @@ export interface AppSettings {
   density?: 'compact' | 'comfortable' | 'spacious';
   language?: string;
   sendShortcut?: 'enter' | 'cmdEnter';
-  leftNavShortcut?: 'Comma' | 'BracketLeft';
-  rightPanelShortcut?: 'Period' | 'BracketRight';
+  leftNavShortcut?: 'Comma' | 'BracketLeft' | 'None';
+  rightPanelShortcut?: 'Period' | 'BracketRight' | 'None';
   devMode?: boolean;
   notifications?: NotificationSettings;
 }
