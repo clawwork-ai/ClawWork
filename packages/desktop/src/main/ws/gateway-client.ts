@@ -49,6 +49,12 @@ type PendingReq = {
 };
 
 const REQ_TIMEOUT_MS = 15_000;
+const MAX_RECONNECT_BACKOFF_EXPONENT = 5;
+
+export function calculateReconnectDelay(attempt: number): number {
+  const exponent = Math.min(Math.max(attempt - 1, 0), MAX_RECONNECT_BACKOFF_EXPONENT);
+  return RECONNECT_DELAY_MS * Math.pow(2, exponent);
+}
 
 function isSecureGatewayWebSocketUrl(raw: string): boolean {
   try {
@@ -157,7 +163,7 @@ export class GatewayClient {
       });
       this.authenticated = false;
       this.serverVersion = undefined;
-      this.stopHeartbeat();
+      this.cleanup();
       sendToWindow(getMainWindow(), 'gateway-status', {
         gatewayId: this.gatewayId,
         connected: false,
@@ -866,8 +872,9 @@ export class GatewayClient {
       return;
     }
 
-    const delay = RECONNECT_DELAY_MS * Math.pow(2, Math.min(this.reconnectAttempts, 5));
-    this.reconnectAttempts++;
+    const attempt = this.reconnectAttempts + 1;
+    const delay = calculateReconnectDelay(attempt);
+    this.reconnectAttempts = attempt;
     getDebugLogger().warn({
       domain: 'gateway',
       event: 'gateway.reconnect.scheduled',
