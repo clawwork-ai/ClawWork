@@ -991,32 +991,44 @@ export default function AgentsSection() {
       setFileContent(null);
       setEditingFileContent(null);
       setLoadingFileContent(true);
-      const res = await window.clawwork.getAgentFile(selectedGatewayId, agentId, name);
-      setLoadingFileContent(false);
-      if (res.ok && res.result) {
-        const data = res.result as unknown as { file?: { content?: string } };
-        setFileContent(data.file?.content ?? null);
+      try {
+        const res = await window.clawwork.getAgentFile(selectedGatewayId, agentId, name);
+        if (res.ok && res.result) {
+          const data = res.result as unknown as { file?: { content?: string } };
+          setFileContent(data.file?.content ?? null);
+        }
+      } catch (err) {
+        console.error('[AgentsSection] getAgentFile failed:', err);
+        toast.error(t('errors.failed'));
+      } finally {
+        setLoadingFileContent(false);
       }
     },
-    [selectedGatewayId, selectedFileName],
+    [selectedGatewayId, selectedFileName, t],
   );
 
   const handleSaveFile = useCallback(async () => {
     if (!selectedGatewayId || !expandedFilesAgentId || !selectedFileName || editingFileContent === null) return;
     setSavingFile(true);
-    const res = await window.clawwork.setAgentFile(
-      selectedGatewayId,
-      expandedFilesAgentId,
-      selectedFileName,
-      editingFileContent,
-    );
-    setSavingFile(false);
-    if (res.ok) {
-      toast.success(t('settings.agentFileSaved'));
-      setFileContent(editingFileContent);
-      setEditingFileContent(null);
-    } else {
-      toast.error(res.error ?? t('settings.agentFileSaveFailed'));
+    try {
+      const res = await window.clawwork.setAgentFile(
+        selectedGatewayId,
+        expandedFilesAgentId,
+        selectedFileName,
+        editingFileContent,
+      );
+      if (res.ok) {
+        toast.success(t('settings.agentFileSaved'));
+        setFileContent(editingFileContent);
+        setEditingFileContent(null);
+      } else {
+        toast.error(res.error ?? t('settings.agentFileSaveFailed'));
+      }
+    } catch (err) {
+      console.error('[AgentsSection] setAgentFile failed:', err);
+      toast.error(t('settings.agentFileSaveFailed'));
+    } finally {
+      setSavingFile(false);
     }
   }, [selectedGatewayId, expandedFilesAgentId, selectedFileName, editingFileContent, t]);
 
