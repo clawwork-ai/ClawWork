@@ -16,10 +16,11 @@ import { useGatewayBootstrap } from './hooks/useGatewayBootstrap';
 import { useWorkspaceRefresh } from './hooks/useWorkspaceRefresh';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { useTraySync } from './hooks/useTraySync';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useSettingsBootstrap } from './hooks/useSettingsBootstrap';
 import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { motionDuration, motionEase } from '@/styles/design-tokens';
-import { useSettingsStore } from './stores/settingsStore';
 
 function AppToaster({ themeMode }: { themeMode: Theme }) {
   return (
@@ -59,14 +60,21 @@ export default function App() {
   const leftNavShortcut = useUiStore((s) => s.leftNavShortcut);
   const rightPanelShortcut = useUiStore((s) => s.rightPanelShortcut);
   const themeMode = useUiStore((s) => s.theme);
-  const settings = useSettingsStore((s) => s.settings);
-  const settingsLoaded = useSettingsStore((s) => s.loaded);
-  const loadSettings = useSettingsStore((s) => s.load);
 
   useGatewayBootstrap();
   useWorkspaceRefresh();
   useUpdateCheck();
   useTraySync();
+  useSettingsBootstrap(ready);
+  useKeyboardShortcuts({
+    startNewTask,
+    setMainView,
+    toggleCommandPalette,
+    leftNavShortcut,
+    rightPanelShortcut,
+    toggleLeftNavCollapsed,
+    toggleRightPanel,
+  });
 
   const startPanelDrag = useCallback(
     (e: React.MouseEvent, startWidth: number, setWidth: (w: number) => void, dir: 1 | -1) => {
@@ -109,77 +117,6 @@ export default function App() {
         setNeedsSetup(true);
       });
   }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    if (settingsLoaded) return;
-    void loadSettings().catch((err: unknown) => {
-      console.error('[App] loadSettings failed:', err);
-    });
-  }, [ready, settingsLoaded, loadSettings]);
-
-  useEffect(() => {
-    if (!ready || !settings) return;
-    useUiStore.setState({
-      ...(settings.sendShortcut ? { sendShortcut: settings.sendShortcut } : {}),
-      ...(settings.leftNavShortcut ? { leftNavShortcut: settings.leftNavShortcut } : {}),
-      ...(settings.rightPanelShortcut ? { rightPanelShortcut: settings.rightPanelShortcut } : {}),
-      devMode: Boolean(settings.devMode),
-    });
-  }, [ready, settings]);
-
-  const handleGlobalKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      const meta = e.metaKey || e.ctrlKey;
-      if (!meta) return;
-
-      if (e.shiftKey && e.code === 'KeyO') {
-        e.preventDefault();
-        startNewTask();
-        return;
-      }
-
-      if (e.shiftKey && e.code === 'KeyF') {
-        e.preventDefault();
-        setMainView('files');
-        return;
-      }
-
-      if (!e.shiftKey && e.code === 'KeyK') {
-        e.preventDefault();
-        toggleCommandPalette();
-        return;
-      }
-
-      const leftCode = leftNavShortcut;
-      const rightCode = rightPanelShortcut;
-
-      if (!e.shiftKey && e.code === leftCode) {
-        e.preventDefault();
-        toggleLeftNavCollapsed();
-        return;
-      }
-
-      if (!e.shiftKey && e.code === rightCode) {
-        e.preventDefault();
-        if (useUiStore.getState().mainView === 'chat') toggleRightPanel();
-      }
-    },
-    [
-      startNewTask,
-      setMainView,
-      toggleCommandPalette,
-      leftNavShortcut,
-      rightPanelShortcut,
-      toggleLeftNavCollapsed,
-      toggleRightPanel,
-    ],
-  );
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [handleGlobalKeyDown]);
 
   useEffect(() => {
     window.clawwork.setWindowButtonVisibility(!leftNavCollapsed);
