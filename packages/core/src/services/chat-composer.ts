@@ -27,7 +27,7 @@ export interface ChatComposerDeps {
       role: 'user' | 'system',
       content: string,
       attachments?: MessageAttachment[],
-      options?: { persist?: boolean },
+      options?: { persist?: boolean; sessionKey?: string },
     ) => Message;
     setProcessing: (taskId: string, processing: boolean) => void;
     clearMessages: (taskId: string) => void;
@@ -112,10 +112,11 @@ export function createChatComposer(deps: ChatComposerDeps) {
     rawMessage: string,
     code?: string,
     details?: Record<string, unknown>,
+    sessionKey?: string,
   ): void {
     const store = deps.getMessageStore();
     const appError = buildAppError({ source, stage, rawMessage, code, details });
-    store.addMessage(taskId, 'system', formatErrorForUser(appError, deps.translate));
+    store.addMessage(taskId, 'system', formatErrorForUser(appError, deps.translate), undefined, { sessionKey });
     const toast = formatErrorForToast(appError, deps.translate);
     deps.onError?.(toast);
   }
@@ -169,7 +170,15 @@ export function createChatComposer(deps: ChatComposerDeps) {
           });
           if (!modelRes.ok) {
             store.setProcessing(task.sessionKey, false);
-            emitError(task.id, 'gateway', 'send', modelRes.error || deps.translate('errors.sendFailed'));
+            emitError(
+              task.id,
+              'gateway',
+              'send',
+              modelRes.error || deps.translate('errors.sendFailed'),
+              undefined,
+              undefined,
+              task.sessionKey,
+            );
             return { ok: false, taskId: task.id };
           }
           deps.getTaskStore().updateTaskMetadata(task.id, {
@@ -183,7 +192,15 @@ export function createChatComposer(deps: ChatComposerDeps) {
           });
           if (!thinkingRes.ok) {
             store.setProcessing(task.sessionKey, false);
-            emitError(task.id, 'gateway', 'send', thinkingRes.error || deps.translate('errors.sendFailed'));
+            emitError(
+              task.id,
+              'gateway',
+              'send',
+              thinkingRes.error || deps.translate('errors.sendFailed'),
+              undefined,
+              undefined,
+              task.sessionKey,
+            );
             return { ok: false, taskId: task.id };
           }
           deps.getTaskStore().updateTaskMetadata(task.id, { thinkingLevel: options.presetThinking });
@@ -202,7 +219,15 @@ export function createChatComposer(deps: ChatComposerDeps) {
           store.setProcessing(task.sessionKey, false);
           const reason =
             failed.status === 'rejected' ? String(failed.reason) : 'value' in failed ? (failed.value?.error ?? '') : '';
-          emitError(task.id, 'gateway', 'send', reason || deps.translate('errors.sendFailed'));
+          emitError(
+            task.id,
+            'gateway',
+            'send',
+            reason || deps.translate('errors.sendFailed'),
+            undefined,
+            undefined,
+            task.sessionKey,
+          );
           return { ok: false, taskId: task.id };
         }
 
@@ -233,6 +258,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
             result.error || deps.translate('errors.sendFailed'),
             result.errorCode,
             result.errorDetails,
+            task.sessionKey,
           );
           return { ok: false, taskId: task.id };
         }
@@ -251,7 +277,11 @@ export function createChatComposer(deps: ChatComposerDeps) {
             stage: 'lifecycle',
             rawMessage: deps.translate('errors.agentNotResponding'),
           });
-          deps.getMessageStore().addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate));
+          deps
+            .getMessageStore()
+            .addMessage(task.id, 'system', formatErrorForUser(appError, deps.translate), undefined, {
+              sessionKey: task.sessionKey,
+            });
         }, SEND_TIMEOUT_MS),
       );
 
@@ -271,7 +301,15 @@ export function createChatComposer(deps: ChatComposerDeps) {
       return { ok: true, taskId: task.id };
     } catch (err) {
       store.setProcessing(task.sessionKey, false);
-      emitError(task.id, 'local', 'send', err instanceof Error ? err.message : String(err));
+      emitError(
+        task.id,
+        'local',
+        'send',
+        err instanceof Error ? err.message : String(err),
+        undefined,
+        undefined,
+        task.sessionKey,
+      );
       return { ok: false, taskId: task.id };
     }
   }
@@ -320,7 +358,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
         const res = await deps.compactSession(task.gatewayId, task.sessionKey);
         if (res.ok) {
           const msg = deps.translate('session.contextCompacted');
-          store.addMessage(taskId, 'system', msg);
+          store.addMessage(taskId, 'system', msg, undefined, { sessionKey: task.sessionKey });
           return { ok: true, message: msg };
         }
         return { ok: false };
@@ -330,7 +368,7 @@ export function createChatComposer(deps: ChatComposerDeps) {
         if (res.ok) {
           store.clearMessages(taskId);
           const msg = deps.translate('session.contextReset');
-          store.addMessage(taskId, 'system', msg);
+          store.addMessage(taskId, 'system', msg, undefined, { sessionKey: task.sessionKey });
           return { ok: true, message: msg };
         }
         return { ok: false };
