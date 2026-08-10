@@ -10,7 +10,15 @@ export function resolveFdRealPath(fd: number, absolutePath: string): string {
   if (process.platform === 'win32') {
     return realpathSync(absolutePath);
   }
-  return realpathSync(`/dev/fd/${fd}`);
+  try {
+    const target = realpathSync(`/dev/fd/${fd}`);
+    if (!target.startsWith('/dev/fd/')) {
+      return target;
+    }
+  } catch {
+    // macOS may leave /dev/fd aliases unresolved; fall back to the opened path.
+  }
+  return realpathSync(absolutePath);
 }
 
 export function readContextFile(absolutePath: string, contextFolders: string[]): FileReadResult {
