@@ -74,6 +74,7 @@ export function createRoomStore(deps: RoomStoreDeps) {
 
   function cleanupRoomResources(taskId: string): void {
     taskGateways.delete(taskId);
+    verifyInFlight.delete(taskId);
   }
 
   function updateRoom(
@@ -116,6 +117,7 @@ export function createRoomStore(deps: RoomStoreDeps) {
           message: prompt,
         });
         if (!res.ok) {
+          cleanupRoomResources(taskId);
           return false;
         }
 
@@ -126,6 +128,7 @@ export function createRoomStore(deps: RoomStoreDeps) {
         return true;
       } catch (err) {
         console.warn('[room-store] initConductor failed:', err);
+        cleanupRoomResources(taskId);
         return false;
       }
     },
