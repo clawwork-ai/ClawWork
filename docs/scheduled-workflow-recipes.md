@@ -1,6 +1,6 @@
 # Scheduled Workflow Recipes
 
-ClawWork's Cron panel can run repeatable OpenClaw tasks against the same
+OpenClaw Desktop's Cron panel can run repeatable OpenClaw tasks against the same
 Gateway capabilities you use in chat. These recipes give operators a concrete
 starting point for plugin-backed work that should stay visible in task history,
 run history, artifacts, and approval prompts.
@@ -13,7 +13,7 @@ schedule.
 
 Use this when you want a scheduled task that searches tweets, checks monitored
 accounts, summarizes replies, or drafts a daily X/Twitter report inside
-ClawWork. TweetClaw is an optional OpenClaw plugin backed by Xquik. It exposes
+OpenClaw Desktop. TweetClaw is an optional OpenClaw plugin backed by Xquik. It exposes
 the free `explore` catalog tool and the optional `tweetclaw` API tool for
 account-backed X/Twitter automation or read-only MPP calls.
 
@@ -29,7 +29,7 @@ openclaw plugins inspect tweetclaw --runtime
 openclaw skills info tweetclaw
 ```
 
-Store credentials in Gateway config, not in ClawWork messages, task names, or
+Store credentials in Gateway config, not in OpenClaw Desktop messages, task names, or
 cron prompts:
 
 ```bash
@@ -48,7 +48,7 @@ draws, or read account-backed private data.
 
 ### Create The Cron Task
 
-In ClawWork:
+In OpenClaw Desktop:
 
 1. Open **Cron** from the sidebar.
 2. Create a job with an `every` or `cron` schedule.
@@ -84,7 +84,7 @@ condition, and delivery destination.
 - Review OpenClaw approval prompts before post tweets, post tweet replies,
   direct messages, follows, monitor changes, webhooks, media upload, media
   download, or giveaway draws.
-- Use ClawWork run history to confirm each scheduled run produced a useful
+- Use OpenClaw Desktop run history to confirm each scheduled run produced a useful
   summary, not just raw API output.
 - Disable or pause the job when the keyword, account list, or campaign window is
   no longer current.

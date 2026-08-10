@@ -6,11 +6,11 @@
 
 ## Post body
 
-做了个开源项目：**ClawWork** — OpenClaw 专用桌面客户端。
+做了个开源项目：**OpenClaw Desktop** — OpenClaw 专用桌面客户端。
 
 一句话定位：别再在飞书里和 Agent 聊天了。
 
-OpenClaw 很强，但用飞书/钉钉/Slack 当对话通道，多任务一多就乱套。ClawWork 给每个任务独立的工作区：
+OpenClaw 很强，但用飞书/钉钉/Slack 当对话通道，多任务一多就乱套。OpenClaw Desktop 给每个任务独立的工作区：
 
 - 三栏布局：任务列表 + 对话 + 进度/产物
 - 多任务并行，各自独立 Session

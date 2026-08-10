@@ -30,7 +30,7 @@ export const zh: Translations = {
     subtitle: '通过单一 WebSocket 连接一个或多个 OpenClaw 网关。每个任务拥有独立会话。所有数据本地存储。',
   },
   features: {
-    title: '为什么选择 ClawWork',
+    title: '为什么选择 OpenClaw Desktop',
     items: [
       {
         title: '并行多任务',
@@ -66,7 +66,7 @@ export const zh: Translations = {
       },
       {
         title: 'PWA 与移动端',
-        description: '在任何浏览器中访问 ClawWork——桌面或移动端。可安装到主屏幕，支持离线使用。',
+        description: '在任何浏览器中访问 OpenClaw Desktop——桌面或移动端。可安装到主屏幕，支持离线使用。',
       },
     ],
   },
@@ -74,7 +74,7 @@ export const zh: Translations = {
     title: '快速开始',
     steps: [
       {
-        title: '安装 ClawWork',
+        title: '安装 OpenClaw Desktop',
         code: 'brew tap clawwork-ai/clawwork\nbrew install --cask clawwork',
       },
       {
@@ -121,6 +121,6 @@ export const zh: Translations = {
         { label: '许可证', href: 'https://github.com/clawwork-ai/clawwork/blob/main/LICENSE' },
       ],
     },
-    copyright: '© 2026 ClawWork 贡献者。Apache 2.0 协议。',
+    copyright: '© 2026 OpenClaw Desktop 贡献者。Apache 2.0 协议。',
   },
 };

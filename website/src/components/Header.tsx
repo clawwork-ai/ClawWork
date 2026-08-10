@@ -52,9 +52,13 @@ export function Header({ navigate }: HeaderProps) {
           onClick={(e) => handleLink(e, '')}
           style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}
         >
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '28px', height: '28px' }} />
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="OpenClaw Desktop"
+            style={{ width: '28px', height: '28px' }}
+          />
           <span className="mono" style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-            ClawWork
+            OpenClaw Desktop
           </span>
         </a>
 

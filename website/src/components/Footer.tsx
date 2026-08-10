@@ -72,7 +72,11 @@ export function Footer({ navigate }: FooterProps) {
             gap: '12px',
           }}
         >
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="ClawWork" style={{ width: '20px', height: '20px' }} />
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="OpenClaw Desktop"
+            style={{ width: '20px', height: '20px' }}
+          />
           <span className="mono" style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
             {t.footer.copyright}
           </span>

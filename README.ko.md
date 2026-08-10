@@ -1,13 +1,13 @@
 <div align="center">
 
 <table border="0" cellspacing="0" cellpadding="0"><tr>
-<td><img src="./docs/screenshot.png" alt="ClawWork Desktop" height="420" /></td>
-<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="ClawWork PWA" height="420" /></td>
+<td><img src="./docs/screenshot.png" alt="OpenClaw Desktop" height="420" /></td>
+<td><img src="https://github.com/user-attachments/assets/3dd775d0-8441-45d9-92f5-19e843f793c4" alt="OpenClaw Desktop PWA" height="420" /></td>
 </tr></table>
 
 [English](./README.md) · [简体中文](./README.zh.md) · [繁體中文](./README.zh-TW.md) · [日本語](./README.ja.md) · **한국어**
 
-# ClawWork
+# OpenClaw Desktop
 
 **Agent OS 시대를 위한 로컬 우선 워크스페이스.**
 
@@ -22,7 +22,7 @@
 </div>
 
 > **⚠️ 공식 저장소**
-> 이것은 ClawWork의 **공식** 프로젝트입니다: https://github.com/clawwork-ai/clawwork
+> 이것은 OpenClaw Desktop의 **공식** 프로젝트입니다: https://github.com/clawwork-ai/clawwork
 >
 > ClawWork 이름을 무단으로 사용한 유사 저장소(ClawWorkAi/ClawWork)와 유사 사이트(clawworkai.store)가 발견되었습니다. 위의 공식 링크를 이용해 주세요.
 >
@@ -31,11 +31,11 @@
 > **📝 번역 상태**
 > 이 한국어 번역은 커뮤니티 초안입니다. 어색한 표현이 남아 있을 수 있습니다. 네이티브 스피커의 리뷰와 [Pull Request](https://github.com/clawwork-ai/clawwork/pulls)를 환영합니다.
 
-## 왜 ClawWork인가
+## 왜 OpenClaw Desktop인가
 
 **에이전트는 계속 늘어나고 있다. 병목은 더 이상 능력이 아니라, 오퍼레이터의 조작 면이다.**
 
-Agent Runtime이 우후죽순 등장하면서, 사용자는 채팅 창, 웹 UI, 터미널 사이를 왔다 갔다 해야 하고, 각자가 자신의 컨텍스트를 가지며, 서로 공유되는 메모리는 없습니다. IDE가 코드의 오퍼레이터 계층이 되었고 터미널이 Unix의 오퍼레이터 계층이 된 것처럼, Agent OS 또한 워크스페이스 계층이 필요합니다. ClawWork는 바로 그 계층을 만들고 있습니다 —— OpenClaw를 위한 최상의 클라이언트로 출발하여, 멀티 런타임의 미래로 확장해 나갑니다.
+Agent Runtime이 우후죽순 등장하면서, 사용자는 채팅 창, 웹 UI, 터미널 사이를 왔다 갔다 해야 하고, 각자가 자신의 컨텍스트를 가지며, 서로 공유되는 메모리는 없습니다. IDE가 코드의 오퍼레이터 계층이 되었고 터미널이 Unix의 오퍼레이터 계층이 된 것처럼, Agent OS 또한 워크스페이스 계층이 필요합니다. OpenClaw Desktop는 바로 그 계층을 만들고 있습니다 —— OpenClaw를 위한 최상의 클라이언트로 출발하여, 멀티 런타임의 미래로 확장해 나갑니다.
 
 ### 지금: OpenClaw, 채팅 기록의 늪에서 구하기
 
@@ -43,13 +43,13 @@ OpenClaw는 강력합니다. 그러나 순수한 채팅은 그 역량을 담아�
 
 여러 세션, 장시간 실행되는 작업, 승인 대기, 생성된 파일, 반복되는 자동화, 여러 게이트웨이 —— 이 모든 것이 겹치는 순간, 채팅 기록은 진흙탕이 됩니다. 상태가 사라집니다. 파일이 사라집니다. 컨텍스트가 사라집니다.
 
-ClawWork는 이 문제를 해결합니다. 모든 태스크는 독립된 세션, 아티팩트, 제어, 히스토리를 가진 영속적인 워크스페이스가 되고, 3 패널 레이아웃으로 배치됩니다: 왼쪽은 태스크 목록, 가운데는 진행 중인 작업, 오른쪽은 아티팩트와 컨텍스트.
+OpenClaw Desktop는 이 문제를 해결합니다. 모든 태스크는 독립된 세션, 아티팩트, 제어, 히스토리를 가진 영속적인 워크스페이스가 되고, 3 패널 레이아웃으로 배치됩니다: 왼쪽은 태스크 목록, 가운데는 진행 중인 작업, 오른쪽은 아티팩트와 컨텍스트.
 
 ## Teams
 
 에이전트 하나는 유용합니다. 잘 조율된 에이전트 팀은 하나의 노동력이 됩니다.
 
-ClawWork Teams는 여러 에이전트를 하나의 배포 가능한 단위로 묶습니다 —— 역할, 인격, 스킬, 워크플로우를 포함해서. **Coordinator** 에이전트가 태스크를 분해해 **Worker** 에이전트에게 위임하고, 각 Worker는 자신의 서브 세션에서 동작합니다. 전체 오케스트레이션을 실시간으로 확인할 수 있습니다.
+OpenClaw Desktop Teams는 여러 에이전트를 하나의 배포 가능한 단위로 묶습니다 —— 역할, 인격, 스킬, 워크플로우를 포함해서. **Coordinator** 에이전트가 태스크를 분해해 **Worker** 에이전트에게 위임하고, 각 Worker는 자신의 서브 세션에서 동작합니다. 전체 오케스트레이션을 실시간으로 확인할 수 있습니다.
 
 ```
 skill → agent → team
@@ -99,7 +99,7 @@ macOS, Windows, Linux 빌드는 [Releases 페이지](https://github.com/clawwork
 ## 빠른 시작
 
 1. OpenClaw Gateway를 실행합니다.
-2. ClawWork를 열고 설정에서 gateway를 추가합니다. token, 비밀번호, 또는 페어링 코드로 인증합니다. 기본 로컬 엔드포인트: `ws://127.0.0.1:18789`.
+2. OpenClaw Desktop를 열고 설정에서 gateway를 추가합니다. token, 비밀번호, 또는 페어링 코드로 인증합니다. 기본 로컬 엔드포인트: `ws://127.0.0.1:18789`.
 3. 태스크를 만들고 gateway와 에이전트를 선택한 뒤, 작업 내용을 설명합니다.
 4. 채팅: 메시지 전송, 이미지 첨부, `@`로 파일 참조, 또는 `/` 명령 사용.
 5. 태스크 실행을 지켜보고, 도구 동작을 확인하고, 출력 파일을 보관합니다.
@@ -156,7 +156,7 @@ macOS, Windows, Linux 빌드는 [Releases 페이지](https://github.com/clawwork
 
 ## 데이터 & 아키텍처
 
-ClawWork는 단일 Gateway WebSocket 연결로 OpenClaw와 통신합니다. 태스크마다 자신의 session key로 격리되며, 모든 데이터는 사용자가 선택한 로컬 워크스페이스 디렉터리에 저장됩니다 —— 클라우드 동기화 없음, 외부 데이터베이스 없음.
+OpenClaw Desktop는 단일 Gateway WebSocket 연결로 OpenClaw와 통신합니다. 태스크마다 자신의 session key로 격리되며, 모든 데이터는 사용자가 선택한 로컬 워크스페이스 디렉터리에 저장됩니다 —— 클라우드 동기화 없음, 외부 데이터베이스 없음.
 
 - **Tasks** —— 태스크마다 독립된 OpenClaw 세션에 대응, 병렬 작업이 충돌하지 않음.
 - **Messages** —— 사용자, 어시스턴트, 시스템 메시지(도구 호출 및 이미지 첨부 포함)를 모두 로컬에 영속화.
@@ -164,7 +164,7 @@ ClawWork는 단일 Gateway WebSocket 연결로 OpenClaw와 통신합니다. 태�
 - **전문 검색** —— 위 모든 것을 가로질러 검색. 어느 태스크였는지 기억나지 않는 3주 전의 스니펫도 찾을 수 있음.
 
 <div align="center">
-<img src="./docs/architecture.svg" alt="ClawWork Architecture" width="840" />
+<img src="./docs/architecture.svg" alt="OpenClaw Desktop Architecture" width="840" />
 </div>
 
 ## 저장소 구조
@@ -219,7 +219,7 @@ Electron 34, React 19, TypeScript, Tailwind CSS v4, Zustand, SQLite (Drizzle ORM
 
 ### 🌐 비전 —— Agent OS의 워크스페이스 계층
 
-ClawWork는 현재 OpenClaw에 최적화되어 있습니다. 우리가 향하는 미래는 워크스페이스 계층이 런타임에 종속되지 않는 세계입니다 —— 하나의 오퍼레이터 표면이 당신이 다루는 모든 에이전트를 맡는 세계.
+OpenClaw Desktop는 현재 OpenClaw에 최적화되어 있습니다. 우리가 향하는 미래는 워크스페이스 계층이 런타임에 종속되지 않는 세계입니다 —— 하나의 오퍼레이터 표면이 당신이 다루는 모든 에이전트를 맡는 세계.
 
 - **멀티 런타임 어댑터** —— 다른 런타임의 에이전트를 동일한 task / session / artifact 모델로 흡수
 - **더 풍부한 팀 오케스트레이션** —— coordinator / worker를 넘어서는 협업 패턴

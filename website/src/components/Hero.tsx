@@ -123,7 +123,7 @@ export function Hero() {
       <div style={{ marginTop: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px' }}>
         <img
           src={`${import.meta.env.BASE_URL}screenshot.png`}
-          alt="ClawWork Desktop"
+          alt="OpenClaw Desktop"
           style={{
             flex: '1 1 0',
             minWidth: 0,
@@ -135,7 +135,7 @@ export function Hero() {
         />
         <img
           src={`${import.meta.env.BASE_URL}screenshot-mobile.png`}
-          alt="ClawWork PWA"
+          alt="OpenClaw Desktop PWA"
           style={{
             flex: '0 0 auto',
             height: '420px',

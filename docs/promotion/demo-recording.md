@@ -30,7 +30,7 @@ Pick a visually compelling workflow that completes in ~30 seconds, e.g. **"Gener
 ```markdown
 ## Demo
 
-![ClawWork 60-second demo](./docs/demo.gif)
+![OpenClaw Desktop 60-second demo](./docs/demo.gif)
 ```
 
 ## Hero screenshot

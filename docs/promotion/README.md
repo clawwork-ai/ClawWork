@@ -1,4 +1,4 @@
-# ClawWork Promotion Materials
+# OpenClaw Desktop Promotion Materials
 
 Draft copy and outlines for the launch promotion campaign tracked in [#11](https://github.com/clawwork-ai/ClawWork/issues/11).
 
@@ -6,7 +6,7 @@ Draft copy and outlines for the launch promotion campaign tracked in [#11](https
 
 **The dedicated UI for OpenClaw — stop chatting with Agents in Feishu.**
 
-ClawWork is to OpenClaw what GitHub Desktop is to Git — a purpose-built native client that replaces generic messaging channels (Feishu, DingTalk, Slack).
+OpenClaw Desktop is to OpenClaw what GitHub Desktop is to Git — a purpose-built native client that replaces generic messaging channels (Feishu, DingTalk, Slack).
 
 ## Ready-to-post drafts
 

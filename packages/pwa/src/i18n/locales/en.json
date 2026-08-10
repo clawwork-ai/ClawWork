@@ -6,7 +6,7 @@
   "app": {
     "error": "Something went wrong",
     "loading": "Loading...",
-    "name": "ClawWork",
+    "name": "OpenClaw Desktop",
     "paired": "Mobile device paired",
     "reload": "Reload"
   },

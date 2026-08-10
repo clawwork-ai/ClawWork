@@ -21,7 +21,7 @@
 
 ### 3. 聊天通道的结构性缺陷
 
-用对比表展开（飞书/钉钉/Slack vs ClawWork）：
+用对比表展开（飞书/钉钉/Slack vs OpenClaw Desktop）：
 
 - 单线程 vs 三栏工作区
 - 单任务 vs 并行隔离
@@ -29,7 +29,7 @@
 - 产物丢失 vs Git 版本化
 - 数据在第三方 vs 100% 本地
 
-### 4. ClawWork 的产品哲学
+### 4. OpenClaw Desktop 的产品哲学
 
 - Task-first，不是 Chat-first
 - 每个任务 = 持久工作区（Session + 产物 + 控制 + 历史）

@@ -6,19 +6,19 @@ date: 2026-04-24
 
 # AgentOS: From Single-Runtime Desktop Client to a Task-First Multi-Runtime Operator Surface
 
-> ClawWork is the operator UX.
+> OpenClaw Desktop is the operator UX.
 > The control plane owns execution governance.
 > The runtime owns actual execution.
 
-The long-term framing ClawWork is **the Workspace layer of the Agent OS** — the IDE is the operator layer for code, the Terminal is the operator layer for Unix, and the Agent OS era needs a workspace layer that plays the same role for agent work.
+The long-term framing OpenClaw Desktop is **the Workspace layer of the Agent OS** — the IDE is the operator layer for code, the Terminal is the operator layer for Unix, and the Agent OS era needs a workspace layer that plays the same role for agent work.
 
-But today's ClawWork is still an "OpenClaw desktop client": one workspace can only host one runtime. Between that and the Vision bullet — **Multi-runtime adapters — bring agents from other runtimes into the same task / session / artifact model** — there's a structural gap.
+But today's OpenClaw Desktop is still an "OpenClaw desktop client": one workspace can only host one runtime. Between that and the Vision bullet — **Multi-runtime adapters — bring agents from other runtimes into the same task / session / artifact model** — there's a structural gap.
 
 This post is about how to cross that gap.
 
 ## Why now
 
-As an early instance of the Agent OS workspace layer, ClawWork's execution model today is still built around a single runtime:
+As an early instance of the Agent OS workspace layer, OpenClaw Desktop's execution model today is still built around a single runtime:
 
 - one primary `Task`
 - one primary OpenClaw session
@@ -57,11 +57,11 @@ But ACP does not solve these control-plane problems:
 - execution-tree observability and audit
 - capability-based orchestration
 
-If ClawWork keeps binding product logic directly to OpenClaw session semantics, the renderer and core layers will absorb more and more runtime-specific complexity, eventually devolving into a pile of special cases.
+If OpenClaw Desktop keeps binding product logic directly to OpenClaw session semantics, the renderer and core layers will absorb more and more runtime-specific complexity, eventually devolving into a pile of special cases.
 
 ## A concrete example
 
-Today's ClawWork assumes, directly or indirectly, in several places:
+Today's OpenClaw Desktop assumes, directly or indirectly, in several places:
 
 - `Task` maps directly to OpenClaw's `sessionKey`
 - subagents are native OpenClaw sessions
@@ -76,7 +76,7 @@ All of these break down in a mixed-runtime future. A few examples:
 - a Hermes-style runtime may have an entirely different lifecycle model and event stream
 - even across multiple OpenClaw instances, models, skills, permissions, and plugin capabilities can diverge
 
-Without an intermediate control plane, ClawWork would have to fork by runtime in many places: task routing, message sync, approval, room and performer tracking, team orchestration, artifact ownership, failure handling, usage accounting.
+Without an intermediate control plane, OpenClaw Desktop would have to fork by runtime in many places: task routing, message sync, approval, room and performer tracking, team orchestration, artifact ownership, failure handling, usage accounting.
 
 That is not a sustainable architecture.
 
@@ -189,7 +189,7 @@ The architecture accommodates three deployment shapes at the same time:
 ### Mode A: Direct
 
 ```text
-ClawWork -> OpenClaw Gateway
+OpenClaw Desktop -> OpenClaw Gateway
 ```
 
 The current shape. Good for local, single-instance setups. The Next phase does not change any user-visible behavior on this path — it only puts a formal Adapter boundary behind it.
@@ -197,15 +197,15 @@ The current shape. Good for local, single-instance setups. The Next phase does n
 ### Mode B: Managed
 
 ```text
-ClawWork -> managed-agents -> OpenClaw
+OpenClaw Desktop -> managed-agents -> OpenClaw
 ```
 
-For setups that need stronger runtime governance. managed-agents already ships with execution isolation, quota, networking policy, session versioning, audit, and recovery-oriented state — ClawWork does not need to rebuild any of it.
+For setups that need stronger runtime governance. managed-agents already ships with execution isolation, quota, networking policy, session versioning, audit, and recovery-oriented state — OpenClaw Desktop does not need to rebuild any of it.
 
 ### Mode C: Hybrid scheduling
 
 ```text
-ClawWork -> Execution Control Plane -> {
+OpenClaw Desktop -> Execution Control Plane -> {
   OpenClaw, managed-agents, Codex, Claude Code, Hermes, ...
 }
 ```
@@ -271,7 +271,7 @@ If this line isn't drawn clearly, the architecture collapses into the illusion t
 
 ### Engine-specific adapters
 
-Where ACP is insufficient or unavailable, ClawWork can still supply dedicated adapters for specific engines — Codex, Claude Code, Hermes-style runtimes. Those adapters still have to terminate on the same internal contract.
+Where ACP is insufficient or unavailable, OpenClaw Desktop can still supply dedicated adapters for specific engines — Codex, Claude Code, Hermes-style runtimes. Those adapters still have to terminate on the same internal contract.
 
 ## Capability set
 
@@ -376,7 +376,7 @@ Ship `ManagedAgentsAdapter`. Let a task or profile pick direct mode or managed m
 
 Acceptance:
 
-- a single ClawWork instance can use both direct OpenClaw and a managed runtime backend at the same time
+- a single OpenClaw Desktop instance can use both direct OpenClaw and a managed runtime backend at the same time
 
 ### Phase 4: Support mixed-runtime routing
 
@@ -386,7 +386,7 @@ Acceptance:
 
 - a single Task can coordinate execution across heterogeneous runtimes
 
-At this point ClawWork actually becomes a runtime-agnostic workspace layer — and the README Vision line _one operator surface for every agent you touch_ gets its first real cash-out.
+At this point OpenClaw Desktop actually becomes a runtime-agnostic workspace layer — and the README Vision line _one operator surface for every agent you touch_ gets its first real cash-out.
 
 ## Persistence strategy
 
@@ -407,7 +407,7 @@ New local metadata introduced:
 - placement decisions
 - normalized event checkpoints
 
-Do not replace product state with purely remote orchestration state. The strong local model is the foundation of ClawWork and can't be traded away.
+Do not replace product state with purely remote orchestration state. The strong local model is the foundation of OpenClaw Desktop and can't be traded away.
 
 ## Risks
 
@@ -421,9 +421,9 @@ Mitigation:
 - keep the adapter contract small
 - only normalize the semantics the UI and the control plane actually need
 
-### Turning ClawWork into an ops console
+### Turning OpenClaw Desktop into an ops console
 
-If runtime primitives leak heavily into the main UI, ClawWork loses its task-first product identity and becomes an `Agent / Environment / Session / Event`-style ops backend.
+If runtime primitives leak heavily into the main UI, OpenClaw Desktop loses its task-first product identity and becomes an `Agent / Environment / Session / Event`-style ops backend.
 
 Mitigation:
 
@@ -458,6 +458,6 @@ When it actually starts, step one is:
 
 > pull the current direct OpenClaw execution path behind a formal runtime adapter boundary, with zero user-visible behavior change.
 
-This is the smallest, safest, highest-leverage first step. It won't give ClawWork multi-runtime support overnight — but it's the first time the workspace layer is genuinely decoupled from a runtime. Which is also the first step from "OpenClaw desktop client" toward "Agent OS workspace layer."
+This is the smallest, safest, highest-leverage first step. It won't give OpenClaw Desktop multi-runtime support overnight — but it's the first time the workspace layer is genuinely decoupled from a runtime. Which is also the first step from "OpenClaw desktop client" toward "Agent OS workspace layer."
 
 The full KEP lives at `design/kep-task-first-multi-runtime-control-plane.zh-CN.md`. PRs and challenges welcome.

@@ -12,13 +12,13 @@ import { t } from '../composables/i18n';
   <div class="cw-split--hero">
     <div class="cw-hero-copy">
       <div class="cw-brand-row">
-        <img src="/images/clawwork-logo.png" class="cw-logo-lg cw-float cw-logo-glow" alt="ClawWork" />
+        <img src="/images/clawwork-logo.png" class="cw-logo-lg cw-float cw-logo-glow" alt="OpenClaw Desktop" />
         <span class="cw-brand-divider">×</span>
         <img src="/images/openclaw-logo.png" class="cw-logo-openclaw cw-float-slow" alt="OpenClaw" />
       </div>
 
       <h1 class="cw-hero-title">
-        <span class="cw-shimmer">ClawWork</span>
+        <span class="cw-shimmer">OpenClaw Desktop</span>
       </h1>
 
       <p class="cw-subtitle">
@@ -49,7 +49,7 @@ import { t } from '../composables/i18n';
 
     <div class="cw-shot-stage">
       <div class="cw-screenshot-glow"></div>
-      <img src="/images/clawwork-screenshot.png" class="cw-shot cw-shot--hero cw-float" alt="ClawWork App" />
+      <img src="/images/clawwork-screenshot.png" class="cw-shot cw-shot--hero cw-float" alt="OpenClaw Desktop App" />
       <p
         class="cw-shot-caption"
         v-html="

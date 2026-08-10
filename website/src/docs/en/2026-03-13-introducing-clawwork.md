@@ -1,6 +1,6 @@
 ---
 title: Why I Built a Desktop Client for OpenClaw
-description: Chat interfaces can't manage parallel tasks, so I built ClawWork
+description: Chat interfaces can't manage parallel tasks, so I built OpenClaw Desktop
 date: 2026-03-13
 ---
 
@@ -12,9 +12,9 @@ I use OpenClaw every day. Writing code, sending emails, organizing docs, running
 
 When you're running 5 tasks at once, all crammed into one conversation, you can't tell them apart. Tool calls are buried in the message stream with no visibility into what's happening. Files the AI generates scroll away and you can't find them.
 
-**ClawWork** is the open-source desktop client built to solve exactly these pain points. It gives every AI task its own workspace, turning scattered Agent workflows into a clear, controllable, and efficient desktop productivity tool.
+**OpenClaw Desktop** is the open-source desktop client built to solve exactly these pain points. It gives every AI task its own workspace, turning scattered Agent workflows into a clear, controllable, and efficient desktop productivity tool.
 
-## Why ClawWork
+## Why OpenClaw Desktop
 
 OpenClaw itself is incredibly capable — it can send emails, manage calendars, manipulate files, and call external tools. But when tasks multiply and grow complex, chat interfaces fall short:
 
@@ -44,7 +44,7 @@ OpenClaw itself is incredibly capable — it can send emails, manage calendars, 
 ## Getting Started
 
 1. Start your OpenClaw Gateway: `openclaw gateway start`
-2. Install ClawWork:
+2. Install OpenClaw Desktop:
    - macOS: `brew tap clawwork-ai/clawwork && brew install --cask clawwork`
    - Or grab the installer from GitHub Releases
 3. Add the Gateway address in Settings (default `ws://127.0.0.1:18789`)
@@ -54,11 +54,11 @@ Takes a few minutes. All data stays on your machine, no cloud dependency.
 
 ## Current State
 
-ClawWork is fully open source (Apache 2.0 License), built with Electron + React + TypeScript + SQLite. Clean codebase, contributions welcome.
+OpenClaw Desktop is fully open source (Apache 2.0 License), built with Electron + React + TypeScript + SQLite. Clean codebase, contributions welcome.
 
 ## Summary
 
-If you're running OpenClaw locally and want to upgrade your AI Agent from "occasional chat assistant" to "truly parallel-working AI colleague," ClawWork is the desktop client worth trying. It's not just a chat tool replacement — it's a productivity amplifier that fully unleashes OpenClaw's potential.
+If you're running OpenClaw locally and want to upgrade your AI Agent from "occasional chat assistant" to "truly parallel-working AI colleague," OpenClaw Desktop is the desktop client worth trying. It's not just a chat tool replacement — it's a productivity amplifier that fully unleashes OpenClaw's potential.
 
 **GitHub**: https://github.com/clawwork-ai/ClawWork
 

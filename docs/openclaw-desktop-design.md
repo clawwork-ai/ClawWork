@@ -1,6 +1,6 @@
-# ClawWork — Application Design Document
+# OpenClaw Desktop — Application Design Document
 
-> OpenClaw ClawWork · Version: v0.2 | Date: 2026-03-12 | Authors: samzong + Claude
+> OpenClaw OpenClaw Desktop · Version: v0.2 | Date: 2026-03-12 | Authors: samzong + Claude
 > Historical note: this is the project bootstrap design document. It is kept to preserve the original design context; new designs may borrow from it, but should not follow it mechanically.
 
 ---
@@ -147,14 +147,14 @@ On first launch, the user selects a workspace directory:
 
 ### 3.1 Gateway-Only Architecture
 
-ClawWork communicates with the OpenClaw Gateway (:18789) via a single WebSocket connection:
+OpenClaw Desktop communicates with the OpenClaw Gateway (:18789) via a single WebSocket connection:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ User's machine                                              │
 │                                                             │
 │  ┌─────────────────────┐      ┌──────────────────────────┐  │
-│  │ OpenClaw Server      │      │ ClawWork Desktop App     │  │
+│  │ OpenClaw Server      │      │ OpenClaw Desktop App     │  │
 │  │ (Node.js process)    │  WS  │ (Electron process)       │  │
 │  │                     │◄────►│                          │  │
 │  │ ┌─────────────────┐ │      │  React UI + SQLite       │  │
@@ -196,7 +196,7 @@ Desktop acts as a Gateway WebSocket client, communicating via JSON-RPC style fra
 agent:<agentId>:<mainKey>
 ```
 
-ClawWork generates a unique mainKey for each Task (using the Task's local UUID), ensuring each Task maps to an independent OpenClaw session. For example:
+OpenClaw Desktop generates a unique mainKey for each Task (using the Task's local UUID), ensuring each Task maps to an independent OpenClaw session. For example:
 
 ```
 agent:my-agent:task-a1b2c3d4    ← Task "Refactor user module"
@@ -224,7 +224,7 @@ Gateway broadcasts events from all sessions via WebSocket (known design: no sess
 
 - Create: Automatically created when the user creates a new Task
 - Maintain: Sessions are naturally dormant between messages, consuming no Gateway resources
-- Reset: OpenClaw resets sessions daily at 4:00 AM by default. ClawWork should disable auto-reset via server config to maintain long-term Task conversation context
+- Reset: OpenClaw resets sessions daily at 4:00 AM by default. OpenClaw Desktop should disable auto-reset via server config to maintain long-term Task conversation context
 - Persist: Gateway stores conversation records as `.jsonl` transcript files (`~/.openclaw/agents/<agentId>/sessions/<sessionId>.jsonl`); the client also keeps a local SQLite copy for offline viewing and search
 
 ### 3.3 Communication Architecture
@@ -246,7 +246,7 @@ Gateway broadcasts events from all sessions via WebSocket (known design: no sess
 
 **Message Flow:**
 
-1. **User → Agent**: ClawWork sends message via `chat.send` RPC, carrying the target Task's sessionKey + idempotencyKey
+1. **User → Agent**: OpenClaw Desktop sends message via `chat.send` RPC, carrying the target Task's sessionKey + idempotencyKey
 2. **Agent → User**: Gateway pushes Agent reply via `chat` event; client routes to the corresponding Task by sessionKey
 3. **Tool calls**: When the Agent executes tools, progress is pushed in real time via `agent` events (requires `caps:["tool-events"]`)
 4. **Artifact handling**: Artifact files are copied to the workspace artifact directory via local paths (see 3.4 File Transfer Design)
@@ -255,10 +255,10 @@ Gateway broadcasts events from all sessions via WebSocket (known design: no sess
 
 MVP assumes co-located deployment only: artifact files are copied directly to the workspace artifact directory via local paths.
 
-| Scenario             | Approach                  | Notes                                                                                                               |
-| -------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Co-located (MVP)** | Pass path directly        | Agent artifacts are passed via `mediaPath`; ClawWork reads the local file and copies to the Task artifact directory |
-| **Remote (future)**  | Third-party storage relay | Artifacts uploaded to third-party storage (WebDAV / S3 / MinIO); ClawWork downloads from the storage service        |
+| Scenario             | Approach                  | Notes                                                                                                                       |
+| -------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Co-located (MVP)** | Pass path directly        | Agent artifacts are passed via `mediaPath`; OpenClaw Desktop reads the local file and copies to the Task artifact directory |
+| **Remote (future)**  | Third-party storage relay | Artifacts uploaded to third-party storage (WebDAV / S3 / MinIO); OpenClaw Desktop downloads from the storage service        |
 
 ```
 Local path (co-located) ← MVP default
@@ -284,7 +284,7 @@ S3-compatible (AWS S3 / MinIO / Cloudflare R2)
 1. ~~Gateway protocol details~~ → Full protocol reverse-engineered
 2. **Disabling session auto-reset**: How to configure the server to disable 4:00 AM auto-reset
 3. **Session recovery after WS reconnect**: Historical messages can be backfilled via `chat.history` RPC after reconnection
-4. **`mediaLocalRoots` configuration**: How to properly configure for the ClawWork use case
+4. **`mediaLocalRoots` configuration**: How to properly configure for the OpenClaw Desktop use case
 5. ~~Legacy bridge verification~~ → Bypassed via Gateway-Only architecture
 6. ~~Broadcast filtering~~ → Client-side filtering implemented
 

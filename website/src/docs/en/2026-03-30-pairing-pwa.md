@@ -1,12 +1,12 @@
 ---
-title: Using ClawWork PWA (Mobile)
-description: Install ClawWork PWA on Android and iOS via browser, pair with QR code
+title: Using OpenClaw Desktop PWA (Mobile)
+description: Install OpenClaw Desktop PWA on Android and iOS via browser, pair with QR code
 date: 2026-03-30
 ---
 
-# Using ClawWork PWA (Mobile)
+# Using OpenClaw Desktop PWA (Mobile)
 
-ClawWork is most powerful on desktop. For mobile, we provide a unified PWA that you can install directly from the browser on Android and iOS.
+OpenClaw Desktop is most powerful on desktop. For mobile, we provide a unified PWA that you can install directly from the browser on Android and iOS.
 
 ## Installation
 
@@ -16,7 +16,7 @@ ClawWork is most powerful on desktop. For mobile, we provide a unified PWA that 
 
 ## Offline First
 
-ClawWork PWA is a purely offline app. After the initial load, it does not connect to any external services other than the OpenClaw gateway.
+OpenClaw Desktop PWA is a purely offline app. After the initial load, it does not connect to any external services other than the OpenClaw gateway.
 
 The app is hosted on Cloudflare Pages and auto-builds from the code repository. When a new version is released, you need to manually tap update in the mobile **Settings** — the app only contacts the cloud when you tap update.
 
@@ -24,7 +24,7 @@ The app is hosted on Cloudflare Pages and auto-builds from the code repository. 
 
 First-time use requires pairing with the desktop app via QR code:
 
-1. In ClawWork Desktop, find the **Pair with Mobile** feature
+1. In OpenClaw Desktop, find the **Pair with Mobile** feature
 2. Select the gateway to connect, and the desktop app will generate a QR code
 3. Scan the QR code with your phone
 4. Confirm authorization in OpenClaw, and pairing is complete

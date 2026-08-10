@@ -10,7 +10,7 @@ Tag @OpenClaw. Hashtags: #OpenClaw #LocalFirst #OpenSource #DevTools
 
 Stop chatting with your OpenClaw agents in Feishu.
 
-ClawWork is the dedicated desktop client for OpenClaw — parallel tasks, real-time tool calls, local Git artifacts.
+OpenClaw Desktop is the dedicated desktop client for OpenClaw — parallel tasks, real-time tool calls, local Git artifacts.
 
 Open source. Apache 2.0.
 
@@ -30,7 +30,7 @@ Chat is a workaround, not a workspace.
 
 ## Tweet 3 (solution)
 
-ClawWork gives every task its own workspace:
+OpenClaw Desktop gives every task its own workspace:
 
 📋 Task list (left)
 💬 Conversation (center)

@@ -51,7 +51,7 @@ const EMPTY_MODELS: ModelCatalogEntry[] = [];
 
 const VALID_ROLES = new Set<string>(['coordinator', 'worker']);
 
-const SYSTEM_PROMPT_TEMPLATE = `You are a Team creation assistant for ClawWork. Help the user create a new AI Team — a group of specialized Agents that work together on tasks.
+const SYSTEM_PROMPT_TEMPLATE = `You are a Team creation assistant for OpenClaw Desktop. Help the user create a new AI Team — a group of specialized Agents that work together on tasks.
 
 Your job:
 1. Ask what kind of Team the user wants and what tasks it should handle

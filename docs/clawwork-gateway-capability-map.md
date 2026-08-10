@@ -1,9 +1,9 @@
-# ClawWork Gateway Capability Map
+# OpenClaw Desktop Gateway Capability Map
 
-> Which Gateway capabilities ClawWork actually uses, where each RPC is called,
+> Which Gateway capabilities OpenClaw Desktop actually uses, where each RPC is called,
 > and where to find the full Gateway API surface.
 >
-> Version: ClawWork main @ 2026-04-02, OpenClaw Gateway 2026.4.2
+> Version: OpenClaw Desktop main @ 2026-04-02, OpenClaw Gateway 2026.4.2
 
 ---
 
@@ -17,7 +17,7 @@
 
 **Debugging:**
 
-1. Find the failing method in §1 → look at the "ClawWork Call Site" column.
+1. Find the failing method in §1 → look at the "OpenClaw Desktop Call Site" column.
 2. Cross-reference the "Gateway Schema" column → confirm params/return values in `openclaw` source.
 3. Check §3 (Events) → verify the event is handled (or missing).
 
@@ -27,7 +27,7 @@
 
 ### 1.1 Chat (Core Conversation)
 
-| Gateway Method | ClawWork Call Site                          | IPC Channel                           | Purpose                                                  |
+| Gateway Method | OpenClaw Desktop Call Site                  | IPC Channel                           | Purpose                                                  |
 | -------------- | ------------------------------------------- | ------------------------------------- | -------------------------------------------------------- |
 | `chat.send`    | `gateway-client.ts:535` `sendChatMessage()` | `ws:send-message`                     | Send user message, trigger streaming AI response         |
 | `chat.history` | `gateway-client.ts:542` `getChatHistory()`  | `ws:chat-history`, `ws:sync-sessions` | Fetch session history (default limit=50, sync limit=200) |
@@ -44,7 +44,7 @@
 
 ### 1.2 Sessions
 
-| Gateway Method              | ClawWork Call Site                                | IPC Channel                   | Purpose                                                   |
+| Gateway Method              | OpenClaw Desktop Call Site                        | IPC Channel                   | Purpose                                                   |
 | --------------------------- | ------------------------------------------------- | ----------------------------- | --------------------------------------------------------- |
 | `sessions.list`             | `gateway-client.ts:546` `listSessions()`          | `ws:list-sessions`            | List all sessions                                         |
 | `sessions.list` (spawnedBy) | `gateway-client.ts:550` `listSessionsBySpawner()` | `ws:list-sessions-by-spawner` | Filter sessions by parent (sub-agents)                    |
@@ -67,7 +67,7 @@
 
 ### 1.3 Agents
 
-| Gateway Method      | ClawWork Call Site                         | IPC Channel            | Purpose                                       |
+| Gateway Method      | OpenClaw Desktop Call Site                 | IPC Channel            | Purpose                                       |
 | ------------------- | ------------------------------------------ | ---------------------- | --------------------------------------------- |
 | `agents.list`       | `gateway-client.ts:562` `listAgents()`     | `ws:agents-list`       | List all agents                               |
 | `agents.create`     | `gateway-client.ts:566` `createAgent()`    | `ws:agents-create`     | Create agent (name, workspace, emoji, avatar) |
@@ -82,7 +82,7 @@
 
 ### 1.4 Models & Tools
 
-| Gateway Method  | ClawWork Call Site                          | IPC Channel        | Purpose                                         |
+| Gateway Method  | OpenClaw Desktop Call Site                  | IPC Channel        | Purpose                                         |
 | --------------- | ------------------------------------------- | ------------------ | ----------------------------------------------- |
 | `models.list`   | `gateway-client.ts:558` `listModels()`      | `ws:models-list`   | List available AI models                        |
 | `tools.catalog` | `gateway-client.ts:619` `getToolsCatalog()` | `ws:tools-catalog` | Get tool catalog (always `includePlugins=true`) |
@@ -94,7 +94,7 @@
 
 ### 1.5 Usage
 
-| Gateway Method | ClawWork Call Site                         | IPC Channel       | Purpose                              |
+| Gateway Method | OpenClaw Desktop Call Site                 | IPC Channel       | Purpose                              |
 | -------------- | ------------------------------------------ | ----------------- | ------------------------------------ |
 | `usage.status` | `gateway-client.ts:631` `getUsageStatus()` | `ws:usage-status` | Overall usage summary                |
 | `usage.cost`   | `gateway-client.ts:635` `getUsageCost()`   | `ws:usage-cost`   | Cost breakdown (supports date range) |
@@ -103,7 +103,7 @@
 
 ### 1.6 Cron
 
-| Gateway Method | ClawWork Call Site                        | IPC Channel      | Purpose                   |
+| Gateway Method | OpenClaw Desktop Call Site                | IPC Channel      | Purpose                   |
 | -------------- | ----------------------------------------- | ---------------- | ------------------------- |
 | `cron.list`    | `gateway-client.ts:651` `listCronJobs()`  | `ws:cron-list`   | List cron jobs            |
 | `cron.status`  | `gateway-client.ts:655` `getCronStatus()` | `ws:cron-status` | Cron service status       |
@@ -117,7 +117,7 @@
 
 ### 1.7 Approvals
 
-| Gateway Method          | ClawWork Call Site                      | IPC Channel                | Purpose                                |
+| Gateway Method          | OpenClaw Desktop Call Site              | IPC Channel                | Purpose                                |
 | ----------------------- | --------------------------------------- | -------------------------- | -------------------------------------- |
 | `exec.approval.resolve` | `ws-handlers.ts:556` `sendReq()` direct | `ws:exec-approval-resolve` | Approve or reject an execution request |
 
@@ -127,7 +127,7 @@
 
 ### 1.8 System
 
-| Gateway Method | ClawWork Call Site                      | IPC Channel  | Purpose                                |
+| Gateway Method | OpenClaw Desktop Call Site              | IPC Channel  | Purpose                                |
 | -------------- | --------------------------------------- | ------------ | -------------------------------------- |
 | `health`       | `gateway-client.ts:706` heartbeat timer | — (internal) | Keepalive heartbeat, sent periodically |
 
@@ -297,7 +297,7 @@
   maxProtocol: 3,
   client: {
     id: "gateway-client",         // ⚠ should be "openclaw-macos" (whitepaper §3.3)
-    displayName: "ClawWork Desktop",
+    displayName: "OpenClaw Desktop",
     version: app.getVersion(),
     platform: process.platform,
     mode: "backend"               // ⚠ should be "ui" (whitepaper §3.3)
@@ -331,7 +331,7 @@
 
 ## 6. Key Files
 
-### ClawWork
+### OpenClaw Desktop
 
 | File                                                         | Responsibility                                                             |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -379,7 +379,7 @@
 
 3. **Confirm permission requirements**
    - Check `openclaw`: `src/gateway/method-scopes.ts`
-   - ClawWork requests `operator.admin` by default, so nearly all methods are accessible
+   - OpenClaw Desktop requests `operator.admin` by default, so nearly all methods are accessible
 
 4. **Add method to GatewayClient**
    - Edit: `packages/desktop/src/main/ws/gateway-client.ts`
@@ -427,12 +427,12 @@
 
 ```text
 Gateway methods total:   110+ (BASE_METHODS)
-ClawWork uses:           30   (27%)
-ClawWork does not use:   80+  (73%)
+OpenClaw Desktop uses:           30   (27%)
+OpenClaw Desktop does not use:   80+  (73%)
 
 Gateway events total:    24
-ClawWork handles:        6    (25%)
-ClawWork does not handle:18   (75%)
+OpenClaw Desktop handles:        6    (25%)
+OpenClaw Desktop does not handle:18   (75%)
 
 High-value gaps:
   - sessions.subscribe/unsubscribe          → real-time session list

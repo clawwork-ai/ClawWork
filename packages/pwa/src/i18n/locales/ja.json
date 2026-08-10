@@ -6,7 +6,7 @@
   "app": {
     "error": "エラーが発生しました",
     "loading": "読み込み中...",
-    "name": "ClawWork",
+    "name": "OpenClaw Desktop",
     "paired": "モバイルデバイスがペアリングされました",
     "reload": "再読み込み"
   },

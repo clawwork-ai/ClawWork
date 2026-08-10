@@ -6,12 +6,12 @@ date: 2026-03-18
 
 # Pairing with an OpenClaw Gateway
 
-ClawWork connects to OpenClaw through a Gateway. Here's how to add a gateway and authenticate your device.
+OpenClaw Desktop connects to OpenClaw through a Gateway. Here's how to add a gateway and authenticate your device.
 
 ## Prerequisites
 
 - An OpenClaw Gateway instance running and reachable on your network
-- ClawWork desktop app installed
+- OpenClaw Desktop desktop app installed
 - The gateway URL (default for local: `ws://127.0.0.1:18789`)
 
 ```bash
@@ -20,7 +20,7 @@ openclaw gateway start
 
 ## Adding a Gateway
 
-1. Open ClawWork and go to **Settings** (gear icon in the sidebar)
+1. Open OpenClaw Desktop and go to **Settings** (gear icon in the sidebar)
 2. Scroll to the **Gateways** section and click **Add Gateway**
 3. Enter a name (e.g. "Local Gateway") and the WebSocket URL
 4. Choose an authentication method: **Token**, **Password**, or **Pairing Code**
@@ -50,12 +50,12 @@ The pairing code flow is suited for first-time device setup. The gateway generat
 
 1. Select the **Pairing Code** tab in the gateway form
 2. Get the setup code from your gateway admin or the gateway's web UI
-3. Paste the setup code — ClawWork will auto-extract the URL and pairing token
+3. Paste the setup code — OpenClaw Desktop will auto-extract the URL and pairing token
 4. Click **Start Pairing** to initiate the device pairing request
 5. Wait for the gateway admin to approve your device
-6. Once approved, ClawWork receives a device token and connects automatically
+6. Once approved, OpenClaw Desktop receives a device token and connects automatically
 
-> The pairing code is one-time use. After your device is approved, ClawWork stores a device token locally for future connections. If you reset your device identity, you will need to pair again.
+> The pairing code is one-time use. After your device is approved, OpenClaw Desktop stores a device token locally for future connections. If you reset your device identity, you will need to pair again.
 
 ## Verifying the Connection
 

@@ -34,7 +34,7 @@
         <path d="M749 1068 c-36 -13 -91 -39 -123 -58 -72 -43 -177 -153 -211 -220 -50 -98 -68 -215 -44 -290 6 -19 10 -62 10 -96 -2 -71 23 -118 79 -147 74 -39 194 0 262 84 18 22 48 48 68 57 126 60 211 240 182 392 -11 63 -47 150 -62 150 -4 0 -13 -13 -18 -29 -17 -48 -82 -111 -153 -146 -37 -19 -76 -46 -88 -61 -12 -15 -21 -22 -21 -16 0 19 49 69 80 82 16 7 30 17 30 22 0 6 14 39 32 75 22 46 53 84 106 134 41 38 72 72 69 75 -3 4 -34 8 -69 10 -48 4 -78 -1 -129 -18z"/>
       </g>
     </svg>
-    <text x="335" y="22" text-anchor="middle" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="500">ClawWork</text>
+    <text x="335" y="22" text-anchor="middle" fill="#555" font-family="system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="500">OpenClaw Desktop</text>
 
     <!-- Panel dividers -->
     <line x1="160" y1="34" x2="160" y2="310" stroke="#E8E8E8" stroke-width="1"/>

@@ -22,7 +22,7 @@ const EMPTY_CONFIG: AgentConfig = { name: '', description: '', model: '', identi
 
 const EMPTY_MODELS: ModelCatalogEntry[] = [];
 
-const SYSTEM_PROMPT_TEMPLATE = `You are an Agent creation assistant for ClawWork. Help the user create a new AI Agent through guided conversation.
+const SYSTEM_PROMPT_TEMPLATE = `You are an Agent creation assistant for OpenClaw Desktop. Help the user create a new AI Agent through guided conversation.
 
 Your job:
 1. Ask what kind of Agent the user wants and what it should do

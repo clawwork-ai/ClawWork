@@ -18,7 +18,7 @@ The most common feedback after TaskRoom shipped wasn't "it doesn't run" — it w
 
 From the user's point of view, wiring up a multi-agent task means answering a pile of questions: How many agents? What role is each one? What system prompt? Which skills to install? Who is the coordinator? How do they collaborate?
 
-These questions aren't hard for someone who already knows how. But they are an **adoption barrier**, not a capability gap. OpenClaw's runtime primitives are strong enough, ClawWork's Ensemble Task already runs, but the missing piece is a "pick one and go" abstraction.
+These questions aren't hard for someone who already knows how. But they are an **adoption barrier**, not a capability gap. OpenClaw's runtime primitives are strong enough, OpenClaw Desktop's Ensemble Task already runs, but the missing piece is a "pick one and go" abstraction.
 
 So the Team definition is simple:
 
@@ -148,7 +148,7 @@ The install flow is a transactional async generator. Every step yields a progres
    |- agents.files.set      -> write SOUL.md
    `- skills.install x N    -> install each required skill
 
-3. Persist team metadata in ClawWork's local DB
+3. Persist team metadata in OpenClaw Desktop's local DB
 ```
 
 The yield event sequence:
@@ -173,7 +173,7 @@ The fix: before install, query `agents.list`. If an agent with the same name exi
 
 There's a deliberate stance on distribution: **no centralized API**.
 
-TeamsHub is just a GitHub repository. Each Team is a directory in the repo. ClawWork fetches TEAM.md and agent files via GitHub raw URLs. No registry, no upload review, no API key.
+TeamsHub is just a GitHub repository. Each Team is a directory in the repo. OpenClaw Desktop fetches TEAM.md and agent files via GitHub raw URLs. No registry, no upload review, no API key.
 
 A community registry — `clawwork-ai/teamshub-community` — is built in, and users can add custom GitHub repos as additional registries. Registry ID is the first 12 chars of the URL's SHA256 hash, with path traversal guarded.
 

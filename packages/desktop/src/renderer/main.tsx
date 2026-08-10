@@ -21,7 +21,7 @@ if (!window.clawwork) {
   heading.textContent = 'Preload bridge missing';
   const detail = document.createElement('p');
   detail.textContent =
-    'window.clawwork is undefined. The preload script failed to expose the ClawWork API. Check that the preload is built as CJS (not ESM) when sandbox is enabled.';
+    'window.clawwork is undefined. The preload script failed to expose the OpenClaw Desktop API. Check that the preload is built as CJS (not ESM) when sandbox is enabled.';
   wrapper.appendChild(heading);
   wrapper.appendChild(detail);
   root.appendChild(wrapper);

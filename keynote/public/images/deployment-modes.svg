@@ -44,7 +44,7 @@
        C 306,76 306,102 304,124
        C 274,126 232,126 192,124
        C 190,102 190,76 192,52 Z"/>
-  <text x="248" y="82" class="ink" font-size="15" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="248" y="82" class="ink" font-size="15" font-weight="600" text-anchor="middle">OpenClaw Desktop</text>
   <text x="248" y="104" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
 
   <path class="arr s-gn" marker-end="url(#ah-gn)" d="M 310,88 Q 342,86 372,88"/>
@@ -83,7 +83,7 @@
        C 274,238 274,262 272,284
        C 244,286 208,286 178,284
        C 176,262 176,236 178,214 Z"/>
-  <text x="225" y="244" class="ink" font-size="14" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="225" y="244" class="ink" font-size="14" font-weight="600" text-anchor="middle">OpenClaw Desktop</text>
   <text x="225" y="266" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
 
   <path class="arr s-cy" marker-end="url(#ah-cy)" d="M 278,250 Q 304,248 324,250"/>
@@ -123,7 +123,7 @@
        C 274,418 274,442 272,464
        C 244,466 208,466 178,464
        C 176,442 176,416 178,394 Z"/>
-  <text x="225" y="424" class="ink" font-size="14" font-weight="600" text-anchor="middle">ClawWork</text>
+  <text x="225" y="424" class="ink" font-size="14" font-weight="600" text-anchor="middle">OpenClaw Desktop</text>
   <text x="225" y="446" class="ink-d" font-size="11" text-anchor="middle">Desktop · PWA</text>
 
   <path class="arr s-pl" marker-end="url(#ah-pl)" d="M 278,430 Q 304,428 324,430"/>

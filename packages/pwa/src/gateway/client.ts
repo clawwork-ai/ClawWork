@@ -403,7 +403,7 @@ export class BrowserGatewayClient {
           maxProtocol: 3,
           client: {
             id: 'gateway-client',
-            displayName: 'ClawWork PWA',
+            displayName: 'OpenClaw Desktop PWA',
             version: __APP_VERSION__,
             platform: 'pwa',
             mode: 'backend',

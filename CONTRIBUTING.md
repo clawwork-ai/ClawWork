@@ -1,4 +1,4 @@
-# Contributing to ClawWork
+# Contributing to OpenClaw Desktop
 
 Thanks for contributing.
 

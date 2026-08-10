@@ -6,11 +6,11 @@ Submit to the OpenClaw documentation repository under **Desktop Clients** / **Co
 
 ## Suggested page title
 
-ClawWork — Desktop Client
+OpenClaw Desktop — Desktop Client
 
 ## Summary paragraph
 
-[ClawWork](https://github.com/clawwork-ai/ClawWork) is an open-source, local-first desktop client for OpenClaw. It provides a three-panel workspace for parallel agent tasks, real-time tool call visualization, and Git-native artifact management. Available for macOS, Windows, and Linux, with a browser PWA option.
+[OpenClaw Desktop](https://github.com/clawwork-ai/ClawWork) is an open-source, local-first desktop client for OpenClaw. It provides a three-panel workspace for parallel agent tasks, real-time tool call visualization, and Git-native artifact management. Available for macOS, Windows, and Linux, with a browser PWA option.
 
 ## Installation
 
@@ -32,7 +32,7 @@ Open [cpwa.pages.dev](https://cpwa.pages.dev) in any modern browser.
 ## Quick start
 
 1. Start your OpenClaw Gateway (default: `ws://127.0.0.1:18789`).
-2. Open ClawWork → Settings → add your Gateway (token, password, or pairing code).
+2. Open OpenClaw Desktop → Settings → add your Gateway (token, password, or pairing code).
 3. Create a task, select an agent and model, and start working.
 
 ## Key features
@@ -64,5 +64,5 @@ Include these assets in the PR:
 For `awesome-openclaw` or similar curated lists:
 
 ```markdown
-- [ClawWork](https://github.com/clawwork-ai/ClawWork) — Local-first desktop client with parallel tasks, tool call visualization, and Git-native artifact management. (macOS/Windows/Linux/PWA)
+- [OpenClaw Desktop](https://github.com/clawwork-ai/ClawWork) — Local-first desktop client with parallel tasks, tool call visualization, and Git-native artifact management. (macOS/Windows/Linux/PWA)
 ```

@@ -2,7 +2,7 @@
 
 > **Status:** Beta — tested on macOS only.
 
-ClawWork supports hold-Space-to-dictate via a local [whisper.cpp](https://github.com/ggerganov/whisper.cpp) sidecar. No cloud API is involved; all transcription runs on your machine.
+OpenClaw Desktop supports hold-Space-to-dictate via a local [whisper.cpp](https://github.com/ggerganov/whisper.cpp) sidecar. No cloud API is involved; all transcription runs on your machine.
 
 ## Prerequisites
 
@@ -31,7 +31,7 @@ ClawWork supports hold-Space-to-dictate via a local [whisper.cpp](https://github
 
 ## Model Search Paths
 
-ClawWork looks for models in the following directories (first match wins):
+OpenClaw Desktop looks for models in the following directories (first match wins):
 
 - `~/models/whisper/`
 - `/opt/homebrew/share/whisper-cpp/models/`
@@ -39,7 +39,7 @@ ClawWork looks for models in the following directories (first match wins):
 
 ## Usage
 
-1. Open a task in ClawWork.
+1. Open a task in OpenClaw Desktop.
 2. **Hold Space** in the chat input to start recording.
 3. **Release Space** to stop recording and begin transcription.
 4. The transcript is inserted at the cursor position. It is never sent automatically.

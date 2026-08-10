@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bot, ChevronRight, Sparkles, Users, Compass } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Team } from '@clawwork/shared';
+import { PRODUCT_DISPLAY_NAME } from '@clawwork/shared';
 import { useTaskStore } from '@/stores/taskStore';
 import { useUiStore } from '@/stores/uiStore';
 import { useTeamStore } from '@/stores/teamStore';
@@ -210,9 +211,13 @@ export default function WelcomeScreen() {
     >
       <div className="relative mb-6">
         <div className="absolute inset-0 scale-[2.5] rounded-full bg-[var(--accent)] opacity-[0.06] blur-2xl" />
-        <img src={logo} alt="ClawWork" className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]" />
+        <img
+          src={logo}
+          alt={PRODUCT_DISPLAY_NAME}
+          className="relative w-16 h-16 rounded-2xl shadow-[var(--glow-accent)]"
+        />
       </div>
-      <h3 className="type-page-title mb-6 text-[var(--text-primary)]">ClawWork</h3>
+      <h3 className="type-page-title mb-6 text-[var(--text-primary)]">{PRODUCT_DISPLAY_NAME}</h3>
 
       <div className="flex flex-col items-center w-full max-w-lg">
         <div className="flex items-center gap-1 rounded-full bg-[var(--bg-secondary)] p-1.5">

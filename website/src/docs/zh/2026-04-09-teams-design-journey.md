@@ -18,7 +18,7 @@ TaskRoom 上线之后，最直接的反馈不是"跑不起来"，而是"我不�
 
 从用户视角看，配一个多 Agent 任务要回答一堆问题：要几个 agent？分别什么角色？用什么 system prompt？装哪些 skill？谁是 coordinator？怎么协作？
 
-这些问题对会用的人不难，但它们是**采纳障碍**，不是能力问题。OpenClaw 的运行时原语已经够强了，ClawWork 的 Ensemble Task 也能跑，缺的是一个"选一下就能用"的抽象。
+这些问题对会用的人不难，但它们是**采纳障碍**，不是能力问题。OpenClaw 的运行时原语已经够强了，OpenClaw Desktop 的 Ensemble Task 也能跑，缺的是一个"选一下就能用"的抽象。
 
 所以 Team 的定位很明确：
 
@@ -148,7 +148,7 @@ Layer 2 是 Team 作者完全控制的领域工作流。可以写团队目标、
    |- agents.files.set      -> 写入 SOUL.md
    `- skills.install x N    -> 安装所需的每个 skill
 
-3. 在 ClawWork 本地 DB 存储 team 元数据
+3. 在 OpenClaw Desktop 本地 DB 存储 team 元数据
 ```
 
 yield 的事件序列：
@@ -173,7 +173,7 @@ agent_creating -> agent_created
 
 分发方式上有一个明确的立场：**不做中心化 API**。
 
-TeamsHub 就是一个 GitHub 仓库。每个 Team 是仓库里的一个目录。ClawWork 通过 GitHub raw URL 拉 TEAM.md 和 agent 文件。没有注册中心、没有上传审核、没有 API key。
+TeamsHub 就是一个 GitHub 仓库。每个 Team 是仓库里的一个目录。OpenClaw Desktop 通过 GitHub raw URL 拉 TEAM.md 和 agent 文件。没有注册中心、没有上传审核、没有 API key。
 
 内置了一个社区注册表 `clawwork-ai/teamshub-community`，用户也可以添加自定义 GitHub 仓库作为注册表。注册表 ID 是 URL 的 SHA256 哈希前 12 位，做了路径遍历防护。
 

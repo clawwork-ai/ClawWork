@@ -1,11 +1,11 @@
 # Skill: sync-gateway-docs
 
-Sync the three ClawWork Gateway reference documents against the latest OpenClaw source code.
+Sync the three OpenClaw Desktop Gateway reference documents against the latest OpenClaw source code.
 
 ## When to Use
 
 - Periodically (e.g., after OpenClaw releases or major Gateway changes)
-- When adding a new Gateway feature to ClawWork and the docs feel stale
+- When adding a new Gateway feature to OpenClaw Desktop and the docs feel stale
 - User says: "更新 Gateway 文档", "sync gateway docs", or similar
 
 ## Documents
@@ -14,12 +14,12 @@ Sync the three ClawWork Gateway reference documents against the latest OpenClaw 
 |-----|------|---------|
 | Whitepaper | `docs/openclaw-gateway-whitepaper.md` | Protocol contract reference — what Gateway exposes |
 | Source Guide | `docs/openclaw-gateway-source-guide.md` | Code navigation — where to find things in openclaw |
-| Capability Map | `docs/clawwork-gateway-capability-map.md` | Usage inventory — what ClawWork actually uses |
+| Capability Map | `docs/clawwork-gateway-capability-map.md` | Usage inventory — what OpenClaw Desktop actually uses |
 
 ## Prerequisites
 
 - OpenClaw repo checked out at `~/git/openclaw` with latest `main`
-- ClawWork repo at `~/git/clawwork/main`
+- OpenClaw Desktop repo at `~/git/clawwork/main`
 
 ## Execution
 
@@ -85,21 +85,21 @@ The source guide maps code structure. It must reflect the current directory layo
 
 ### Phase 3: Update Capability Map
 
-The capability map tracks what ClawWork uses. It must reflect the current ClawWork code.
+The capability map tracks what OpenClaw Desktop uses. It must reflect the current OpenClaw Desktop code.
 
-**Step 1 — Scan ClawWork RPC calls.** Read:
+**Step 1 — Scan OpenClaw Desktop RPC calls.** Read:
 - `packages/desktop/src/main/ws/gateway-client.ts` — all `sendReq()` calls (the method string is the first argument)
 - `packages/desktop/src/main/ipc/ws-handlers.ts` — all `ipcMain.handle()` registrations
 
-**Step 2 — Scan ClawWork event handlers.** Read:
+**Step 2 — Scan OpenClaw Desktop event handlers.** Read:
 - `packages/core/src/services/gateway-dispatcher.ts` — the dispatch switch/if-else block
 - `packages/desktop/src/main/ws/gateway-client.ts` — the `handleEvent()` method
 
 **Step 3 — Diff against existing doc.**
-- New RPC calls in ClawWork → move from §2 (unused) to §1 (used), add location + IPC channel
+- New RPC calls in OpenClaw Desktop → move from §2 (unused) to §1 (used), add location + IPC channel
 - Removed RPC calls → move from §1 to §2
 - New event handlers → move from §3.2 (unhandled) to §3.1 (handled)
-- New Gateway methods (from Phase 1) not in ClawWork → add to §2 (unused)
+- New Gateway methods (from Phase 1) not in OpenClaw Desktop → add to §2 (unused)
 
 **Step 4 — Update ConnectParams (§5).** Read the current connect handshake in `gateway-client.ts` and verify client.id, client.mode, caps, scopes, device fields match.
 
@@ -109,8 +109,8 @@ The capability map tracks what ClawWork uses. It must reflect the current ClawWo
 
 After updating, report:
 1. What changed in each document (bullet list)
-2. New Gateway capabilities that ClawWork could benefit from (if any)
-3. Any discrepancies found (e.g., ClawWork calling a removed method)
+2. New Gateway capabilities that OpenClaw Desktop could benefit from (if any)
+3. Any discrepancies found (e.g., OpenClaw Desktop calling a removed method)
 
 ## Rules
 

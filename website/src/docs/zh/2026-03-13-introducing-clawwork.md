@@ -1,6 +1,6 @@
 ---
 title: 为什么我要给 OpenClaw 做一个桌面客户端
-description: 聊天界面管不了并行任务，所以我做了 ClawWork
+description: 聊天界面管不了并行任务，所以我做了 OpenClaw Desktop
 date: 2026-03-13
 ---
 
@@ -12,9 +12,9 @@ date: 2026-03-13
 
 当你同时跑 5 个任务，全挤在一个对话框里，根本分不清谁是谁。工具调用埋在消息流里，看不到执行过程。AI 生成的文件刷两下就找不到了。
 
-**ClawWork** 正是为解决这些痛点而生的开源桌面客户端。它让每个 AI 任务都拥有独立的「工作空间」，把散乱的 Agent 流程变成清晰、可控、高效的桌面生产力工具。
+**OpenClaw Desktop** 正是为解决这些痛点而生的开源桌面客户端。它让每个 AI 任务都拥有独立的「工作空间」，把散乱的 Agent 流程变成清晰、可控、高效的桌面生产力工具。
 
-## 为什么需要 ClawWork
+## 为什么需要 OpenClaw Desktop
 
 OpenClaw 本身非常强大，能真正「做事」——发邮件、管理日历、操作文件、调用外部工具。但当任务变多、变复杂时，聊天界面就力不从心了：
 
@@ -44,7 +44,7 @@ OpenClaw 本身非常强大，能真正「做事」——发邮件、管理日�
 ## 怎么开始
 
 1. 启动 OpenClaw Gateway：`openclaw gateway start`
-2. 安装 ClawWork：
+2. 安装 OpenClaw Desktop：
    - macOS：`brew tap clawwork-ai/clawwork && brew install --cask clawwork`
    - 或去 GitHub Releases 下载
 3. 设置里添加 Gateway 地址（默认 `ws://127.0.0.1:18789`）
@@ -54,12 +54,12 @@ OpenClaw 本身非常强大，能真正「做事」——发邮件、管理日�
 
 ## 现状
 
-ClawWork 是完全开源的（Apache 2.0 协议），代码采用 Electron + React + TypeScript + SQLite 构建，结构清晰，欢迎社区贡献。
+OpenClaw Desktop 是完全开源的（Apache 2.0 协议），代码采用 Electron + React + TypeScript + SQLite 构建，结构清晰，欢迎社区贡献。
 
 ## 总结
 
-如果你正在本地运行 OpenClaw，并希望把 AI Agent 从「偶尔聊天助手」升级为「真正能并行工作的 AI 同事」，ClawWork 是目前最值得尝试的桌面客户端。它不只是一个聊天工具的替代品，而是把 OpenClaw 的潜力彻底释放出来的生产力放大器。
+如果你正在本地运行 OpenClaw，并希望把 AI Agent 从「偶尔聊天助手」升级为「真正能并行工作的 AI 同事」，OpenClaw Desktop 是目前最值得尝试的桌面客户端。它不只是一个聊天工具的替代品，而是把 OpenClaw 的潜力彻底释放出来的生产力放大器。
 
 **GitHub**：https://github.com/clawwork-ai/ClawWork
 
-感兴趣的开发者可以直接用 Homebrew 一键安装试用，欢迎在 GitHub 上 star、提 issue 或提交 PR，一起把 ClawWork 打造成 OpenClaw 生态里最趁手的桌面利器！
+感兴趣的开发者可以直接用 Homebrew 一键安装试用，欢迎在 GitHub 上 star、提 issue 或提交 PR，一起把 OpenClaw Desktop 打造成 OpenClaw 生态里最趁手的桌面利器！
