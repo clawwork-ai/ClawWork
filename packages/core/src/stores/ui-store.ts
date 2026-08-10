@@ -1,5 +1,6 @@
 import { createStore } from 'zustand/vanilla';
 import type { AgentInfo, CommandEntry, ModelCatalogEntry, SkillStatusReport, ToolsCatalog } from '@clawwork/shared';
+import { applyGatewayPatch, emptyGatewayState, patchGatewayState } from './ui-store-gateway.js';
 
 export type MainView = 'chat' | 'files' | 'archived' | 'cron' | 'teams' | 'dashboard';
 export type Theme = 'dark' | 'light' | 'auto';
@@ -51,6 +52,8 @@ export interface UiState {
   setGatewayStatusByGateway: (gatewayId: string, status: GatewayConnectionStatus) => void;
 
   gatewayRegistry: Record<string, GatewayState>;
+  updateGateway: (gatewayId: string, patch: Partial<GatewayState>) => void;
+  getGatewayState: (gatewayId: string) => GatewayState;
 
   gatewayVersionMap: Record<string, string>;
   setGatewayVersion: (gatewayId: string, version: string | undefined) => void;
@@ -184,37 +187,29 @@ export function createUiStore(deps: UiStoreDeps) {
     },
 
     gatewayStatusMap: {},
-    setGatewayStatusByGateway: (gatewayId, status) =>
-      set((s) => ({
-        gatewayStatusMap: { ...s.gatewayStatusMap, [gatewayId]: status },
-      })),
+    setGatewayStatusByGateway: (gatewayId, status) => set((s) => patchGatewayState(s, gatewayId, { status })),
 
     gatewayRegistry: {},
+    updateGateway: (gatewayId, patch) => set((s) => patchGatewayState(s, gatewayId, patch)),
+    getGatewayState: (gatewayId) => get().gatewayRegistry[gatewayId] ?? emptyGatewayState(gatewayId),
 
     gatewayVersionMap: {},
     setGatewayVersion: (gatewayId, version) =>
       set((s) => {
-        const current = s.gatewayVersionMap[gatewayId];
         if (!version) {
-          if (current === undefined) return s;
-          const next = { ...s.gatewayVersionMap };
-          delete next[gatewayId];
-          return { gatewayVersionMap: next };
+          return patchGatewayState(s, gatewayId, { version: undefined });
         }
-        if (current === version) return s;
-        return { gatewayVersionMap: { ...s.gatewayVersionMap, [gatewayId]: version } };
+        if (s.gatewayVersionMap[gatewayId] === version) return s;
+        return patchGatewayState(s, gatewayId, { version });
       }),
 
     gatewayReconnectInfo: {},
     setGatewayReconnectInfo: (gatewayId, info) =>
-      set((s) => {
-        if (info === null) {
-          const next = { ...s.gatewayReconnectInfo };
-          delete next[gatewayId];
-          return { gatewayReconnectInfo: next };
-        }
-        return { gatewayReconnectInfo: { ...s.gatewayReconnectInfo, [gatewayId]: info } };
-      }),
+      set((s) =>
+        patchGatewayState(s, gatewayId, {
+          reconnectInfo: info === null ? undefined : info,
+        }),
+      ),
 
     gatewaysLoaded: false,
     setGatewaysLoaded: (loaded) => set({ gatewaysLoaded: loaded }),
@@ -223,7 +218,14 @@ export function createUiStore(deps: UiStoreDeps) {
     setDefaultGatewayId: (id) => set({ defaultGatewayId: id }),
 
     gatewayInfoMap: {},
-    setGatewayInfoMap: (map) => set({ gatewayInfoMap: map }),
+    setGatewayInfoMap: (map) =>
+      set((s) => {
+        let state: UiState = { ...s, gatewayInfoMap: map };
+        for (const [id, info] of Object.entries(map)) {
+          state = applyGatewayPatch(state, id, { info });
+        }
+        return state;
+      }),
 
     unreadTaskIds: new Set(),
     markUnread: (taskId) =>
@@ -243,40 +245,17 @@ export function createUiStore(deps: UiStoreDeps) {
     setHasUpdate: (has) => set({ hasUpdate: has }),
 
     modelCatalogByGateway: {},
-    setModelCatalogForGateway: (gatewayId, models) =>
-      set((s) => ({
-        modelCatalogByGateway: {
-          ...s.modelCatalogByGateway,
-          [gatewayId]: models,
-        },
-      })),
+    setModelCatalogForGateway: (gatewayId, models) => set((s) => patchGatewayState(s, gatewayId, { models })),
 
     agentCatalogByGateway: {},
     setAgentCatalogForGateway: (gatewayId, agents, defaultId) =>
-      set((s) => ({
-        agentCatalogByGateway: {
-          ...s.agentCatalogByGateway,
-          [gatewayId]: { agents, defaultId },
-        },
-      })),
+      set((s) => patchGatewayState(s, gatewayId, { agents: { agents, defaultId } })),
 
     toolsCatalogByGateway: {},
-    setToolsCatalogForGateway: (gatewayId, catalog) =>
-      set((s) => ({
-        toolsCatalogByGateway: {
-          ...s.toolsCatalogByGateway,
-          [gatewayId]: catalog,
-        },
-      })),
+    setToolsCatalogForGateway: (gatewayId, catalog) => set((s) => patchGatewayState(s, gatewayId, { tools: catalog })),
 
     skillsStatusByGateway: {},
-    setSkillsStatusForGateway: (gatewayId, report) =>
-      set((s) => ({
-        skillsStatusByGateway: {
-          ...s.skillsStatusByGateway,
-          [gatewayId]: report,
-        },
-      })),
+    setSkillsStatusForGateway: (gatewayId, report) => set((s) => patchGatewayState(s, gatewayId, { skills: report })),
 
     commandCatalogByGateway: {},
     setCommandCatalogForGateway: (gatewayId, commands) =>
