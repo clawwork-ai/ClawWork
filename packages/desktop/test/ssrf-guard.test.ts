@@ -252,11 +252,11 @@ describe('assertNotPrivateHost', () => {
 
   it('rejects when DNS fails entirely', async () => {
     mockLookup.mockRejectedValue(new Error('ENOTFOUND'));
-    await expect(assertNotPrivateHost('broken-dns.example.com')).rejects.toThrow('SSRF blocked');
+    await expect(assertNotPrivateHost('broken-dns.example.com')).rejects.toThrow('SSRF blocked: DNS resolution failed');
   });
 
   it('rejects when DNS returns no addresses', async () => {
     mockLookup.mockResolvedValue([]);
-    await expect(assertNotPrivateHost('empty-dns.example.com')).rejects.toThrow('SSRF blocked');
+    await expect(assertNotPrivateHost('empty-dns.example.com')).rejects.toThrow('SSRF blocked: DNS resolution failed');
   });
 });
