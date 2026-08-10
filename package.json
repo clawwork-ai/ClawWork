@@ -34,10 +34,11 @@
     "test:e2e:smoke": "playwright test --config=e2e/playwright.config.ts --project=smoke",
     "test:e2e:gateway": "playwright test --config=e2e/playwright.config.ts --project=gateway",
     "check:i18n": "node scripts/check-i18n.mjs",
+    "check:promotion-readiness": "node scripts/check-promotion-readiness.mjs",
     "check:dead-code": "knip",
     "typecheck:e2e": "pnpm --filter @clawwork/desktop exec tsc --noEmit -p ../../e2e/tsconfig.json",
     "release-notes": "node scripts/generate-release-notes.mjs",
-    "check": "pnpm lint && pnpm check:architecture && pnpm check:ci-bot-security && pnpm check:ui-contract && pnpm check:renderer-copy && pnpm check:i18n && pnpm check:dead-code && pnpm format:check && pnpm typecheck && pnpm typecheck:tests && pnpm typecheck:e2e && pnpm test"
+    "check": "pnpm lint && pnpm check:architecture && pnpm check:ci-bot-security && pnpm check:ui-contract && pnpm check:renderer-copy && pnpm check:i18n && pnpm check:promotion-readiness && pnpm check:dead-code && pnpm format:check && pnpm typecheck && pnpm typecheck:tests && pnpm typecheck:e2e && pnpm test"
   },
   "lint-staged": {
     "*.{ts,tsx,mts,cts,js,mjs,cjs}": [
