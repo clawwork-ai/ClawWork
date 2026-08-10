@@ -78,13 +78,7 @@ interface ErrorCorrelation {
 
 type NotificationSettingKey = 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect';
 
-export interface GatewayDispatcherDeps {
-  gateway: GatewayTransportPort;
-  getSettings: () => Promise<{
-    notifications?: { taskComplete?: boolean; approvalRequest?: boolean; gatewayDisconnect?: boolean };
-  } | null>;
-  sendNotification: (params: { title: string; body: string; taskId?: string }) => Promise<unknown>;
-
+export interface GatewayDispatcherStoreDeps {
   getTaskStore: () => {
     tasks: { id: string; title: string; gatewayId: string; sessionKey: string; ensemble?: boolean }[];
     updateTaskTitle: (id: string, title: string) => void;
@@ -101,10 +95,11 @@ export interface GatewayDispatcherDeps {
     | 'clearActiveTurn'
     | 'setProcessing'
   >;
-
   getActiveTaskId: () => string | null;
   markUnread: (taskId: string) => void;
+}
 
+export interface GatewayDispatcherStatusDeps {
   setGatewayStatusByGateway: (gatewayId: string, status: 'connected' | 'connecting' | 'disconnected') => void;
   setGatewayVersion: (gatewayId: string, version: string | undefined) => void;
   setGatewayReconnectInfo: (gatewayId: string, info: { attempt: number; max: number; gaveUp: boolean } | null) => void;
@@ -112,12 +107,34 @@ export interface GatewayDispatcherDeps {
   setGatewayInfoMap: (map: Record<string, { id: string; name: string; color?: string }>) => void;
   setGatewaysLoaded: (loaded: boolean) => void;
   getGatewayInfoMap: () => Record<string, { id: string; name: string; color?: string }>;
+}
 
+export interface GatewayDispatcherCatalogDeps {
   setModelCatalogForGateway: (gatewayId: string, models: unknown[]) => void;
   setAgentCatalogForGateway: (gatewayId: string, agents: unknown[], defaultId: string) => void;
   setToolsCatalogForGateway: (gatewayId: string, catalog: ToolsCatalog) => void;
   setSkillsStatusForGateway: (gatewayId: string, report: SkillStatusReport) => void;
   setCommandCatalogForGateway: (gatewayId: string, commands: CommandEntry[]) => void;
+}
+
+export interface GatewayDispatcherSyncDeps {
+  hydrateFromLocal: () => Promise<void>;
+  syncFromGateway: () => Promise<void>;
+  syncSessionMessages: (taskId: string, sessionKeyOverride?: string) => Promise<void>;
+  retrySyncPending: () => void;
+}
+
+export interface GatewayDispatcherDeps
+  extends
+    GatewayDispatcherStoreDeps,
+    GatewayDispatcherStatusDeps,
+    GatewayDispatcherCatalogDeps,
+    GatewayDispatcherSyncDeps {
+  gateway: GatewayTransportPort;
+  getSettings: () => Promise<{
+    notifications?: { taskComplete?: boolean; approvalRequest?: boolean; gatewayDisconnect?: boolean };
+  } | null>;
+  sendNotification: (params: { title: string; body: string; taskId?: string }) => Promise<unknown>;
 
   onPerformerCandidate?: (taskId: string, sessionKey: string, gatewayId: string) => void;
   lookupTaskIdBySubagentKey?: (subagentKey: string) => string | undefined;
@@ -135,11 +152,6 @@ export interface GatewayDispatcherDeps {
     feature?: string;
     data?: Record<string, unknown>;
   }) => void;
-
-  hydrateFromLocal: () => Promise<void>;
-  syncFromGateway: () => Promise<void>;
-  syncSessionMessages: (taskId: string, sessionKeyOverride?: string) => Promise<void>;
-  retrySyncPending: () => void;
 }
 
 const DEDUP_FALLBACK_WINDOW_MS = 2000;
