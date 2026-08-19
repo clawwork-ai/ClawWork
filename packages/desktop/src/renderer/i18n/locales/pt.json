@@ -522,6 +522,7 @@
     "noGateways": "Nenhum gateway configurado",
     "notifications": "Notificações",
     "notificationsDesc": "Notificações da área de trabalho para eventos em segundo plano",
+    "notificationsUpdated": "Configurações de notificação atualizadas",
     "notifyApproval": "Solicitações de aprovação",
     "notifyDisconnect": "Desconexão do Gateway",
     "notifyTaskComplete": "Conclusão de tarefa",

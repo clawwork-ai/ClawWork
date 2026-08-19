@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Moon, Sun, Monitor, Bell, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
@@ -90,7 +90,7 @@ export default function GeneralSection() {
     });
   }, [settingsLoaded, loadSettings]);
 
-  const notifyState = useMemo(
+  const storedNotifyState = useMemo(
     () => ({
       taskComplete: notifications?.taskComplete ?? true,
       approvalRequest: notifications?.approvalRequest ?? true,
@@ -98,15 +98,31 @@ export default function GeneralSection() {
     }),
     [notifications?.approvalRequest, notifications?.gatewayDisconnect, notifications?.taskComplete],
   );
+  const [notifyState, setNotifyState] = useState(storedNotifyState);
+  const notifyStateRef = useRef(notifyState);
+
+  useEffect(() => {
+    notifyStateRef.current = storedNotifyState;
+    setNotifyState(storedNotifyState);
+  }, [storedNotifyState]);
 
   const handleNotificationToggle = useCallback(
-    (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
-      const next = { ...notifyState, [key]: value };
-      void updateSettings({ notifications: next }).catch((err: unknown) => {
-        console.error('[GeneralSection] updateSettings failed:', err);
-      });
+    async (key: 'taskComplete' | 'approvalRequest' | 'gatewayDisconnect', value: boolean) => {
+      const next = { ...notifyStateRef.current, [key]: value };
+      notifyStateRef.current = next;
+      setNotifyState(next);
+      try {
+        const result = await updateSettings({ notifications: next });
+        if (result?.ok) {
+          toast.success(t('settings.notificationsUpdated'));
+        } else {
+          toast.error(t('errors.failed'));
+        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t('errors.failed'));
+      }
     },
-    [notifyState, updateSettings],
+    [t, updateSettings],
   );
 
   const notificationToggles = [

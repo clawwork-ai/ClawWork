@@ -522,6 +522,7 @@
     "noGateways": "Keine Gateways konfiguriert",
     "notifications": "Benachrichtigungen",
     "notificationsDesc": "Desktop-Benachrichtigungen fuer Hintergrundereignisse",
+    "notificationsUpdated": "Benachrichtigungseinstellungen aktualisiert",
     "notifyApproval": "Genehmigungsanfragen",
     "notifyDisconnect": "Gateway-Verbindungsabbruch",
     "notifyTaskComplete": "Aufgabenabschluss",

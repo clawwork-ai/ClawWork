@@ -522,6 +522,7 @@
     "noGateways": "구성된 게이트웨이가 없습니다",
     "notifications": "알림",
     "notificationsDesc": "백그라운드 이벤트에 대한 데스크톱 알림",
+    "notificationsUpdated": "알림 설정이 업데이트되었습니다",
     "notifyApproval": "승인 요청",
     "notifyDisconnect": "게이트웨이 연결 끊김",
     "notifyTaskComplete": "작업 완료",

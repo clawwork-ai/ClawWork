@@ -522,6 +522,7 @@
     "noGateways": "暂无配置的网关",
     "notifications": "通知",
     "notificationsDesc": "后台事件的桌面通知",
+    "notificationsUpdated": "通知设置已更新",
     "notifyApproval": "授权请求通知",
     "notifyDisconnect": "Gateway 断开通知",
     "notifyTaskComplete": "任务完成通知",
