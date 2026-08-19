@@ -226,7 +226,7 @@ ClawWork 目前针对 OpenClaw 优化。我们正在构建一个未来：工作�
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/image?repos=clawwork-ai/ClawWork&type=date&legend=top-left)](https://www.star-history.com/?repos=clawwork-ai%2FClawWork&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/image?repos=clawwork-ai/ClawWork&type=date&legend=top-left)](https://star-history.dera.page/#clawwork-ai/ClawWork&type=date&legend=top-left)
 
 ## 贡献
 
