@@ -71,7 +71,7 @@ export function parseIdentityMd(raw: string): ParsedIdentityMd {
   const match = raw.trim().match(FRONTMATTER_RE);
   if (!match) return { body: raw.trim() };
   const fm = parseFrontmatter(match[1]);
-  const desc = typeof fm.description === 'string' && fm.description ? fm.description : undefined;
+  const desc = typeof fm.description === 'string' && fm.description ? fm.description.replaceAll('\\"', '"') : undefined;
   return { description: desc, body: match[2].trim(), rawFrontmatter: match[1] };
 }
 

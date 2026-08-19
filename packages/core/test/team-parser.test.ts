@@ -236,6 +236,30 @@ describe('serializeIdentityMd', () => {
     expect(result).toContain('description: "Expert in \\"React\\""');
   });
 
+  it('round-trips a description containing double quotes without corruption', () => {
+    const desc = 'Agent "Alpha"';
+    const body = 'You coordinate the team.';
+    const parsed = parseIdentityMd(serializeIdentityMd(desc, body));
+    expect(parsed.description).toBe(desc);
+    expect(parsed.body).toBe(body);
+  });
+
+  it('round-trips multiple quoted segments through the existing-frontmatter path', () => {
+    const desc = 'Bridges "alpha" and "beta" squads';
+    const existing = '---\ndescription: "old"\nversion: 2\n---\n\nOld body';
+    expect(extractDescription(serializeIdentityMd(desc, 'New body', existing))).toBe(desc);
+  });
+
+  it('round-trips quotes without corrupting literal backslashes', () => {
+    const desc = 'Config at C:\\Users\\dev runs "beta"';
+    const parsed = parseIdentityMd(serializeIdentityMd(desc, 'body'));
+    expect(parsed.description).toBe(desc);
+  });
+
+  it('round-trips a description that is only a double quote', () => {
+    expect(parseIdentityMd(serializeIdentityMd('"', 'body')).description).toBe('"');
+  });
+
   it('strips newlines from description', () => {
     const result = serializeIdentityMd('line1\nline2', 'body');
     expect(result).toContain('description: "line1 line2"');
