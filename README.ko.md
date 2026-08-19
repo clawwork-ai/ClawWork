@@ -229,7 +229,7 @@ ClawWork는 현재 OpenClaw에 최적화되어 있습니다. 우리가 향하는
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/image?repos=clawwork-ai/ClawWork&type=date&legend=top-left)](https://www.star-history.com/?repos=clawwork-ai%2FClawWork&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/image?repos=clawwork-ai/ClawWork&type=date&legend=top-left)](https://star-history.dera.page/#clawwork-ai/ClawWork&type=date&legend=top-left)
 
 ## 기여
 
