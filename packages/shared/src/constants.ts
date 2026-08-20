@@ -5,6 +5,7 @@ const CLAWWORK_DEVICE_SESSION_RE = /^agent:([^:]+):clawwork:([^:]+):task:(.+)$/;
 const CLAWWORK_SESSION_RE = /^agent:([^:]+):clawwork:task:(.+)$/;
 const LEGACY_SESSION_KEY_RE = /^agent:[^:]+:task-(.+)$/;
 const SUBAGENT_SESSION_RE = /^agent:([^:]+):subagent:([a-f0-9-]+)$/;
+const GENERIC_AGENT_SESSION_RE = /^agent:([^:]+):/;
 
 export function buildSessionKey(taskId: string, agentId: string = 'main', deviceId?: string): string {
   if (deviceId) return `agent:${agentId}:clawwork:${deviceId}:task:${taskId}`;
@@ -29,6 +30,8 @@ export function parseAgentIdFromSessionKey(sessionKey: string): string {
   if (m) return m[1];
   const sub = sessionKey.match(SUBAGENT_SESSION_RE);
   if (sub) return sub[1];
+  const generic = sessionKey.match(GENERIC_AGENT_SESSION_RE);
+  if (generic) return generic[1];
   return 'main';
 }
 

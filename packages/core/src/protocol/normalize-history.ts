@@ -16,7 +16,7 @@ export function isVisibleAssistantContent(content: string): boolean {
 }
 
 const IMAGE_EXT_RE = /\.(png|jpe?g|gif|webp|avif)(?:[?#].*)?$/i;
-const DATA_IMAGE_RE = /^data:image\/(png|jpe?g|gif|webp|avif);base64,/i;
+const DATA_URL_RE = /^data:([^;]+);base64,/i;
 const GATEWAY_MEDIA_PATH_RE = /^\/(?:api\/chat\/media\/outgoing\/|media\/|__openclaw__\/media\/)/;
 
 function cleanMediaCandidate(raw: string): string {
@@ -126,18 +126,25 @@ function resolveGatewayMediaSource(candidate: string, httpBase?: string): string
 }
 
 function mimeTypeFromSource(source: string, fallback?: string): string | undefined {
-  if (fallback?.startsWith('image/')) return fallback;
+  if (fallback) return fallback;
   const lower = source.split(/[?#]/)[0]?.toLowerCase() ?? '';
   if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
   if (lower.endsWith('.png')) return 'image/png';
   if (lower.endsWith('.gif')) return 'image/gif';
   if (lower.endsWith('.webp')) return 'image/webp';
   if (lower.endsWith('.avif')) return 'image/avif';
-  const dataMatch = source.match(/^data:(image\/[^;]+);/i);
+  if (lower.endsWith('.pdf')) return 'application/pdf';
+  if (lower.endsWith('.md')) return 'text/markdown';
+  if (lower.endsWith('.txt')) return 'text/plain';
+  if (lower.endsWith('.json')) return 'application/json';
+  if (lower.endsWith('.csv')) return 'text/csv';
+  if (lower.endsWith('.html')) return 'text/html';
+  if (lower.endsWith('.zip')) return 'application/zip';
+  const dataMatch = source.match(/^data:([^;]+);/i);
   return dataMatch?.[1] ?? fallback;
 }
 
-function attachmentFromMediaSource(
+function attachmentFromSource(
   source: string,
   alt?: string,
   mimeType?: string,
@@ -147,27 +154,27 @@ function attachmentFromMediaSource(
   if (!candidate || candidate.length > 4096 || hasUnsafePathSegment(candidate) || candidate.startsWith('~'))
     return null;
 
-  if (DATA_IMAGE_RE.test(candidate)) {
+  if (DATA_URL_RE.test(candidate)) {
     return {
-      fileName: alt?.trim() || 'image.png',
+      fileName: alt?.trim() || fileNameFromSource(candidate, 'attachment'),
       dataUrl: candidate,
       mimeType: mimeTypeFromSource(candidate, mimeType),
     };
   }
 
   const gatewayMedia = resolveGatewayMediaSource(candidate, httpBase);
-  if (gatewayMedia && (IMAGE_EXT_RE.test(gatewayMedia) || mimeType?.startsWith('image/'))) {
+  if (gatewayMedia) {
     return {
-      fileName: alt?.trim() || fileNameFromSource(gatewayMedia, 'image.png'),
+      fileName: alt?.trim() || fileNameFromSource(gatewayMedia, 'attachment'),
       dataUrl: gatewayMedia,
       mimeType: mimeTypeFromSource(gatewayMedia, mimeType),
     };
   }
   if (candidate.startsWith('/') && GATEWAY_MEDIA_PATH_RE.test(candidate)) return null;
 
-  if (isAllowedRemoteMediaUrl(candidate) && (IMAGE_EXT_RE.test(candidate) || mimeType?.startsWith('image/'))) {
+  if (isAllowedRemoteMediaUrl(candidate)) {
     return {
-      fileName: alt?.trim() || fileNameFromSource(candidate, 'image.png'),
+      fileName: alt?.trim() || fileNameFromSource(candidate, 'attachment'),
       dataUrl: candidate,
       mimeType: mimeTypeFromSource(candidate, mimeType),
     };
@@ -175,9 +182,9 @@ function attachmentFromMediaSource(
 
   const filePath = filePathFromMediaCandidate(candidate);
   if (!filePath) return null;
-  if (filePath.startsWith('/') && IMAGE_EXT_RE.test(filePath)) {
+  if (filePath.startsWith('/')) {
     return {
-      fileName: alt?.trim() || fileNameFromSource(filePath, 'image.png'),
+      fileName: alt?.trim() || fileNameFromSource(filePath, 'attachment'),
       dataUrl: encodeFilePath(filePath),
       mimeType: mimeTypeFromSource(filePath, mimeType),
       sourcePath: filePath,
@@ -201,7 +208,7 @@ function splitTextMediaDirectives(text: string, httpBase?: string): { text: stri
     }
 
     if (!inFence && trimmed.toUpperCase().startsWith('MEDIA:')) {
-      const media = attachmentFromMediaSource(trimmed.slice('MEDIA:'.length), undefined, undefined, httpBase);
+      const media = attachmentFromSource(trimmed.slice('MEDIA:'.length), undefined, undefined, httpBase);
       if (media) {
         attachments.push(media);
         continue;
@@ -224,13 +231,33 @@ export function mergeMessageAttachments(
   incoming: MessageAttachment[] | undefined,
 ): MessageAttachment[] | undefined {
   const merged = [...(base ?? [])];
-  const seen = new Set(merged.map((attachment) => attachment.dataUrl));
+  const seen = new Set(merged.map((attachment) => attachment.sourcePath ?? attachment.dataUrl));
   for (const attachment of incoming ?? []) {
-    if (seen.has(attachment.dataUrl)) continue;
-    seen.add(attachment.dataUrl);
+    const key = attachment.sourcePath ?? attachment.dataUrl;
+    if (seen.has(key)) continue;
+    seen.add(key);
     merged.push(attachment);
   }
   return merged.length ? merged : undefined;
+}
+
+function attachmentFromFileBlock(block: RawContentBlock, httpBase?: string): MessageAttachment | null {
+  const fileName = block.fileName ?? block.name ?? block.alt;
+  if (block.dataUrl) return attachmentFromSource(block.dataUrl, fileName, block.mimeType, httpBase);
+  if (block.base64) {
+    const mimeType = block.mimeType ?? 'application/octet-stream';
+    return {
+      fileName: fileName?.trim() || 'attachment',
+      dataUrl: `data:${mimeType};base64,${block.base64}`,
+      mimeType,
+      size: block.size,
+    };
+  }
+  const source = block.url ?? block.openUrl ?? block.sourcePath ?? block.filePath ?? block.path;
+  if (!source) return null;
+  const attachment = attachmentFromSource(source, fileName, block.mimeType, httpBase);
+  if (!attachment) return null;
+  return { ...attachment, size: block.size ?? attachment.size };
 }
 
 export function normalizeContentBlocks(
@@ -254,9 +281,14 @@ export function normalizeContentBlocks(
     if (block.type === 'image') {
       const rawSource = block.url ?? block.openUrl;
       if (rawSource) {
-        const attachment = attachmentFromMediaSource(rawSource, block.alt, block.mimeType, httpBase);
+        const attachment = attachmentFromSource(rawSource, block.alt, block.mimeType, httpBase);
         attachments = mergeMessageAttachments(attachments, attachment ? [attachment] : undefined);
       }
+    }
+
+    if (block.type === 'file' || block.type === 'attachment') {
+      const attachment = attachmentFromFileBlock(block, httpBase);
+      attachments = mergeMessageAttachments(attachments, attachment ? [attachment] : undefined);
     }
   }
 

@@ -253,6 +253,7 @@ export interface AgentInfo {
   name?: string;
   identity?: AgentIdentity;
   model?: AgentModelInfo;
+  workspace?: string;
 }
 
 export interface AgentListResponse {

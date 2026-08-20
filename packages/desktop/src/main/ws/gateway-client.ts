@@ -597,8 +597,8 @@ export class GatewayClient {
     return this.sendReq('chat.history', { sessionKey, limit }, this.sessionMeta(sessionKey));
   }
 
-  async listSessions(): Promise<Record<string, unknown>> {
-    return this.sendReq('sessions.list', {}, { requestId: randomUUID() });
+  async listSessions(params: Record<string, unknown> = {}): Promise<Record<string, unknown>> {
+    return this.sendReq('sessions.list', params, { requestId: randomUUID() });
   }
 
   async listSessionsBySpawner(spawnedBy: string): Promise<Record<string, unknown>> {

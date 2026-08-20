@@ -2,6 +2,7 @@ import { parseAgentIdFromSessionKey, parseTaskIdFromSessionKey } from '@clawwork
 import type { Message, MessageRole, ToolCall, IpcResult } from '@clawwork/shared';
 import type { RawHistoryMessage } from '../protocol/types.js';
 import type { ActiveTurn, MessageState } from '../stores/message-store.js';
+import type { SessionSyncFilter } from '../ports/gateway-transport.js';
 import { mergeCanonicalMessageWithActiveTurn } from '../stores/message-store.js';
 import {
   sanitizeModel,
@@ -52,7 +53,7 @@ export interface SessionSyncDeps {
   gateway: {
     getHttpBase?: (gatewayId: string) => string | undefined | Promise<string | undefined>;
     chatHistory: (gatewayId: string, sessionKey: string, limit?: number) => Promise<IpcResult>;
-    syncSessions: () => Promise<{
+    syncSessions: (filter?: SessionSyncFilter) => Promise<{
       ok: boolean;
       discovered?: {
         gatewayId: string;
@@ -99,6 +100,7 @@ export interface SessionSyncDeps {
         inputTokens?: number;
         outputTokens?: number;
         contextTokens?: number;
+        agentId?: string;
       },
     ) => void;
   };
@@ -372,12 +374,12 @@ export function createSessionSync(deps: SessionSyncDeps) {
     }
   }
 
-  async function syncFromGateway(): Promise<void> {
+  async function syncFromGateway(filter?: SessionSyncFilter): Promise<void> {
     const epoch = syncEpoch;
     try {
       await hydrateFromLocal();
       if (syncEpoch !== epoch) return;
-      const res = await deps.gateway.syncSessions();
+      const res = await deps.gateway.syncSessions(filter);
       if (syncEpoch !== epoch) return;
       if (!res.ok || !res.discovered) return;
       const taskStore = deps.getTaskStore();
@@ -399,6 +401,7 @@ export function createSessionSync(deps: SessionSyncDeps) {
         );
 
         taskStore.updateTaskMetadata(d.taskId, {
+          agentId: d.agentId,
           model: d.model,
           modelProvider: d.modelProvider,
           thinkingLevel: d.thinkingLevel,

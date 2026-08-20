@@ -12,6 +12,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
   Plus,
   Search,
+  Check,
+  ChevronDown,
   FolderOpen,
   Settings,
   Archive,
@@ -34,6 +36,12 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -42,8 +50,10 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { exportToFiles, exportToLocal } from '@/lib/export-session';
+import { syncFromGateway } from '@/lib/session-sync';
+import AgentIcon from '@/components/AgentIcon';
 import TaskItem from './TaskItem';
-import type { Task, TaskStatus } from '@clawwork/shared';
+import type { AgentInfo, Task, TaskStatus } from '@clawwork/shared';
 import EmptyState from '@/components/semantic/EmptyState';
 import { useSessionPreviews } from '@/hooks/useSessionPreviews';
 
@@ -151,8 +161,170 @@ const navActiveClass = (active: boolean) =>
     ? 'bg-[var(--accent-dim)] text-[var(--text-primary)]'
     : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]';
 
+function basename(path: string | undefined): string {
+  if (!path) return '';
+  const normalized = path.replace(/\\/g, '/').replace(/\/+$/, '');
+  return normalized.split('/').pop() || normalized;
+}
+
+function agentLabel(agent: AgentInfo | undefined, fallbackId: string): string {
+  if (!agent) return fallbackId;
+  return basename(agent.workspace) || agent.name || fallbackId;
+}
+
+function isCronTaskTitle(title: string | undefined): boolean {
+  return /^\s*cron\s*[:\uFF1A]/i.test(title ?? '');
+}
+
+function isEmptyImportedPlaceholder(task: Task): boolean {
+  return task.id.startsWith('native-') && !task.title.trim();
+}
+
+function matchesSelectedMainAgent(task: Task, gatewayId: string | undefined, agentId: string | undefined): boolean {
+  if (!gatewayId || !agentId) return true;
+  return task.gatewayId === gatewayId && task.agentId === agentId;
+}
+
+const startupSyncedMainAgentKeys = new Set<string>();
+
+function mainAgentSyncKey(gatewayId: string, agent: AgentInfo): string {
+  return `${gatewayId}:${agent.id}:${agent.workspace ?? ''}`;
+}
+
+function syncMainAgentSessions(gatewayId: string, agent: AgentInfo): void {
+  void syncFromGateway({ gatewayId, agentId: agent.id, workspace: agent.workspace }).catch((err) =>
+    console.warn('[left-nav] sync selected main agent sessions failed:', err),
+  );
+}
+
+function useStartupMainAgentSessionSync(): void {
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const catalog = useUiStore((s) => (defaultGatewayId ? s.agentCatalogByGateway[defaultGatewayId] : undefined));
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
+  const gwStatusMap = useUiStore((s) => s.gatewayStatusMap);
+
+  useEffect(() => {
+    if (!defaultGatewayId || gwStatusMap[defaultGatewayId] !== 'connected') return;
+
+    const selectedId = selectedMainAgentByGateway[defaultGatewayId];
+    if (!selectedId || !catalog?.agents.length) return;
+
+    const selected = catalog.agents.find((agent) => agent.id === selectedId);
+    if (!selected) return;
+
+    const syncKey = mainAgentSyncKey(defaultGatewayId, selected);
+    if (startupSyncedMainAgentKeys.has(syncKey)) return;
+
+    startupSyncedMainAgentKeys.add(syncKey);
+    syncMainAgentSessions(defaultGatewayId, selected);
+  }, [catalog, defaultGatewayId, gwStatusMap, selectedMainAgentByGateway]);
+}
+
+function MainAgentWorkspaceSelector({ collapsed }: { collapsed?: boolean }) {
+  const { t } = useTranslation();
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const catalog = useUiStore((s) => (defaultGatewayId ? s.agentCatalogByGateway[defaultGatewayId] : undefined));
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
+  const setSelectedMainAgentForGateway = useUiStore((s) => s.setSelectedMainAgentForGateway);
+  const updatePending = useTaskStore((s) => s.updatePending);
+
+  if (!defaultGatewayId || !catalog?.agents.length) return null;
+
+  const selectedId = selectedMainAgentByGateway[defaultGatewayId] || '';
+  const selected = selectedId ? catalog.agents.find((agent) => agent.id === selectedId) : undefined;
+
+  const handleSelect = (agent: AgentInfo): void => {
+    setSelectedMainAgentForGateway(defaultGatewayId, agent.id);
+    const pending = useTaskStore.getState().pendingNewTask;
+    if (pending?.gatewayId === defaultGatewayId && !pending.ensemble && !pending.teamId) {
+      updatePending({ agentId: agent.id });
+    }
+    syncMainAgentSessions(defaultGatewayId, agent);
+  };
+
+  const label = selected
+    ? agentLabel(selected, selected.id)
+    : t('leftNav.selectMainWorkspace', { defaultValue: 'Select workspace' });
+  const secondaryLabel = selected
+    ? selected.workspace
+      ? (selected.name ?? selected.id)
+      : selected.id
+    : t('leftNav.noMainWorkspaceSelected', { defaultValue: 'No main workspace selected' });
+  const triggerClass = collapsed
+    ? 'titlebar-no-drag flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] focus-visible:outline-none glow-focus'
+    : 'titlebar-no-drag flex min-w-0 w-full items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2.5 py-2 text-left transition-colors hover:border-[var(--text-muted)] focus-visible:outline-none glow-focus';
+
+  return (
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button className={triggerClass} aria-label={t('leftNav.mainWorkspace', { defaultValue: 'Main workspace' })}>
+              {selected ? (
+                <AgentIcon
+                  gatewayId={defaultGatewayId}
+                  agentId={selected.id}
+                  gatewayAvatarUrl={selected.identity?.avatarUrl}
+                  emoji={selected.identity?.emoji}
+                  imgClass="h-4 w-4 rounded-full object-cover"
+                  emojiClass="emoji-sm"
+                  iconSize={collapsed ? 16 : 14}
+                />
+              ) : (
+                <FolderOpen size={collapsed ? 16 : 14} className="flex-shrink-0 text-[var(--text-muted)]" />
+              )}
+              {!collapsed && (
+                <>
+                  <span className="min-w-0 flex-1">
+                    <span className="type-label block truncate text-[var(--text-primary)]">{label}</span>
+                    <span className="type-support block truncate text-[var(--text-muted)]">{secondaryLabel}</span>
+                  </span>
+                  <ChevronDown size={13} className="flex-shrink-0 text-[var(--text-muted)]" />
+                </>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side={collapsed ? 'right' : 'top'}>
+          {t('leftNav.mainWorkspace', { defaultValue: 'Main workspace' })}
+        </TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent align={collapsed ? 'start' : 'end'} side={collapsed ? 'right' : 'top'} className="w-72">
+        {catalog.agents.map((agent) => {
+          const selectedAgent = agent.id === selected?.id;
+          return (
+            <DropdownMenuItem
+              key={agent.id}
+              onClick={() => handleSelect(agent)}
+              className={cn(selectedAgent && 'text-[var(--accent)]')}
+            >
+              <AgentIcon
+                gatewayId={defaultGatewayId}
+                agentId={agent.id}
+                gatewayAvatarUrl={agent.identity?.avatarUrl}
+                emoji={agent.identity?.emoji}
+                imgClass="h-4 w-4 rounded-full object-cover"
+                emojiClass="emoji-sm"
+                iconSize={14}
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate">{agentLabel(agent, agent.id)}</span>
+                <span className="type-support block truncate text-[var(--text-muted)]">
+                  {agent.workspace ? (agent.name ?? agent.id) : agent.id}
+                </span>
+              </span>
+              {selectedAgent && <Check size={13} className="ml-auto flex-shrink-0" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function LeftNav() {
   const { t } = useTranslation();
+  useStartupMainAgentSessionSync();
   const tasks = useTaskStore((s) => s.tasks);
   const activeTaskId = useTaskStore((s) => s.activeTaskId);
   const startNewTask = useTaskStore((s) => s.startNewTask);
@@ -173,6 +345,9 @@ export default function LeftNav() {
   const toggleLeftNavCollapsed = useUiStore((s) => s.toggleLeftNavCollapsed);
   const focusSearch = useUiStore((s) => s.focusSearch);
   const searchFocusTrigger = useUiStore((s) => s.searchFocusTrigger);
+  const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
+  const selectedMainAgentId = defaultGatewayId ? selectedMainAgentByGateway[defaultGatewayId] : undefined;
 
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [confirmTaskId, setConfirmTaskId] = useState('');
@@ -290,7 +465,17 @@ export default function LeftNav() {
     openMenu(e, taskId, status);
   };
 
-  const visibleTasks = useMemo(() => tasks.filter((t) => t.status !== 'archived'), [tasks]);
+  const visibleTasks = useMemo(
+    () =>
+      tasks.filter(
+        (t) =>
+          t.status !== 'archived' &&
+          !isCronTaskTitle(t.title) &&
+          !isEmptyImportedPlaceholder(t) &&
+          matchesSelectedMainAgent(t, defaultGatewayId ?? undefined, selectedMainAgentId),
+      ),
+    [defaultGatewayId, selectedMainAgentId, tasks],
+  );
   const activeTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'active'), [visibleTasks]);
   const completedTasks = useMemo(() => visibleTasks.filter((t) => t.status === 'completed'), [visibleTasks]);
   const activeGroups = useMemo(() => groupTasksByTime(activeTasks), [activeTasks]);
@@ -440,6 +625,8 @@ export default function LeftNav() {
 
         <div className="w-6 h-px bg-[var(--border)]" />
 
+        <MainAgentWorkspaceSelector collapsed />
+
         <div className="flex flex-col items-center gap-0.5">
           <IconButton
             icon={Clock}
@@ -568,6 +755,9 @@ export default function LeftNav() {
       </div>
 
       <div className="flex-shrink-0 px-3" style={{ paddingBottom: 'calc(var(--density-panel-gap) / 4)' }}>
+        <div className="mb-2">
+          <MainAgentWorkspaceSelector />
+        </div>
         <NavButton
           icon={Clock}
           label={t('leftNav.scheduledTasks')}

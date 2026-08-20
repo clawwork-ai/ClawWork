@@ -31,6 +31,8 @@ import type {
   ConfigSchemaLookupResult,
   ParsedTeam,
   AgentFileSet,
+  Artifact,
+  MessageAttachment,
   SessionsPreviewResult,
 } from '@clawwork/shared';
 
@@ -190,6 +192,7 @@ interface PersistedTask {
   tags: string[];
   artifactDir: string;
   gatewayId: string;
+  agentId?: string | null;
 }
 
 interface PersistedMessage {
@@ -218,13 +221,19 @@ interface DiscoveredSession {
   inputTokens?: number;
   outputTokens?: number;
   contextTokens?: number;
-  messages: { role: string; content: string; timestamp: string }[];
+  messages: { role: string; content: string; timestamp: string; attachments?: MessageAttachment[]; toolCalls?: unknown[] }[];
 }
 
 interface SyncResult {
   ok: boolean;
   discovered?: DiscoveredSession[];
   error?: string;
+}
+
+interface SessionSyncFilter {
+  gatewayId?: string;
+  agentId?: string;
+  workspace?: string;
 }
 
 interface ListResult<T> {
@@ -283,7 +292,7 @@ export interface ClawWorkAPI {
   lookupConfigSchema: (gatewayId: string, path: string) => Promise<IpcResult<ConfigSchemaLookupResult>>;
 
   gatewayStatus: () => Promise<GatewayStatusMap>;
-  syncSessions: () => Promise<SyncResult>;
+  syncSessions: (filter?: SessionSyncFilter) => Promise<SyncResult>;
   listGateways: () => Promise<GatewayListItem[]>;
 
   onGatewayEvent: (callback: (data: GatewayEvent) => void) => () => void;
@@ -326,6 +335,11 @@ export interface ClawWorkAPI {
     language?: string;
     fileName?: string;
   }) => Promise<IpcResult>;
+  saveMessageAttachment: (params: {
+    taskId: string;
+    messageId: string;
+    attachment: MessageAttachment;
+  }) => Promise<IpcResult<Artifact>>;
   saveImageFromUrl: (params: { taskId: string; messageId: string; url: string; alt?: string }) => Promise<IpcResult>;
   searchArtifacts: (
     query: string,
@@ -408,6 +422,7 @@ export interface ClawWorkAPI {
     tags: string[];
     artifactDir: string;
     gatewayId: string;
+    agentId?: string | null;
   }) => Promise<IpcResult>;
 
   persistTaskUpdate: (params: {
@@ -422,6 +437,7 @@ export interface ClawWorkAPI {
     outputTokens?: number;
     contextTokens?: number;
     teamId?: string | null;
+    agentId?: string | null;
     updatedAt: string;
   }) => Promise<IpcResult>;
 

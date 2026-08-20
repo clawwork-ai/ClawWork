@@ -8,9 +8,12 @@ import { eq } from 'drizzle-orm';
 import { getDb, getSqlite } from '../db/index.js';
 import { artifacts, tasks, messages } from '../db/schema.js';
 import { saveArtifact, saveArtifactFromBuffer } from '../artifact/save.js';
+import { saveAttachmentArtifact } from '../artifact/auto-extract.js';
 import { getWorkspacePath } from '../workspace/config.js';
 import { searchArtifacts } from '../db/search.js';
 import { safeFetch } from '../net/safe-fetch.js';
+import { getGatewayClient } from '../ws/index.js';
+import type { MessageAttachment } from '@clawwork/shared';
 
 interface SaveParams {
   taskId: string;
@@ -89,6 +92,39 @@ export function registerArtifactHandlers(): void {
       return { ok: false, error: msg };
     }
   });
+
+  ipcMain.handle(
+    'artifact:save-attachment',
+    async (
+      _event,
+      params: {
+        taskId: string;
+        messageId: string;
+        attachment: MessageAttachment;
+      },
+    ) => {
+      const workspacePath = getWorkspacePath();
+      if (!workspacePath) return { ok: false, error: 'workspace not configured' };
+      try {
+        const db = getDb();
+        const task = db.select({ gatewayId: tasks.gatewayId }).from(tasks).where(eq(tasks.id, params.taskId)).get();
+        const gatewayHttpBase = task ? getGatewayClient(task.gatewayId)?.httpBase : undefined;
+        const artifact = await saveAttachmentArtifact({
+          workspacePath,
+          taskId: params.taskId,
+          messageId: params.messageId,
+          attachment: params.attachment,
+          gatewayHttpBase,
+        });
+        if (!artifact) return { ok: false, error: 'attachment unavailable' };
+        const win = BrowserWindow.getAllWindows()[0];
+        if (win) win.webContents.send('artifact:saved', artifact);
+        return { ok: true, result: artifact };
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'unknown error' };
+      }
+    },
+  );
 
   ipcMain.handle('artifact:read-file', async (_event, params: { localPath: string }) => {
     const workspacePath = getWorkspacePath();

@@ -80,6 +80,10 @@ export interface UiState {
   agentCatalogByGateway: Record<string, { agents: AgentInfo[]; defaultId: string }>;
   setAgentCatalogForGateway: (gatewayId: string, agents: AgentInfo[], defaultId: string) => void;
 
+  selectedMainAgentByGateway: Record<string, string>;
+  setSelectedMainAgentForGateway: (gatewayId: string, agentId: string | null) => void;
+  getSelectedMainAgentId: (gatewayId: string) => string | null;
+
   toolsCatalogByGateway: Record<string, ToolsCatalog>;
   setToolsCatalogForGateway: (gatewayId: string, catalog: ToolsCatalog) => void;
 
@@ -259,6 +263,32 @@ export function createUiStore(deps: UiStoreDeps) {
           [gatewayId]: { agents, defaultId },
         },
       })),
+
+    selectedMainAgentByGateway: (() => {
+      const raw = deps.storage.get('cw:selectedMainAgentByGateway');
+      if (!raw) return {};
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' ? (parsed as Record<string, string>) : {};
+      } catch {
+        return {};
+      }
+    })(),
+    setSelectedMainAgentForGateway: (gatewayId, agentId) =>
+      set((s) => {
+        const next = { ...s.selectedMainAgentByGateway };
+        if (agentId) next[gatewayId] = agentId;
+        else delete next[gatewayId];
+        deps.storage.set('cw:selectedMainAgentByGateway', JSON.stringify(next));
+        return { selectedMainAgentByGateway: next };
+      }),
+    getSelectedMainAgentId: (gatewayId) => {
+      const state = get();
+      const selected = state.selectedMainAgentByGateway[gatewayId];
+      const catalog = state.agentCatalogByGateway[gatewayId];
+      if (selected && catalog?.agents.some((agent) => agent.id === selected)) return selected;
+      return null;
+    },
 
     toolsCatalogByGateway: {},
     setToolsCatalogForGateway: (gatewayId, catalog) =>

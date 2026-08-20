@@ -24,6 +24,8 @@ export function useGatewaySelector(options: UseGatewaySelectorOptions = {}): Use
   const gatewayInfoMap = useUiStore((s) => s.gatewayInfoMap);
   const defaultGatewayId = useUiStore((s) => s.defaultGatewayId);
   const agentCatalogByGateway = useUiStore((s) => s.agentCatalogByGateway);
+  const selectedMainAgentByGateway = useUiStore((s) => s.selectedMainAgentByGateway);
+  const setSelectedMainAgentForGateway = useUiStore((s) => s.setSelectedMainAgentForGateway);
 
   const gateways = useMemo(() => Object.values(gatewayInfoMap), [gatewayInfoMap]);
   const [selectedGwId, setSelectedGwId] = useState(
@@ -32,17 +34,19 @@ export function useGatewaySelector(options: UseGatewaySelectorOptions = {}): Use
 
   const gwAgents = agentCatalogByGateway[selectedGwId];
   const agentCatalog = useMemo(() => gwAgents?.agents ?? [], [gwAgents]);
-  const [selectedAgentId, setSelectedAgentId] = useState(
-    options.initialAgentId ??
-      agentCatalogByGateway[options.initialGatewayId ?? defaultGatewayId ?? '']?.defaultId ??
-      '',
-  );
+  const [localSelectedAgentId, setLocalSelectedAgentId] = useState(options.initialAgentId ?? '');
 
   const defaultAgentId = gwAgents?.defaultId ?? agentCatalog[0]?.id ?? '';
+  const selectedAgentId = localSelectedAgentId || selectedMainAgentByGateway[selectedGwId] || '';
   const effectiveAgentId = useMemo(
     () => (agentCatalog.some((agent) => agent.id === selectedAgentId) ? selectedAgentId : defaultAgentId),
     [agentCatalog, defaultAgentId, selectedAgentId],
   );
+
+  const setSelectedAgentId = (id: string): void => {
+    setLocalSelectedAgentId(id);
+    if (selectedGwId) setSelectedMainAgentForGateway(selectedGwId, id || null);
+  };
 
   useEffect(() => {
     if (!gateways.length) return;

@@ -155,6 +155,26 @@ function createWindow(): BrowserWindow {
     if (isReload) event.preventDefault();
   });
 
+  win.webContents.on('context-menu', (_event, params) => {
+    const template: Electron.MenuItemConstructorOptions[] = params.isEditable
+      ? [
+          { role: 'undo', label: '撤销' },
+          { role: 'redo', label: '重做' },
+          { type: 'separator' },
+          { role: 'cut', label: '剪切', enabled: params.editFlags.canCut },
+          { role: 'copy', label: '复制', enabled: params.editFlags.canCopy },
+          { role: 'paste', label: '粘贴', enabled: params.editFlags.canPaste },
+          { role: 'delete', label: '删除', enabled: params.editFlags.canDelete },
+          { type: 'separator' },
+          { role: 'selectAll', label: '全选', enabled: params.editFlags.canSelectAll },
+        ]
+      : params.selectionText.trim()
+        ? [{ role: 'copy', label: '复制', enabled: params.editFlags.canCopy }]
+        : [];
+    if (template.length === 0) return;
+    Menu.buildFromTemplate(template).popup({ window: win });
+  });
+
   win.on('blur', () => {
     if (win.isDestroyed()) return;
     const level = win.webContents.getZoomLevel();

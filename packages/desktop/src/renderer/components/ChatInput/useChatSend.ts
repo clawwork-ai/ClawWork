@@ -74,7 +74,6 @@ export function useChatSend(opts: UseChatSendOpts) {
 
   const activeTask = useTaskStore((s) => s.tasks.find((tt) => tt.id === s.activeTaskId));
   const commitPendingTask = useTaskStore((s) => s.commitPendingTask);
-  const updateTaskMetadata = useTaskStore((s) => s.updateTaskMetadata);
   const pendingNewTask = useTaskStore((s) => s.pendingNewTask);
   const addMessage = useMessageStore((s) => s.addMessage);
   const setProcessing = useMessageStore((s) => s.setProcessing);
@@ -460,18 +459,11 @@ export function useChatSend(opts: UseChatSendOpts) {
         useTaskStore.getState().updatePending({ model: modelId });
         return;
       }
-      const ta = textareaRef.current;
-      if (!ta) return;
-      updateTaskMetadata(activeTask.id, {
-        model: modelId,
-        modelProvider: modelCatalog.find((m) => m.id === modelId)?.provider,
+      void composer.applySlashCommand(activeTask.id, 'model', modelId).then((result) => {
+        if (!result.ok) toast.error(t('errors.sendFailed'));
       });
-      ta.value = `/model ${modelId}`;
-      ta.style.height = 'auto';
-      ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
-      void handleSend();
     },
-    [activeTask, handleSend, modelCatalog, updateTaskMetadata, textareaRef],
+    [activeTask, t],
   );
 
   const handleThinkingQuickSend = useCallback(
@@ -480,14 +472,11 @@ export function useChatSend(opts: UseChatSendOpts) {
         useTaskStore.getState().updatePending({ thinkingLevel: level });
         return;
       }
-      const ta = textareaRef.current;
-      if (!ta) return;
-      ta.value = `/think ${level}`;
-      ta.style.height = 'auto';
-      ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
-      void handleSend();
+      void composer.applySlashCommand(activeTask.id, 'think', level).then((result) => {
+        if (!result.ok) toast.error(t('errors.sendFailed'));
+      });
     },
-    [activeTask, handleSend, textareaRef],
+    [activeTask, t],
   );
 
   const [aborting, setAborting] = useState(false);

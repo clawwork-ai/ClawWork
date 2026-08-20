@@ -28,7 +28,8 @@ function buildApi(): ClawWorkAPI {
       ipcRenderer.invoke('ws:chat-history', { gatewayId, sessionKey, limit }),
     listSessions: (gatewayId: string) => ipcRenderer.invoke('ws:list-sessions', { gatewayId }),
     gatewayStatus: () => ipcRenderer.invoke('ws:gateway-status'),
-    syncSessions: () => ipcRenderer.invoke('ws:sync-sessions'),
+    syncSessions: (filter?: { gatewayId?: string; agentId?: string; workspace?: string }) =>
+      ipcRenderer.invoke('ws:sync-sessions', filter),
     abortChat: (gatewayId: string, sessionKey: string) =>
       ipcRenderer.invoke('ws:abort-chat', { gatewayId, sessionKey }),
     listGateways: () => ipcRenderer.invoke('ws:list-gateways'),
@@ -143,6 +144,7 @@ function buildApi(): ClawWorkAPI {
       };
     },
     saveCodeBlock: (params) => ipcRenderer.invoke('artifact:save-content', params),
+    saveMessageAttachment: (params) => ipcRenderer.invoke('artifact:save-attachment', params),
     saveImageFromUrl: (params) => ipcRenderer.invoke('artifact:save-image-url', params),
     searchArtifacts: (query: string, options) => ipcRenderer.invoke('artifact:search', { query, ...(options ?? {}) }),
     openArtifactFile: (localPath: string) => ipcRenderer.invoke('artifact:open-file', { localPath }),
@@ -243,6 +245,7 @@ function buildApi(): ClawWorkAPI {
       tags: string[];
       artifactDir: string;
       gatewayId: string;
+      agentId?: string | null;
     }) => ipcRenderer.invoke('data:create-task', task),
 
     persistTaskUpdate: (params: {
@@ -257,6 +260,7 @@ function buildApi(): ClawWorkAPI {
       outputTokens?: number;
       contextTokens?: number;
       teamId?: string | null;
+      agentId?: string | null;
       updatedAt: string;
     }) => ipcRenderer.invoke('data:update-task', params),
 

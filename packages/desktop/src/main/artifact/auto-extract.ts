@@ -20,7 +20,7 @@ interface AutoExtractParams {
   gatewayHttpBase?: string;
 }
 
-const DATA_IMAGE_RE = /^data:(image\/(?:png|jpe?g|gif|webp|avif));base64,(.+)$/i;
+const DATA_URL_RE = /^data:([^;]+);base64,(.+)$/i;
 const extractionByMessage = new Map<string, Promise<void>>();
 
 type ExistingArtifact = Pick<Artifact, 'name' | 'type' | 'size' | 'contentText' | 'sourceKey'>;
@@ -44,6 +44,13 @@ function isUniqueArtifactError(err: unknown): boolean {
 }
 
 function extFromMime(mimeType: string | undefined): string {
+  if (mimeType === 'application/pdf') return 'pdf';
+  if (mimeType === 'application/json') return 'json';
+  if (mimeType === 'application/zip') return 'zip';
+  if (mimeType === 'text/csv') return 'csv';
+  if (mimeType === 'text/html') return 'html';
+  if (mimeType === 'text/markdown') return 'md';
+  if (mimeType?.startsWith('text/')) return 'txt';
   if (mimeType === 'image/jpeg') return 'jpg';
   if (mimeType === 'image/gif') return 'gif';
   if (mimeType === 'image/webp') return 'webp';
@@ -59,13 +66,19 @@ function safeImageFileName(fileName: string | undefined, mimeType: string | unde
   return `${clean || 'image'}.${ext}`;
 }
 
-async function readAttachmentImage(attachment: MessageAttachment, trustedOrigin?: string): Promise<Buffer | null> {
+function safeAttachmentFileName(fileName: string | undefined, mimeType: string | undefined): string {
+  const raw = fileName?.trim() || `attachment.${extFromMime(mimeType)}`;
+  const clean = raw.replace(/[/\\]/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_');
+  return clean || `attachment.${extFromMime(mimeType)}`;
+}
+
+async function readAttachmentBuffer(attachment: MessageAttachment, trustedOrigin?: string): Promise<Buffer | null> {
   if (attachment.sourcePath) {
     const base64 = await readOpenClawMediaFile(attachment.sourcePath);
     return base64 ? Buffer.from(base64, 'base64') : null;
   }
 
-  const dataMatch = attachment.dataUrl.match(DATA_IMAGE_RE);
+  const dataMatch = attachment.dataUrl.match(DATA_URL_RE);
   if (dataMatch) return Buffer.from(dataMatch[2], 'base64');
 
   if (/^https?:\/\//i.test(attachment.dataUrl)) {
@@ -73,6 +86,38 @@ async function readAttachmentImage(attachment: MessageAttachment, trustedOrigin?
   }
 
   return null;
+}
+
+export async function saveAttachmentArtifact(params: {
+  workspacePath: string;
+  taskId: string;
+  messageId: string;
+  attachment: MessageAttachment;
+  gatewayHttpBase?: string;
+}): Promise<Artifact | null> {
+  const key = sourceKey('attachment', params.attachment.sourcePath ?? params.attachment.dataUrl);
+  const existing = getDb()
+    .select()
+    .from(artifacts)
+    .where(eq(artifacts.messageId, params.messageId))
+    .all()
+    .find((artifact) => artifact.sourceKey === key) as Artifact | undefined;
+  if (existing) return existing;
+
+  const buffer = await readAttachmentBuffer(params.attachment, params.gatewayHttpBase);
+  if (!buffer) return null;
+  const isImage = params.attachment.mimeType?.startsWith('image/') ?? false;
+  return saveArtifactFromBuffer({
+    workspacePath: params.workspacePath,
+    taskId: params.taskId,
+    messageId: params.messageId,
+    fileName: isImage
+      ? safeImageFileName(params.attachment.fileName, params.attachment.mimeType)
+      : safeAttachmentFileName(params.attachment.fileName, params.attachment.mimeType),
+    buffer,
+    artifactType: isImage ? 'image' : 'file',
+    sourceKey: key,
+  });
 }
 
 async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> {
@@ -91,7 +136,7 @@ async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> 
   async function saveExtracted(input: {
     fileName: string;
     buffer: Buffer;
-    artifactType: 'image' | 'code';
+    artifactType: 'image' | 'code' | 'file';
     sourceKey: string;
     contentText?: string;
   }): Promise<void> {
@@ -169,20 +214,20 @@ async function doAutoExtractArtifacts(params: AutoExtractParams): Promise<void> 
   for (const attachment of attachments) {
     try {
       if (!attachment.dataUrl && !attachment.sourcePath) continue;
-      if (attachment.mimeType && !attachment.mimeType.startsWith('image/')) continue;
       const key = sourceKey('attachment', attachment.sourcePath ?? attachment.dataUrl);
       if (existingSourceKeys.has(key)) continue;
-      const buffer = await readAttachmentImage(attachment, gatewayHttpBase);
-      if (!buffer) continue;
-      const fileName = safeImageFileName(attachment.fileName, attachment.mimeType);
-      await saveExtracted({
-        fileName,
-        buffer,
-        artifactType: 'image',
-        sourceKey: key,
-      });
+      const artifact = await saveAttachmentArtifact({ workspacePath, taskId, messageId, attachment, gatewayHttpBase });
+      if (artifact) {
+        existingSourceKeys.add(key);
+        existing.push(artifact);
+        saved.push(artifact);
+      }
     } catch (err) {
-      console.error('[auto-extract] attachment image save failed:', err);
+      if (isUniqueArtifactError(err)) {
+        existingSourceKeys.add(sourceKey('attachment', attachment.sourcePath ?? attachment.dataUrl));
+        continue;
+      }
+      console.error('[auto-extract] attachment save failed:', err);
     }
   }
 

@@ -220,7 +220,9 @@ export function createGatewayDispatcher(deps: GatewayDispatcherDeps) {
     const direct = parseTaskIdFromSessionKey(sessionKey);
     if (direct) return direct;
     const mapped = deps.lookupTaskIdBySubagentKey?.(sessionKey);
-    return mapped ?? null;
+    if (mapped) return mapped;
+    const matched = deps.getTaskStore().tasks.find((task) => task.sessionKey === sessionKey);
+    return matched?.id ?? null;
   }
 
   function resolveTaskIdFromSpawnedBy(spawnedBy?: string): string | null {
