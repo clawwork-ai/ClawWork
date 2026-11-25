@@ -395,12 +395,13 @@ Local expectation: do not open a PR that obviously cannot survive CI.
 
 ### Releases
 
-- push a release tag on `main` to trigger `release.yml`
-- supported tags: `vX.Y.Z`, `vX.Y.Z-beta.N`, `vX.Y.Z-rc.N`, `vX.Y.Z-alpha.N`
-- release verifies tag format and tag/package version match
-- prerelease tags publish GitHub prereleases
-- stable releases trigger Homebrew update
-- artifacts: macOS arm64 + macOS x64 + Windows x64 + Linux x64
+- All workspace manifests (`package.json`, `packages/*/package.json`, `website/package.json`, and `keynote/package.json`) share one lockstep version (`pnpm check:version`).
+- Supported tags follow strict SemVer without leading zeros: `vX.Y.Z`, `vX.Y.Z-alpha.N`, `vX.Y.Z-beta.N`, and `vX.Y.Z-rc.N`.
+- Before tagging a stable release, update `CHANGELOG.md` with `node scripts/generate-release-notes.mjs --format changelog --tag vX.Y.Z --date YYYY-MM-DD <prevTag>..HEAD` in the release commit.
+- Pushing a `v*` tag on `main` runs `.github/workflows/release.yml`, which enforces tag-to-commit parity and workspace manifest parity before building.
+- Prerelease tags publish GitHub prereleases (`--prerelease`) and skip stable Homebrew cask updates.
+- Stable releases publish GitHub Releases from `CHANGELOG.md` (or `scripts/generate-release-notes.mjs`) and update `Casks/clawwork.rb` in `clawwork-ai/homebrew-clawwork` in-place.
+- Artifacts cover macOS arm64, macOS x64, Windows x64, and Linux x64.
 
 ## OpenClaw-Specific Rules
 

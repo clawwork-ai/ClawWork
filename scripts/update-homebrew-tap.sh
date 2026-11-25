@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-CLAWWORK_REPO="${CLAWWORK_REPO:-clawwork-ai/clawwork}"
+CLAWWORK_REPO="${CLAWWORK_REPO:-clawwork-ai/ClawWork}"
 TAP_DIR="${TAP_DIR:-homebrew-clawwork}"
 RELEASE_TAG="${RELEASE_TAG:-${GITHUB_REF_NAME:-}}"
 
@@ -11,7 +11,30 @@ if [[ -z "${RELEASE_TAG}" ]]; then
   exit 1
 fi
 
+if [[ ! "${RELEASE_TAG}" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)\.[1-9][0-9]*))?$ ]]; then
+  echo "Invalid SemVer release tag: ${RELEASE_TAG}" >&2
+  exit 1
+fi
+
+if [[ "${RELEASE_TAG}" == *-* ]]; then
+  echo "Skipping stable Homebrew cask update for prerelease tag: ${RELEASE_TAG}"
+  exit 0
+fi
+
+CASK_FILE="${TAP_DIR}/Casks/clawwork.rb"
+if [[ ! -f "${CASK_FILE}" ]]; then
+  echo "Cask file not found: ${CASK_FILE}" >&2
+  exit 1
+fi
+
 version="${RELEASE_TAG#v}"
+
+tmp_base="${TMPDIR:-/tmp}"
+TMP_WORK_DIR="$(mktemp -d "${tmp_base%/}/clawwork-tap.XXXXXX")"
+cleanup() {
+  rm -rf "${TMP_WORK_DIR}"
+}
+trap cleanup EXIT
 
 fetch_sha256() {
   local arch="$1"
@@ -29,11 +52,17 @@ fetch_sha256() {
   sha256="${asset_digest#sha256:}"
 
   if [[ -z "${sha256}" ]]; then
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    trap 'rm -rf "${tmp_dir}"' EXIT
+    local tmp_dir="${TMP_WORK_DIR}/${arch}"
+    rm -rf "${tmp_dir}"
+    mkdir -p "${tmp_dir}"
     gh release download "${RELEASE_TAG}" -R "${CLAWWORK_REPO}" --pattern "${asset_name}" --dir "${tmp_dir}"
     sha256="$(shasum -a 256 "${tmp_dir}/${asset_name}" | awk '{print $1}')"
+    rm -rf "${tmp_dir}"
+  fi
+
+  if [[ ! "${sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "Invalid sha256 digest for ${arch}: ${sha256}" >&2
+    exit 1
   fi
 
   echo "${sha256}"
@@ -42,25 +71,44 @@ fetch_sha256() {
 sha256_arm64="$(fetch_sha256 arm64)"
 sha256_x64="$(fetch_sha256 x64)"
 
-mkdir -p "${TAP_DIR}/Casks"
-
-cat > "${TAP_DIR}/Casks/clawwork.rb" <<EOF
-cask "clawwork" do
-  arch arm: "arm64", intel: "x64"
-
-  version "${version}"
-  sha256 arm:   "${sha256_arm64}",
-         intel: "${sha256_x64}"
-
-  url "https://github.com/${CLAWWORK_REPO}/releases/download/v#{version}/ClawWork-#{version}-mac-#{arch}.dmg"
-  name "ClawWork"
-  desc "Desktop client for OpenClaw"
-  homepage "https://github.com/${CLAWWORK_REPO}"
-
-  app "ClawWork.app"
-
-  postflight do
-    system_command "xattr", args: ["-cr", "#{appdir}/ClawWork.app"]
-  end
-end
-EOF
+node -e '
+const fs = require("node:fs");
+const [caskPath, nextVersion, shaArm64, shaX64, repoSlug] = process.argv.slice(1);
+if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(nextVersion)) {
+  throw new Error(`Invalid stable Homebrew cask version: ${nextVersion}`);
+}
+if (!/^[0-9a-f]{64}$/.test(shaArm64) || !/^[0-9a-f]{64}$/.test(shaX64)) {
+  throw new Error("Invalid sha256 digest");
+}
+const current = fs.readFileSync(caskPath, "utf8");
+let versionUpdated = false;
+let updated = current.replace(/^([ \t]*version[ \t]+)(["\x27])([^"\x27]+)\2([ \t]*)$/m, (_, prefix, quote, __, suffix) => {
+  versionUpdated = true;
+  return `${prefix}${quote}${nextVersion}${quote}${suffix}`;
+});
+if (!versionUpdated) {
+  throw new Error("Could not locate cask version stanza in Casks/clawwork.rb");
+}
+let armUpdated = false;
+let intelUpdated = false;
+const shaStanzaRe = /^([ \t]*sha256\b[^\n]*(?:\n[ \t]+(?:arm|intel):[^\n]*)*)/m;
+if (!shaStanzaRe.test(updated)) {
+  throw new Error("Could not locate sha256 stanza in Casks/clawwork.rb");
+}
+updated = updated.replace(shaStanzaRe, (stanza) => {
+  let nextStanza = stanza.replace(/(\barm:[ \t]*)(["\x27])[0-9a-fA-F]{64}\2/, (_, prefix, quote) => {
+    armUpdated = true;
+    return `${prefix}${quote}${shaArm64}${quote}`;
+  });
+  nextStanza = nextStanza.replace(/(\bintel:[ \t]*)(["\x27])[0-9a-fA-F]{64}\2/, (_, prefix, quote) => {
+    intelUpdated = true;
+    return `${prefix}${quote}${shaX64}${quote}`;
+  });
+  return nextStanza;
+});
+if (!armUpdated || !intelUpdated) {
+  throw new Error("Could not update both arm and intel sha256 entries in Casks/clawwork.rb");
+}
+updated = updated.replace(/(https:\/\/github\.com\/)clawwork-ai\/clawwork(?=["\x27/])/g, `$1${repoSlug}`);
+fs.writeFileSync(caskPath, updated, "utf8");
+' "${CASK_FILE}" "${version}" "${sha256_arm64}" "${sha256_x64}" "${CLAWWORK_REPO}"

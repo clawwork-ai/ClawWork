@@ -1,15 +1,24 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
-import { argv, stderr, stdout, exit } from 'node:process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { argv, env, exit, stderr, stdout } from 'node:process';
+import { pathToFileURL } from 'node:url';
+
+export const CANONICAL_REPO = 'clawwork-ai/ClawWork';
+
+export const STRICT_SEMVER_TAG_RE = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:alpha|beta|rc)\.[1-9]\d*))?$/;
+
+export const STABLE_SEMVER_TAG_RE = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
 const PREFIX_META = {
-  '[Feat]': { emoji: '✨', name: 'Features', order: 1 },
-  '[UI]': { emoji: '🎨', name: 'UI / UX', order: 2 },
-  '[Fix]': { emoji: '🐛', name: 'Bug Fixes', order: 3 },
-  '[Refactor]': { emoji: '♻️', name: 'Refactor', order: 4 },
-  '[Build]': { emoji: '🔧', name: 'Build / CI', order: 5 },
-  '[Docs]': { emoji: '📚', name: 'Docs', order: 6 },
-  '[Chore]': { emoji: '🧹', name: 'Chore', order: 7 },
+  '[Feat]': { emoji: '✨', name: 'Features', changelogSection: 'Added', order: 1 },
+  '[UI]': { emoji: '🎨', name: 'UI / UX', changelogSection: 'Changed', order: 2 },
+  '[Fix]': { emoji: '🐛', name: 'Bug Fixes', changelogSection: 'Fixed', order: 3 },
+  '[Refactor]': { emoji: '♻️', name: 'Refactor', changelogSection: 'Changed', order: 4 },
+  '[Build]': { emoji: '🔧', name: 'Build / CI', changelogSection: 'Changed', order: 5 },
+  '[Docs]': { emoji: '📚', name: 'Docs', changelogSection: 'Changed', order: 6 },
+  '[Chore]': { emoji: '🧹', name: 'Chore', changelogSection: 'Changed', order: 7 },
 };
 
 const CONVENTIONAL_MAP = {
@@ -40,9 +49,11 @@ const PREFIX_ALIASES = {
   '[Style]': '[UI]',
 };
 
-function sh(cmd, { allowFail = false } = {}) {
+const CHANGELOG_SECTION_ORDER = ['Added', 'Changed', 'Fixed'];
+
+function sh(cmd, { allowFail = false, exec = execSync } = {}) {
   try {
-    return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+    return exec(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   } catch (err) {
     if (allowFail) return '';
     stderr.write(`command failed: ${cmd}\n${err.stderr ?? err.message}\n`);
@@ -50,50 +61,176 @@ function sh(cmd, { allowFail = false } = {}) {
   }
 }
 
-function isStableTag(ref) {
-  return /^v\d+\.\d+\.\d+$/.test(ref);
+export function isValidSemVerTag(ref) {
+  return typeof ref === 'string' && STRICT_SEMVER_TAG_RE.test(ref);
 }
 
-function previousTag(head) {
-  const prereleaseFilter = isStableTag(head) ? " --exclude 'v*-*'" : '';
-  return sh(`git describe --tags --abbrev=0${prereleaseFilter} ${head}^`, { allowFail: true });
+export function isStableTag(ref) {
+  return typeof ref === 'string' && STABLE_SEMVER_TAG_RE.test(ref);
 }
 
-function parseArgs() {
-  const args = argv.slice(2);
+export function normalizeRepoSlug(slug) {
+  if (!slug) return CANONICAL_REPO;
+  if (slug.toLowerCase() === CANONICAL_REPO.toLowerCase()) return CANONICAL_REPO;
+  return slug;
+}
+
+export function previousTag(head, exec = execSync) {
+  if (head !== 'HEAD' && !isValidSemVerTag(head)) {
+    throw new Error(`Invalid SemVer release tag: ${head}`);
+  }
+  const stableTarget = head === 'HEAD' || isStableTag(head);
+  const prereleaseFilter = stableTarget ? " --exclude 'v*-*'" : '';
+  const resolved = sh(`git describe --tags --abbrev=0 --match 'v[0-9]*'${prereleaseFilter} ${head}^`, {
+    allowFail: true,
+    exec,
+  });
+  if (!resolved) return '';
+  if (!isValidSemVerTag(resolved)) {
+    throw new Error(`Resolved base tag is not valid SemVer: ${resolved}`);
+  }
+  return resolved;
+}
+
+export function extractChangelogSection(changelogText, tag) {
+  if (!isValidSemVerTag(tag)) {
+    throw new Error(`Invalid SemVer release tag: ${tag}`);
+  }
+  const version = tag.slice(1);
+  const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const lines = changelogText.split(/\r?\n/);
+  const headingRe = new RegExp(`^##\\s+\\[${escaped}\\](?:\\s+-\\s+.*)?\\s*$`);
+  let startIndex = -1;
+  for (let i = 0; i < lines.length; i += 1) {
+    if (headingRe.test(lines[i])) {
+      startIndex = i + 1;
+      break;
+    }
+  }
+  if (startIndex === -1) return null;
+
+  const collected = [];
+  for (let i = startIndex; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (/^##\s+\[/.test(line) || /^\[[^\]]+\]:\s+https?:\/\//.test(line)) {
+      break;
+    }
+    collected.push(line);
+  }
+  const body = collected.join('\n').trim();
+  return body || null;
+}
+
+function resolveRepoSlug(exec = execSync) {
+  if (env.GITHUB_REPOSITORY) {
+    return normalizeRepoSlug(env.GITHUB_REPOSITORY);
+  }
+  const remoteUrl = sh('git remote get-url origin', { allowFail: true, exec });
+  const remoteMatch = remoteUrl.match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/i);
+  if (remoteMatch) {
+    return normalizeRepoSlug(remoteMatch[1]);
+  }
+  const ghRepo = sh('gh repo view --json nameWithOwner -q .nameWithOwner', { allowFail: true, exec });
+  return normalizeRepoSlug(ghRepo);
+}
+
+function parseArgs(args = argv.slice(2)) {
   if (args.includes('--help') || args.includes('-h')) {
     stdout.write(
       [
-        'Usage: node scripts/generate-release-notes.mjs [RANGE]',
+        'Usage: node scripts/generate-release-notes.mjs [OPTIONS] [RANGE]',
+        '',
+        'Options:',
+        '  --format github|changelog   Output format (default: github)',
+        '  --tag <TAG>                 Target SemVer tag for --format changelog',
+        '  --from-changelog <TAG>      Extract non-empty section from CHANGELOG.md',
+        '  --has-changelog <TAG>       Exit 0 if CHANGELOG.md contains <TAG>, else 1',
+        '  --changelog-file <PATH>     Override CHANGELOG.md path',
+        '  --date <YYYY-MM-DD>         Release date for --format changelog',
+        '  --base <REF>                Override base tag for compare footer',
         '',
         'RANGE forms:',
-        '  v0.0.15                previous stable tag..v0.0.15',
-        '  v0.0.15-beta.4         previous tag..v0.0.15-beta.4',
-        '  v0.0.13..v0.0.14       explicit range',
-        '  (no arg)               previous tag..HEAD',
-        '',
-        'Output: markdown to stdout. Log to stderr.',
+        '  v0.0.15                     previous stable tag..v0.0.15',
+        '  v0.0.15-beta.4              previous tag..v0.0.15-beta.4',
+        '  v0.0.13..v0.0.14            explicit range',
+        '  (no arg)                    previous tag..HEAD',
         '',
       ].join('\n'),
     );
     exit(0);
   }
 
-  const arg = args[0];
+  const options = {
+    format: 'github',
+    tag: null,
+    fromChangelog: null,
+    hasChangelog: null,
+    changelogFile: resolve('CHANGELOG.md'),
+    date: null,
+    baseOverride: null,
+    rangeArg: null,
+  };
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === '--format') {
+      options.format = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--tag') {
+      options.tag = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--from-changelog') {
+      options.fromChangelog = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--has-changelog') {
+      options.hasChangelog = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--changelog-file') {
+      options.changelogFile = resolve(args[i + 1] ?? 'CHANGELOG.md');
+      i += 1;
+    } else if (arg === '--date') {
+      options.date = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--base') {
+      options.baseOverride = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg.startsWith('--')) {
+      throw new Error(`Unknown argument: ${arg}`);
+    } else if (!options.rangeArg) {
+      options.rangeArg = arg;
+    } else {
+      throw new Error(`Unexpected extra argument: ${arg}`);
+    }
+  }
+
+  if (options.format !== 'github' && options.format !== 'changelog') {
+    throw new Error(`Unsupported format: ${options.format}`);
+  }
+  if (options.tag !== null && !isValidSemVerTag(options.tag)) {
+    throw new Error(`Invalid SemVer release tag: ${options.tag}`);
+  }
+
+  return options;
+}
+
+function resolveRange(rangeArg, baseOverride, exec = execSync) {
   let base;
   let head;
-  if (!arg) {
+  if (!rangeArg) {
     head = 'HEAD';
-    base = previousTag(head);
-  } else if (arg.includes('..')) {
-    [base, head] = arg.split('..');
+    base = baseOverride ?? previousTag(head, exec);
+  } else if (rangeArg.includes('..')) {
+    [base, head] = rangeArg.split('..');
+    if (baseOverride) base = baseOverride;
   } else {
-    head = arg;
-    base = previousTag(head);
+    if (!isValidSemVerTag(rangeArg)) {
+      throw new Error(`Invalid SemVer release tag: ${rangeArg}`);
+    }
+    head = rangeArg;
+    base = baseOverride ?? previousTag(head, exec);
   }
   if (!base || !head) {
-    stderr.write('error: could not resolve base..head range\n');
-    exit(1);
+    throw new Error('Could not resolve base..head range');
   }
   return { base, head };
 }
@@ -150,7 +287,7 @@ function fetchPr(num) {
   return JSON.parse(raw);
 }
 
-function classify(title) {
+export function classify(title) {
   for (const [prefix, meta] of Object.entries(PREFIX_META)) {
     if (title.startsWith(prefix)) {
       return { prefix, strippedTitle: title.slice(prefix.length).trim(), ...meta };
@@ -170,10 +307,17 @@ function classify(title) {
       return { prefix: mapped, strippedTitle: m[3], ...PREFIX_META[mapped] };
     }
   }
-  return { prefix: null, strippedTitle: title, emoji: '📦', name: 'Other', order: 99 };
+  return {
+    prefix: null,
+    strippedTitle: title,
+    emoji: '📦',
+    name: 'Other',
+    changelogSection: 'Changed',
+    order: 99,
+  };
 }
 
-function extractReleaseNote(body) {
+export function extractReleaseNote(body) {
   if (!body) return null;
   const m = body.match(/```release-note\s*([\s\S]*?)```/);
   if (!m) return null;
@@ -211,14 +355,16 @@ function findNewContributors(prs) {
   return result.sort((a, b) => a.firstPr.number - b.firstPr.number);
 }
 
-function render({ base, head, groups, newContributors, repo }) {
+export function renderGithubNotes({ base, head, groups, newContributors, repo }) {
   const lines = [];
   const sorted = [...groups.values()].sort((a, b) => a.order - b.order);
+  let itemCount = 0;
   for (const group of sorted) {
     if (group.items.length === 0) continue;
     lines.push(`## ${group.emoji} ${group.name}`);
     lines.push('');
     for (const item of group.items) {
+      itemCount += 1;
       const text = item.text.replace(/\s+/g, ' ').trim();
       if (item.orphan) {
         lines.push(`- ${text} by ${item.author} (${item.sha.slice(0, 7)})`);
@@ -236,12 +382,128 @@ function render({ base, head, groups, newContributors, repo }) {
     }
     lines.push('');
   }
-  lines.push(`**Full Changelog**: https://github.com/${repo}/compare/${base}...${head}`);
-  return lines.join('\n') + '\n';
+  if (itemCount === 0 && newContributors.length === 0) {
+    throw new Error(`Generated release notes are empty for ${base}..${head}`);
+  }
+  lines.push(`**Full Changelog**: https://github.com/${normalizeRepoSlug(repo)}/compare/${base}...${head}`);
+  return `${lines.join('\n')}\n`;
+}
+
+export function renderChangelogSection({ base, head, targetTag = null, date, groups, repo }) {
+  const tagRef = targetTag ?? head;
+  if (targetTag !== null && !isValidSemVerTag(targetTag)) {
+    throw new Error(`Invalid SemVer release tag: ${targetTag}`);
+  }
+  const version = isValidSemVerTag(tagRef) ? tagRef.slice(1) : 'Unreleased';
+  const sectionBuckets = new Map(CHANGELOG_SECTION_ORDER.map((section) => [section, []]));
+  const sorted = [...groups.values()].sort((a, b) => a.order - b.order);
+  let itemCount = 0;
+
+  for (const group of sorted) {
+    const targetSection = group.changelogSection ?? 'Changed';
+    const bucket = sectionBuckets.get(targetSection);
+    for (const item of group.items) {
+      itemCount += 1;
+      const text = item.text.replace(/\s+/g, ' ').trim();
+      const suffix = item.orphan ? `(${item.sha.slice(0, 7)})` : `(#${item.number})`;
+      bucket.push(`- ${text} ${suffix}`);
+    }
+  }
+
+  if (itemCount === 0) {
+    throw new Error(`Generated changelog section is empty for ${base}..${head}`);
+  }
+
+  const lines = [];
+  lines.push(version === 'Unreleased' ? '## [Unreleased]' : `## [${version}] - ${date}`);
+  lines.push('');
+
+  for (const section of CHANGELOG_SECTION_ORDER) {
+    const items = sectionBuckets.get(section);
+    if (!items || items.length === 0) continue;
+    lines.push(`### ${section}`);
+    lines.push('');
+    lines.push(...items);
+    lines.push('');
+  }
+
+  if (version !== 'Unreleased') {
+    lines.push(`[${version}]: https://github.com/${normalizeRepoSlug(repo)}/compare/${base}...${tagRef}`);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+export function extractChangelogCompareUrl(changelogText, tag) {
+  if (!isValidSemVerTag(tag)) return null;
+  const version = tag.slice(1);
+  const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = changelogText.match(new RegExp(`^\\[${escaped}\\]:\\s*(https?://\\S+)\\s*$`, 'm'));
+  if (!match) return null;
+  const url = match[1];
+  return url.includes('/compare/') ? url : null;
+}
+
+export function renderFromChangelog({ changelogText, tag, base, repo }) {
+  const section = extractChangelogSection(changelogText, tag);
+  if (!section) {
+    throw new Error(`CHANGELOG.md has no non-empty entry for ${tag}`);
+  }
+  const normalizedRepo = normalizeRepoSlug(repo);
+  if (/\*\*Full Changelog\*\*:/.test(section)) {
+    return `${section}\n`;
+  }
+  if (base) {
+    return `${section}\n\n**Full Changelog**: https://github.com/${normalizedRepo}/compare/${base}...${tag}\n`;
+  }
+  const refUrl = extractChangelogCompareUrl(changelogText, tag);
+  if (refUrl) {
+    return `${section}\n\n**Full Changelog**: ${refUrl}\n`;
+  }
+  return `${section}\n`;
+}
+
+function resolveReleaseDate(head, overrideDate, exec = execSync) {
+  if (overrideDate) return overrideDate;
+  if (head !== 'HEAD') {
+    const tagDate = sh(`git log -1 --format=%cs ${head}`, { allowFail: true, exec });
+    if (tagDate) return tagDate;
+  }
+  return new Date().toISOString().slice(0, 10);
 }
 
 function main() {
-  const { base, head } = parseArgs();
+  const options = parseArgs();
+
+  if (options.hasChangelog) {
+    if (!existsSync(options.changelogFile)) {
+      exit(1);
+    }
+    const changelogText = readFileSync(options.changelogFile, 'utf8');
+    const section = isValidSemVerTag(options.hasChangelog)
+      ? extractChangelogSection(changelogText, options.hasChangelog)
+      : null;
+    exit(section ? 0 : 1);
+  }
+
+  const repo = resolveRepoSlug();
+
+  if (options.fromChangelog) {
+    if (!existsSync(options.changelogFile)) {
+      throw new Error(`CHANGELOG.md not found at ${options.changelogFile}`);
+    }
+    const changelogText = readFileSync(options.changelogFile, 'utf8');
+    const base = options.baseOverride ?? previousTag(options.fromChangelog);
+    const out = renderFromChangelog({
+      changelogText,
+      tag: options.fromChangelog,
+      base,
+      repo,
+    });
+    stdout.write(out);
+    return;
+  }
+
+  const { base, head } = resolveRange(options.rangeArg, options.baseOverride);
   stderr.write(`range: ${base}..${head}\n`);
 
   const candidates = getPrCandidates(base, head);
@@ -251,7 +513,7 @@ function main() {
   for (const [prefix, meta] of Object.entries(PREFIX_META)) {
     groups.set(prefix, { ...meta, items: [] });
   }
-  groups.set('__other__', { emoji: '📦', name: 'Other', order: 99, items: [] });
+  groups.set('__other__', { emoji: '📦', name: 'Other', changelogSection: 'Changed', order: 99, items: [] });
 
   const prs = [];
   const unresolved = [];
@@ -300,11 +562,6 @@ function main() {
   }
   stderr.write('\n');
 
-  const repo = sh('gh repo view --json nameWithOwner -q .nameWithOwner');
-  stderr.write(`resolving first-time contributors...\n`);
-  const newContributors = findNewContributors(prs);
-  stderr.write(`  ${newContributors.length} new contributors\n`);
-
   if (unresolved.length > 0) {
     stderr.write(
       `warning: ${unresolved.length} PR(s) could not be resolved via gh API: ${unresolved
@@ -313,7 +570,24 @@ function main() {
     );
   }
 
-  stdout.write(render({ base, head, groups, newContributors, repo }));
+  if (options.format === 'changelog') {
+    const date = resolveReleaseDate(head, options.date);
+    stdout.write(renderChangelogSection({ base, head, targetTag: options.tag, date, groups, repo }));
+    return;
+  }
+
+  stderr.write('resolving first-time contributors...\n');
+  const newContributors = findNewContributors(prs);
+  stderr.write(`  ${newContributors.length} new contributors\n`);
+  stdout.write(renderGithubNotes({ base, head, groups, newContributors, repo }));
 }
 
-main();
+const isMain = argv[1] && import.meta.url === pathToFileURL(resolve(argv[1])).href;
+if (isMain) {
+  try {
+    main();
+  } catch (err) {
+    stderr.write(`${err.message}\n`);
+    exit(1);
+  }
+}
