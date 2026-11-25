@@ -14,8 +14,9 @@ Project-specific workflow for publishing ClawWork desktop releases.
 
 - Release from `main` only.
 - Do not open a PR unless the user explicitly asks for one.
-- For prereleases, use tags like `v0.0.15-beta.4`.
-- `packages/desktop/package.json` version must exactly match the tag without `v`.
+- Supported tags follow strict SemVer without leading zeros: `vX.Y.Z`, `vX.Y.Z-alpha.N`, `vX.Y.Z-beta.N`, and `vX.Y.Z-rc.N`.
+- Root `package.json` and all workspace manifests in `pnpm-workspace.yaml` (`packages/*/package.json`, `website/package.json`, `keynote/package.json`) must equal the tag version without `v` (`pnpm check:version`).
+- Before tagging a stable `vX.Y.Z` release, record its entry in `CHANGELOG.md`.
 - Commit release prep with `git commit -s`.
 - Do not push commits or tags without explicit user approval.
 - The canonical local verification gate is `pnpm check`.
@@ -40,18 +41,22 @@ Project-specific workflow for publishing ClawWork desktop releases.
 
 ## Prepare Commit
 
-1. Update `packages/desktop/package.json` to the release version.
-2. Run:
+1. Update `package.json`, `packages/*/package.json`, `website/package.json`, and `keynote/package.json` to the release version.
+2. For a stable release (`vX.Y.Z`), update `CHANGELOG.md` using:
+   ```bash
+   node scripts/generate-release-notes.mjs --format changelog --tag vX.Y.Z --date YYYY-MM-DD <previous-tag>..HEAD
+   ```
+3. Run:
    ```bash
    pnpm check
    ```
-3. Inspect the final diff:
+4. Inspect the final diff:
    ```bash
-   git diff -- packages/desktop/package.json
+   git diff -- package.json packages/*/package.json website/package.json keynote/package.json CHANGELOG.md
    git status --short
    ```
-4. Stage only intended files.
-5. Commit:
+5. Stage only intended files.
+6. Commit:
    ```bash
    git commit -s -m "chore(release): prepare vX.Y.Z[-beta.N]"
    ```
@@ -80,7 +85,7 @@ Only after the user explicitly approves pushing:
 1. Confirm `release.yml` succeeded.
 2. Confirm GitHub Release exists and is not draft:
    ```bash
-   gh release view vX.Y.Z[-beta.N] --repo clawwork-ai/clawwork --json tagName,isDraft,isPrerelease,isLatest,assets
+   gh release view vX.Y.Z[-beta.N] --repo clawwork-ai/ClawWork --json tagName,isDraft,isPrerelease,isLatest,assets
    ```
 3. Confirm expected assets are present:
    - macOS arm64 DMG + zip + blockmaps
@@ -95,7 +100,7 @@ Only after the user explicitly approves pushing:
 
 ## Failure Handling
 
-- Version mismatch: update `packages/desktop/package.json`, recommit, move or recreate the tag only after confirming with the user.
+- Version mismatch: update all workspace `package.json` manifests to match the release version, recommit, move or recreate the tag only after confirming with the user.
 - Missing assets: inspect the failed matrix job first; do not re-run blindly.
 - macOS notarization failure: `release.yml` has an ad-hoc fallback. Treat non-notarization macOS failures as real blockers.
 - Failed local `pnpm check`: fix root cause before publishing.

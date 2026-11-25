@@ -397,7 +397,7 @@ Local expectation: do not open a PR that obviously cannot survive CI.
 
 - All workspace manifests (`package.json`, `packages/*/package.json`, `website/package.json`, and `keynote/package.json`) share one lockstep version (`pnpm check:version`).
 - Supported tags follow strict SemVer without leading zeros: `vX.Y.Z`, `vX.Y.Z-alpha.N`, `vX.Y.Z-beta.N`, and `vX.Y.Z-rc.N`.
-- Before tagging a stable release, update `CHANGELOG.md` with `node scripts/generate-release-notes.mjs --format changelog --date YYYY-MM-DD <prevTag>..HEAD` in the release commit.
+- Before tagging a stable release, update `CHANGELOG.md` with `node scripts/generate-release-notes.mjs --format changelog --tag vX.Y.Z --date YYYY-MM-DD <prevTag>..HEAD` in the release commit.
 - Pushing a `v*` tag on `main` runs `.github/workflows/release.yml`, which enforces tag-to-commit parity and workspace manifest parity before building.
 - Prerelease tags publish GitHub prereleases (`--prerelease`) and skip stable Homebrew cask updates.
 - Stable releases publish GitHub Releases from `CHANGELOG.md` (or `scripts/generate-release-notes.mjs`) and update `Casks/clawwork.rb` in `clawwork-ai/homebrew-clawwork` in-place.

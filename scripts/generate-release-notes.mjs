@@ -142,6 +142,7 @@ function parseArgs(args = argv.slice(2)) {
         '',
         'Options:',
         '  --format github|changelog   Output format (default: github)',
+        '  --tag <TAG>                 Target SemVer tag for --format changelog',
         '  --from-changelog <TAG>      Extract non-empty section from CHANGELOG.md',
         '  --has-changelog <TAG>       Exit 0 if CHANGELOG.md contains <TAG>, else 1',
         '  --changelog-file <PATH>     Override CHANGELOG.md path',
@@ -161,6 +162,7 @@ function parseArgs(args = argv.slice(2)) {
 
   const options = {
     format: 'github',
+    tag: null,
     fromChangelog: null,
     hasChangelog: null,
     changelogFile: resolve('CHANGELOG.md'),
@@ -173,6 +175,9 @@ function parseArgs(args = argv.slice(2)) {
     const arg = args[i];
     if (arg === '--format') {
       options.format = args[i + 1] ?? '';
+      i += 1;
+    } else if (arg === '--tag') {
+      options.tag = args[i + 1] ?? '';
       i += 1;
     } else if (arg === '--from-changelog') {
       options.fromChangelog = args[i + 1] ?? '';
@@ -200,6 +205,9 @@ function parseArgs(args = argv.slice(2)) {
 
   if (options.format !== 'github' && options.format !== 'changelog') {
     throw new Error(`Unsupported format: ${options.format}`);
+  }
+  if (options.tag !== null && !isValidSemVerTag(options.tag)) {
+    throw new Error(`Invalid SemVer release tag: ${options.tag}`);
   }
 
   return options;
@@ -381,8 +389,12 @@ export function renderGithubNotes({ base, head, groups, newContributors, repo })
   return `${lines.join('\n')}\n`;
 }
 
-export function renderChangelogSection({ base, head, date, groups, repo }) {
-  const version = isValidSemVerTag(head) ? head.slice(1) : 'Unreleased';
+export function renderChangelogSection({ base, head, targetTag = null, date, groups, repo }) {
+  const tagRef = targetTag ?? head;
+  if (targetTag !== null && !isValidSemVerTag(targetTag)) {
+    throw new Error(`Invalid SemVer release tag: ${targetTag}`);
+  }
+  const version = isValidSemVerTag(tagRef) ? tagRef.slice(1) : 'Unreleased';
   const sectionBuckets = new Map(CHANGELOG_SECTION_ORDER.map((section) => [section, []]));
   const sorted = [...groups.values()].sort((a, b) => a.order - b.order);
   let itemCount = 0;
@@ -416,7 +428,7 @@ export function renderChangelogSection({ base, head, date, groups, repo }) {
   }
 
   if (version !== 'Unreleased') {
-    lines.push(`[${version}]: https://github.com/${normalizeRepoSlug(repo)}/compare/${base}...${head}`);
+    lines.push(`[${version}]: https://github.com/${normalizeRepoSlug(repo)}/compare/${base}...${tagRef}`);
   }
   return `${lines.join('\n')}\n`;
 }
@@ -560,7 +572,7 @@ function main() {
 
   if (options.format === 'changelog') {
     const date = resolveReleaseDate(head, options.date);
-    stdout.write(renderChangelogSection({ base, head, date, groups, repo }));
+    stdout.write(renderChangelogSection({ base, head, targetTag: options.tag, date, groups, repo }));
     return;
   }
 

@@ -29,6 +29,14 @@ fi
 
 version="${RELEASE_TAG#v}"
 
+CLEANUP_DIRS=()
+cleanup() {
+  for dir in "${CLEANUP_DIRS[@]+"${CLEANUP_DIRS[@]}"}"; do
+    rm -rf "${dir}"
+  done
+}
+trap cleanup EXIT
+
 fetch_sha256() {
   local arch="$1"
   local asset_json
@@ -47,9 +55,9 @@ fetch_sha256() {
   if [[ -z "${sha256}" ]]; then
     local tmp_dir
     tmp_dir="$(mktemp -d)"
+    CLEANUP_DIRS+=("${tmp_dir}")
     gh release download "${RELEASE_TAG}" -R "${CLAWWORK_REPO}" --pattern "${asset_name}" --dir "${tmp_dir}"
     sha256="$(shasum -a 256 "${tmp_dir}/${asset_name}" | awk '{print $1}')"
-    rm -rf "${tmp_dir}"
   fi
 
   if [[ ! "${sha256}" =~ ^[0-9a-f]{64}$ ]]; then

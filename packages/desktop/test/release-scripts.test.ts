@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -124,7 +124,7 @@ describe('verify-release-version.mjs', () => {
     const ws = createWorkspaceFixture('0.1.0');
     const badTags = ['v0.1.0-fix.1', 'v01.2.0', 'v0.01.0', 'v0.1.0-alpha.0', 'v0.1.0-beta2', '0.1.0', 'dev'];
     for (const tag of badTags) {
-      expect(() => runNode([verifyScript, '--root', ws, '--tag', tag])).toThrow();
+      expect(() => runNode([verifyScript, '--root', ws, '--tag', tag])).toThrow(/Invalid SemVer release tag/);
     }
   });
 
@@ -258,7 +258,7 @@ describe('generate-release-notes.mjs and CHANGELOG.md', () => {
             ['[Feat]', { emoji: '✨', name: 'Features', changelogSection: 'Added', order: 1, items: [{ text: 'Add strict SemVer gate', number: 569 }] }],
             ['[Fix]', { emoji: '🐛', name: 'Bug Fixes', changelogSection: 'Fixed', order: 3, items: [{ text: 'Fix cask stanza wipe', sha: '1234567890', orphan: true }] }],
           ]);
-          return m.renderChangelogSection({ base: 'v0.0.16', head: 'v0.0.17', date: '2026-06-01', groups, repo: 'clawwork-ai/clawwork' });
+          return m.renderChangelogSection({ base: 'v0.0.16', head: 'HEAD', targetTag: 'v0.0.17', date: '2026-06-01', groups, repo: 'clawwork-ai/clawwork' });
         }`,
       ),
     ) as string;
@@ -447,7 +447,38 @@ if (q === ".name") {
         },
         stdio: ['ignore', 'pipe', 'pipe'],
       }),
+    ).toThrow(/Cask file not found/);
+
+    const leakDir = makeTempDir('clawwork-tmpdir-');
+    writeFileSync(caskPath, sampleCask, 'utf8');
+    const failDownloadGh = path.join(binDir, 'gh');
+    writeFileSync(
+      failDownloadGh,
+      `#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == "release" && "$2" == "view" ]]; then
+  echo '{"name":"ClawWork-0.0.17-mac-arm64.dmg","digest":""}'
+  exit 0
+fi
+exit 1
+`,
+      'utf8',
+    );
+    chmodSync(failDownloadGh, 0o755);
+    expect(() =>
+      execFileSync('bash', [updateTapScript], {
+        cwd: repoRoot,
+        env: {
+          ...process.env,
+          PATH: `${binDir}:${process.env.PATH ?? ''}`,
+          TMPDIR: leakDir,
+          TAP_DIR: tapDir,
+          RELEASE_TAG: 'v0.0.17',
+        },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
     ).toThrow();
+    expect(readdirSync(leakDir)).toEqual([]);
   });
 });
 
@@ -456,6 +487,7 @@ describe('release workflow and packaging canonical slug parity', () => {
     const files = [
       '.github/workflows/release.yml',
       '.github/workflows/update-homebrew.yml',
+      '.claude/skills/release-publish/SKILL.md',
       'scripts/update-homebrew-tap.sh',
       'scripts/generate-release-notes.mjs',
       'packages/desktop/electron-builder.yml',
