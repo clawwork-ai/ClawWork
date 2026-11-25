@@ -29,11 +29,10 @@ fi
 
 version="${RELEASE_TAG#v}"
 
-CLEANUP_DIRS=()
+tmp_base="${TMPDIR:-/tmp}"
+TMP_WORK_DIR="$(mktemp -d "${tmp_base%/}/clawwork-tap.XXXXXX")"
 cleanup() {
-  for dir in "${CLEANUP_DIRS[@]+"${CLEANUP_DIRS[@]}"}"; do
-    rm -rf "${dir}"
-  done
+  rm -rf "${TMP_WORK_DIR}"
 }
 trap cleanup EXIT
 
@@ -53,11 +52,12 @@ fetch_sha256() {
   sha256="${asset_digest#sha256:}"
 
   if [[ -z "${sha256}" ]]; then
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    CLEANUP_DIRS+=("${tmp_dir}")
+    local tmp_dir="${TMP_WORK_DIR}/${arch}"
+    rm -rf "${tmp_dir}"
+    mkdir -p "${tmp_dir}"
     gh release download "${RELEASE_TAG}" -R "${CLAWWORK_REPO}" --pattern "${asset_name}" --dir "${tmp_dir}"
     sha256="$(shasum -a 256 "${tmp_dir}/${asset_name}" | awk '{print $1}')"
+    rm -rf "${tmp_dir}"
   fi
 
   if [[ ! "${sha256}" =~ ^[0-9a-f]{64}$ ]]; then
