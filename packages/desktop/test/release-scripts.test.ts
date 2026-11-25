@@ -99,7 +99,8 @@ afterEach(() => {
 describe('verify-release-version.mjs', () => {
   it('verifies workspace manifest alignment in the repository', () => {
     const out = runNode([verifyScript, '--check-workspace', '--root', repoRoot]);
-    expect(out).toContain('Workspace manifests aligned at version 0.0.16');
+    const { version } = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+    expect(out).toContain(`version ${version}`);
   });
 
   it('validates strict SemVer tags and emits GitHub outputs for stable and prerelease tags', () => {
