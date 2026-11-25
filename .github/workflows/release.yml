@@ -20,36 +20,32 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      RELEASE_REF: refs/tags/${{ inputs.tag || github.ref_name }}
     outputs:
       release_tag: ${{ steps.meta.outputs.release_tag }}
+      version: ${{ steps.meta.outputs.version }}
+      stage: ${{ steps.meta.outputs.stage }}
       is_prerelease: ${{ steps.meta.outputs.is_prerelease }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ env.RELEASE_REF }}
 
-      - name: Verify tag format and version consistency
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Verify SemVer tag and workspace manifest parity
         id: meta
         run: |
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-((alpha|beta|rc)\.[0-9]+))?$ ]]; then
-            echo "::error::Unsupported release tag format: $RELEASE_TAG"
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((alpha|beta|rc)\.[1-9][0-9]*))?$ ]]; then
+            echo "::error::Invalid SemVer release tag: $RELEASE_TAG"
             exit 1
           fi
-
-          DESKTOP_VERSION=$(node -p "require('./packages/desktop/package.json').version")
-          TAG_VERSION="${RELEASE_TAG#v}"
-          if [ "$DESKTOP_VERSION" != "$TAG_VERSION" ]; then
-            echo "::error::Version mismatch: package.json=${DESKTOP_VERSION}, tag=${TAG_VERSION}"
-            exit 1
-          fi
-
-          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          if [[ "$RELEASE_TAG" == *-* ]]; then
-            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
+          node scripts/verify-release-version.mjs --tag "$RELEASE_TAG" --verify-commit --github-output "$GITHUB_OUTPUT"
 
   release:
     needs: prepare-release
@@ -88,7 +84,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: refs/tags/${{ env.RELEASE_TAG }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -179,7 +175,7 @@ jobs:
         if: matrix.platform == 'mac' && matrix.arch == 'arm64'
         run: |
           cp packages/desktop/dist/latest-mac.yml packages/desktop/dist/latest-mac-arm64.yml
-          gh release upload "$RELEASE_TAG" packages/desktop/dist/latest-mac-arm64.yml --clobber --repo clawwork-ai/clawwork
+          gh release upload "$RELEASE_TAG" packages/desktop/dist/latest-mac-arm64.yml --clobber --repo clawwork-ai/ClawWork
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -191,7 +187,7 @@ jobs:
     steps:
       - name: Verify update metadata files
         run: |
-          ASSETS=$(gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json assets -q '.assets[].name')
+          ASSETS=$(gh release view "$RELEASE_TAG" --repo clawwork-ai/ClawWork --json assets -q '.assets[].name')
           echo "Release assets:"
           echo "$ASSETS"
           echo "$ASSETS" | grep -q "latest-mac-arm64.yml" || { echo "::error::latest-mac-arm64.yml missing from release"; exit 1; }
@@ -217,7 +213,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: refs/tags/${{ env.RELEASE_TAG }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -229,7 +225,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          node scripts/generate-release-notes.mjs "$RELEASE_TAG" > /tmp/release-notes.md
+          set -euo pipefail
+          args=("$RELEASE_TAG")
+          if [ "$IS_PRERELEASE" != "true" ] && node scripts/generate-release-notes.mjs --has-changelog "$RELEASE_TAG"; then
+            args=(--from-changelog "$RELEASE_TAG")
+          fi
+          node scripts/generate-release-notes.mjs "${args[@]}" > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ] || [ -z "$(tr -d '[:space:]' < /tmp/release-notes.md)" ]; then
+            echo "::error::Generated release notes are empty for $RELEASE_TAG"
+            exit 1
+          fi
           {
             echo "## Draft release notes for $RELEASE_TAG"
             echo ''
@@ -246,14 +251,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! current=$(gh release view "$RELEASE_TAG" --repo ${{ github.repository }} --json body -q '.body' 2>/dev/null); then
+          if ! current=$(gh release view "$RELEASE_TAG" --repo clawwork-ai/ClawWork --json body -q '.body' 2>/dev/null); then
             echo "::warning::Could not read current Release body — skipping notes fill to avoid overwriting hand-written content"
             exit 0
           fi
           stripped=$(printf '%s' "$current" | tr -d '[:space:]')
           if [ -z "$stripped" ]; then
             echo "Release body is empty — writing draft"
-            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --notes-file /tmp/release-notes.md
+            notes_args=(--notes-file /tmp/release-notes.md)
+            if [ "$IS_PRERELEASE" = "true" ]; then
+              notes_args+=(--prerelease)
+            fi
+            gh release edit "$RELEASE_TAG" --repo clawwork-ai/ClawWork "${notes_args[@]}"
           else
             echo "Release body already populated — leaving it alone"
           fi
@@ -263,9 +272,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "$IS_PRERELEASE" = "true" ]; then
-            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --draft=false --prerelease
+            gh release edit "$RELEASE_TAG" --repo clawwork-ai/ClawWork --draft=false --prerelease
           else
-            gh release edit "$RELEASE_TAG" --repo ${{ github.repository }} --draft=false --latest
+            gh release edit "$RELEASE_TAG" --repo clawwork-ai/ClawWork --draft=false --latest
           fi
 
   update-homebrew:
@@ -276,14 +285,14 @@ jobs:
       - name: Verify release is public
         run: |
           for attempt in {1..12}; do
-            is_draft="$(gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json isDraft --jq .isDraft 2>/dev/null || true)"
+            is_draft="$(gh release view "$RELEASE_TAG" --repo clawwork-ai/ClawWork --json isDraft --jq .isDraft 2>/dev/null || true)"
             if [ "$is_draft" = "false" ]; then
               exit 0
             fi
             echo "Release is not public yet; waiting ($attempt/12)"
             sleep 5
           done
-          gh release view "$RELEASE_TAG" --repo clawwork-ai/clawwork --json isDraft --jq .isDraft
+          gh release view "$RELEASE_TAG" --repo clawwork-ai/ClawWork --json isDraft --jq .isDraft
           exit 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -292,7 +301,7 @@ jobs:
       - name: Trigger Homebrew tap update
         run: |
           gh workflow run update-homebrew.yml \
-            --repo clawwork-ai/clawwork \
+            --repo clawwork-ai/ClawWork \
             --field tag="$RELEASE_TAG"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -6,7 +6,7 @@ directories:
 publish:
   provider: github
   owner: clawwork-ai
-  repo: clawwork
+  repo: ClawWork
 extraResources:
   - from: build/icon.png
     to: icon.png

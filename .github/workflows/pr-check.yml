@@ -97,7 +97,7 @@ jobs:
             echo "$name=$value" >> "$GITHUB_OUTPUT"
           }
 
-          set_flag quality "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$PWA" "$WEBSITE"
+          set_flag quality "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_RENDERER" "$DESKTOP_MAIN" "$DESKTOP_PACKAGE" "$PWA" "$WEBSITE" "$KEYNOTE"
           set_flag architecture "$GLOBAL" "$SHARED" "$CORE" "$DESKTOP_MAIN"
           set_flag ui_contract "$GLOBAL" "$DESKTOP_RENDERER" "$PWA"
           set_flag renderer_copy "$GLOBAL" "$DESKTOP_RENDERER"
@@ -136,6 +136,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Workspace version parity
+        run: pnpm check:version
 
       - name: Lint
         run: pnpm lint
