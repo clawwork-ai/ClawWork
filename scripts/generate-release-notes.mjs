@@ -421,16 +421,33 @@ export function renderChangelogSection({ base, head, date, groups, repo }) {
   return `${lines.join('\n')}\n`;
 }
 
+export function extractChangelogCompareUrl(changelogText, tag) {
+  if (!isValidSemVerTag(tag)) return null;
+  const version = tag.slice(1);
+  const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = changelogText.match(new RegExp(`^\\[${escaped}\\]:\\s*(https?://\\S+)\\s*$`, 'm'));
+  if (!match) return null;
+  const url = match[1];
+  return url.includes('/compare/') ? url : null;
+}
+
 export function renderFromChangelog({ changelogText, tag, base, repo }) {
   const section = extractChangelogSection(changelogText, tag);
   if (!section) {
     throw new Error(`CHANGELOG.md has no non-empty entry for ${tag}`);
   }
   const normalizedRepo = normalizeRepoSlug(repo);
-  if (!base || /\*\*Full Changelog\*\*:/.test(section)) {
+  if (/\*\*Full Changelog\*\*:/.test(section)) {
     return `${section}\n`;
   }
-  return `${section}\n\n**Full Changelog**: https://github.com/${normalizedRepo}/compare/${base}...${tag}\n`;
+  if (base) {
+    return `${section}\n\n**Full Changelog**: https://github.com/${normalizedRepo}/compare/${base}...${tag}\n`;
+  }
+  const refUrl = extractChangelogCompareUrl(changelogText, tag);
+  if (refUrl) {
+    return `${section}\n\n**Full Changelog**: ${refUrl}\n`;
+  }
+  return `${section}\n`;
 }
 
 function resolveReleaseDate(head, overrideDate, exec = execSync) {

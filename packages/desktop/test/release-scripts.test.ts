@@ -166,6 +166,17 @@ describe('generate-release-notes.mjs and CHANGELOG.md', () => {
     const notes = runNode([releaseNotesScript, '--from-changelog', 'v0.0.16']);
     expect(notes).toContain('Published GitHub Release before triggering Homebrew tap updates');
     expect(notes).toContain('**Full Changelog**: https://github.com/clawwork-ai/ClawWork/compare/v0.0.15...v0.0.16');
+
+    const shallowNotes = JSON.parse(
+      runScriptModule(
+        releaseNotesScript,
+        `(m, cl) => m.renderFromChangelog({ changelogText: cl, tag: 'v0.0.16', base: '', repo: 'clawwork-ai/ClawWork' })`,
+        [readFileSync(path.join(repoRoot, 'CHANGELOG.md'), 'utf8')],
+      ),
+    ) as string;
+    expect(shallowNotes).toContain(
+      '**Full Changelog**: https://github.com/clawwork-ai/ClawWork/compare/v0.0.15...v0.0.16',
+    );
   });
 
   it('fails when CHANGELOG.md entry is missing, empty, or given an invalid SemVer tag', () => {
