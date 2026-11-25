@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.0.17] - 2026-11-25
+
 ### Added
 
 - French (`fr`) translation support (#555)
@@ -23,6 +25,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- Restored inbox attachment reads on macOS after an app restart
 - Restored window dragging on title bars, and re-hydrated renderer stores after workspace changes (#491, #528)
 - Hardened `safeFetch` DNS pinning, redirect handling, and incremental `maxSize` cancellation (#523, #524)
 - Hardened conductor prompt injection in `initConductor`, `listSessionsBySpawner` validation, and Windows `readContextFile` path handling (#516, #519, #530)
@@ -223,7 +226,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Initial pre-release with three-column desktop workspace, parallel task isolation, streaming responses, local Git artifact versioning, SQLite FTS5 search, light/dark themes, and challenge-response Gateway auth
 
-[Unreleased]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.16...HEAD
+[Unreleased]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.17...HEAD
+[0.0.17]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.13...v0.0.14

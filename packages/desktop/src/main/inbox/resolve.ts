@@ -1,5 +1,5 @@
 import { realpathSync } from 'fs';
-import { open, realpath } from 'fs/promises';
+import { open, realpath, stat } from 'fs/promises';
 import { resolve, sep } from 'path';
 
 interface InboxPathInfo {
@@ -54,20 +54,25 @@ export async function readInboxFile(workspacePath: string, localPath: string): P
   const handle = await open(info.full, 'r').catch(() => null);
   if (!handle) return null;
   try {
-    const pathToResolve = process.platform === 'win32' ? info.full : `/dev/fd/${handle.fd}`;
-    const realTarget =
+    const openedStat = await handle.stat();
+    if (!openedStat.isFile()) return null;
+    const fdTarget =
       process.platform === 'win32'
-        ? await resolveValidatedPath(info, pathToResolve)
+        ? null
         : (() => {
             try {
-              return realpathSync(pathToResolve);
+              const target = realpathSync(`/dev/fd/${handle.fd}`);
+              return target.startsWith('/dev/fd/') ? null : target;
             } catch {
               return null;
             }
           })();
+    const realTarget = fdTarget ?? (await resolveValidatedPath(info, info.full));
     if (!realTarget) return null;
     const realInboxDir = await resolveValidatedPath(info, info.inboxDir);
     if (!realInboxDir || !isWithin(realInboxDir, realTarget)) return null;
+    const targetStat = await stat(realTarget).catch(() => null);
+    if (!targetStat || targetStat.dev !== openedStat.dev || targetStat.ino !== openedStat.ino) return null;
     return await handle.readFile({ encoding: 'base64' });
   } finally {
     await handle.close();
