@@ -102,5 +102,5 @@ Only after the user explicitly approves pushing:
 
 - Version mismatch: update all workspace `package.json` manifests to match the release version, recommit, move or recreate the tag only after confirming with the user.
 - Missing assets: inspect the failed matrix job first; do not re-run blindly.
-- macOS notarization failure: `release.yml` has an ad-hoc fallback. Treat non-notarization macOS failures as real blockers.
+- macOS signing: `electron-builder.yml` sets `mac.identity: null` and `mac.notarize: false`, and `packages/desktop/scripts/afterPack.cjs` applies ad-hoc `codesign` with `build/entitlements.mac.plist`.
 - Failed local `pnpm check`: fix root cause before publishing.

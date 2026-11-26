@@ -29,11 +29,9 @@ mac:
         - x64
   category: public.app-category.developer-tools
   icon: build/icon.icns
-  hardenedRuntime: true
+  identity: null
   gatekeeperAssess: false
-  entitlements: build/entitlements.mac.plist
-  entitlementsInherit: build/entitlements.mac.plist
-  notarize: true
+  notarize: false
   extendInfo:
     NSMicrophoneUsageDescription: ClawWork needs microphone access for voice dictation in chat input.
 win:

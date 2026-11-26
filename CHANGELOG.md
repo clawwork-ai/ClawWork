@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.0.18] - 2026-11-25
+
+### Changed
+
+- Package macOS desktop releases with ad-hoc signing without Apple Developer signing or notarization
+
 ## [0.0.17] - 2026-11-25
 
 ### Added
@@ -226,7 +232,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Initial pre-release with three-column desktop workspace, parallel task isolation, streaming responses, local Git artifact versioning, SQLite FTS5 search, light/dark themes, and challenge-response Gateway auth
 
-[Unreleased]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.17...HEAD
+[Unreleased]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.18...HEAD
+[0.0.18]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.17...v0.0.18
 [0.0.17]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/clawwork-ai/ClawWork/compare/v0.0.14...v0.0.15
