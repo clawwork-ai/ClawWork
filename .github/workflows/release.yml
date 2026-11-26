@@ -100,36 +100,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Import Apple signing certificate (macOS)
-        if: matrix.platform == 'mac'
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          for credential in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
-            if [ -z "${!credential}" ]; then
-              echo "::error::Missing required release credential: $credential"
-              exit 1
-            fi
-          done
-
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
-
-          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o "$RUNNER_TEMP/certificate.p12"
-
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$RUNNER_TEMP/certificate.p12" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-
-          echo "✅ Certificate imported successfully"
-
       - name: Build Electron app
         run: pnpm --filter @clawwork/desktop build
 
@@ -141,23 +111,12 @@ jobs:
           file "$ADDON" | grep -q "${{ matrix.expected_macho_arch }}"
 
       - name: Package and publish (${{ matrix.platform }})
-        if: matrix.platform != 'mac'
         run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_VERSION: ${{ github.run_number }}
           EP_PRE_RELEASE: ${{ env.IS_PRERELEASE }}
-
-      - name: Package and publish (mac)
-        if: matrix.platform == 'mac'
-        run: pnpm --filter @clawwork/desktop exec electron-builder ${{ matrix.build_args }} --publish always -c.buildVersion="$BUILD_VERSION" -c.mac.type=distribution -c.mac.forceCodeSigning=true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUILD_VERSION: ${{ github.run_number }}
-          EP_PRE_RELEASE: ${{ env.IS_PRERELEASE }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
 
       - name: Upload arch-specific update metadata (macOS arm64)
         if: matrix.platform == 'mac' && matrix.arch == 'arm64'
